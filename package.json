@@ -1,10 +1,10 @@
 {
-  "name": "my-turborepo",
-  "version": "0.0.0",
+  "name": "happy-melon",
+  "version": "1.0.0",
   "private": true,
   "description": "",
-  "author": "",
-  "license": "UNLICENSED",
+  "author": "João Guilherme",
+  "license": "MIT",
   "scripts": {
     "dev": "turbo run dev",
     "build": "turbo run build",
