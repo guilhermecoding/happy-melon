@@ -21,7 +21,6 @@
     "@nestjs/core": "^11.1.11",
     "@nestjs/platform-express": "^11.1.11",
     "@nestjs/platform-fastify": "^11.1.28",
-    "@repo/api": "workspace:*",
     "@repo/database": "workspace:*",
     "@thallesp/nestjs-better-auth": "^2.7.0",
     "better-auth": "^1.6.23",
