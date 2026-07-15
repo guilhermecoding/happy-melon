@@ -74,3 +74,10 @@ model Verification {
   @@map("verification")
   @@schema("system-auth")
 }
+
+enum Role {
+  ADMIN
+  STAFF
+
+  @@schema("system-auth")
+}
