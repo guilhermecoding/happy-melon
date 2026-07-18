@@ -1,7 +1,6 @@
 import 'dotenv/config';
-import { randomUUID } from 'node:crypto';
-import { hashPassword } from 'better-auth/crypto';
 import { prisma } from '@repo/database';
+import { auth } from './auth.js';
 
 async function seedAdmin() {
   const email = process.env.ADMIN_EMAIL;
@@ -21,6 +20,7 @@ async function seedAdmin() {
   }
 
   const existing = await prisma.user.findUnique({ where: { email } });
+
   if (existing) {
     if (existing.role !== 'admin') {
       await prisma.user.update({
@@ -34,36 +34,19 @@ async function seedAdmin() {
     return;
   }
 
-  const userId = randomUUID();
-  const now = new Date();
-  const hashed = await hashPassword(password);
-
-  await prisma.$transaction([
-    prisma.user.create({
+  const { user } = await auth.api.createUser({
+    body: {
+      email,
+      password,
+      name,
+      role: 'admin',
       data: {
-        id: userId,
-        name,
-        email,
         emailVerified: true,
-        role: 'admin',
-        createdAt: now,
-        updatedAt: now,
       },
-    }),
-    prisma.account.create({
-      data: {
-        id: randomUUID(),
-        accountId: userId,
-        providerId: 'credential',
-        userId,
-        password: hashed,
-        createdAt: now,
-        updatedAt: now,
-      },
-    }),
-  ]);
+    },
+  });
 
-  console.log(`Admin criado com sucesso: ${email}`);
+  console.log(`Admin criado com sucesso: ${user.email}`);
 }
 
 seedAdmin()
