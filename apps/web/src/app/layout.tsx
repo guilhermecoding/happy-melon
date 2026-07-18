@@ -1,9 +1,14 @@
 import type { Metadata } from 'next';
 import './globals.css';
-import { Inter } from "next/font/google";
+import { Cause, Inter } from "next/font/google";
 import { cn } from "@/lib/utils";
 
 const inter = Inter({ subsets: ['latin'], variable: '--font-sans' });
+const cause = Cause({
+  subsets: ['latin'],
+  variable: '--font-cause',
+  adjustFontFallback: false,
+});
 
 export const metadata: Metadata = {
   title: {
@@ -19,7 +24,7 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="pt-BR" className={cn("font-sans", inter.variable)}>
+    <html lang="pt-BR" className={cn("font-sans", inter.variable, cause.variable)}>
       <body>{children}</body>
     </html>
   );

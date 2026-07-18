@@ -7,7 +7,7 @@ const buttonVariants = cva(
   [
     "group/button inline-flex shrink-0 cursor-pointer items-center justify-center gap-2",
     "rounded-full border-0 bg-clip-padding",
-    "font-black tracking-wide whitespace-nowrap text-white",
+    "font-cause font-extrabold text-xl tracking-wide whitespace-nowrap text-white",
     "[-webkit-text-stroke:1.75px_black] [paint-order:stroke_fill]",
     "text-shadow-sm text-shadow-black/35",
     "shadow-[0_6px_0_0] transition-[transform,box-shadow,filter] duration-100 outline-none select-none",
@@ -28,9 +28,9 @@ const buttonVariants = cva(
         white: "border border-black/10 bg-white shadow-zinc-400 hover:bg-zinc-50",
       },
       size: {
-        default: "h-12 px-8 text-base",
-        sm: "h-9 px-5 text-sm [-webkit-text-stroke:1.25px_black]",
-        lg: "h-14 px-10 text-lg [-webkit-text-stroke:2px_black]",
+        default: "h-12 px-8",
+        sm: "h-9 px-5 [-webkit-text-stroke:1.25px_black]",
+        lg: "h-14 px-10 [-webkit-text-stroke:2px_black]",
         icon: "size-12 p-0",
       },
     },
