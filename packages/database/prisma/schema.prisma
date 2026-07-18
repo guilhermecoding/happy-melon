@@ -16,6 +16,10 @@ model User {
   image         String?
   createdAt     DateTime  @default(now())
   updatedAt     DateTime  @updatedAt
+  role          String?
+  banned        Boolean?  @default(false)
+  banReason     String?
+  banExpires    DateTime?
   sessions      Session[]
   accounts      Account[]
 
@@ -25,15 +29,16 @@ model User {
 }
 
 model Session {
-  id        String   @id
-  expiresAt DateTime
-  token     String
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-  ipAddress String?
-  userAgent String?
-  userId    String
-  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  id             String   @id
+  expiresAt      DateTime
+  token          String
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+  ipAddress      String?
+  userAgent      String?
+  userId         String
+  impersonatedBy String?
+  user           User     @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@unique([token])
   @@index([userId])
@@ -72,12 +77,5 @@ model Verification {
 
   @@index([identifier])
   @@map("verification")
-  @@schema("system-auth")
-}
-
-enum Role {
-  ADMIN
-  STAFF
-
   @@schema("system-auth")
 }

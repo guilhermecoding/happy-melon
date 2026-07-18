@@ -1,6 +1,7 @@
 "use client"
 
 import { useState } from "react"
+import { useRouter } from "next/navigation"
 import { cn } from "@/lib/utils"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent } from "@/components/ui/card"
@@ -12,6 +13,7 @@ import {
 } from "@/components/ui/field"
 import { Input } from "@/components/ui/input"
 import Image from "next/image"
+import { authClient } from "@/lib/auth-client"
 
 import { HugeiconsIcon } from "@hugeicons/react"
 import {
@@ -22,17 +24,62 @@ import {
   SquareLock01Icon,
 } from "@hugeicons/core-free-icons"
 
+const ADMIN_ROLES = new Set(["admin", "staff"])
+
 export function LoginForm({
   className,
   ...props
 }: React.ComponentProps<"div">) {
-  const [isAdmin, setIsAdmin] = useState(false)
+  const router = useRouter()
+  const [isAdmin, setIsAdmin] = useState(true)
+  const [email, setEmail] = useState("")
+  const [password, setPassword] = useState("")
+  const [error, setError] = useState<string | null>(null)
+  const [isLoading, setIsLoading] = useState(false)
+
+  async function handleSubmit(event: React.FormEvent<HTMLFormElement>) {
+    event.preventDefault()
+    setError(null)
+
+    if (!isAdmin) {
+      setError("Login de colaborador ainda não está disponível.")
+      return
+    }
+
+    setIsLoading(true)
+
+    try {
+      const { data, error: signInError } = await authClient.signIn.email({
+        email,
+        password,
+      })
+
+      if (signInError) {
+        setError(signInError.message ?? "Falha ao entrar. Verifique suas credenciais.")
+        return
+      }
+
+      const role = data?.user?.role
+      if (!role || !ADMIN_ROLES.has(role)) {
+        await authClient.signOut()
+        setError("Acesso restrito a administradores e staff.")
+        return
+      }
+
+      router.push("/admin")
+      router.refresh()
+    } catch {
+      setError("Não foi possível conectar ao servidor de autenticação.")
+    } finally {
+      setIsLoading(false)
+    }
+  }
 
   return (
     <div className={cn("flex flex-col gap-6", className)} {...props}>
       <Card className="overflow-hidden rounded-2xl border-b-8 border-l-8 p-0 shadow-none">
         <CardContent className="grid p-0 md:grid-cols-2">
-          <form className="p-6 md:p-8">
+          <form className="p-6 md:p-8" onSubmit={handleSubmit}>
             <FieldGroup>
               <div className="flex flex-col items-center gap-2 text-center">
                 <Image
@@ -44,7 +91,9 @@ export function LoginForm({
                   loading="eager"
                 />
                 <p className="text-balance text-base text-muted-foreground">
-                  Entre com as credenciais da maratona
+                  {isAdmin
+                    ? "Entre com suas credenciais de administrador"
+                    : "Entre com as credenciais da maratona"}
                 </p>
               </div>
               <Field>
@@ -53,8 +102,12 @@ export function LoginForm({
                 </FieldLabel>
                 <Input
                   id="email"
+                  name="email"
                   type="email"
                   placeholder="Digite seu email"
+                  value={email}
+                  onChange={(event) => setEmail(event.target.value)}
+                  autoComplete="email"
                   icon={
                     <HugeiconsIcon
                       icon={MailIcon}
@@ -82,6 +135,13 @@ export function LoginForm({
                       ? "Digite sua senha"
                       : "Digite o código da maratona"
                   }
+                  value={isAdmin ? password : undefined}
+                  onChange={
+                    isAdmin
+                      ? (event) => setPassword(event.target.value)
+                      : undefined
+                  }
+                  autoComplete={isAdmin ? "current-password" : "off"}
                   icon={
                     <HugeiconsIcon
                       icon={isAdmin ? SquareLock01Icon : BalloonIcon}
@@ -92,9 +152,14 @@ export function LoginForm({
                   required
                 />
               </Field>
+              {error ? (
+                <p className="text-center text-sm text-destructive" role="alert">
+                  {error}
+                </p>
+              ) : null}
               <Field>
-                <Button type="submit">
-                  Entrar
+                <Button type="submit" disabled={isLoading || !isAdmin}>
+                  {isLoading ? "Entrando..." : "Entrar"}
                   <HugeiconsIcon
                     icon={LoginCircle01Icon}
                     className="size-5"
@@ -105,7 +170,10 @@ export function LoginForm({
               <FieldDescription className="flex justify-center text-center">
                 <button
                   type="button"
-                  onClick={() => setIsAdmin((prev) => !prev)}
+                  onClick={() => {
+                    setIsAdmin((prev) => !prev)
+                    setError(null)
+                  }}
                   className="flex cursor-pointer items-center gap-1 hover:underline"
                 >
                   {isAdmin ? "Sou Colaborador" : "Sou Administrador"}

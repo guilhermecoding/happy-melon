@@ -1,6 +1,7 @@
 import { Controller, Get } from '@nestjs/common';
 import {
   AllowAnonymous,
+  Roles,
   Session,
   type UserSession,
 } from '@thallesp/nestjs-better-auth';
@@ -18,6 +19,7 @@ export class AppController {
   }
 
   @Get('me')
+  @Roles(['admin', 'staff'])
   getMe(@Session() session: UserSession<typeof auth>) {
     return {
       user: session.user,
