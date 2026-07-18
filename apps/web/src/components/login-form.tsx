@@ -11,7 +11,7 @@ import { Input } from "@/components/ui/input"
 import Image from "next/image"
 
 import { HugeiconsIcon } from '@hugeicons/react';
-import { ArrowRight02Icon, LoginCircle01Icon } from '@hugeicons/core-free-icons'
+import { ArrowRight02Icon, BalloonIcon, LoginCircle01Icon, MailIcon } from '@hugeicons/core-free-icons'
 
 export function LoginForm({
   className,
@@ -37,19 +37,20 @@ export function LoginForm({
                 </p>
               </div>
               <Field>
-                <FieldLabel htmlFor="email">Email</FieldLabel>
+                <div className="flex items-center">
+                  <FieldLabel htmlFor="text" className="font-bold text-base">Código da Maratona</FieldLabel>
+                </div>
+                <Input id="text" type="text" icon={<HugeiconsIcon icon={BalloonIcon} className="size-5 text-muted-foreground/50" strokeWidth={2} />} placeholder="Digite o código da maratona" required />
+              </Field>
+              <Field>
+                <FieldLabel htmlFor="email" className="font-bold text-base">Email</FieldLabel>
                 <Input
                   id="email"
                   type="email"
-                  placeholder="m@example.com"
+                  placeholder="Digite seu email"
+                  icon={<HugeiconsIcon icon={MailIcon} className="size-5 text-muted-foreground/50" strokeWidth={2} />}
                   required
                 />
-              </Field>
-              <Field>
-                <div className="flex items-center">
-                  <FieldLabel htmlFor="password">Password</FieldLabel>
-                </div>
-                <Input id="password" type="password" required />
               </Field>
               <Field>
                 <Button type="submit">
