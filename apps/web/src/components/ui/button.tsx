@@ -6,7 +6,7 @@ import { cn } from "@/lib/utils"
 const buttonVariants = cva(
   [
     "group/button inline-flex shrink-0 cursor-pointer items-center justify-center gap-2",
-    "rounded-full border-0 bg-clip-padding",
+    "rounded-2xl border-0 bg-clip-padding",
     "font-cause font-extrabold text-xl tracking-wide whitespace-nowrap text-white",
     "[-webkit-text-stroke:1.75px_black] [paint-order:stroke_fill]",
     "text-shadow-sm text-shadow-black/35",
