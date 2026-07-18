@@ -1,3 +1,6 @@
+"use client"
+
+import { useState } from "react"
 import { cn } from "@/lib/utils"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent } from "@/components/ui/card"
@@ -5,21 +8,29 @@ import {
   Field,
   FieldDescription,
   FieldGroup,
-  FieldLabel
+  FieldLabel,
 } from "@/components/ui/field"
 import { Input } from "@/components/ui/input"
 import Image from "next/image"
 
-import { HugeiconsIcon } from '@hugeicons/react';
-import { ArrowRight02Icon, BalloonIcon, LoginCircle01Icon, MailIcon } from '@hugeicons/core-free-icons'
+import { HugeiconsIcon } from "@hugeicons/react"
+import {
+  ArrowRight02Icon,
+  BalloonIcon,
+  LoginCircle01Icon,
+  MailIcon,
+  SquareLock01Icon,
+} from "@hugeicons/core-free-icons"
 
 export function LoginForm({
   className,
   ...props
 }: React.ComponentProps<"div">) {
+  const [isAdmin, setIsAdmin] = useState(false)
+
   return (
     <div className={cn("flex flex-col gap-6", className)} {...props}>
-      <Card className="overflow-hidden p-0 shadow-none border-b-8 border-l-8 rounded-2xl">
+      <Card className="overflow-hidden rounded-2xl border-b-8 border-l-8 p-0 shadow-none">
         <CardContent className="grid p-0 md:grid-cols-2">
           <form className="p-6 md:p-8">
             <FieldGroup>
@@ -27,7 +38,7 @@ export function LoginForm({
                 <Image
                   src="/logo-texto.svg"
                   alt="Logo Happy Melon"
-                  className="w-auto h-18 object-contain pointer-events-none"
+                  className="pointer-events-none h-18 w-auto object-contain"
                   width={100}
                   height={100}
                   loading="eager"
@@ -37,31 +48,69 @@ export function LoginForm({
                 </p>
               </div>
               <Field>
-                <div className="flex items-center">
-                  <FieldLabel htmlFor="text" className="font-bold text-base">Código da Maratona</FieldLabel>
-                </div>
-                <Input id="text" type="text" icon={<HugeiconsIcon icon={BalloonIcon} className="size-5 text-muted-foreground/50" strokeWidth={2} />} placeholder="Digite o código da maratona" required />
-              </Field>
-              <Field>
-                <FieldLabel htmlFor="email" className="font-bold text-base">Email</FieldLabel>
+                <FieldLabel htmlFor="email" className="text-base font-bold">
+                  Email
+                </FieldLabel>
                 <Input
                   id="email"
                   type="email"
                   placeholder="Digite seu email"
-                  icon={<HugeiconsIcon icon={MailIcon} className="size-5 text-muted-foreground/50" strokeWidth={2} />}
+                  icon={
+                    <HugeiconsIcon
+                      icon={MailIcon}
+                      className="size-5 text-muted-foreground/50"
+                      strokeWidth={2}
+                    />
+                  }
+                  required
+                />
+              </Field>
+              <Field>
+                <FieldLabel
+                  htmlFor={isAdmin ? "password" : "marathon-code"}
+                  className="text-base font-bold"
+                >
+                  {isAdmin ? "Senha" : "Código da Maratona"}
+                </FieldLabel>
+                <Input
+                  key={isAdmin ? "password" : "marathon-code"}
+                  id={isAdmin ? "password" : "marathon-code"}
+                  name={isAdmin ? "password" : "marathonCode"}
+                  type={isAdmin ? "password" : "text"}
+                  placeholder={
+                    isAdmin
+                      ? "Digite sua senha"
+                      : "Digite o código da maratona"
+                  }
+                  icon={
+                    <HugeiconsIcon
+                      icon={isAdmin ? SquareLock01Icon : BalloonIcon}
+                      className="size-5 text-muted-foreground/50"
+                      strokeWidth={2}
+                    />
+                  }
                   required
                 />
               </Field>
               <Field>
                 <Button type="submit">
                   Entrar
-                  <HugeiconsIcon icon={LoginCircle01Icon} className="size-5" strokeWidth={3} />
+                  <HugeiconsIcon
+                    icon={LoginCircle01Icon}
+                    className="size-5"
+                    strokeWidth={3}
+                  />
                 </Button>
               </Field>
-              <FieldDescription className="text-center flex justify-center">
-                <span className="flex items-center gap-1 hover:underline cursor-pointer">
-                  Sou administrador
-                  <HugeiconsIcon icon={ArrowRight02Icon} className="size-5" /></span>
+              <FieldDescription className="flex justify-center text-center">
+                <button
+                  type="button"
+                  onClick={() => setIsAdmin((prev) => !prev)}
+                  className="flex cursor-pointer items-center gap-1 hover:underline"
+                >
+                  {isAdmin ? "Sou Colaborador" : "Sou Administrador"}
+                  <HugeiconsIcon icon={ArrowRight02Icon} className="size-5" />
+                </button>
               </FieldDescription>
             </FieldGroup>
           </form>
