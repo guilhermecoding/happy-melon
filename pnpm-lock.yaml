@@ -130,6 +130,9 @@ importers:
       '@base-ui/react':
         specifier: ^1.6.0
         version: 1.6.0(@types/react@19.1.0)(react-dom@19.2.7)(react@19.2.7)
+      '@fontsource-variable/cause':
+        specifier: ^5.2.1
+        version: 5.2.1
       '@hugeicons/core-free-icons':
         specifier: ^4.2.2
         version: 4.2.2
@@ -1414,6 +1417,10 @@ packages:
 
   /@floating-ui/utils@0.2.12:
     resolution: {integrity: sha512-HpCo8tmWzLVad5s2d19EhAz5zqrrQ6s69qd6moPMQvkOuSwDT1YgRfWSVuc4ennqrgv3OHppiOGMQ7oC13yIww==}
+    dev: false
+
+  /@fontsource-variable/cause@5.2.1:
+    resolution: {integrity: sha512-Som9xu08LgOuEWajLp8Aabd3PgjF0uYfQyy6LH6BdRsFP8dZSw38uKL/TtpGKvRXbaVchwczG9sa+jAlJ4bX3w==}
     dev: false
 
   /@hono/node-server@1.19.11(hono@4.12.30):

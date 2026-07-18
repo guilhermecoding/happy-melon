@@ -24,7 +24,7 @@
 }
 
 @theme inline {
-  --font-heading: var(--font-sans);
+  --font-heading: var(--font-sans), cursive;
   --font-sans: var(--font-sans), cursive;
   --font-cause: var(--font-sans), cursive;
   --color-sidebar-ring: var(--sidebar-ring);

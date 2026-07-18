@@ -1,12 +1,13 @@
 import type { Metadata } from 'next';
+import localFont from 'next/font/local';
 import './globals.css';
-import { Cause } from "next/font/google";
-import { cn } from "@/lib/utils";
+import { cn } from '@/lib/utils';
 
-const cause = Cause({
-  subsets: ['latin'],
+const cause = localFont({
+  src: '../fonts/cause-latin-wght-normal.woff2',
   variable: '--font-sans',
-  adjustFontFallback: false,
+  weight: '100 900',
+  display: 'swap',
 });
 
 export const metadata: Metadata = {
@@ -23,7 +24,7 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="pt-BR" className={cn("font-sans", cause.variable)}>
+    <html lang="pt-BR" className={cn('font-sans', cause.variable)}>
       <body>{children}</body>
     </html>
   );
