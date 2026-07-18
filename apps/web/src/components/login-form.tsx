@@ -19,7 +19,7 @@ export function LoginForm({
 }: React.ComponentProps<"div">) {
   return (
     <div className={cn("flex flex-col gap-6", className)} {...props}>
-      <Card className="overflow-hidden p-0">
+      <Card className="overflow-hidden p-0 shadow-none border-b-8 border-l-8">
         <CardContent className="grid p-0 md:grid-cols-2">
           <form className="p-6 md:p-8">
             <FieldGroup>
@@ -27,7 +27,7 @@ export function LoginForm({
                 <Image
                   src="/logo-texto.svg"
                   alt="Logo Happy Melon"
-                  className="w-auto h-26 object-contain pointer-events-none"
+                  className="w-auto h-18 object-contain pointer-events-none"
                   width={100}
                   height={100}
                   loading="eager"
