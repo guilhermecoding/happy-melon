@@ -5,26 +5,27 @@ import { cn } from "@/lib/utils"
 
 const buttonVariants = cva(
   [
-    "group/button inline-flex shrink-0 cursor-pointer items-center justify-center",
+    "group/button inline-flex shrink-0 cursor-pointer items-center justify-center gap-2",
     "rounded-full border-0 bg-clip-padding",
     "font-black tracking-wide whitespace-nowrap text-white",
     "[-webkit-text-stroke:1.75px_black] [paint-order:stroke_fill]",
-    "[text-shadow:0_2px_0_rgb(0_0_0_/_35%)]",
-    "shadow-[0_6px_0_0_var(--btn-edge)] transition-[transform,box-shadow,filter] duration-100 outline-none select-none",
+    "text-shadow-sm text-shadow-black/35",
+    "shadow-[0_6px_0_0] transition-[transform,box-shadow,filter] duration-100 outline-none select-none",
     "hover:brightness-105",
-    "active:translate-y-[6px] active:shadow-[0_0_0_0_var(--btn-edge)]",
+    "active:translate-y-[6px] active:shadow-none",
     "focus-visible:ring-3 focus-visible:ring-black/25",
     "disabled:pointer-events-none disabled:opacity-50",
     "[&_svg]:pointer-events-none [&_svg]:shrink-0 [&_svg:not([class*='size-'])]:size-4",
+    "[&_svg]:[filter:drop-shadow(1px_0_0_rgb(0_0_0_/_40%))_drop-shadow(-1px_0_0_rgb(0_0_0_/_40%))_drop-shadow(0_1px_0_rgb(0_0_0_/_40%))_drop-shadow(0_-1px_0_rgb(0_0_0_/_40%))_drop-shadow(0_1.5px_0_rgb(0_0_0_/_25%))]",
   ].join(" "),
   {
     variants: {
       variant: {
-        blue: "[--btn-edge:#0077C2] bg-[#00A8FF] hover:bg-[#33B9FF]",
-        green: "[--btn-edge:#2F9E44] bg-[#51CF66] hover:bg-[#69DB7C]",
-        orange: "[--btn-edge:#E67700] bg-[#FF922B] hover:bg-[#FFA94D]",
-        red: "[--btn-edge:#C92A2A] bg-[#FF6B6B] hover:bg-[#FF8787]",
-        white: "[--btn-edge:#ADB5BD] bg-white hover:bg-zinc-50 border-black/10 border",
+        blue: "bg-sky-400 shadow-sky-700 hover:bg-sky-300",
+        green: "bg-green-400 shadow-green-700 hover:bg-green-300",
+        orange: "bg-orange-400 shadow-orange-700 hover:bg-orange-300",
+        red: "bg-red-400 shadow-red-700 hover:bg-red-300",
+        white: "border border-black/10 bg-white shadow-zinc-400 hover:bg-zinc-50",
       },
       size: {
         default: "h-12 px-8 text-base",
@@ -42,7 +43,7 @@ const buttonVariants = cva(
 
 function Button({
   className,
-  variant = "white",
+  variant = "blue",
   size = "default",
   ...props
 }: ButtonPrimitive.Props & VariantProps<typeof buttonVariants>) {

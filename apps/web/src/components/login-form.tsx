@@ -10,6 +10,9 @@ import {
 import { Input } from "@/components/ui/input"
 import Image from "next/image"
 
+import { HugeiconsIcon } from '@hugeicons/react';
+import { LoginCircle01Icon } from '@hugeicons/core-free-icons'
+
 export function LoginForm({
   className,
   ...props
@@ -55,7 +58,10 @@ export function LoginForm({
                 <Input id="password" type="password" required />
               </Field>
               <Field>
-                <Button type="submit">Login</Button>
+                <Button type="submit">
+                  Entrar
+                  <HugeiconsIcon icon={LoginCircle01Icon} className="size-5" strokeWidth={3} />
+                </Button>
               </Field>
               <FieldDescription className="text-center">
                 Don&apos;t have an account? <a href="#">Sign up</a>
