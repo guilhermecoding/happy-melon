@@ -24,7 +24,7 @@ export function LoginForm({
                 <Image
                   src="/logo-texto.svg"
                   alt="Logo Happy Melon"
-                  className="w-auto h-26 object-contain"
+                  className="w-auto h-26 object-contain pointer-events-none"
                   width={100}
                   height={100}
                   loading="eager"
