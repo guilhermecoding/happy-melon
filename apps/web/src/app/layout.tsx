@@ -3,11 +3,14 @@ import './globals.css';
 import { Inter } from "next/font/google";
 import { cn } from "@/lib/utils";
 
-const inter = Inter({subsets:['latin'],variable:'--font-sans'});
+const inter = Inter({ subsets: ['latin'], variable: '--font-sans' });
 
 export const metadata: Metadata = {
-  title: 'Happy Mellon',
-  description: 'Happy Mellon',
+  title: {
+    default: 'Happy Melon - Otimize a organização dos staffs na entrega de balões!',
+    template: '%s | Happy Melon',
+  },
+  description: 'Otimize a organização dos staffs na entrega de balões!',
 };
 
 export default function RootLayout({
