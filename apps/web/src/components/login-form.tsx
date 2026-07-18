@@ -11,7 +11,7 @@ import { Input } from "@/components/ui/input"
 import Image from "next/image"
 
 import { HugeiconsIcon } from '@hugeicons/react';
-import { LoginCircle01Icon } from '@hugeicons/core-free-icons'
+import { ArrowRight02Icon, LoginCircle01Icon } from '@hugeicons/core-free-icons'
 
 export function LoginForm({
   className,
@@ -48,12 +48,6 @@ export function LoginForm({
               <Field>
                 <div className="flex items-center">
                   <FieldLabel htmlFor="password">Password</FieldLabel>
-                  <a
-                    href="#"
-                    className="ml-auto text-sm underline-offset-2 hover:underline"
-                  >
-                    Forgot your password?
-                  </a>
                 </div>
                 <Input id="password" type="password" required />
               </Field>
@@ -63,8 +57,10 @@ export function LoginForm({
                   <HugeiconsIcon icon={LoginCircle01Icon} className="size-5" strokeWidth={3} />
                 </Button>
               </Field>
-              <FieldDescription className="text-center">
-                Don&apos;t have an account? <a href="#">Sign up</a>
+              <FieldDescription className="text-center flex justify-center">
+                <span className="flex items-center gap-1 hover:underline cursor-pointer">
+                  Sou administrador
+                  <HugeiconsIcon icon={ArrowRight02Icon} className="size-5" /></span>
               </FieldDescription>
             </FieldGroup>
           </form>
