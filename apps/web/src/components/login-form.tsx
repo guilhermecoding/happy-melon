@@ -75,6 +75,9 @@ export function LoginForm({
     }
   }
 
+  const canSubmitAdmin =
+    email.trim().length > 0 && password.trim().length > 0
+
   return (
     <div className={cn("flex flex-col gap-6", className)} {...props}>
       <Card className="overflow-hidden rounded-2xl border-b-8 border-l-8 p-0 shadow-none">
@@ -93,7 +96,7 @@ export function LoginForm({
                 <p className="text-balance text-base text-muted-foreground">
                   {isAdmin
                     ? "Entre com suas credenciais de administrador"
-                    : "Entre com as credenciais da maratona"}
+                    : "Entre com as credenciais da competição"}
                 </p>
               </div>
               <Field>
@@ -120,20 +123,20 @@ export function LoginForm({
               </Field>
               <Field>
                 <FieldLabel
-                  htmlFor={isAdmin ? "password" : "marathon-code"}
+                  htmlFor={isAdmin ? "password" : "competition-code"}
                   className="text-base font-bold"
                 >
-                  {isAdmin ? "Senha" : "Código da Maratona"}
+                  {isAdmin ? "Senha" : "Código da Competição"}
                 </FieldLabel>
                 <Input
-                  key={isAdmin ? "password" : "marathon-code"}
-                  id={isAdmin ? "password" : "marathon-code"}
-                  name={isAdmin ? "password" : "marathonCode"}
+                  key={isAdmin ? "password" : "competition-code"}
+                  id={isAdmin ? "password" : "competition-code"}
+                  name={isAdmin ? "password" : "competitionCode"}
                   type={isAdmin ? "password" : "text"}
                   placeholder={
                     isAdmin
                       ? "Digite sua senha"
-                      : "Digite o código da maratona"
+                      : "Digite o código da competição"
                   }
                   value={isAdmin ? password : undefined}
                   onChange={
@@ -158,8 +161,10 @@ export function LoginForm({
                 </p>
               ) : null}
               <Field>
-                <Button type="submit" disabled={isLoading || !isAdmin}>
-                  {isLoading ? "Entrando..." : "Entrar"}
+                <Button
+                  type="submit"
+                  disabled={isLoading || !isAdmin || !canSubmitAdmin}
+                >                  {isLoading ? "Entrando..." : "Entrar"}
                   <HugeiconsIcon
                     icon={LoginCircle01Icon}
                     className="size-5"
