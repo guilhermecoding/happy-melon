@@ -2,6 +2,7 @@ import { Button as ButtonPrimitive } from "@base-ui/react/button"
 import { cva, type VariantProps } from "class-variance-authority"
 
 import { cn } from "@/lib/utils"
+import { Dots } from "../dots"
 
 const buttonVariants = cva(
   [
@@ -54,14 +55,20 @@ function Button({
   className,
   variant = "blue",
   size = "default",
+  loading = false,
+  children,
   ...props
-}: ButtonPrimitive.Props & VariantProps<typeof buttonVariants>) {
+}: ButtonPrimitive.Props & VariantProps<typeof buttonVariants> & { loading?: boolean }) {
   return (
     <ButtonPrimitive
       data-slot="button"
+      data-loading={loading}
       className={cn(buttonVariants({ variant, size }), className)}
+      disabled={loading || props.disabled}
       {...props}
-    />
+    >
+      {loading ? <Dots className="text-gray-600 size-7" /> : children}
+    </ButtonPrimitive>
   )
 }
 

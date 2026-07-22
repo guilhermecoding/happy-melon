@@ -163,13 +163,10 @@ export function LoginForm({
               <Field>
                 <Button
                   type="submit"
+                  loading={isLoading}
                   disabled={isLoading || !isAdmin || !canSubmitAdmin}
-                >                  {isLoading ? "Entrando..." : "Entrar"}
-                  <HugeiconsIcon
-                    icon={LoginCircle01Icon}
-                    className="size-5"
-                    strokeWidth={3}
-                  />
+                >
+                  Entrar
                 </Button>
               </Field>
               <FieldDescription className="flex justify-center text-center">
