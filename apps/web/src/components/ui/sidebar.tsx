@@ -262,9 +262,14 @@ function SidebarTrigger({
     <Button
       data-sidebar="trigger"
       data-slot="sidebar-trigger"
-      variant="ghost"
-      size="icon-sm"
-      className={cn(className)}
+      size="icon"
+      className={cn(
+        "size-7 shadow-none text-foreground [-webkit-text-stroke:0] text-shadow-none",
+        "bg-transparent hover:bg-accent hover:brightness-100",
+        "active:translate-y-0 active:shadow-none",
+        "[&_svg]:filter-none",
+        className
+      )}
       onClick={(event) => {
         onClick?.(event)
         toggleSidebar()
