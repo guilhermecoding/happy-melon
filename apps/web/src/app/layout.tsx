@@ -2,6 +2,7 @@ import type { Metadata } from 'next';
 import localFont from 'next/font/local';
 import './globals.css';
 import { cn } from '@/lib/utils';
+import Providers from '@/lib/providers';
 
 const cause = localFont({
   src: '../fonts/cause-latin-wght-normal.woff2',
@@ -25,7 +26,11 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="pt-BR" className={cn('font-sans', cause.variable)}>
-      <body>{children}</body>
+      <body>
+        <Providers>
+          {children}
+        </Providers>
+      </body>
     </html>
   );
 }

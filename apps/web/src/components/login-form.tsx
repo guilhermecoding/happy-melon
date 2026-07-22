@@ -18,10 +18,8 @@ import { authClient } from "@/lib/auth-client"
 import { HugeiconsIcon } from "@hugeicons/react"
 import {
   ArrowRight02Icon,
-  BalloonIcon,
-  LoginCircle01Icon,
-  MailIcon,
-  SquareLock01Icon,
+  BalloonIcon, MailIcon,
+  SquareLock01Icon
 } from "@hugeicons/core-free-icons"
 
 const ADMIN_ROLES = new Set(["admin", "staff"])
