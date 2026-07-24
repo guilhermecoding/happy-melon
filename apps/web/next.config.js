@@ -6,9 +6,10 @@ const nextConfig = {
   // localhost is already allowed by Next when this is empty/absent.
   allowedDevOrigins: process.env.ALLOWED_DEV_ORIGINS
     ? process.env.ALLOWED_DEV_ORIGINS.split(",")
-        .map((origin) => origin.trim())
-        .filter(Boolean)
+      .map((origin) => origin.trim())
+      .filter(Boolean)
     : [],
+  cacheComponents: true,
 };
 
 export default nextConfig;
