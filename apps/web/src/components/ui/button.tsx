@@ -33,12 +33,12 @@ const buttonVariants = cva("", {
   variants: {
     variant: {
       normal: "",
-      blue: "bg-sky-400 shadow-sky-700 group-hover/button:bg-sky-300",
-      green: "bg-green-400 shadow-green-700 group-hover/button:bg-green-300",
-      orange: "bg-orange-400 shadow-orange-700 group-hover/button:bg-orange-300",
-      red: "bg-red-400 shadow-red-700 group-hover/button:bg-red-300",
+      blue: "bg-sky-500 shadow-sky-700 group-hover/button:bg-sky-400",
+      green: "bg-green-500 shadow-green-700 group-hover/button:bg-green-400",
+      orange: "bg-orange-500 shadow-orange-700 group-hover/button:bg-orange-400",
+      red: "bg-red-500 shadow-red-700 group-hover/button:bg-red-400",
       white:
-        "border border-black/10 bg-white shadow-zinc-400 text-black group-hover/button:bg-zinc-50",
+        "border border-black/10 bg-white shadow-zinc-400 text-black group-hover/button:bg-zinc-200",
     },
     size: {
       sm: [
