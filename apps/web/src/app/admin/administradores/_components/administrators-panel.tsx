@@ -21,6 +21,17 @@ import { EditAdministratorSheet } from './edit-administrator-sheet';
 import { HugeiconsIcon } from '@hugeicons/react';
 import { CirclePlusIcon, PencilEdit02Icon } from '@hugeicons/core-free-icons';
 
+function formatLastAccess(lastAccess: string | null) {
+  if (!lastAccess) {
+    return 'Nunca';
+  }
+
+  return new Date(lastAccess).toLocaleString('pt-BR', {
+    dateStyle: 'short',
+    timeStyle: 'short',
+  });
+}
+
 export function AdministratorsPanel() {
   const { data: session } = authClient.useSession();
   const currentUserId = session?.user.id;
@@ -159,41 +170,42 @@ export function AdministratorsPanel() {
         <Table>
           <TableHeader>
             <TableRow>
-              <TableHead className="w-20 font-bold">#</TableHead>
-              <TableHead className="font-bold">Nome</TableHead>
-              <TableHead className="font-bold">Email</TableHead>
-              <TableHead className="font-bold">Acesso</TableHead>
-              <TableHead className="w-16 font-bold text-right">Opções</TableHead>
+              <TableHead className="w-20 px-4 font-bold">#</TableHead>
+              <TableHead className="px-4 font-bold">Nome</TableHead>
+              <TableHead className="px-4 font-bold">Email</TableHead>
+              <TableHead className="px-4 font-bold">Acesso</TableHead>
+              <TableHead className="px-4 font-bold">Último acesso</TableHead>
+              <TableHead className="w-16 px-4 font-bold text-right">Editar</TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
             {loading ? (
               <TableRow>
-                <TableCell colSpan={5} className="h-24 text-center">
+                <TableCell colSpan={6} className="h-24 px-4 text-center">
                   Carregando...
                 </TableCell>
               </TableRow>
             ) : error && administrators.length === 0 ? (
               <TableRow>
-                <TableCell colSpan={5} className="h-24 text-center text-muted-foreground">
+                <TableCell colSpan={6} className="h-24 px-4 text-center text-muted-foreground">
                   Não foi possível carregar a lista.
                 </TableCell>
               </TableRow>
             ) : administrators.length === 0 ? (
               <TableRow>
-                <TableCell colSpan={5} className="h-24 text-center text-muted-foreground">
+                <TableCell colSpan={6} className="h-24 px-4 text-center text-muted-foreground">
                   Nenhum administrador encontrado.
                 </TableCell>
               </TableRow>
             ) : (
               administrators.map((administrator, index) => (
                 <TableRow key={administrator.id} className={index % 2 === 0 ? 'bg-white' : ''}>
-                  <TableCell className="w-20 whitespace-nowrap font-mono text-xs">
+                  <TableCell className="w-20 px-4 whitespace-nowrap font-mono text-xs">
                     {administrator.id}
                   </TableCell>
-                  <TableCell>{administrator.name}</TableCell>
-                  <TableCell>{administrator.email}</TableCell>
-                  <TableCell>
+                  <TableCell className="px-4">{administrator.name}</TableCell>
+                  <TableCell className="px-4">{administrator.email}</TableCell>
+                  <TableCell className="px-4">
                     <Switch
                       checked={administrator.hasAccess}
                       disabled={
@@ -206,7 +218,10 @@ export function AdministratorsPanel() {
                       }
                     />
                   </TableCell>
-                  <TableCell className="text-right">
+                  <TableCell className="px-4 text-muted-foreground">
+                    {formatLastAccess(administrator.lastAccess)}
+                  </TableCell>
+                  <TableCell className="px-4 text-right">
                     <Button
                       type="button"
                       variant="normal"

@@ -3,6 +3,7 @@ export type Administrator = {
   name: string;
   email: string;
   hasAccess: boolean;
+  lastAccess: string | null;
 };
 
 export type CreatedAdministrator = Administrator & {

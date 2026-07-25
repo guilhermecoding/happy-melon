@@ -10,6 +10,7 @@ import {
 } from '@nestjs/common';
 import { APIError } from 'better-auth/api';
 import { fromNodeHeaders } from 'better-auth/node';
+import { prisma } from '@repo/database';
 import { auth } from '../auth/auth.js';
 import type {
   CreateAdministratorDto,
@@ -32,14 +33,20 @@ export class AdministratorsService {
         },
       });
 
-      return result.users
-        .filter((user) => user.role === 'admin' || user.role === 'staff')
-        .map((user) => ({
-          id: user.id,
-          name: user.name,
-          email: user.email,
-          hasAccess: !user.banned,
-        }));
+      const administrators = result.users.filter(
+        (user) => user.role === 'admin' || user.role === 'staff',
+      );
+      const lastAccessByUserId = await this.getLastAccessByUserIds(
+        administrators.map((user) => user.id),
+      );
+
+      return administrators.map((user) => ({
+        id: user.id,
+        name: user.name,
+        email: user.email,
+        hasAccess: !user.banned,
+        lastAccess: lastAccessByUserId.get(user.id) ?? null,
+      }));
     } catch (error) {
       this.rethrowApiError(error);
     }
@@ -69,6 +76,7 @@ export class AdministratorsService {
         name: user.name,
         email: user.email,
         hasAccess: true,
+        lastAccess: null,
         temporaryPassword,
       };
     } catch (error) {
@@ -90,7 +98,7 @@ export class AdministratorsService {
         },
       });
 
-      return this.toAdministrator(user);
+      return await this.toAdministrator(user);
     } catch (error) {
       this.rethrowApiError(error);
     }
@@ -131,7 +139,7 @@ export class AdministratorsService {
         query: { id },
       });
 
-      return this.toAdministrator(user);
+      return await this.toAdministrator(user);
     } catch (error) {
       this.rethrowApiError(error);
     }
@@ -180,18 +188,45 @@ export class AdministratorsService {
     }
   }
 
-  private toAdministrator(user: {
+  private async toAdministrator(user: {
     id: string;
     name: string;
     email: string;
     banned?: boolean | null;
   }) {
+    const lastAccessByUserId = await this.getLastAccessByUserIds([user.id]);
+
     return {
       id: user.id,
       name: user.name,
       email: user.email,
       hasAccess: !user.banned,
+      lastAccess: lastAccessByUserId.get(user.id) ?? null,
     };
+  }
+
+  private async getLastAccessByUserIds(
+    userIds: string[],
+  ): Promise<Map<string, string>> {
+    if (userIds.length === 0) {
+      return new Map();
+    }
+
+    const sessions = await prisma.session.groupBy({
+      by: ['userId'],
+      where: { userId: { in: userIds } },
+      _max: { updatedAt: true },
+    });
+
+    return new Map(
+      sessions.flatMap((session) => {
+        if (!session._max.updatedAt) {
+          return [];
+        }
+
+        return [[session.userId, session._max.updatedAt.toISOString()]];
+      }),
+    );
   }
 
   private toAuthHeaders(headers: IncomingHttpHeaders): Headers {
