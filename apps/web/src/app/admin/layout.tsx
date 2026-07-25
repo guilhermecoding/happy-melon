@@ -17,8 +17,8 @@ import { Metadata } from "next"
 
 export const metadata: Metadata = {
   title: {
-    default: 'Administrador - Happy Melon',
-    template: '%s | Administrador - Happy Melon',
+    default: 'Happy Melon (Administrador)',
+    template: '%s | Happy Melon (Administrador)',
   }
 }
 
