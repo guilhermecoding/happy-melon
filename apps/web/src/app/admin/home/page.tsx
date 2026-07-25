@@ -15,8 +15,8 @@ export default function AdminHomePage() {
                 <h1 className="text-3xl font-bold">Boa noite, Matheus!</h1>
             </Section>
             <Section className='flex flex-row gap-8 mt-6'>
+                <BoxOption title='Administradores' type='users' />
                 <BoxOption title='Competições' type='contests' />
-                <BoxOption title='Usuários' type='users' />
             </Section>
         </Page>
     )
