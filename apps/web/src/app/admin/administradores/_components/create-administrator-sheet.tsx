@@ -3,7 +3,8 @@
 import { useRef, useState } from 'react';
 import { useForm } from '@tanstack/react-form';
 import { HugeiconsIcon } from '@hugeicons/react';
-import { api } from '@/lib/api';
+import { administratorService } from '@/services/administrator/administrator.service';
+import type { Administrator } from '@/services/administrator/administrator.type';
 import { Button } from '@/components/ui/button';
 import { Field, FieldError, FieldLabel } from '@/components/ui/field';
 import { Input } from '@/components/ui/input';
@@ -17,14 +18,9 @@ import {
 } from '@/components/ui/sheet';
 import {
   administratorSchema,
-  type Administrator,
   type AdministratorFormValues,
 } from './administrator-schema';
 import { CopyCheckIcon, CopyIcon } from '@hugeicons/core-free-icons';
-
-type CreatedAdministrator = Administrator & {
-  temporaryPassword: string;
-};
 
 type CreateAdministratorSheetProps = {
   open: boolean;
@@ -53,10 +49,7 @@ export function CreateAdministratorSheet({
     onSubmit: async ({ value }) => {
       setRequestError(undefined);
       try {
-        const administrator = await api<CreatedAdministrator>('/administrators', {
-          method: 'POST',
-          body: JSON.stringify(value),
-        });
+        const administrator = await administratorService.create(value);
         onCreated(administrator);
         setTemporaryPassword(administrator.temporaryPassword);
       } catch (error) {

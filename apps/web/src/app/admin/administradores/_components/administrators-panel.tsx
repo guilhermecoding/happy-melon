@@ -2,7 +2,8 @@
 
 import { useEffect, useState } from 'react';
 import { authClient } from '@/lib/auth-client';
-import { api } from '@/lib/api';
+import { administratorService } from '@/services/administrator/administrator.service';
+import type { Administrator } from '@/services/administrator/administrator.type';
 import { Button } from '@/components/ui/button';
 import { Switch } from '@/components/ui/switch';
 import {
@@ -14,7 +15,6 @@ import {
   TableRow,
 } from '@/components/ui/table';
 import { CreateAdministratorSheet } from './create-administrator-sheet';
-import type { Administrator } from './administrator-schema';
 import { EditAdministratorSheet } from './edit-administrator-sheet';
 import { HugeiconsIcon } from '@hugeicons/react';
 import { CirclePlusIcon, PencilEdit02Icon } from '@hugeicons/core-free-icons';
@@ -36,7 +36,7 @@ export function AdministratorsPanel() {
 
     async function loadAdministrators() {
       try {
-        const data = await api<Administrator[]>('/administrators');
+        const data = await administratorService.list();
         if (active) setAdministrators(data);
       } catch (loadError) {
         if (active) {
@@ -68,12 +68,9 @@ export function AdministratorsPanel() {
     setUpdatingAccess((current) => new Set(current).add(administrator.id));
 
     try {
-      const updatedAdministrator = await api<Administrator>(
-        `/administrators/${administrator.id}/access`,
-        {
-          method: 'PATCH',
-          body: JSON.stringify({ hasAccess }),
-        },
+      const updatedAdministrator = await administratorService.setAccess(
+        administrator.id,
+        hasAccess,
       );
       setAdministrators((current) =>
         current.map((item) =>

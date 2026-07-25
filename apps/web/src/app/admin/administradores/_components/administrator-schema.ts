@@ -6,10 +6,3 @@ export const administratorSchema = z.object({
 });
 
 export type AdministratorFormValues = z.infer<typeof administratorSchema>;
-
-export type Administrator = {
-  id: string;
-  name: string;
-  email: string;
-  hasAccess: boolean;
-};

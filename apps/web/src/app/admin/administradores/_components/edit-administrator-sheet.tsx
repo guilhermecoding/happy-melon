@@ -2,7 +2,8 @@
 
 import { useEffect, useState } from 'react';
 import { useForm } from '@tanstack/react-form';
-import { api } from '@/lib/api';
+import { administratorService } from '@/services/administrator/administrator.service';
+import type { Administrator } from '@/services/administrator/administrator.type';
 import { Button } from '@/components/ui/button';
 import { Field, FieldError, FieldLabel } from '@/components/ui/field';
 import { Input } from '@/components/ui/input';
@@ -16,7 +17,6 @@ import {
 } from '@/components/ui/sheet';
 import {
   administratorSchema,
-  type Administrator,
   type AdministratorFormValues,
 } from './administrator-schema';
 
@@ -48,12 +48,9 @@ export function EditAdministratorSheet({
 
       setRequestError(undefined);
       try {
-        const updatedAdministrator = await api<Administrator>(
-          `/administrators/${administrator.id}`,
-          {
-            method: 'PATCH',
-            body: JSON.stringify(value),
-          },
+        const updatedAdministrator = await administratorService.update(
+          administrator.id,
+          value,
         );
         onUpdated(updatedAdministrator);
         onOpenChange(false);
