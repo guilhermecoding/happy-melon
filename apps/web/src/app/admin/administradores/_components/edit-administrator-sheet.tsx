@@ -85,9 +85,9 @@ export function EditAdministratorSheet({
 
   return (
     <Sheet open={open} onOpenChange={handleOpenChange}>
-      <SheetContent side="right">
+      <SheetContent side="right" showCloseButton={false}>
         <SheetHeader>
-          <SheetTitle>Editar administrador</SheetTitle>
+          <SheetTitle className="text-2xl font-bold">Editar administrador</SheetTitle>
           <SheetDescription>
             Atualize o nome e o e-mail do administrador.
           </SheetDescription>
@@ -145,11 +145,19 @@ export function EditAdministratorSheet({
           <SheetFooter className="mt-auto px-0">
             <form.Subscribe selector={(state) => state.isSubmitting}>
               {(isSubmitting) => (
-                <Button type="submit" loading={isSubmitting}>
+                <Button type="submit" loading={isSubmitting} className="w-full">
                   Salvar
                 </Button>
               )}
             </form.Subscribe>
+            <Button
+              type="button"
+              variant="white"
+              onClick={() => handleOpenChange(false)}
+              className="w-full"
+            >
+              Fechar
+            </Button>
           </SheetFooter>
         </form>
       </SheetContent>

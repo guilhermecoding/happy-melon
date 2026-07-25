@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from 'react';
+import { useRef, useState } from 'react';
 import { useForm } from '@tanstack/react-form';
 import { HugeiconsIcon } from '@hugeicons/react';
 import { api } from '@/lib/api';
@@ -20,7 +20,7 @@ import {
   type Administrator,
   type AdministratorFormValues,
 } from './administrator-schema';
-import { CopyIcon } from '@hugeicons/core-free-icons';
+import { CopyCheckIcon, CopyIcon } from '@hugeicons/core-free-icons';
 
 type CreatedAdministrator = Administrator & {
   temporaryPassword: string;
@@ -39,6 +39,8 @@ export function CreateAdministratorSheet({
 }: CreateAdministratorSheetProps) {
   const [temporaryPassword, setTemporaryPassword] = useState<string>();
   const [requestError, setRequestError] = useState<string>();
+  const [copied, setCopied] = useState(false);
+  const copiedTimeoutRef = useRef<ReturnType<typeof setTimeout>>(null);
 
   const form = useForm({
     defaultValues: {
@@ -70,15 +72,33 @@ export function CreateAdministratorSheet({
       form.reset();
       setTemporaryPassword(undefined);
       setRequestError(undefined);
+      setCopied(false);
+      if (copiedTimeoutRef.current) {
+        clearTimeout(copiedTimeoutRef.current);
+        copiedTimeoutRef.current = null;
+      }
     }
     onOpenChange(nextOpen);
   }
 
+  async function handleCopyPassword() {
+    if (!temporaryPassword) return;
+    await navigator.clipboard.writeText(temporaryPassword);
+    setCopied(true);
+    if (copiedTimeoutRef.current) {
+      clearTimeout(copiedTimeoutRef.current);
+    }
+    copiedTimeoutRef.current = setTimeout(() => {
+      setCopied(false);
+      copiedTimeoutRef.current = null;
+    }, 3000);
+  }
+
   return (
     <Sheet open={open} onOpenChange={handleOpenChange}>
-      <SheetContent side="right">
+      <SheetContent side="right" showCloseButton={false}>
         <SheetHeader>
-          <SheetTitle>Adicionar administrador</SheetTitle>
+          <SheetTitle className="text-2xl font-bold">Adicionar administrador</SheetTitle>
           <SheetDescription>
             Cadastre um novo administrador do sistema.
           </SheetDescription>
@@ -98,10 +118,14 @@ export function CreateAdministratorSheet({
                 variant="normal"
                 className="size-10"
                 size="icon"
-                aria-label="Copiar senha temporária"
-                onClick={() => void navigator.clipboard.writeText(temporaryPassword)}
+                aria-label={copied ? 'Senha copiada' : 'Copiar senha temporária'}
+                onClick={() => void handleCopyPassword()}
               >
-                <HugeiconsIcon icon={CopyIcon} className="size-5" strokeWidth={2} />
+                <HugeiconsIcon
+                  icon={copied ? CopyCheckIcon : CopyIcon}
+                  className="size-5"
+                  strokeWidth={2}
+                />
               </Button>
             </div>
             <SheetFooter className="mt-auto px-0">
@@ -180,6 +204,14 @@ export function CreateAdministratorSheet({
                   </Button>
                 )}
               </form.Subscribe>
+              <Button
+                type="button"
+                variant="white"
+                onClick={() => handleOpenChange(false)}
+                className="w-full"
+              >
+                Fechar
+              </Button>
             </SheetFooter>
           </form>
         )}

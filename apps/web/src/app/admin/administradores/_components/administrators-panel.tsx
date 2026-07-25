@@ -1,16 +1,9 @@
 "use client";
 
 import { useEffect, useState } from 'react';
-import { IconDots, IconEdit } from '@tabler/icons-react';
 import { authClient } from '@/lib/auth-client';
 import { api } from '@/lib/api';
 import { Button } from '@/components/ui/button';
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuTrigger,
-} from '@/components/ui/dropdown-menu';
 import { Switch } from '@/components/ui/switch';
 import {
   Table,
@@ -24,7 +17,7 @@ import { CreateAdministratorSheet } from './create-administrator-sheet';
 import type { Administrator } from './administrator-schema';
 import { EditAdministratorSheet } from './edit-administrator-sheet';
 import { HugeiconsIcon } from '@hugeicons/react';
-import { CirclePlusIcon } from '@hugeicons/core-free-icons';
+import { CirclePlusIcon, PencilEdit02Icon } from '@hugeicons/core-free-icons';
 
 export function AdministratorsPanel() {
   const { data: session } = authClient.useSession();
@@ -125,10 +118,11 @@ export function AdministratorsPanel() {
   }
 
   return (
-    <div className="flex flex-col gap-4">
+    <div className="flex flex-col gap-4 mt-6">
       <div className="flex justify-end">
         <Button
           onClick={() => setCreateOpen(true)}
+          className="w-full sm:w-auto"
           size="sm"
         >
           <HugeiconsIcon icon={CirclePlusIcon} className="size-5" strokeWidth={3} />
@@ -142,7 +136,7 @@ export function AdministratorsPanel() {
         </p>
       )}
 
-      <div className="overflow-hidden bg-muted rounded-md border">
+      <div className="overflow-hidden rounded-2xl p-2 border bg-muted">
         <Table>
           <TableHeader>
             <TableRow>
@@ -186,26 +180,16 @@ export function AdministratorsPanel() {
                     />
                   </TableCell>
                   <TableCell className="text-right">
-                    <DropdownMenu>
-                      <DropdownMenuTrigger
-                        render={
-                          <Button
-                            type="button"
-                            variant="normal"
-                            size="sm"
-                            aria-label={`Opções de ${administrator.name}`}
-                          />
-                        }
-                      >
-                        <IconDots />
-                      </DropdownMenuTrigger>
-                      <DropdownMenuContent align="end">
-                        <DropdownMenuItem onClick={() => openEditSheet(administrator)}>
-                          <IconEdit />
-                          Editar
-                        </DropdownMenuItem>
-                      </DropdownMenuContent>
-                    </DropdownMenu>
+                    <Button
+                      type="button"
+                      variant="normal"
+                      size="icon"
+                      className="size-9"
+                      aria-label={`Editar ${administrator.name}`}
+                      onClick={() => openEditSheet(administrator)}
+                    >
+                      <HugeiconsIcon icon={PencilEdit02Icon} className="size-5" strokeWidth={1.5} />
+                    </Button>
                   </TableCell>
                 </TableRow>
               ))

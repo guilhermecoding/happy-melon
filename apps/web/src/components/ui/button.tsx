@@ -12,12 +12,12 @@ const gameButtonStyles = [
   "hover:brightness-105",
   "active:translate-y-[6px] active:shadow-none",
   "disabled:cursor-not-allowed",
-  "disabled:bg-zinc-300 disabled:shadow-zinc-400 disabled:hover:bg-zinc-300 disabled:hover:brightness-100",
-  "disabled:active:translate-y-0 disabled:active:shadow-[0_6px_0_0]",
+  "disabled:bg-zinc-300 disabled:shadow-none disabled:hover:bg-zinc-300 disabled:hover:brightness-100",
+  "disabled:active:translate-y-0 disabled:active:shadow-none",
   "disabled:text-zinc-100",
   "data-disabled:cursor-not-allowed",
-  "data-disabled:bg-zinc-300 data-disabled:shadow-zinc-400 data-disabled:hover:bg-zinc-300 data-disabled:hover:brightness-100",
-  "data-disabled:active:translate-y-0 data-disabled:active:shadow-[0_6px_0_0]",
+  "data-disabled:bg-zinc-300 data-disabled:shadow-none data-disabled:hover:bg-zinc-300 data-disabled:hover:brightness-100",
+  "data-disabled:active:translate-y-0 data-disabled:active:shadow-none",
   "data-disabled:text-zinc-100",
   "[&_svg]:pointer-events-none [&_svg]:shrink-0 [&_svg:not([class*='size-'])]:size-4",
   "[&_svg]:[filter:drop-shadow(1px_4px_0_rgb(0_0_0_/_40%))_drop-shadow(-1px_4px_0_rgb(0_0_0_/_40%))_drop-shadow(0_4px_0_rgb(0_0_0_/_40%))_drop-shadow(0_4'px_0_rgb(0_0_0_/_40%))_drop-shadow(0_4px_0_rgb(0_0_0_/_5%))_drop-shadow(0_1px_1px_rgb(0_4px_4px_/_5%))_drop-shadow(0_4px_2px_rgb(0_0_0_/_5%))]",
@@ -39,7 +39,7 @@ const buttonVariants = cva("", {
       sm: [
         "h-9 px-5 text-base",
         "shadow-[0_4px_0_0] active:translate-y-[4px]",
-        "disabled:active:shadow-[0_4px_0_0] data-disabled:active:shadow-[0_4px_0_0]",
+        "disabled:active:shadow-none data-disabled:active:shadow-none",
         "[&_svg:not([class*='size-'])]:size-3.5",
       ].join(" "),
       normal: "h-12 px-8 text-xl",
@@ -91,6 +91,7 @@ function Button({
       className={cn(
         "inline-flex w-fit items-center justify-center rounded-3xl border-4 bg-black/10",
         "has-focus-visible:ring-3 has-focus-visible:ring-black/25",
+        "has-disabled:pb-0 has-data-disabled:pb-0",
         size === "icon" ? "p-0" : size === "sm" ? "pb-1" : "pb-1.5",
         className
       )}
