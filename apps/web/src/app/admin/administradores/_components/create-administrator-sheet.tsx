@@ -4,6 +4,7 @@ import { useRef, useState } from 'react';
 import { useForm } from '@tanstack/react-form';
 import { HugeiconsIcon } from '@hugeicons/react';
 import { administratorService } from '@/services/administrator/administrator.service';
+import { getAdministratorErrorMessage } from '@/services/administrator/administrator.error';
 import type { Administrator } from '@/services/administrator/administrator.type';
 import { Button } from '@/components/ui/button';
 import { Field, FieldError, FieldLabel } from '@/components/ui/field';
@@ -54,7 +55,10 @@ export function CreateAdministratorSheet({
         setTemporaryPassword(administrator.temporaryPassword);
       } catch (error) {
         setRequestError(
-          error instanceof Error ? error.message : 'Não foi possível criar o administrador',
+          getAdministratorErrorMessage(
+            error,
+            'Não foi possível criar o administrador.',
+          ),
         );
       }
     },

@@ -3,6 +3,7 @@
 import { useEffect, useState } from 'react';
 import { useForm } from '@tanstack/react-form';
 import { administratorService } from '@/services/administrator/administrator.service';
+import { getAdministratorErrorMessage } from '@/services/administrator/administrator.error';
 import type { Administrator } from '@/services/administrator/administrator.type';
 import { Button } from '@/components/ui/button';
 import { Field, FieldError, FieldLabel } from '@/components/ui/field';
@@ -56,7 +57,10 @@ export function EditAdministratorSheet({
         onOpenChange(false);
       } catch (error) {
         setRequestError(
-          error instanceof Error ? error.message : 'Não foi possível editar o administrador',
+          getAdministratorErrorMessage(
+            error,
+            'Não foi possível atualizar o administrador.',
+          ),
         );
       }
     },

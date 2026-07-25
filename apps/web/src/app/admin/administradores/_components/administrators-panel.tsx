@@ -3,6 +3,7 @@
 import { useEffect, useState } from 'react';
 import { authClient } from '@/lib/auth-client';
 import { administratorService } from '@/services/administrator/administrator.service';
+import { getAdministratorErrorMessage } from '@/services/administrator/administrator.error';
 import type { Administrator } from '@/services/administrator/administrator.type';
 import { Button } from '@/components/ui/button';
 import { Switch } from '@/components/ui/switch';
@@ -41,9 +42,10 @@ export function AdministratorsPanel() {
       } catch (loadError) {
         if (active) {
           setError(
-            loadError instanceof Error
-              ? loadError.message
-              : 'Não foi possível carregar os administradores',
+            getAdministratorErrorMessage(
+              loadError,
+              'Não foi possível carregar os administradores.',
+            ),
           );
         }
       } finally {
@@ -86,9 +88,10 @@ export function AdministratorsPanel() {
         ),
       );
       setError(
-        updateError instanceof Error
-          ? updateError.message
-          : 'Não foi possível atualizar o acesso',
+        getAdministratorErrorMessage(
+          updateError,
+          'Não foi possível atualizar o acesso do administrador.',
+        ),
       );
     } finally {
       setUpdatingAccess((current) => {
@@ -149,6 +152,12 @@ export function AdministratorsPanel() {
               <TableRow>
                 <TableCell colSpan={5} className="h-24 text-center">
                   Carregando...
+                </TableCell>
+              </TableRow>
+            ) : error && administrators.length === 0 ? (
+              <TableRow>
+                <TableCell colSpan={5} className="h-24 text-center text-muted-foreground">
+                  Não foi possível carregar a lista.
                 </TableCell>
               </TableRow>
             ) : administrators.length === 0 ? (

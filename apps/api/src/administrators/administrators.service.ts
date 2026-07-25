@@ -1,6 +1,7 @@
 import { randomBytes } from 'node:crypto';
 import type { IncomingHttpHeaders } from 'node:http';
 import {
+  ConflictException,
   ForbiddenException,
   HttpException,
   HttpStatus,
@@ -175,14 +176,53 @@ export class AdministratorsService {
     ).join('');
   }
 
+  private extractApiErrorMessage(error: APIError): string {
+    const body = error.body;
+
+    if (typeof body === 'string' && body.trim()) {
+      return body;
+    }
+
+    if (body && typeof body === 'object') {
+      const message = (body as { message?: unknown }).message;
+
+      if (typeof message === 'string' && message.trim()) {
+        return message;
+      }
+
+      if (Array.isArray(message)) {
+        return message.map(String).join(', ');
+      }
+    }
+
+    return error.message || 'Erro inesperado ao processar a solicitação.';
+  }
+
+  private isDuplicateEmailError(statusCode: number, message: string): boolean {
+    if (
+      /already exists|user.?exists|email.?already|unique constraint|duplicate/i.test(
+        message,
+      )
+    ) {
+      return true;
+    }
+
+    return statusCode === HttpStatus.CONFLICT;
+  }
+
   private rethrowApiError(error: unknown): never {
     if (error instanceof APIError) {
       const statusCode =
         typeof error.statusCode === 'number'
           ? error.statusCode
           : HttpStatus.INTERNAL_SERVER_ERROR;
+      const message = this.extractApiErrorMessage(error);
 
-      throw new HttpException(error.body ?? error.message, statusCode);
+      if (this.isDuplicateEmailError(statusCode, message)) {
+        throw new ConflictException('Já existe um usuário com este e-mail.');
+      }
+
+      throw new HttpException(message, statusCode);
     }
 
     throw error;
