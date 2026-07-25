@@ -23,3 +23,12 @@ export type UpdateAdministratorInput = {
 export type DeleteAdministratorInput = {
   password: string;
 };
+
+export type ResetAdministratorPasswordInput = {
+  password: string;
+};
+
+export type ResetAdministratorPasswordResult = {
+  temporaryPassword: string;
+};
+

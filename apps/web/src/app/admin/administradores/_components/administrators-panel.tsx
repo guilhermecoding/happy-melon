@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { authClient } from '@/lib/auth-client';
 import { administratorService } from '@/services/administrator/administrator.service';
 import { getAdministratorErrorMessage } from '@/services/administrator/administrator.error';
@@ -32,6 +32,21 @@ function formatLastAccess(lastAccess: string | null) {
   });
 }
 
+/** Logged-in admin first, then A–Z by name (pt-BR). */
+function orderAdministrators(
+  administrators: Administrator[],
+  currentUserId?: string,
+) {
+  return [...administrators].sort((a, b) => {
+    if (currentUserId) {
+      if (a.id === currentUserId) return -1;
+      if (b.id === currentUserId) return 1;
+    }
+
+    return a.name.localeCompare(b.name, 'pt-BR', { sensitivity: 'base' });
+  });
+}
+
 export function AdministratorsPanel() {
   const { data: session } = authClient.useSession();
   const currentUserId = session?.user.id;
@@ -43,6 +58,11 @@ export function AdministratorsPanel() {
   const [editOpen, setEditOpen] = useState(false);
   const [selectedAdministrator, setSelectedAdministrator] =
     useState<Administrator | null>(null);
+
+  const orderedAdministrators = useMemo(
+    () => orderAdministrators(administrators, currentUserId),
+    [administrators, currentUserId],
+  );
 
   useEffect(() => {
     let active = true;
@@ -185,31 +205,43 @@ export function AdministratorsPanel() {
                   Carregando...
                 </TableCell>
               </TableRow>
-            ) : error && administrators.length === 0 ? (
+            ) : error && orderedAdministrators.length === 0 ? (
               <TableRow>
                 <TableCell colSpan={6} className="h-24 px-4 text-center text-muted-foreground">
                   Não foi possível carregar a lista.
                 </TableCell>
               </TableRow>
-            ) : administrators.length === 0 ? (
+            ) : orderedAdministrators.length === 0 ? (
               <TableRow>
                 <TableCell colSpan={6} className="h-24 px-4 text-center text-muted-foreground">
                   Nenhum administrador encontrado.
                 </TableCell>
               </TableRow>
             ) : (
-              administrators.map((administrator, index) => (
+              orderedAdministrators.map((administrator, index) => {
+                const isCurrentUser = administrator.id === currentUserId;
+
+                return (
                 <TableRow key={administrator.id} className={index % 2 === 0 ? 'bg-white' : ''}>
                   <TableCell className="w-20 px-4 whitespace-nowrap font-mono text-xs">
                     {administrator.id}
                   </TableCell>
-                  <TableCell className="px-4">{administrator.name}</TableCell>
+                  <TableCell className="px-4">
+                    <span className="inline-flex items-center gap-2">
+                      {administrator.name}
+                      {isCurrentUser && (
+                        <span className="rounded-md bg-primary/10 px-1.5 py-0.5 text-xs font-medium text-primary">
+                          Você
+                        </span>
+                      )}
+                    </span>
+                  </TableCell>
                   <TableCell className="px-4">{administrator.email}</TableCell>
                   <TableCell className="px-4">
                     <Switch
                       checked={administrator.hasAccess}
                       disabled={
-                        administrator.id === currentUserId ||
+                        isCurrentUser ||
                         updatingAccess.has(administrator.id)
                       }
                       aria-label={`Acesso de ${administrator.name}`}
@@ -234,7 +266,8 @@ export function AdministratorsPanel() {
                     </Button>
                   </TableCell>
                 </TableRow>
-              ))
+                );
+              })
             )}
           </TableBody>
         </Table>

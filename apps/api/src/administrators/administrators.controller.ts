@@ -19,10 +19,12 @@ import { AdministratorsService } from './administrators.service.js';
 import {
   createAdministratorSchema,
   deleteAdministratorSchema,
+  resetPasswordAdministratorSchema,
   setAccessSchema,
   updateAdministratorSchema,
   type CreateAdministratorDto,
   type DeleteAdministratorDto,
+  type ResetPasswordAdministratorDto,
   type SetAccessDto,
   type UpdateAdministratorDto,
 } from './dto/administrator.dto.js';
@@ -33,6 +35,9 @@ const createAdministratorPipe = new ZodValidationPipe(createAdministratorSchema)
 const updateAdministratorPipe = new ZodValidationPipe(updateAdministratorSchema);
 const setAccessPipe = new ZodValidationPipe(setAccessSchema);
 const deleteAdministratorPipe = new ZodValidationPipe(deleteAdministratorSchema);
+const resetPasswordAdministratorPipe = new ZodValidationPipe(
+  resetPasswordAdministratorSchema,
+);
 
 @Controller('administrators')
 @Roles(['admin'])
@@ -90,6 +95,19 @@ export class AdministratorsController {
       id,
       dto,
       session.user.id,
+    );
+  }
+
+  @Post(':id/reset-password')
+  resetPassword(
+    @Req() request: RequestWithHeaders,
+    @Param('id') id: string,
+    @Body(resetPasswordAdministratorPipe) dto: ResetPasswordAdministratorDto,
+  ) {
+    return this.administratorsService.resetPassword(
+      request.headers,
+      id,
+      dto,
     );
   }
 }

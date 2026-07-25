@@ -15,6 +15,7 @@ import { auth } from '../auth/auth.js';
 import type {
   CreateAdministratorDto,
   DeleteAdministratorDto,
+  ResetPasswordAdministratorDto,
   UpdateAdministratorDto,
 } from './dto/administrator.dto.js';
 
@@ -183,6 +184,45 @@ export class AdministratorsService {
       });
 
       return { success: true as const };
+    } catch (error) {
+      this.rethrowApiError(error);
+    }
+  }
+
+  async resetPassword(
+    headers: IncomingHttpHeaders,
+    id: string,
+    dto: ResetPasswordAdministratorDto,
+  ) {
+    const authHeaders = this.toAuthHeaders(headers);
+
+    try {
+      await auth.api.verifyPassword({
+        headers: authHeaders,
+        body: {
+          password: dto.password,
+        },
+      });
+    } catch (error) {
+      if (error instanceof APIError) {
+        throw new UnauthorizedException('Senha de administrador incorreta.');
+      }
+
+      throw error;
+    }
+
+    const temporaryPassword = this.generateTemporaryPassword();
+
+    try {
+      await auth.api.setUserPassword({
+        headers: authHeaders,
+        body: {
+          userId: id,
+          newPassword: temporaryPassword,
+        },
+      });
+
+      return { temporaryPassword };
     } catch (error) {
       this.rethrowApiError(error);
     }

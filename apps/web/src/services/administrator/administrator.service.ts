@@ -7,6 +7,8 @@ import type {
   CreateAdministratorInput,
   CreatedAdministrator,
   DeleteAdministratorInput,
+  ResetAdministratorPasswordInput,
+  ResetAdministratorPasswordResult,
   UpdateAdministratorInput,
 } from './administrator.type';
 
@@ -141,6 +143,37 @@ export const administratorService = {
       throw normalizeAdministratorError(
         error,
         'Não foi possível excluir o administrador.',
+      );
+    }
+  },
+
+  async resetPassword(
+    id: string,
+    data: ResetAdministratorPasswordInput,
+  ): Promise<ResetAdministratorPasswordResult> {
+    try {
+      const response = await fetch(
+        `${API_URL}/administrators/${id}/reset-password`,
+        {
+          method: 'POST',
+          credentials: 'include',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(data),
+        },
+      );
+
+      if (!response.ok) {
+        throw await parseAdministratorError(
+          response,
+          'Não foi possível redefinir a senha do administrador.',
+        );
+      }
+
+      return response.json();
+    } catch (error) {
+      throw normalizeAdministratorError(
+        error,
+        'Não foi possível redefinir a senha do administrador.',
       );
     }
   },
