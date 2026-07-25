@@ -159,7 +159,7 @@ export function AdministratorsPanel() {
         <Table>
           <TableHeader>
             <TableRow>
-              <TableHead className="font-bold">#</TableHead>
+              <TableHead className="w-20 font-bold">#</TableHead>
               <TableHead className="font-bold">Nome</TableHead>
               <TableHead className="font-bold">Email</TableHead>
               <TableHead className="font-bold">Acesso</TableHead>
@@ -188,7 +188,9 @@ export function AdministratorsPanel() {
             ) : (
               administrators.map((administrator, index) => (
                 <TableRow key={administrator.id} className={index % 2 === 0 ? 'bg-white' : ''}>
-                  <TableCell className="font-mono text-xs">{administrator.id}</TableCell>
+                  <TableCell className="w-20 whitespace-nowrap font-mono text-xs">
+                    {administrator.id}
+                  </TableCell>
                   <TableCell>{administrator.name}</TableCell>
                   <TableCell>{administrator.email}</TableCell>
                   <TableCell>
