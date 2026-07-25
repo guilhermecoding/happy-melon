@@ -7,9 +7,8 @@ import { Button } from "@/components/ui/button"
 import { Card, CardContent } from "@/components/ui/card"
 import {
   Field,
-  FieldDescription,
   FieldGroup,
-  FieldLabel,
+  FieldLabel
 } from "@/components/ui/field"
 import { Input } from "@/components/ui/input"
 import Image from "next/image"
@@ -17,7 +16,7 @@ import { authClient } from "@/lib/auth-client"
 
 import { HugeiconsIcon } from "@hugeicons/react"
 import {
-  ArrowRight02Icon,
+  Crown03Icon,
   BalloonIcon, MailIcon,
   SquareLock01Icon
 } from "@hugeicons/core-free-icons"
@@ -138,7 +137,7 @@ export function LoginForm({
                   icon={
                     <HugeiconsIcon
                       icon={MailIcon}
-                      className="size-5 text-muted-foreground/50"
+                      className="size-5 opacity-50"
                       strokeWidth={2}
                     />
                   }
@@ -172,7 +171,7 @@ export function LoginForm({
                   icon={
                     <HugeiconsIcon
                       icon={isAdmin ? SquareLock01Icon : BalloonIcon}
-                      className="size-5 text-muted-foreground/50"
+                      className="size-5 opacity-50"
                       strokeWidth={2}
                     />
                   }
@@ -192,20 +191,23 @@ export function LoginForm({
                 >
                   Entrar
                 </Button>
-              </Field>
-              <FieldDescription className="flex justify-center text-center">
-                <button
+                <Button
                   type="button"
+                  variant="white"
                   onClick={() => {
                     setIsAdmin((prev) => !prev)
                     setError(null)
                   }}
-                  className="flex cursor-pointer items-center gap-1 hover:underline"
+                  className="w-full"
                 >
+                  <HugeiconsIcon
+                    icon={isAdmin ? BalloonIcon : Crown03Icon}
+                    className="size-5"
+                    strokeWidth={2.5}
+                  />
                   {isAdmin ? "Sou Colaborador" : "Sou Administrador"}
-                  <HugeiconsIcon icon={ArrowRight02Icon} className="size-5" />
-                </button>
-              </FieldDescription>
+                </Button>
+              </Field>
             </FieldGroup>
           </form>
           <div className="relative hidden bg-muted md:block">
