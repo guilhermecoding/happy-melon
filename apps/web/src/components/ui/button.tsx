@@ -115,7 +115,7 @@ function Button({
       className={cn(
         "inline-flex w-fit items-center justify-center rounded-3xl border-4 bg-black/10",
         "has-focus-visible:ring-3 has-focus-visible:ring-black/25",
-        "has-[[data-disabled]]:border-zinc-300 has-[[data-disabled]]:bg-zinc-300",
+        "has-data-disabled:border-zinc-300 has-data-disabled:bg-zinc-300",
         size === "icon" ? "p-0" : undefined,
         className,
       )}
