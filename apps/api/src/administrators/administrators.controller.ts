@@ -29,6 +29,11 @@ import {
 
 type RequestWithHeaders = { headers: IncomingHttpHeaders };
 
+const createAdministratorPipe = new ZodValidationPipe(createAdministratorSchema);
+const updateAdministratorPipe = new ZodValidationPipe(updateAdministratorSchema);
+const setAccessPipe = new ZodValidationPipe(setAccessSchema);
+const deleteAdministratorPipe = new ZodValidationPipe(deleteAdministratorSchema);
+
 @Controller('administrators')
 @Roles(['admin'])
 export class AdministratorsController {
@@ -44,8 +49,7 @@ export class AdministratorsController {
   @Post()
   create(
     @Req() request: RequestWithHeaders,
-    @Body(new ZodValidationPipe(createAdministratorSchema))
-    dto: CreateAdministratorDto,
+    @Body(createAdministratorPipe) dto: CreateAdministratorDto,
   ) {
     return this.administratorsService.create(request.headers, dto);
   }
@@ -54,8 +58,7 @@ export class AdministratorsController {
   update(
     @Req() request: RequestWithHeaders,
     @Param('id') id: string,
-    @Body(new ZodValidationPipe(updateAdministratorSchema))
-    dto: UpdateAdministratorDto,
+    @Body(updateAdministratorPipe) dto: UpdateAdministratorDto,
   ) {
     return this.administratorsService.update(request.headers, id, dto);
   }
@@ -64,7 +67,7 @@ export class AdministratorsController {
   setAccess(
     @Req() request: RequestWithHeaders,
     @Param('id') id: string,
-    @Body(new ZodValidationPipe(setAccessSchema)) dto: SetAccessDto,
+    @Body(setAccessPipe) dto: SetAccessDto,
     @Session() session: UserSession<typeof auth>,
   ) {
     return this.administratorsService.setAccess(
@@ -79,8 +82,7 @@ export class AdministratorsController {
   remove(
     @Req() request: RequestWithHeaders,
     @Param('id') id: string,
-    @Body(new ZodValidationPipe(deleteAdministratorSchema))
-    dto: DeleteAdministratorDto,
+    @Body(deleteAdministratorPipe) dto: DeleteAdministratorDto,
     @Session() session: UserSession<typeof auth>,
   ) {
     return this.administratorsService.remove(
