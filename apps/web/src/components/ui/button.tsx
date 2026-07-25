@@ -33,7 +33,7 @@ const buttonVariants = cva("", {
       green: `${gameButtonStyles} bg-green-400 shadow-green-700 hover:bg-green-300`,
       orange: `${gameButtonStyles} bg-orange-400 shadow-orange-700 hover:bg-orange-300`,
       red: `${gameButtonStyles} bg-red-400 shadow-red-700 hover:bg-red-300`,
-      white: `${gameButtonStyles} border border-black/10 bg-white shadow-zinc-400 hover:bg-zinc-50`,
+      white: `${gameButtonStyles} border border-black/10 bg-white shadow-zinc-400 hover:bg-zinc-50 text-black`,
     },
     size: {
       sm: [
@@ -43,7 +43,7 @@ const buttonVariants = cva("", {
         "[&_svg:not([class*='size-'])]:size-3.5",
       ].join(" "),
       normal: "h-12 px-8 text-xl",
-      icon: "size-12 p-0",
+      icon: "size-12 p-0 inline-flex items-center justify-center rounded-lg hover:bg-black/10",
     },
   },
   defaultVariants: {
@@ -64,7 +64,6 @@ function Button({
   children,
   ...props
 }: ButtonPrimitive.Props & VariantProps<typeof buttonVariants> & { loading?: boolean }) {
-  const isNormalVariant = variant === "normal"
   const isGame = variant != null && gameVariants.has(variant)
 
   const button = (
@@ -72,10 +71,8 @@ function Button({
       data-slot="button"
       data-loading={loading}
       className={cn(
-        buttonVariants({
-          variant,
-          size: isNormalVariant ? null : size,
-        }),
+        buttonVariants({ variant, size }),
+        isGame && "w-full",
         className
       )}
       disabled={loading || props.disabled}
@@ -92,9 +89,10 @@ function Button({
   return (
     <div
       className={cn(
-        "inline-flex w-fit rounded-3xl border-4 bg-black/10",
+        "inline-flex w-fit items-center justify-center rounded-3xl border-4 bg-black/10",
         "has-focus-visible:ring-3 has-focus-visible:ring-black/25",
-        size === "sm" ? "pb-1" : "pb-1.5"
+        size === "icon" ? "p-0" : size === "sm" ? "pb-1" : "pb-1.5",
+        className
       )}
     >
       {button}

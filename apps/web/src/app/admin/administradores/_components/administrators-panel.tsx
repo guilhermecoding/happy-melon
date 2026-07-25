@@ -142,7 +142,7 @@ export function AdministratorsPanel() {
         </p>
       )}
 
-      <div className="overflow-hidden rounded-md border">
+      <div className="overflow-hidden bg-muted rounded-md border">
         <Table>
           <TableHeader>
             <TableRow>

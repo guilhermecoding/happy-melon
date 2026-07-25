@@ -2,7 +2,7 @@
 
 import { useState } from 'react';
 import { useForm } from '@tanstack/react-form';
-import { IconCopy } from '@tabler/icons-react';
+import { HugeiconsIcon } from '@hugeicons/react';
 import { api } from '@/lib/api';
 import { Button } from '@/components/ui/button';
 import { Field, FieldError, FieldLabel } from '@/components/ui/field';
@@ -20,6 +20,7 @@ import {
   type Administrator,
   type AdministratorFormValues,
 } from './administrator-schema';
+import { CopyIcon } from '@hugeicons/core-free-icons';
 
 type CreatedAdministrator = Administrator & {
   temporaryPassword: string;
@@ -94,16 +95,22 @@ export function CreateAdministratorSheet({
               </code>
               <Button
                 type="button"
-                variant="ghost"
+                variant="normal"
+                className="size-10"
                 size="icon"
                 aria-label="Copiar senha temporária"
                 onClick={() => void navigator.clipboard.writeText(temporaryPassword)}
               >
-                <IconCopy />
+                <HugeiconsIcon icon={CopyIcon} className="size-5" strokeWidth={2} />
               </Button>
             </div>
             <SheetFooter className="mt-auto px-0">
-              <Button type="button" variant="blue" onClick={() => handleOpenChange(false)}>
+              <Button
+                type="button"
+                variant="white"
+                onClick={() => handleOpenChange(false)}
+                className="w-full"
+              >
                 Fechar
               </Button>
             </SheetFooter>
@@ -124,6 +131,7 @@ export function CreateAdministratorSheet({
                   <Input
                     id={field.name}
                     name={field.name}
+                    placeholder="Nome do administrador"
                     value={field.state.value}
                     onBlur={field.handleBlur}
                     onChange={(event) => field.handleChange(event.target.value)}
@@ -142,6 +150,7 @@ export function CreateAdministratorSheet({
                     id={field.name}
                     name={field.name}
                     type="email"
+                    placeholder="exemplo@email.com"
                     value={field.state.value}
                     onBlur={field.handleBlur}
                     onChange={(event) => field.handleChange(event.target.value)}
@@ -161,7 +170,12 @@ export function CreateAdministratorSheet({
             <SheetFooter className="mt-auto px-0">
               <form.Subscribe selector={(state) => state.isSubmitting}>
                 {(isSubmitting) => (
-                  <Button type="submit" loading={isSubmitting}>
+                  <Button
+                    type="submit"
+                    variant="green"
+                    loading={isSubmitting}
+                    className="w-full"
+                  >
                     Adicionar
                   </Button>
                 )}
