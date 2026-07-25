@@ -211,18 +211,16 @@ export class AdministratorsService {
       throw error;
     }
 
-    const temporaryPassword = this.generateTemporaryPassword();
-
     try {
       await auth.api.setUserPassword({
         headers: authHeaders,
         body: {
           userId: id,
-          newPassword: temporaryPassword,
+          newPassword: dto.newPassword,
         },
       });
 
-      return { temporaryPassword };
+      return { success: true as const };
     } catch (error) {
       this.rethrowApiError(error);
     }

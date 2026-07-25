@@ -20,6 +20,7 @@ export const deleteAdministratorSchema = z.object({
 
 export const resetPasswordAdministratorSchema = z.object({
   password: z.string().min(1),
+  newPassword: z.string().min(8),
 });
 
 export type CreateAdministratorDto = z.infer<

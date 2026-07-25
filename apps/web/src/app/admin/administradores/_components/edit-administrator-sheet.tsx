@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useState, type FormEvent } from 'react';
 import { useForm } from '@tanstack/react-form';
 import { toast } from '@/components/ui/toast';
 import { authClient } from '@/lib/auth-client';
@@ -37,8 +37,7 @@ import {
   SaveIcon,
   Delete01Icon,
   EyeClosedIcon,
-  CopyIcon,
-  CopyCheckIcon,
+  ResetPasswordIcon,
 } from '@hugeicons/core-free-icons';
 
 type EditAdministratorSheetProps = {
@@ -63,9 +62,10 @@ export function EditAdministratorSheet({
   const [confirmAction, setConfirmAction] = useState<ConfirmAction>(null);
   const [confirmError, setConfirmError] = useState<string>();
   const [isConfirming, setIsConfirming] = useState(false);
-  const [temporaryPassword, setTemporaryPassword] = useState<string>();
-  const [copied, setCopied] = useState(false);
-  const copiedTimeoutRef = useRef<ReturnType<typeof setTimeout>>(null);
+  const [newPasswordOpen, setNewPasswordOpen] = useState(false);
+  const [newPassword, setNewPassword] = useState('');
+  const [newPasswordError, setNewPasswordError] = useState<string>();
+  const [pendingNewPassword, setPendingNewPassword] = useState<string>();
 
   const isCurrentUser = Boolean(
     administrator && session?.user.id === administrator.id,
@@ -114,8 +114,10 @@ export function EditAdministratorSheet({
       setRequestError(undefined);
       setConfirmAction(null);
       setConfirmError(undefined);
-      setTemporaryPassword(undefined);
-      setCopied(false);
+      setNewPasswordOpen(false);
+      setNewPassword('');
+      setNewPasswordError(undefined);
+      setPendingNewPassword(undefined);
     }
   }, [administrator, form, open]);
 
@@ -125,12 +127,10 @@ export function EditAdministratorSheet({
       setRequestError(undefined);
       setConfirmAction(null);
       setConfirmError(undefined);
-      setTemporaryPassword(undefined);
-      setCopied(false);
-      if (copiedTimeoutRef.current) {
-        clearTimeout(copiedTimeoutRef.current);
-        copiedTimeoutRef.current = null;
-      }
+      setNewPasswordOpen(false);
+      setNewPassword('');
+      setNewPasswordError(undefined);
+      setPendingNewPassword(undefined);
     }
     onOpenChange(nextOpen);
   }
@@ -139,7 +139,33 @@ export function EditAdministratorSheet({
     if (!nextOpen) {
       setConfirmAction(null);
       setConfirmError(undefined);
+      if (confirmAction === 'resetPassword') {
+        setPendingNewPassword(undefined);
+      }
     }
+  }
+
+  function handleNewPasswordOpenChange(nextOpen: boolean) {
+    setNewPasswordOpen(nextOpen);
+    if (!nextOpen) {
+      setNewPassword('');
+      setNewPasswordError(undefined);
+    }
+  }
+
+  function handleNewPasswordSubmit(event: FormEvent<HTMLFormElement>) {
+    event.preventDefault();
+
+    if (newPassword.trim().length < 8) {
+      setNewPasswordError('A nova senha deve ter no mínimo 8 caracteres.');
+      return;
+    }
+
+    setNewPasswordError(undefined);
+    setPendingNewPassword(newPassword.trim());
+    handleNewPasswordOpenChange(false);
+    setConfirmError(undefined);
+    setConfirmAction('resetPassword');
   }
 
   async function handleConfirmPassword(password: string) {
@@ -161,13 +187,19 @@ export function EditAdministratorSheet({
         return;
       }
 
-      const result = await administratorService.resetPassword(administrator.id, {
+      if (!pendingNewPassword) {
+        setConfirmError('Informe a nova senha antes de confirmar.');
+        return;
+      }
+
+      await administratorService.resetPassword(administrator.id, {
         password,
+        newPassword: pendingNewPassword,
       });
+      setPendingNewPassword(undefined);
       handleConfirmOpenChange(false);
-      setTemporaryPassword(result.temporaryPassword);
       toast.add({
-        title: 'Senha redefinida com sucesso.',
+        title: 'Senha alterada com sucesso.',
         type: 'success',
       });
     } catch (error) {
@@ -175,7 +207,7 @@ export function EditAdministratorSheet({
         error,
         confirmAction === 'delete'
           ? 'Não foi possível excluir o administrador.'
-          : 'Não foi possível redefinir a senha do administrador.',
+          : 'Não foi possível alterar a senha do administrador.',
       );
       setConfirmError(message);
       toast.add({
@@ -186,21 +218,6 @@ export function EditAdministratorSheet({
       setIsConfirming(false);
     }
   }
-
-  async function handleCopyPassword() {
-    if (!temporaryPassword) return;
-    await navigator.clipboard.writeText(temporaryPassword);
-    setCopied(true);
-    if (copiedTimeoutRef.current) {
-      clearTimeout(copiedTimeoutRef.current);
-    }
-    copiedTimeoutRef.current = setTimeout(() => {
-      setCopied(false);
-      copiedTimeoutRef.current = null;
-    }, 3000);
-  }
-
-  const confirmOpen = confirmAction !== null;
 
   return (
     <>
@@ -231,6 +248,7 @@ export function EditAdministratorSheet({
                     id={field.name}
                     name={field.name}
                     value={field.state.value}
+                    placeholder="Nome do administrador"
                     onBlur={field.handleBlur}
                     onChange={(event) => field.handleChange(event.target.value)}
                     aria-invalid={!field.state.meta.isValid}
@@ -249,6 +267,7 @@ export function EditAdministratorSheet({
                     name={field.name}
                     type="email"
                     value={field.state.value}
+                    placeholder="E-mail do administrador"
                     onBlur={field.handleBlur}
                     onChange={(event) => field.handleChange(event.target.value)}
                     aria-invalid={!field.state.meta.isValid}
@@ -263,6 +282,29 @@ export function EditAdministratorSheet({
                 {requestError}
               </p>
             )}
+
+            <Separator className="my-1 bg-black/15" />
+
+            <div className="flex flex-col gap-2">
+              <Button
+                type="button"
+                variant="orange"
+                size="sm"
+                className="w-full"
+                onClick={() => {
+                  setNewPasswordError(undefined);
+                  setNewPassword('');
+                  setNewPasswordOpen(true);
+                }}
+              >
+                <HugeiconsIcon
+                  icon={ResetPasswordIcon}
+                  className="size-5"
+                  strokeWidth={2.5}
+                />
+                Alterar senha
+              </Button>
+            </div>
 
             <SheetFooter className="mt-auto px-0 gap-3">
               <form.Subscribe selector={(state) => state.isSubmitting}>
@@ -296,26 +338,69 @@ export function EditAdministratorSheet({
                 <HugeiconsIcon icon={EyeClosedIcon} className="size-5" strokeWidth={3} />
                 Fechar
               </Button>
-
-              <Separator className="my-1 bg-black/15" />
-
-              <button
-                type="button"
-                className="w-full py-1 text-center text-sm text-muted-foreground underline-offset-4 hover:text-foreground hover:underline"
-                onClick={() => {
-                  setConfirmError(undefined);
-                  setConfirmAction('resetPassword');
-                }}
-              >
-                Redefinir senha
-              </button>
             </SheetFooter>
           </form>
         </SheetContent>
       </Sheet>
 
+      <Dialog open={newPasswordOpen} onOpenChange={handleNewPasswordOpenChange}>
+        <DialogContent showCloseButton={false}>
+          <DialogHeader>
+            <DialogTitle className="text-xl font-bold">
+              Alterar senha
+            </DialogTitle>
+            <DialogDescription className="text-base">
+              Informe a nova senha para{' '}
+              <strong>{administrator?.name}</strong>. Mínimo de 8 caracteres.
+            </DialogDescription>
+          </DialogHeader>
+
+          <form
+            className="flex flex-col gap-6"
+            onSubmit={handleNewPasswordSubmit}
+          >
+            <Field data-invalid={Boolean(newPasswordError)}>
+              <Input
+                id="admin-new-password"
+                type="password"
+                autoComplete="new-password"
+                placeholder="Nova senha"
+                value={newPassword}
+                onChange={(event) => setNewPassword(event.target.value)}
+                aria-invalid={Boolean(newPasswordError)}
+              />
+              {newPasswordError && (
+                <p role="alert" className="text-sm text-destructive">
+                  {newPasswordError}
+                </p>
+              )}
+            </Field>
+
+            <DialogFooter className="flex-col justify-stretch sm:flex-row-reverse sm:justify-end">
+              <Button
+                type="submit"
+                variant="orange"
+                size="sm"
+                className="w-full"
+              >
+                Continuar
+              </Button>
+              <Button
+                type="button"
+                variant="white"
+                size="sm"
+                className="w-full"
+                onClick={() => handleNewPasswordOpenChange(false)}
+              >
+                Cancelar
+              </Button>
+            </DialogFooter>
+          </form>
+        </DialogContent>
+      </Dialog>
+
       <AdminPasswordConfirmDialog
-        open={confirmOpen && confirmAction === 'delete'}
+        open={confirmAction === 'delete'}
         onOpenChange={(nextOpen) => {
           if (!nextOpen) handleConfirmOpenChange(false);
         }}
@@ -335,80 +420,23 @@ export function EditAdministratorSheet({
       />
 
       <AdminPasswordConfirmDialog
-        open={confirmOpen && confirmAction === 'resetPassword'}
+        open={confirmAction === 'resetPassword'}
         onOpenChange={(nextOpen) => {
           if (!nextOpen) handleConfirmOpenChange(false);
         }}
-        title="Redefinir senha"
+        title="Confirmar alteração de senha"
         description={
           <>
-            Digite a senha do administrador logado para gerar uma nova senha
-            para <strong>{administrator?.name}</strong>.
+            Digite a senha do administrador logado para confirmar a alteração
+            da senha de <strong>{administrator?.name}</strong>.
           </>
         }
-        confirmLabel="Redefinir"
+        confirmLabel="Confirmar"
         confirmVariant="orange"
         isLoading={isConfirming}
         error={confirmError}
         onConfirm={handleConfirmPassword}
       />
-
-      <Dialog
-        open={Boolean(temporaryPassword)}
-        onOpenChange={(nextOpen) => {
-          if (!nextOpen) {
-            setTemporaryPassword(undefined);
-            setCopied(false);
-          }
-        }}
-      >
-        <DialogContent showCloseButton={false}>
-          <DialogHeader>
-            <DialogTitle className="text-xl font-bold">
-              Nova senha gerada
-            </DialogTitle>
-            <DialogDescription className="text-base">
-              Copie a senha temporária antes de fechar. Ela não será exibida
-              novamente.
-            </DialogDescription>
-          </DialogHeader>
-
-          <div className="flex items-center gap-2 rounded-md border p-3">
-            <code className="min-w-0 flex-1 break-all font-mono text-base tracking-wide">
-              {temporaryPassword}
-            </code>
-            <Button
-              type="button"
-              variant="normal"
-              className="size-10"
-              size="icon"
-              aria-label={copied ? 'Senha copiada' : 'Copiar senha temporária'}
-              onClick={() => void handleCopyPassword()}
-            >
-              <HugeiconsIcon
-                icon={copied ? CopyCheckIcon : CopyIcon}
-                className="size-5"
-                strokeWidth={2}
-              />
-            </Button>
-          </div>
-
-          <DialogFooter>
-            <Button
-              type="button"
-              variant="white"
-              size="sm"
-              className="w-full"
-              onClick={() => {
-                setTemporaryPassword(undefined);
-                setCopied(false);
-              }}
-            >
-              Fechar
-            </Button>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
     </>
   );
 }

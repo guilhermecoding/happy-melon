@@ -26,9 +26,6 @@ export type DeleteAdministratorInput = {
 
 export type ResetAdministratorPasswordInput = {
   password: string;
-};
-
-export type ResetAdministratorPasswordResult = {
-  temporaryPassword: string;
+  newPassword: string;
 };
 

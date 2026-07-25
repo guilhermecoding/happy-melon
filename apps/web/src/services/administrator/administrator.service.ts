@@ -8,7 +8,6 @@ import type {
   CreatedAdministrator,
   DeleteAdministratorInput,
   ResetAdministratorPasswordInput,
-  ResetAdministratorPasswordResult,
   UpdateAdministratorInput,
 } from './administrator.type';
 
@@ -150,7 +149,7 @@ export const administratorService = {
   async resetPassword(
     id: string,
     data: ResetAdministratorPasswordInput,
-  ): Promise<ResetAdministratorPasswordResult> {
+  ): Promise<{ success: true }> {
     try {
       const response = await fetch(
         `${API_URL}/administrators/${id}/reset-password`,
@@ -167,6 +166,10 @@ export const administratorService = {
           response,
           'Não foi possível redefinir a senha do administrador.',
         );
+      }
+
+      if (response.status === 204) {
+        return { success: true };
       }
 
       return response.json();

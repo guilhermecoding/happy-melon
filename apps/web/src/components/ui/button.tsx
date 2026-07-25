@@ -44,10 +44,17 @@ const buttonVariants = cva("", {
       sm: [
         "h-9 px-5 text-base",
         "shadow-[0_4px_0_0] group-active/button:translate-y-[4px]",
+        "group-disabled/button:shadow-none group-data-disabled/button:shadow-none",
         "[&_svg:not([class*='size-'])]:size-3.5",
       ].join(" "),
-      normal: "h-12 px-8 text-xl",
-      icon: "size-12 p-0 inline-flex items-center justify-center rounded-lg",
+      normal: [
+        "h-12 px-8 text-xl",
+        "group-disabled/button:shadow-none group-data-disabled/button:shadow-none",
+      ].join(" "),
+      icon: [
+        "size-12 p-0 inline-flex items-center justify-center rounded-lg",
+        "group-disabled/button:shadow-none group-data-disabled/button:shadow-none",
+      ].join(" "),
     },
   },
   defaultVariants: {
@@ -108,6 +115,7 @@ function Button({
       className={cn(
         "inline-flex w-fit items-center justify-center rounded-3xl border-4 bg-black/10",
         "has-focus-visible:ring-3 has-focus-visible:ring-black/25",
+        "has-[[data-disabled]]:border-zinc-300 has-[[data-disabled]]:bg-zinc-300",
         size === "icon" ? "p-0" : undefined,
         className,
       )}
@@ -115,7 +123,11 @@ function Button({
       <ButtonPrimitive
         data-slot="button"
         data-loading={loading}
-        className={cn(gameButtonHitStyles, size === "icon" ? "p-0" : depthClass)}
+        className={cn(
+          gameButtonHitStyles,
+          size === "icon" ? "p-0" : depthClass,
+          "data-disabled:pb-0",
+        )}
         disabled={loading || props.disabled}
         {...props}
       >

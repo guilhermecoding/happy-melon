@@ -24,6 +24,32 @@ import {
 
 const ADMIN_ROLES = new Set(["admin", "staff"])
 
+function getSignInErrorMessage(error: {
+  code?: string | undefined
+  message?: string | undefined
+}) {
+  const code = error.code?.toUpperCase()
+  const message = error.message?.trim() ?? ""
+
+  if (
+    code === "INVALID_EMAIL_OR_PASSWORD" ||
+    code === "INVALID_PASSWORD" ||
+    code === "USER_NOT_FOUND" ||
+    code === "CREDENTIAL_ACCOUNT_NOT_FOUND" ||
+    /invalid email or password|invalid password|user not found|credential account not found/i.test(
+      message,
+    )
+  ) {
+    return "E-mail ou senha inválidos."
+  }
+
+  if (code === "BANNED_USER" || /banned|banido/i.test(message)) {
+    return "Sua conta está desativada. Fale com um administrador."
+  }
+
+  return message || "Falha ao entrar. Verifique suas credenciais."
+}
+
 export function LoginForm({
   className,
   ...props
@@ -53,7 +79,7 @@ export function LoginForm({
       })
 
       if (signInError) {
-        setError(signInError.message ?? "Falha ao entrar. Verifique suas credenciais.")
+        setError(getSignInErrorMessage(signInError))
         return
       }
 
