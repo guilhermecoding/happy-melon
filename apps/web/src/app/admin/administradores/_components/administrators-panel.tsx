@@ -127,7 +127,10 @@ export function AdministratorsPanel() {
   return (
     <div className="flex flex-col gap-4">
       <div className="flex justify-end">
-        <Button onClick={() => setCreateOpen(true)}>
+        <Button
+          onClick={() => setCreateOpen(true)}
+          size="sm"
+        >
           <HugeiconsIcon icon={CirclePlusIcon} className="size-5" strokeWidth={3} />
           Adicionar
         </Button>
@@ -188,8 +191,8 @@ export function AdministratorsPanel() {
                         render={
                           <Button
                             type="button"
-                            variant="ghost"
-                            size="icon"
+                            variant="normal"
+                            size="sm"
                             aria-label={`Opções de ${administrator.name}`}
                           />
                         }
