@@ -7,6 +7,7 @@ import { getAdministratorErrorMessage } from '@/services/administrator/administr
 import type { Administrator } from '@/services/administrator/administrator.type';
 import { Button } from '@/components/ui/button';
 import { Switch } from '@/components/ui/switch';
+import { toast } from '@/components/ui/toast';
 import {
   Table,
   TableBody,
@@ -79,6 +80,12 @@ export function AdministratorsPanel() {
           item.id === updatedAdministrator.id ? updatedAdministrator : item,
         ),
       );
+      toast.add({
+        title: hasAccess
+          ? `Acesso de ${administrator.name} ativado.`
+          : `Acesso de ${administrator.name} desativado.`,
+        type: 'success',
+      });
     } catch (updateError) {
       setAdministrators((current) =>
         current.map((item) =>
@@ -87,12 +94,15 @@ export function AdministratorsPanel() {
             : item,
         ),
       );
-      setError(
-        getAdministratorErrorMessage(
-          updateError,
-          'Não foi possível atualizar o acesso do administrador.',
-        ),
+      const message = getAdministratorErrorMessage(
+        updateError,
+        'Não foi possível atualizar o acesso do administrador.',
       );
+      setError(message);
+      toast.add({
+        title: message,
+        type: 'error',
+      });
     } finally {
       setUpdatingAccess((current) => {
         const next = new Set(current);
@@ -145,15 +155,15 @@ export function AdministratorsPanel() {
         </p>
       )}
 
-      <div className="overflow-hidden rounded-2xl p-2 border bg-muted">
+      <div className="overflow-hidden rounded-2xl border bg-muted">
         <Table>
           <TableHeader>
             <TableRow>
-              <TableHead>ID</TableHead>
-              <TableHead>Nome</TableHead>
-              <TableHead>Email</TableHead>
-              <TableHead>Acesso</TableHead>
-              <TableHead className="w-16 text-right">Opções</TableHead>
+              <TableHead className="font-bold">#</TableHead>
+              <TableHead className="font-bold">Nome</TableHead>
+              <TableHead className="font-bold">Email</TableHead>
+              <TableHead className="font-bold">Acesso</TableHead>
+              <TableHead className="w-16 font-bold text-right">Opções</TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
@@ -176,8 +186,8 @@ export function AdministratorsPanel() {
                 </TableCell>
               </TableRow>
             ) : (
-              administrators.map((administrator) => (
-                <TableRow key={administrator.id}>
+              administrators.map((administrator, index) => (
+                <TableRow key={administrator.id} className={index % 2 === 0 ? 'bg-white' : ''}>
                   <TableCell className="font-mono text-xs">{administrator.id}</TableCell>
                   <TableCell>{administrator.name}</TableCell>
                   <TableCell>{administrator.email}</TableCell>
