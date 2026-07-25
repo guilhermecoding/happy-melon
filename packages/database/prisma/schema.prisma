@@ -79,3 +79,24 @@ model Verification {
   @@map("verification")
   @@schema("system-auth")
 }
+
+enum ContestStatus {
+  ACTIVE
+  INACTIVE
+
+  @@schema("public")
+}
+
+model Contest {
+  id        String        @id
+  name      String
+  status    ContestStatus @default(ACTIVE)
+  startsAt  DateTime
+  endsAt    DateTime
+  venue     String
+  createdAt DateTime      @default(now())
+  updatedAt DateTime      @updatedAt
+
+  @@map("contest")
+  @@schema("public")
+}
