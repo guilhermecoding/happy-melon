@@ -278,7 +278,7 @@ function SidebarTrigger({
       }}
       {...props}
     >
-      {open ?
+      {!open ?
         <HugeiconsIcon
           icon={PanelRightCloseIcon}
           className="size-5"

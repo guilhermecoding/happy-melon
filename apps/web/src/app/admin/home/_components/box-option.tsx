@@ -1,4 +1,4 @@
-import { Crown03Icon, ChampionIcon } from '@hugeicons/core-free-icons';
+import { Crown03Icon, BalloonIcon } from '@hugeicons/core-free-icons';
 import { HugeiconsIcon } from '@hugeicons/react';
 import Link from 'next/link';
 
@@ -8,7 +8,7 @@ interface BoxOptionProps {
 }
 
 export default function BoxOption({ title, type }: BoxOptionProps) {
-    const iconElement = type === 'contests' ? ChampionIcon : Crown03Icon;
+    const iconElement = type === 'contests' ? BalloonIcon : Crown03Icon;
     const href = type === 'contests' ? 'competicoes' : 'administradores';
 
     return (
