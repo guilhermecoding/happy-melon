@@ -146,4 +146,8 @@
   html {
     @apply font-sans;
   }
+  ::selection {
+    background-color: rgb(255, 173, 173);
+    color: rgb(113, 0, 0);
+  }
 }
