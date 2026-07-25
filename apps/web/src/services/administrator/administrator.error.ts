@@ -66,6 +66,9 @@ function mapAdministratorErrorMessage(
   }
 
   if (status === 401) {
+    if (/senha|password|incorrect|inválid|invalid/i.test(message)) {
+      return message || 'Senha de administrador incorreta.';
+    }
     return 'Sessão expirada. Faça login novamente.';
   }
 

@@ -18,9 +18,11 @@ import { ZodValidationPipe } from '../common/pipes/zod-validation.pipe.js';
 import { AdministratorsService } from './administrators.service.js';
 import {
   createAdministratorSchema,
+  deleteAdministratorSchema,
   setAccessSchema,
   updateAdministratorSchema,
   type CreateAdministratorDto,
+  type DeleteAdministratorDto,
   type SetAccessDto,
   type UpdateAdministratorDto,
 } from './dto/administrator.dto.js';
@@ -32,7 +34,7 @@ type RequestWithHeaders = { headers: IncomingHttpHeaders };
 export class AdministratorsController {
   constructor(
     private readonly administratorsService: AdministratorsService,
-  ) { }
+  ) {}
 
   @Get()
   list(@Req() request: RequestWithHeaders) {
@@ -69,6 +71,22 @@ export class AdministratorsController {
       request.headers,
       id,
       dto.hasAccess,
+      session.user.id,
+    );
+  }
+
+  @Post(':id/delete')
+  remove(
+    @Req() request: RequestWithHeaders,
+    @Param('id') id: string,
+    @Body(new ZodValidationPipe(deleteAdministratorSchema))
+    dto: DeleteAdministratorDto,
+    @Session() session: UserSession<typeof auth>,
+  ) {
+    return this.administratorsService.remove(
+      request.headers,
+      id,
+      dto,
       session.user.id,
     );
   }

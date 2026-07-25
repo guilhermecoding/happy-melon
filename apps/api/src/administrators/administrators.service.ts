@@ -6,12 +6,14 @@ import {
   HttpException,
   HttpStatus,
   Injectable,
+  UnauthorizedException,
 } from '@nestjs/common';
 import { APIError } from 'better-auth/api';
 import { fromNodeHeaders } from 'better-auth/node';
 import { auth } from '../auth/auth.js';
 import type {
   CreateAdministratorDto,
+  DeleteAdministratorDto,
   UpdateAdministratorDto,
 } from './dto/administrator.dto.js';
 
@@ -135,6 +137,49 @@ export class AdministratorsService {
     }
   }
 
+  async remove(
+    headers: IncomingHttpHeaders,
+    id: string,
+    dto: DeleteAdministratorDto,
+    currentUserId: string,
+  ) {
+    if (id === currentUserId) {
+      throw new ForbiddenException(
+        'Você não pode excluir a própria conta de administrador',
+      );
+    }
+
+    const authHeaders = this.toAuthHeaders(headers);
+
+    try {
+      await auth.api.verifyPassword({
+        headers: authHeaders,
+        body: {
+          password: dto.password,
+        },
+      });
+    } catch (error) {
+      if (error instanceof APIError) {
+        throw new UnauthorizedException('Senha de administrador incorreta.');
+      }
+
+      throw error;
+    }
+
+    try {
+      await auth.api.removeUser({
+        headers: authHeaders,
+        body: {
+          userId: id,
+        },
+      });
+
+      return { success: true as const };
+    } catch (error) {
+      this.rethrowApiError(error);
+    }
+  }
+
   private toAdministrator(user: {
     id: string;
     name: string;
@@ -177,7 +222,7 @@ export class AdministratorsService {
   }
 
   private extractApiErrorMessage(error: APIError): string {
-    const body = error.body;
+    const body: unknown = error.body;
 
     if (typeof body === 'string' && body.trim()) {
       return body;

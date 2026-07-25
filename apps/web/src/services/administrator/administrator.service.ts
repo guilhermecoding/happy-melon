@@ -6,6 +6,7 @@ import type {
   Administrator,
   CreateAdministratorInput,
   CreatedAdministrator,
+  DeleteAdministratorInput,
   UpdateAdministratorInput,
 } from './administrator.type';
 
@@ -108,6 +109,38 @@ export const administratorService = {
       throw normalizeAdministratorError(
         error,
         'Não foi possível atualizar o acesso do administrador.',
+      );
+    }
+  },
+
+  async remove(
+    id: string,
+    data: DeleteAdministratorInput,
+  ): Promise<{ success: true }> {
+    try {
+      const response = await fetch(`${API_URL}/administrators/${id}/delete`, {
+        method: 'POST',
+        credentials: 'include',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(data),
+      });
+
+      if (!response.ok) {
+        throw await parseAdministratorError(
+          response,
+          'Não foi possível excluir o administrador.',
+        );
+      }
+
+      if (response.status === 204) {
+        return { success: true };
+      }
+
+      return response.json();
+    } catch (error) {
+      throw normalizeAdministratorError(
+        error,
+        'Não foi possível excluir o administrador.',
       );
     }
   },

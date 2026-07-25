@@ -18,3 +18,7 @@ export type UpdateAdministratorInput = {
   name: string;
   email: string;
 };
+
+export type DeleteAdministratorInput = {
+  password: string;
+};

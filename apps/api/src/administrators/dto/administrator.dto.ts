@@ -14,6 +14,10 @@ export const setAccessSchema = z.object({
   hasAccess: z.boolean(),
 });
 
+export const deleteAdministratorSchema = z.object({
+  password: z.string().min(1),
+});
+
 export type CreateAdministratorDto = z.infer<
   typeof createAdministratorSchema
 >;
@@ -21,3 +25,6 @@ export type UpdateAdministratorDto = z.infer<
   typeof updateAdministratorSchema
 >;
 export type SetAccessDto = z.infer<typeof setAccessSchema>;
+export type DeleteAdministratorDto = z.infer<
+  typeof deleteAdministratorSchema
+>;

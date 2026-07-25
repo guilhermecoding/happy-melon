@@ -21,7 +21,7 @@ import {
   administratorSchema,
   type AdministratorFormValues,
 } from './administrator-schema';
-import { CopyCheckIcon, CopyIcon } from '@hugeicons/core-free-icons';
+import { CheckmarkCircle01Icon, CopyCheckIcon, CopyIcon, EyeClosedIcon } from '@hugeicons/core-free-icons';
 
 type CreateAdministratorSheetProps = {
   open: boolean;
@@ -197,6 +197,7 @@ export function CreateAdministratorSheet({
                     loading={isSubmitting}
                     className="w-full"
                   >
+                    <HugeiconsIcon icon={CheckmarkCircle01Icon} className="size-5" strokeWidth={3} />
                     Adicionar
                   </Button>
                 )}
@@ -207,6 +208,7 @@ export function CreateAdministratorSheet({
                 onClick={() => handleOpenChange(false)}
                 className="w-full"
               >
+                <HugeiconsIcon icon={EyeClosedIcon} className="size-5" strokeWidth={3} />
                 Fechar
               </Button>
             </SheetFooter>

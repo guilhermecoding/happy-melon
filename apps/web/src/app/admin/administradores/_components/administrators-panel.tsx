@@ -117,6 +117,15 @@ export function AdministratorsPanel() {
     );
   }
 
+  function removeAdministrator(administratorId: string) {
+    setAdministrators((current) =>
+      current.filter((administrator) => administrator.id !== administratorId),
+    );
+    if (selectedAdministrator?.id === administratorId) {
+      setSelectedAdministrator(null);
+    }
+  }
+
   return (
     <div className="flex flex-col gap-4 mt-6">
       <div className="flex justify-end">
@@ -216,6 +225,7 @@ export function AdministratorsPanel() {
         open={editOpen}
         onOpenChange={setEditOpen}
         onUpdated={replaceAdministrator}
+        onDeleted={removeAdministrator}
       />
     </div>
   );
