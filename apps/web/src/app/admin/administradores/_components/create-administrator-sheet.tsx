@@ -1,0 +1,175 @@
+"use client";
+
+import { useState } from 'react';
+import { useForm } from '@tanstack/react-form';
+import { IconCopy } from '@tabler/icons-react';
+import { api } from '@/lib/api';
+import { Button } from '@/components/ui/button';
+import { Field, FieldError, FieldLabel } from '@/components/ui/field';
+import { Input } from '@/components/ui/input';
+import {
+  Sheet,
+  SheetContent,
+  SheetDescription,
+  SheetFooter,
+  SheetHeader,
+  SheetTitle,
+} from '@/components/ui/sheet';
+import {
+  administratorSchema,
+  type Administrator,
+  type AdministratorFormValues,
+} from './administrator-schema';
+
+type CreatedAdministrator = Administrator & {
+  temporaryPassword: string;
+};
+
+type CreateAdministratorSheetProps = {
+  open: boolean;
+  onOpenChange: (open: boolean) => void;
+  onCreated: (administrator: Administrator) => void;
+};
+
+export function CreateAdministratorSheet({
+  open,
+  onOpenChange,
+  onCreated,
+}: CreateAdministratorSheetProps) {
+  const [temporaryPassword, setTemporaryPassword] = useState<string>();
+  const [requestError, setRequestError] = useState<string>();
+
+  const form = useForm({
+    defaultValues: {
+      name: '',
+      email: '',
+    } satisfies AdministratorFormValues,
+    validators: {
+      onSubmit: administratorSchema,
+    },
+    onSubmit: async ({ value }) => {
+      setRequestError(undefined);
+      try {
+        const administrator = await api<CreatedAdministrator>('/administrators', {
+          method: 'POST',
+          body: JSON.stringify(value),
+        });
+        onCreated(administrator);
+        setTemporaryPassword(administrator.temporaryPassword);
+      } catch (error) {
+        setRequestError(
+          error instanceof Error ? error.message : 'Não foi possível criar o administrador',
+        );
+      }
+    },
+  });
+
+  function handleOpenChange(nextOpen: boolean) {
+    if (!nextOpen) {
+      form.reset();
+      setTemporaryPassword(undefined);
+      setRequestError(undefined);
+    }
+    onOpenChange(nextOpen);
+  }
+
+  return (
+    <Sheet open={open} onOpenChange={handleOpenChange}>
+      <SheetContent side="right">
+        <SheetHeader>
+          <SheetTitle>Adicionar administrador</SheetTitle>
+          <SheetDescription>
+            Cadastre um novo administrador do sistema.
+          </SheetDescription>
+        </SheetHeader>
+
+        {temporaryPassword ? (
+          <div className="flex flex-1 flex-col gap-3 px-4">
+            <p className="text-sm text-muted-foreground">
+              Administrador criado. Copie a senha temporária antes de fechar.
+            </p>
+            <div className="flex items-center gap-2 rounded-md border p-3">
+              <code className="min-w-0 flex-1 break-all font-mono text-base tracking-wide">
+                {temporaryPassword}
+              </code>
+              <Button
+                type="button"
+                variant="ghost"
+                size="icon"
+                aria-label="Copiar senha temporária"
+                onClick={() => void navigator.clipboard.writeText(temporaryPassword)}
+              >
+                <IconCopy />
+              </Button>
+            </div>
+            <SheetFooter className="mt-auto px-0">
+              <Button type="button" variant="blue" onClick={() => handleOpenChange(false)}>
+                Fechar
+              </Button>
+            </SheetFooter>
+          </div>
+        ) : (
+          <form
+            className="flex flex-1 flex-col gap-5 px-4"
+            onSubmit={(event) => {
+              event.preventDefault();
+              event.stopPropagation();
+              void form.handleSubmit();
+            }}
+          >
+            <form.Field name="name">
+              {(field) => (
+                <Field data-invalid={!field.state.meta.isValid}>
+                  <FieldLabel htmlFor={field.name}>Nome</FieldLabel>
+                  <Input
+                    id={field.name}
+                    name={field.name}
+                    value={field.state.value}
+                    onBlur={field.handleBlur}
+                    onChange={(event) => field.handleChange(event.target.value)}
+                    aria-invalid={!field.state.meta.isValid}
+                  />
+                  <FieldError errors={field.state.meta.errors} />
+                </Field>
+              )}
+            </form.Field>
+
+            <form.Field name="email">
+              {(field) => (
+                <Field data-invalid={!field.state.meta.isValid}>
+                  <FieldLabel htmlFor={field.name}>Email</FieldLabel>
+                  <Input
+                    id={field.name}
+                    name={field.name}
+                    type="email"
+                    value={field.state.value}
+                    onBlur={field.handleBlur}
+                    onChange={(event) => field.handleChange(event.target.value)}
+                    aria-invalid={!field.state.meta.isValid}
+                  />
+                  <FieldError errors={field.state.meta.errors} />
+                </Field>
+              )}
+            </form.Field>
+
+            {requestError && (
+              <p role="alert" className="text-sm text-destructive">
+                {requestError}
+              </p>
+            )}
+
+            <SheetFooter className="mt-auto px-0">
+              <form.Subscribe selector={(state) => state.isSubmitting}>
+                {(isSubmitting) => (
+                  <Button type="submit" loading={isSubmitting}>
+                    Adicionar
+                  </Button>
+                )}
+              </form.Subscribe>
+            </SheetFooter>
+          </form>
+        )}
+      </SheetContent>
+    </Sheet>
+  );
+}

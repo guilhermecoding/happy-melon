@@ -36,6 +36,7 @@ const buttonVariants = cva(
         orange: "bg-orange-400 shadow-orange-700 hover:bg-orange-300",
         red: "bg-red-400 shadow-red-700 hover:bg-red-300",
         white: "border border-black/10 bg-white shadow-zinc-400 hover:bg-zinc-50",
+        ghost: "bg-transparent hover:bg-muted/50",
       },
       size: {
         default: "h-12 px-8",
