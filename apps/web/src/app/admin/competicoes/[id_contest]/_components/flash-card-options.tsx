@@ -12,7 +12,7 @@ export default function FlashCardOptions({ icon, title, href }: FlashCardOptions
     return (
         <Link
             href={href}
-            className="flex items-center justify-between gap-1 bg-background p-4 rounded-xl border-2 border-black"
+            className="flex items-center justify-between gap-1 bg-background p-4 rounded-xl border-2 border-black hover:border-border-hover transition-colors duration-300 cursor-pointer"
         >
             <div className="flex items-center gap-1">
                 <HugeiconsIcon

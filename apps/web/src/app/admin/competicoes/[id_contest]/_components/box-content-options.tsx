@@ -8,7 +8,7 @@ export default function BoxContentOptions({
     idContest: string;
 }) {
     return (
-        <div className='flex flex-col gap-4 p-4'>
+        <div className='flex flex-col justify-around h-full gap-4 p-4'>
             <FlashCardOptions title='Prova'
                 icon={File02Icon}
                 href={`/admin/competicoes/${idContest}/prova`}

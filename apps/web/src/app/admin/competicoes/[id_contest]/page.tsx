@@ -1,4 +1,4 @@
-import BoxFeatures from './_components/box-features';
+import BoxFeatures from '@/components/box-features';
 import Page from '@/components/ui/page';
 import Section from '@/components/ui/section';
 import { BadgeInfoIcon } from '@hugeicons/core-free-icons';
@@ -8,6 +8,11 @@ import { Suspense } from 'react';
 import { CustomizeIcon } from '@hugeicons/core-free-icons';
 import BoxContentOptions from './_components/box-content-options';
 import Loading from '@/app/loading';
+import { Metadata } from 'next';
+
+export const metadata: Metadata = {
+    title: 'Gerenciar Competição'
+}
 
 async function AdminContestManagementPageContent({
     params
