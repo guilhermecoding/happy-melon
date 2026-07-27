@@ -3,6 +3,11 @@ import Section from '@/components/ui/section';
 import TitlePage from '@/components/title-page';
 import { File02Icon } from '@hugeicons/core-free-icons';
 import BoxQuestions from './_components/box-questions';
+import { Metadata } from 'next';
+
+export const metadata: Metadata = {
+  title: 'Prova',
+}
 
 async function AdminExamPageContent({
   params,
