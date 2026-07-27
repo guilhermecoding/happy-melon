@@ -47,12 +47,15 @@ function truncateCrumbs(crumbs: Crumb[]): CrumbOrEllipsis[] {
     return crumbs
   }
 
-  return [
-    crumbs[0],
-    { type: "ellipsis" },
-    crumbs[crumbs.length - 2],
-    crumbs[crumbs.length - 1],
-  ]
+  const first = crumbs[0]
+  const penultimate = crumbs.at(-2)
+  const last = crumbs.at(-1)
+
+  if (!first || !penultimate || !last) {
+    return crumbs
+  }
+
+  return [first, { type: "ellipsis" }, penultimate, last]
 }
 
 export function AdminBreadcrumb() {
