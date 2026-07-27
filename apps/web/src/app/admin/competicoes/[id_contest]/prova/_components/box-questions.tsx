@@ -65,6 +65,10 @@ export default function BoxQuestions({ contestId }: BoxQuestionsProps) {
     );
   }
 
+  function handleDeleted(questionId: string) {
+    setQuestions((current) => current.filter((item) => item.id !== questionId));
+  }
+
   function openEditSheet(question: Question) {
     setEditingQuestion(question);
     setEditOpen(true);
@@ -135,6 +139,7 @@ export default function BoxQuestions({ contestId }: BoxQuestionsProps) {
           if (!open) setEditingQuestion(null);
         }}
         onUpdated={handleUpdated}
+        onDeleted={handleDeleted}
       />
     </>
   );

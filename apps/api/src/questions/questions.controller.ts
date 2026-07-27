@@ -1,16 +1,30 @@
-import { Body, Controller, Get, Param, Patch, Post } from '@nestjs/common';
+import {
+  Body,
+  Controller,
+  Get,
+  Param,
+  Patch,
+  Post,
+  Req,
+} from '@nestjs/common';
 import { Roles } from '@thallesp/nestjs-better-auth';
+import type { IncomingHttpHeaders } from 'node:http';
 import { ZodValidationPipe } from '../common/pipes/zod-validation.pipe.js';
 import { QuestionsService } from './questions.service.js';
 import {
   createQuestionSchema,
+  deleteQuestionSchema,
   updateQuestionSchema,
   type CreateQuestionDto,
+  type DeleteQuestionDto,
   type UpdateQuestionDto,
 } from './dto/question.dto.js';
 
+type RequestWithHeaders = { headers: IncomingHttpHeaders };
+
 const createQuestionPipe = new ZodValidationPipe(createQuestionSchema);
 const updateQuestionPipe = new ZodValidationPipe(updateQuestionSchema);
+const deleteQuestionPipe = new ZodValidationPipe(deleteQuestionSchema);
 
 @Controller()
 @Roles(['admin'])
@@ -36,5 +50,14 @@ export class QuestionsController {
     @Body(updateQuestionPipe) dto: UpdateQuestionDto,
   ) {
     return this.questionsService.update(id, dto);
+  }
+
+  @Post('questions/:id/delete')
+  remove(
+    @Req() request: RequestWithHeaders,
+    @Param('id') id: string,
+    @Body(deleteQuestionPipe) dto: DeleteQuestionDto,
+  ) {
+    return this.questionsService.remove(request.headers, id, dto);
   }
 }

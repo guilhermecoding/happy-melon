@@ -15,3 +15,7 @@ export type CreateQuestionInput = {
 };
 
 export type UpdateQuestionInput = CreateQuestionInput;
+
+export type DeleteQuestionInput = {
+  password: string;
+};

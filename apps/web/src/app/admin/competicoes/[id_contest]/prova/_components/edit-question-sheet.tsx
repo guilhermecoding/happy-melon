@@ -3,7 +3,12 @@
 import { useEffect, useState } from 'react';
 import { useForm } from '@tanstack/react-form';
 import { HugeiconsIcon } from '@hugeicons/react';
-import { EyeClosedIcon, SaveIcon } from '@hugeicons/core-free-icons';
+import {
+  Delete01Icon,
+  EyeClosedIcon,
+  SaveIcon,
+} from '@hugeicons/core-free-icons';
+import { AdminPasswordConfirmDialog } from '@/components/admin-password-confirm-dialog';
 import { questionService } from '@/services/question/question.service';
 import { getQuestionErrorMessage } from '@/services/question/question.error';
 import type { Question } from '@/services/question/question.type';
@@ -29,6 +34,7 @@ type EditQuestionSheetProps = {
   open: boolean;
   onOpenChange: (open: boolean) => void;
   onUpdated: (question: Question) => void;
+  onDeleted: (questionId: string) => void;
 };
 
 function toFormValues(question: Question): QuestionFormValues {
@@ -44,8 +50,12 @@ export function EditQuestionSheet({
   open,
   onOpenChange,
   onUpdated,
+  onDeleted,
 }: EditQuestionSheetProps) {
   const [requestError, setRequestError] = useState<string>();
+  const [deleteConfirmOpen, setDeleteConfirmOpen] = useState(false);
+  const [confirmError, setConfirmError] = useState<string>();
+  const [isConfirming, setIsConfirming] = useState(false);
 
   const form = useForm({
     defaultValues: {
@@ -62,7 +72,7 @@ export function EditQuestionSheet({
       setRequestError(undefined);
       try {
         const updatedQuestion = await questionService.update(question.id, {
-          label: value.label,
+          label: value.label.trim().toUpperCase(),
           title: value.title,
           balloonColor: value.balloonColor.toUpperCase(),
         });
@@ -90,6 +100,8 @@ export function EditQuestionSheet({
     if (open && question) {
       form.reset(toFormValues(question));
       setRequestError(undefined);
+      setDeleteConfirmOpen(false);
+      setConfirmError(undefined);
     }
   }, [question, form, open]);
 
@@ -97,117 +109,195 @@ export function EditQuestionSheet({
     if (!nextOpen) {
       form.reset();
       setRequestError(undefined);
+      setDeleteConfirmOpen(false);
+      setConfirmError(undefined);
     }
     onOpenChange(nextOpen);
   }
 
+  async function handleConfirmDelete(password: string) {
+    if (!question) return;
+
+    setIsConfirming(true);
+    setConfirmError(undefined);
+
+    try {
+      await questionService.remove(question.id, { password });
+      onDeleted(question.id);
+      setDeleteConfirmOpen(false);
+      handleOpenChange(false);
+      toast.add({
+        title: 'Questão excluída com sucesso.',
+        type: 'success',
+      });
+    } catch (error) {
+      const message = getQuestionErrorMessage(
+        error,
+        'Não foi possível excluir a questão.',
+      );
+      setConfirmError(message);
+      toast.add({
+        title: message,
+        type: 'error',
+      });
+    } finally {
+      setIsConfirming(false);
+    }
+  }
+
   return (
-    <Sheet open={open} onOpenChange={handleOpenChange}>
-      <SheetContent side="right" showCloseButton={false} className="overflow-hidden">
-        <SheetHeader className="shrink-0">
-          <SheetTitle className="text-2xl font-bold">Editar questão</SheetTitle>
-          <SheetDescription>
-            Atualize os dados da questão selecionada.
-          </SheetDescription>
-        </SheetHeader>
+    <>
+      <Sheet open={open} onOpenChange={handleOpenChange}>
+        <SheetContent side="right" showCloseButton={false} className="overflow-hidden">
+          <SheetHeader className="shrink-0">
+            <SheetTitle className="text-2xl font-bold">Editar questão</SheetTitle>
+            <SheetDescription>
+              Atualize os dados da questão selecionada.
+            </SheetDescription>
+          </SheetHeader>
 
-        <form
-          className="flex min-h-0 flex-1 flex-col"
-          onSubmit={(event) => {
-            event.preventDefault();
-            event.stopPropagation();
-            void form.handleSubmit();
-          }}
-        >
-          <div className="flex min-h-0 flex-1 flex-col gap-5 overflow-y-auto scrollbar-thin px-4 pb-2">
-            <form.Field name="label">
-              {(field) => (
-                <Field data-invalid={!field.state.meta.isValid}>
-                  <FieldLabel htmlFor={field.name}>Identificador</FieldLabel>
-                  <Input
-                    id={field.name}
-                    name={field.name}
-                    placeholder="Ex: A, B, 1, 2"
-                    value={field.state.value}
-                    onBlur={field.handleBlur}
-                    onChange={(event) => field.handleChange(event.target.value)}
-                    aria-invalid={!field.state.meta.isValid}
-                  />
-                  <FieldError errors={field.state.meta.errors} />
-                </Field>
+          <form
+            className="flex min-h-0 flex-1 flex-col"
+            onSubmit={(event) => {
+              event.preventDefault();
+              event.stopPropagation();
+              void form.handleSubmit();
+            }}
+          >
+            <div className="flex min-h-0 flex-1 flex-col gap-5 overflow-y-auto scrollbar-thin px-4 pb-2">
+              <form.Field name="label">
+                {(field) => (
+                  <Field data-invalid={!field.state.meta.isValid}>
+                    <FieldLabel htmlFor={field.name}>Identificador</FieldLabel>
+                    <Input
+                      id={field.name}
+                      name={field.name}
+                      placeholder="Ex: A, B, 1, 2"
+                      value={field.state.value}
+                      onBlur={field.handleBlur}
+                      onChange={(event) =>
+                        field.handleChange(event.target.value.toUpperCase())
+                      }
+                      aria-invalid={!field.state.meta.isValid}
+                      className="uppercase"
+                    />
+                    <FieldError errors={field.state.meta.errors} />
+                  </Field>
+                )}
+              </form.Field>
+
+              <form.Field name="title">
+                {(field) => (
+                  <Field data-invalid={!field.state.meta.isValid}>
+                    <FieldLabel htmlFor={field.name}>Título</FieldLabel>
+                    <Input
+                      id={field.name}
+                      name={field.name}
+                      placeholder="Título da questão"
+                      value={field.state.value}
+                      onBlur={field.handleBlur}
+                      onChange={(event) => field.handleChange(event.target.value)}
+                      aria-invalid={!field.state.meta.isValid}
+                    />
+                    <FieldError errors={field.state.meta.errors} />
+                  </Field>
+                )}
+              </form.Field>
+
+              <form.Field name="balloonColor">
+                {(field) => (
+                  <Field data-invalid={!field.state.meta.isValid}>
+                    <FieldLabel htmlFor={field.name}>Cor do balão</FieldLabel>
+                    <Input
+                      id={field.name}
+                      name={field.name}
+                      type="color"
+                      value={field.state.value}
+                      onBlur={field.handleBlur}
+                      onChange={(event) => field.handleChange(event.target.value)}
+                      aria-invalid={!field.state.meta.isValid}
+                      className="h-12 w-full cursor-pointer p-1"
+                    />
+                    <FieldError errors={field.state.meta.errors} />
+                  </Field>
+                )}
+              </form.Field>
+
+              {requestError && (
+                <p role="alert" className="text-sm text-destructive">
+                  {requestError}
+                </p>
               )}
-            </form.Field>
+            </div>
 
-            <form.Field name="title">
-              {(field) => (
-                <Field data-invalid={!field.state.meta.isValid}>
-                  <FieldLabel htmlFor={field.name}>Título</FieldLabel>
-                  <Input
-                    id={field.name}
-                    name={field.name}
-                    placeholder="Título da questão"
-                    value={field.state.value}
-                    onBlur={field.handleBlur}
-                    onChange={(event) => field.handleChange(event.target.value)}
-                    aria-invalid={!field.state.meta.isValid}
-                  />
-                  <FieldError errors={field.state.meta.errors} />
-                </Field>
-              )}
-            </form.Field>
+            <SheetFooter className="shrink-0">
+              <form.Subscribe selector={(state) => state.isSubmitting}>
+                {(isSubmitting) => (
+                  <Button
+                    type="submit"
+                    variant="green"
+                    loading={isSubmitting}
+                    className="w-full"
+                  >
+                    <HugeiconsIcon icon={SaveIcon} className="size-5" strokeWidth={3} />
+                    Salvar
+                  </Button>
+                )}
+              </form.Subscribe>
+              <Button
+                type="button"
+                variant="red"
+                className="w-full"
+                onClick={() => {
+                  setConfirmError(undefined);
+                  setDeleteConfirmOpen(true);
+                }}
+              >
+                <HugeiconsIcon icon={Delete01Icon} className="size-5" strokeWidth={3} />
+                Apagar
+              </Button>
+              <Button
+                type="button"
+                variant="white"
+                onClick={() => handleOpenChange(false)}
+                className="w-full"
+              >
+                <HugeiconsIcon icon={EyeClosedIcon} className="size-5" strokeWidth={3} />
+                Fechar
+              </Button>
+            </SheetFooter>
+          </form>
+        </SheetContent>
+      </Sheet>
 
-            <form.Field name="balloonColor">
-              {(field) => (
-                <Field data-invalid={!field.state.meta.isValid}>
-                  <FieldLabel htmlFor={field.name}>Cor do balão</FieldLabel>
-                  <Input
-                    id={field.name}
-                    name={field.name}
-                    type="color"
-                    value={field.state.value}
-                    onBlur={field.handleBlur}
-                    onChange={(event) => field.handleChange(event.target.value)}
-                    aria-invalid={!field.state.meta.isValid}
-                    className="h-12 w-full cursor-pointer p-1"
-                  />
-                  <FieldError errors={field.state.meta.errors} />
-                </Field>
-              )}
-            </form.Field>
-
-            {requestError && (
-              <p role="alert" className="text-sm text-destructive">
-                {requestError}
-              </p>
-            )}
-          </div>
-
-          <SheetFooter className="shrink-0">
-            <form.Subscribe selector={(state) => state.isSubmitting}>
-              {(isSubmitting) => (
-                <Button
-                  type="submit"
-                  variant="green"
-                  loading={isSubmitting}
-                  className="w-full"
-                >
-                  <HugeiconsIcon icon={SaveIcon} className="size-5" strokeWidth={3} />
-                  Salvar
-                </Button>
-              )}
-            </form.Subscribe>
-            <Button
-              type="button"
-              variant="white"
-              onClick={() => handleOpenChange(false)}
-              className="w-full"
-            >
-              <HugeiconsIcon icon={EyeClosedIcon} className="size-5" strokeWidth={3} />
-              Fechar
-            </Button>
-          </SheetFooter>
-        </form>
-      </SheetContent>
-    </Sheet>
+      <AdminPasswordConfirmDialog
+        open={deleteConfirmOpen}
+        onOpenChange={(nextOpen) => {
+          if (!nextOpen) {
+            setDeleteConfirmOpen(false);
+            setConfirmError(undefined);
+          }
+        }}
+        title="Confirmar exclusão"
+        description={
+          <>
+            Digite a senha do administrador logado para excluir a questão{' '}
+            <strong>{question?.label}</strong>
+            {question?.title ? (
+              <>
+                {' '}
+                (<strong>{question.title}</strong>)
+              </>
+            ) : null}
+            . Esta ação não pode ser desfeita.
+          </>
+        }
+        confirmLabel="Confirmar"
+        confirmVariant="red"
+        isLoading={isConfirming}
+        error={confirmError}
+        onConfirm={handleConfirmDelete}
+      />
+    </>
   );
 }

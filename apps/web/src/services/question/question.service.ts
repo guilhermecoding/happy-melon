@@ -4,6 +4,7 @@ import {
 } from './question.error';
 import type {
   CreateQuestionInput,
+  DeleteQuestionInput,
   Question,
   UpdateQuestionInput,
 } from './question.type';
@@ -105,6 +106,38 @@ export const questionService = {
       throw normalizeQuestionError(
         error,
         'Não foi possível atualizar a questão.',
+      );
+    }
+  },
+
+  async remove(
+    id: string,
+    data: DeleteQuestionInput,
+  ): Promise<{ success: true }> {
+    try {
+      const response = await fetch(`${API_URL}/questions/${id}/delete`, {
+        method: 'POST',
+        credentials: 'include',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(data),
+      });
+
+      if (!response.ok) {
+        throw await parseQuestionError(
+          response,
+          'Não foi possível excluir a questão.',
+        );
+      }
+
+      if (response.status === 204) {
+        return { success: true };
+      }
+
+      return response.json();
+    } catch (error) {
+      throw normalizeQuestionError(
+        error,
+        'Não foi possível excluir a questão.',
       );
     }
   },

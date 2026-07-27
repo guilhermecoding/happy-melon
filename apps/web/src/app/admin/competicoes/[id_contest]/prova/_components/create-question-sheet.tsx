@@ -52,7 +52,7 @@ export function CreateQuestionSheet({
       setRequestError(undefined);
       try {
         const question = await questionService.create(contestId, {
-          label: value.label,
+          label: value.label.trim().toUpperCase(),
           title: value.title,
           balloonColor: value.balloonColor.toUpperCase(),
         });
@@ -113,8 +113,11 @@ export function CreateQuestionSheet({
                     placeholder="Ex: A, B, 1, 2"
                     value={field.state.value}
                     onBlur={field.handleBlur}
-                    onChange={(event) => field.handleChange(event.target.value)}
+                    onChange={(event) =>
+                      field.handleChange(event.target.value.toUpperCase())
+                    }
                     aria-invalid={!field.state.meta.isValid}
+                    className="uppercase"
                   />
                   <FieldError errors={field.state.meta.errors} />
                 </Field>

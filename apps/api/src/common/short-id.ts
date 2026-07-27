@@ -20,28 +20,63 @@ export function isIdUniqueViolation(error: unknown): boolean {
   return isUniqueViolationOn(error, 'id');
 }
 
+export function isPrismaUniqueViolation(error: unknown): boolean {
+  return getPrismaErrorCode(error) === 'P2002';
+}
+
 export function isUniqueViolationOn(
   error: unknown,
   field: string,
 ): boolean {
-  if (!error || typeof error !== 'object') {
+  if (!isPrismaUniqueViolation(error)) {
     return false;
   }
 
-  const candidate = error as {
-    code?: string;
-    meta?: { target?: string | string[] };
-  };
+  const target = getPrismaUniqueTarget(error);
 
-  if (candidate.code !== 'P2002') {
+  if (!target) {
     return false;
   }
-
-  const target = candidate.meta?.target;
 
   if (Array.isArray(target)) {
     return target.includes(field);
   }
 
-  return typeof target === 'string' && target.includes(field);
+  return target.includes(field);
+}
+
+function getPrismaErrorCode(error: unknown): string | undefined {
+  if (!error || typeof error !== 'object') {
+    return undefined;
+  }
+
+  const candidate = error as {
+    code?: string;
+    cause?: { code?: string };
+  };
+
+  if (typeof candidate.code === 'string') {
+    return candidate.code;
+  }
+
+  if (candidate.cause && typeof candidate.cause.code === 'string') {
+    return candidate.cause.code;
+  }
+
+  return undefined;
+}
+
+function getPrismaUniqueTarget(
+  error: unknown,
+): string | string[] | undefined {
+  if (!error || typeof error !== 'object') {
+    return undefined;
+  }
+
+  const candidate = error as {
+    meta?: { target?: string | string[] };
+    cause?: { meta?: { target?: string | string[] } };
+  };
+
+  return candidate.meta?.target ?? candidate.cause?.meta?.target;
 }
