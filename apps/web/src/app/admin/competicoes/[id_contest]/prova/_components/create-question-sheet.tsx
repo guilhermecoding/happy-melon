@@ -8,7 +8,7 @@ import { questionService } from '@/services/question/question.service';
 import { getQuestionErrorMessage } from '@/services/question/question.error';
 import type { Question } from '@/services/question/question.type';
 import { Button } from '@/components/ui/button';
-import { Field, FieldError, FieldLabel } from '@/components/ui/field';
+import { Field, FieldError, FieldLabel, FieldDescription } from '@/components/ui/field';
 import { Input } from '@/components/ui/input';
 import {
   Sheet,
@@ -156,6 +156,9 @@ export function CreateQuestionSheet({
                     aria-invalid={!field.state.meta.isValid}
                     className="h-12 w-full cursor-pointer p-1"
                   />
+                  <FieldDescription>
+                    Utilize o seletor para mudar para o padrão de cores hex.
+                  </FieldDescription>
                   <FieldError errors={field.state.meta.errors} />
                 </Field>
               )}
