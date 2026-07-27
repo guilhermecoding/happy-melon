@@ -97,7 +97,24 @@ model Contest {
   venue     String
   createdAt DateTime      @default(now())
   updatedAt DateTime      @updatedAt
+  questions Question[]
 
   @@map("contest")
+  @@schema("public")
+}
+
+model Question {
+  id           String   @id
+  contestId    String
+  contest      Contest  @relation(fields: [contestId], references: [id], onDelete: Cascade)
+  label        String
+  title        String
+  balloonColor String
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  @@unique([contestId, label])
+  @@index([contestId])
+  @@map("question")
   @@schema("public")
 }

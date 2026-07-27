@@ -17,6 +17,13 @@ export function generateShortId(length = ID_LENGTH): string {
 }
 
 export function isIdUniqueViolation(error: unknown): boolean {
+  return isUniqueViolationOn(error, 'id');
+}
+
+export function isUniqueViolationOn(
+  error: unknown,
+  field: string,
+): boolean {
   if (!error || typeof error !== 'object') {
     return false;
   }
@@ -33,8 +40,8 @@ export function isIdUniqueViolation(error: unknown): boolean {
   const target = candidate.meta?.target;
 
   if (Array.isArray(target)) {
-    return target.includes('id');
+    return target.includes(field);
   }
 
-  return target === 'id';
+  return typeof target === 'string' && target.includes(field);
 }
