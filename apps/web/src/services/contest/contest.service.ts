@@ -2,7 +2,11 @@ import {
   normalizeContestError,
   parseContestError,
 } from './contest.error';
-import type { Contest, CreateContestInput } from './contest.type';
+import type {
+  Contest,
+  CreateContestInput,
+  UpdateContestInput,
+} from './contest.type';
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL ?? 'http://localhost:3000';
 
@@ -89,6 +93,31 @@ export const contestService = {
       throw normalizeContestError(
         error,
         'Não foi possível criar a competição.',
+      );
+    }
+  },
+
+  async update(id: string, data: UpdateContestInput): Promise<Contest> {
+    try {
+      const response = await fetch(`${API_URL}/contests/${id}`, {
+        method: 'PATCH',
+        credentials: 'include',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(data),
+      });
+
+      if (!response.ok) {
+        throw await parseContestError(
+          response,
+          'Não foi possível atualizar a competição.',
+        );
+      }
+
+      return response.json();
+    } catch (error) {
+      throw normalizeContestError(
+        error,
+        'Não foi possível atualizar a competição.',
       );
     }
   },

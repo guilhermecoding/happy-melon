@@ -10,7 +10,11 @@ import {
   ID_MAX_ATTEMPTS,
   isIdUniqueViolation,
 } from '../common/short-id.js';
-import type { ContestStatusDto, CreateContestDto } from './dto/contest.dto.js';
+import type {
+  ContestStatusDto,
+  CreateContestDto,
+  UpdateContestDto,
+} from './dto/contest.dto.js';
 
 @Injectable()
 export class ContestsService {
@@ -33,21 +37,7 @@ export class ContestsService {
   }
 
   async create(dto: CreateContestDto) {
-    const startsAt = new Date(dto.startsAt);
-    const endsAt = new Date(dto.endsAt);
-
-    if (Number.isNaN(startsAt.getTime()) || Number.isNaN(endsAt.getTime())) {
-      throw new BadRequestException('Datas inválidas.');
-    }
-
-    if (endsAt <= startsAt) {
-      throw new BadRequestException(
-        'A data de término deve ser posterior à data de início.',
-      );
-    }
-
-    const status =
-      dto.status === 'active' ? ContestStatus.ACTIVE : ContestStatus.INACTIVE;
+    const { startsAt, endsAt, status } = this.parseContestDatesAndStatus(dto);
 
     for (let attempt = 0; attempt < ID_MAX_ATTEMPTS; attempt++) {
       try {
@@ -78,6 +68,49 @@ export class ContestsService {
     throw new InternalServerErrorException(
       `Não foi possível gerar um ID único após ${ID_MAX_ATTEMPTS} tentativas.`,
     );
+  }
+
+  async update(id: string, dto: UpdateContestDto) {
+    const existing = await prisma.contest.findUnique({ where: { id } });
+
+    if (!existing) {
+      throw new NotFoundException('Competição não encontrada.');
+    }
+
+    const { startsAt, endsAt, status } = this.parseContestDatesAndStatus(dto);
+
+    const contest = await prisma.contest.update({
+      where: { id },
+      data: {
+        name: dto.name,
+        status,
+        startsAt,
+        endsAt,
+        venue: dto.venue,
+      },
+    });
+
+    return this.toResponse(contest);
+  }
+
+  private parseContestDatesAndStatus(dto: CreateContestDto | UpdateContestDto) {
+    const startsAt = new Date(dto.startsAt);
+    const endsAt = new Date(dto.endsAt);
+
+    if (Number.isNaN(startsAt.getTime()) || Number.isNaN(endsAt.getTime())) {
+      throw new BadRequestException('Datas inválidas.');
+    }
+
+    if (endsAt <= startsAt) {
+      throw new BadRequestException(
+        'A data de término deve ser posterior à data de início.',
+      );
+    }
+
+    const status =
+      dto.status === 'active' ? ContestStatus.ACTIVE : ContestStatus.INACTIVE;
+
+    return { startsAt, endsAt, status };
   }
 
   private toResponse(contest: Contest) {

@@ -15,5 +15,8 @@ export const createContestSchema = z
     path: ['endsAt'],
   });
 
+export const updateContestSchema = createContestSchema;
+
 export type CreateContestDto = z.infer<typeof createContestSchema>;
+export type UpdateContestDto = z.infer<typeof updateContestSchema>;
 export type ContestStatusDto = z.infer<typeof contestStatusSchema>;

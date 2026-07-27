@@ -19,6 +19,8 @@ export type CreateContestInput = {
   venue: string;
 };
 
+export type UpdateContestInput = CreateContestInput;
+
 export function getContestCondition(
   startsAt: string | Date,
   endsAt: string | Date,
