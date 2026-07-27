@@ -38,22 +38,6 @@ export default function BoxContentContestView({
   return (
     <>
       <div className="p-4 flex flex-col gap-2">
-        <div className="flex justify-end">
-          <Button
-            variant="orange"
-            size="sm"
-            className="w-fit"
-            onClick={() => setEditOpen(true)}
-          >
-            <HugeiconsIcon
-              icon={EditIcon}
-              className="size-4 shrink-0"
-              strokeWidth={2}
-            />
-            Editar
-          </Button>
-        </div>
-
         <div className="flex flex-col">
           <div className="flex items-center gap-1 text-muted-foreground font-medium">
             <HugeiconsIcon
@@ -106,6 +90,21 @@ export default function BoxContentContestView({
             {formatDateTime(new Date(contest.startsAt))} &bull;{' '}
             {formatDateTime(new Date(contest.endsAt))}
           </span>
+        </div>
+        <div className="flex justify-end">
+          <Button
+            variant="orange"
+            size="sm"
+            className="w-full @md:w-fit"
+            onClick={() => setEditOpen(true)}
+          >
+            <HugeiconsIcon
+              icon={EditIcon}
+              className="size-4 shrink-0"
+              strokeWidth={2}
+            />
+            Editar
+          </Button>
         </div>
       </div>
 

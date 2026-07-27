@@ -6,6 +6,7 @@ import BoxContentContest from './_components/box-content-contest';
 import TitleContestPageManager from './_components/title-contest-page-manager';
 import { Suspense } from 'react';
 import Spinner from '@/components/spinner';
+import { CustomizeIcon } from '@hugeicons/core-free-icons';
 
 async function AdminContestManagementPageContent({
     params
@@ -17,9 +18,12 @@ async function AdminContestManagementPageContent({
             <Section>
                 <TitleContestPageManager idContest={id_contest} />
             </Section>
-            <Section className='mt-6 flex flex-row gap-4'>
+            <Section className='mt-6 flex flex-col @2xl:flex-row gap-4'>
                 <BoxFeatures title="Detalhes da competição" icon={BadgeInfoIcon}>
                     <BoxContentContest idContest={id_contest} />
+                </BoxFeatures>
+                <BoxFeatures title="Ajustes" icon={CustomizeIcon}>
+                    bunda
                 </BoxFeatures>
             </Section>
         </Page>
