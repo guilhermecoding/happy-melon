@@ -1,13 +1,15 @@
+import { Suspense } from 'react';
 import Page from '@/components/ui/page';
 import Section from '@/components/ui/section';
 import TitlePage from '@/components/title-page';
 import { File02Icon } from '@hugeicons/core-free-icons';
 import BoxQuestions from './_components/box-questions';
+import Loading from '@/app/loading';
 import { Metadata } from 'next';
 
 export const metadata: Metadata = {
   title: 'Prova',
-}
+};
 
 async function AdminExamPageContent({
   params,
@@ -29,5 +31,9 @@ async function AdminExamPageContent({
 export default function AdminExamPage({
   params,
 }: PageProps<'/admin/competicoes/[id_contest]/prova'>) {
-  return <AdminExamPageContent params={params} />;
+  return (
+    <Suspense fallback={<Loading />}>
+      <AdminExamPageContent params={params} />
+    </Suspense>
+  );
 }
