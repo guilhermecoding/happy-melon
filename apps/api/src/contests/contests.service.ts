@@ -2,6 +2,7 @@ import {
   BadRequestException,
   Injectable,
   InternalServerErrorException,
+  NotFoundException,
 } from '@nestjs/common';
 import { ContestStatus, prisma, type Contest } from '@repo/database';
 import {
@@ -19,6 +20,16 @@ export class ContestsService {
     });
 
     return contests.map((contest) => this.toResponse(contest));
+  }
+
+  async findById(id: string) {
+    const contest = await prisma.contest.findUnique({ where: { id } });
+
+    if (!contest) {
+      throw new NotFoundException('Competição não encontrada.');
+    }
+
+    return this.toResponse(contest);
   }
 
   async create(dto: CreateContestDto) {

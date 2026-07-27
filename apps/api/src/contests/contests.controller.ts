@@ -1,4 +1,4 @@
-import { Body, Controller, Get, Post } from '@nestjs/common';
+import { Body, Controller, Get, Param, Post } from '@nestjs/common';
 import { Roles } from '@thallesp/nestjs-better-auth';
 import { ZodValidationPipe } from '../common/pipes/zod-validation.pipe.js';
 import { ContestsService } from './contests.service.js';
@@ -17,6 +17,11 @@ export class ContestsController {
   @Get()
   list() {
     return this.contestsService.list();
+  }
+
+  @Get(':id')
+  findById(@Param('id') id: string) {
+    return this.contestsService.findById(id);
   }
 
   @Post()
