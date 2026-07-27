@@ -54,7 +54,7 @@ export default function ContestsPanel() {
         <Button
           variant="blue"
           size="sm"
-          className="w-fit"
+          className="w-full md:w-fit"
           onClick={() => setCreateOpen(true)}
         >
           <HugeiconsIcon

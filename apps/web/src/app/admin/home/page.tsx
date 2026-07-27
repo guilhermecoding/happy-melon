@@ -18,7 +18,7 @@ export default function AdminHomePage() {
                     <HomeGreeting />
                 </Suspense>
             </Section>
-            <Section className='flex flex-row gap-8 mt-6'>
+            <Section className='flex flex-col md:flex-row gap-8 mt-6'>
                 <BoxOption title='Administradores' type='users' />
                 <BoxOption title='Competições' type='contests' />
             </Section>

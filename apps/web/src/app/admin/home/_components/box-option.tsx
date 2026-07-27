@@ -13,7 +13,7 @@ export default function BoxOption({ title, type }: BoxOptionProps) {
 
     return (
         <Link
-            className='w-52 h-36 bg-muted p-4 rounded-4xl relative overflow-hidden border-4 border-border hover:border-border-hover transition-colors duration-300 cursor-pointer'
+            className='w-full md:w-52 h-36 bg-muted p-4 rounded-4xl relative overflow-hidden border-4 border-border hover:border-border-hover transition-colors duration-300 cursor-pointer'
             href={`/admin/${href}`}
         >
             <h2 className='text-xl font-semibold'>{title}</h2>
