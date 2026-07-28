@@ -18,6 +18,10 @@ export type CreateTeamInput = {
 
 export type UpdateTeamInput = CreateTeamInput;
 
+export type DeleteTeamInput = {
+  password: string;
+};
+
 export type BulkUpsertTeamsInput = {
   teams: CreateTeamInput[];
 };

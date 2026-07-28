@@ -5,6 +5,7 @@ import {
 import type {
   BulkUpsertTeamsInput,
   CreateTeamInput,
+  DeleteTeamInput,
   Team,
   UpdateTeamInput,
 } from './team.type';
@@ -125,6 +126,38 @@ export const teamService = {
       throw normalizeTeamError(
         error,
         'Não foi possível atualizar o time.',
+      );
+    }
+  },
+
+  async remove(
+    id: string,
+    data: DeleteTeamInput,
+  ): Promise<{ success: true }> {
+    try {
+      const response = await fetch(`${API_URL}/teams/${id}/delete`, {
+        method: 'POST',
+        credentials: 'include',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(data),
+      });
+
+      if (!response.ok) {
+        throw await parseTeamError(
+          response,
+          'Não foi possível excluir o time.',
+        );
+      }
+
+      if (response.status === 204) {
+        return { success: true };
+      }
+
+      return response.json();
+    } catch (error) {
+      throw normalizeTeamError(
+        error,
+        'Não foi possível excluir o time.',
       );
     }
   },

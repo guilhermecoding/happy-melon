@@ -113,6 +113,13 @@ export function TeamsPanel({ contestId }: TeamsPanelProps) {
     );
   }
 
+  function handleDeleted(teamId: string) {
+    setTeams((current) => current.filter((item) => item.id !== teamId));
+    if (selectedTeam?.id === teamId) {
+      setSelectedTeam(null);
+    }
+  }
+
   function openEditSheet(team: Team) {
     setSelectedTeam(team);
     setEditOpen(true);
@@ -251,6 +258,7 @@ export function TeamsPanel({ contestId }: TeamsPanelProps) {
         open={editOpen}
         onOpenChange={setEditOpen}
         onUpdated={handleUpdated}
+        onDeleted={handleDeleted}
       />
     </div>
   );

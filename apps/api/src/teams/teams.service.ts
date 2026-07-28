@@ -1,10 +1,15 @@
+import type { IncomingHttpHeaders } from 'node:http';
 import {
   BadRequestException,
   Injectable,
   InternalServerErrorException,
   NotFoundException,
+  UnauthorizedException,
 } from '@nestjs/common';
+import { APIError } from 'better-auth/api';
+import { fromNodeHeaders } from 'better-auth/node';
 import { prisma, type Team } from '@repo/database';
+import { auth } from '../auth/auth.js';
 import {
   generateShortId,
   ID_MAX_ATTEMPTS,
@@ -15,6 +20,7 @@ import {
 import type {
   BulkUpsertTeamsDto,
   CreateTeamDto,
+  DeleteTeamDto,
   UpdateTeamDto,
 } from './dto/team.dto.js';
 
@@ -203,6 +209,24 @@ export class TeamsService {
     }
   }
 
+  async remove(
+    headers: IncomingHttpHeaders,
+    id: string,
+    dto: DeleteTeamDto,
+  ) {
+    const existing = await prisma.team.findUnique({ where: { id } });
+
+    if (!existing) {
+      throw new NotFoundException('Time não encontrado.');
+    }
+
+    await this.verifyAdminPassword(headers, dto.password);
+
+    await prisma.team.delete({ where: { id } });
+
+    return { success: true as const };
+  }
+
   private async ensureUsernameAvailable(
     contestId: string,
     usernameTeam: string,
@@ -230,6 +254,44 @@ export class TeamsService {
     }
 
     return isPrismaUniqueViolation(error) && !isIdUniqueViolation(error);
+  }
+
+  private async verifyAdminPassword(
+    headers: IncomingHttpHeaders,
+    password: string,
+  ) {
+    try {
+      await auth.api.verifyPassword({
+        headers: this.toAuthHeaders(headers),
+        body: { password },
+      });
+    } catch (error) {
+      if (error instanceof APIError) {
+        throw new UnauthorizedException('Senha de administrador incorreta.');
+      }
+
+      throw error;
+    }
+  }
+
+  private toAuthHeaders(headers: IncomingHttpHeaders): Headers {
+    if (typeof fromNodeHeaders === 'function') {
+      return fromNodeHeaders(headers);
+    }
+
+    const authHeaders = new Headers();
+
+    for (const [name, value] of Object.entries(headers)) {
+      if (Array.isArray(value)) {
+        for (const item of value) {
+          authHeaders.append(name, item);
+        }
+      } else if (value !== undefined) {
+        authHeaders.set(name, value);
+      }
+    }
+
+    return authHeaders;
   }
 
   private async ensureContestExists(contestId: string) {

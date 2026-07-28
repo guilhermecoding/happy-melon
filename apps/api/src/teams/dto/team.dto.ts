@@ -35,6 +35,11 @@ export const bulkUpsertTeamsSchema = z.object({
   teams: z.array(createTeamSchema).min(1, 'Informe ao menos um time'),
 });
 
+export const deleteTeamSchema = z.object({
+  password: z.string().min(1),
+});
+
 export type CreateTeamDto = z.infer<typeof createTeamSchema>;
 export type UpdateTeamDto = z.infer<typeof updateTeamSchema>;
 export type BulkUpsertTeamsDto = z.infer<typeof bulkUpsertTeamsSchema>;
+export type DeleteTeamDto = z.infer<typeof deleteTeamSchema>;
