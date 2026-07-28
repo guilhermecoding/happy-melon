@@ -6,6 +6,8 @@ import { HugeiconsIcon } from '@hugeicons/react';
 import {
   AddTeam02Icon,
   CheckmarkCircle01Icon,
+  Csv02Icon,
+  Download01Icon,
   EyeClosedIcon,
   Upload01Icon,
 } from '@hugeicons/core-free-icons';
@@ -417,13 +419,21 @@ export function CreateTeamSheet({
         ) : (
           <div className="flex min-h-0 flex-1 flex-col">
             <div className="flex min-h-0 flex-1 flex-col gap-5 overflow-y-auto scrollbar-thin px-4 pb-2">
-              <button
-                type="button"
-                className="w-fit text-sm font-medium text-primary underline-offset-4 hover:underline"
-                onClick={downloadTeamCsvTemplate}
-              >
-                Baixar modelo CSV
-              </button>
+              <div className="flex justify-end">
+                <Button
+                  variant="orange"
+                  size="sm"
+                  className="w-full sm:w-fit"
+                  onClick={downloadTeamCsvTemplate}
+                >
+                  <HugeiconsIcon
+                    icon={Download01Icon}
+                    className="size-5"
+                    strokeWidth={3}
+                  />
+                  Baixar modelo CSV
+                </Button>
+              </div>
 
               <div className="flex flex-col gap-2">
                 <input
@@ -462,12 +472,19 @@ export function CreateTeamSheet({
                   </span>
                 </label>
                 {csvFileName && (
-                  <p className="text-sm text-muted-foreground">
-                    Arquivo: {csvFileName}
-                    {csvRows.length > 0
-                      ? ` · ${csvRows.length} time(s) válido(s)`
-                      : null}
-                  </p>
+                  <div className="flex items-center gap-2 bg-green-50 border-2 border-green-700 rounded-2xl p-3 font-semibold text-green-700">
+                    <HugeiconsIcon
+                      icon={Csv02Icon}
+                      className="size-5"
+                      strokeWidth={1.5}
+                    />
+                    <p className="text-sm">
+                      Arquivo: {csvFileName}
+                      {csvRows.length > 0
+                        ? ` · ${csvRows.length} time(s) válido(s)`
+                        : null}
+                    </p>
+                  </div>
                 )}
               </div>
 
@@ -494,12 +511,12 @@ export function CreateTeamSheet({
               )}
             </div>
 
-            <SheetFooter className="shrink-0">
+            <SheetFooter className="shrink-0 flex flex-col sm:justify-start sm:flex-row-reverse gap-2">
               <Button
                 type="button"
                 variant="green"
                 loading={isBulkSubmitting}
-                className="w-full"
+                className="w-full md:w-fit"
                 onClick={() => void handleBulkSubmit()}
               >
                 <HugeiconsIcon
@@ -513,7 +530,7 @@ export function CreateTeamSheet({
                 type="button"
                 variant="white"
                 onClick={() => handleOpenChange(false)}
-                className="w-full"
+                className="w-full md:w-fit"
               >
                 <HugeiconsIcon
                   icon={EyeClosedIcon}
