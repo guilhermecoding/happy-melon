@@ -157,7 +157,7 @@ export function EditTeamSheet({
                   <Input
                     id={field.name}
                     name={field.name}
-                    placeholder="username do time"
+                    placeholder="Username do time"
                     value={field.state.value}
                     onBlur={field.handleBlur}
                     onChange={(event) =>
@@ -177,7 +177,7 @@ export function EditTeamSheet({
                   <Input
                     id={field.name}
                     name={field.name}
-                    placeholder="Opcional"
+                    placeholder="Sala do time (opcional)"
                     value={field.state.value}
                     onBlur={field.handleBlur}
                     onChange={(event) =>
@@ -217,14 +217,14 @@ export function EditTeamSheet({
             )}
           </div>
 
-          <SheetFooter className="shrink-0">
+          <SheetFooter className="shrink-0 flex flex-col sm:justify-start sm:flex-row-reverse gap-2">
             <form.Subscribe selector={(state) => state.isSubmitting}>
               {(isSubmitting) => (
                 <Button
                   type="submit"
                   variant="green"
                   loading={isSubmitting}
-                  className="w-full"
+                  className="w-full md:w-fit"
                 >
                   <HugeiconsIcon
                     icon={SaveIcon}
@@ -239,7 +239,7 @@ export function EditTeamSheet({
               type="button"
               variant="white"
               onClick={() => handleOpenChange(false)}
-              className="w-full"
+              className="w-full md:w-fit"
             >
               <HugeiconsIcon
                 icon={EyeClosedIcon}

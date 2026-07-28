@@ -4,6 +4,7 @@ import { useState } from 'react';
 import { useForm } from '@tanstack/react-form';
 import { HugeiconsIcon } from '@hugeicons/react';
 import {
+  AddTeam02Icon,
   CheckmarkCircle01Icon,
   EyeClosedIcon,
   Upload01Icon,
@@ -48,6 +49,8 @@ type SheetTab = 'novo' | 'massa';
 const SHEET_CONTENT_CLASS =
   'overflow-hidden data-[side=right]:md:max-w-[50vw] data-[side=right]:md:w-[50vw]';
 
+const MAX_CSV_BYTES = 5 * 1024 * 1024;
+
 function toCreatePayload(value: TeamFormValues) {
   return {
     name: value.name.trim(),
@@ -55,6 +58,15 @@ function toCreatePayload(value: TeamFormValues) {
     room: value.room.trim() || null,
     machine: value.machine.trim() || null,
   };
+}
+
+function isCsvFile(file: File) {
+  const name = file.name.toLowerCase();
+  return (
+    name.endsWith('.csv') ||
+    file.type === 'text/csv' ||
+    file.type === 'application/vnd.ms-excel'
+  );
 }
 
 export function CreateTeamSheet({
@@ -70,6 +82,7 @@ export function CreateTeamSheet({
   const [csvRows, setCsvRows] = useState<TeamCsvRow[]>([]);
   const [csvFileName, setCsvFileName] = useState<string>();
   const [csvInputKey, setCsvInputKey] = useState(0);
+  const [isDragging, setIsDragging] = useState(false);
   const [isBulkSubmitting, setIsBulkSubmitting] = useState(false);
 
   const form = useForm({
@@ -105,6 +118,7 @@ export function CreateTeamSheet({
     setCsvErrors([]);
     setCsvRows([]);
     setCsvFileName(undefined);
+    setIsDragging(false);
     setCsvInputKey((current) => current + 1);
   }
 
@@ -119,17 +133,29 @@ export function CreateTeamSheet({
     onOpenChange(nextOpen);
   }
 
-  async function handleCsvFileChange(
-    event: React.ChangeEvent<HTMLInputElement>,
-  ) {
-    const file = event.target.files?.[0];
+  async function processCsvFile(file: File | undefined) {
     if (!file) {
       resetBulkState();
       return;
     }
 
-    setCsvFileName(file.name);
     setRequestError(undefined);
+
+    if (!isCsvFile(file)) {
+      setCsvFileName(file.name);
+      setCsvErrors(['Selecione um arquivo CSV válido.']);
+      setCsvRows([]);
+      return;
+    }
+
+    if (file.size > MAX_CSV_BYTES) {
+      setCsvFileName(file.name);
+      setCsvErrors(['O arquivo excede o tamanho máximo de 5MB.']);
+      setCsvRows([]);
+      return;
+    }
+
+    setCsvFileName(file.name);
 
     try {
       const content = await file.text();
@@ -140,6 +166,29 @@ export function CreateTeamSheet({
       setCsvErrors(['Não foi possível ler o arquivo CSV.']);
       setCsvRows([]);
     }
+  }
+
+  function handleCsvFileChange(event: React.ChangeEvent<HTMLInputElement>) {
+    void processCsvFile(event.target.files?.[0]);
+  }
+
+  function handleDragOver(event: React.DragEvent<HTMLLabelElement>) {
+    event.preventDefault();
+    event.stopPropagation();
+    setIsDragging(true);
+  }
+
+  function handleDragLeave(event: React.DragEvent<HTMLLabelElement>) {
+    event.preventDefault();
+    event.stopPropagation();
+    setIsDragging(false);
+  }
+
+  function handleDrop(event: React.DragEvent<HTMLLabelElement>) {
+    event.preventDefault();
+    event.stopPropagation();
+    setIsDragging(false);
+    void processCsvFile(event.dataTransfer.files?.[0]);
   }
 
   async function handleBulkSubmit() {
@@ -202,25 +251,35 @@ export function CreateTeamSheet({
           <button
             type="button"
             className={cn(
-              'border-b-2 px-3 py-2 text-sm font-medium transition-colors',
+              'border-b-2 px-3 py-2 text-sm font-medium transition-colors flex items-center gap-2',
               tab === 'novo'
                 ? 'border-primary text-foreground'
                 : 'border-transparent text-muted-foreground hover:text-foreground',
             )}
             onClick={() => setTab('novo')}
           >
-            Novo Time
+            <HugeiconsIcon
+              icon={AddTeam02Icon}
+              className="size-4"
+              strokeWidth={2}
+            />
+            Manualmente
           </button>
           <button
             type="button"
             className={cn(
-              'border-b-2 px-3 py-2 text-sm font-medium transition-colors',
+              'border-b-2 px-3 py-2 text-sm font-medium transition-colors flex items-center gap-2',
               tab === 'massa'
                 ? 'border-primary text-foreground'
                 : 'border-transparent text-muted-foreground hover:text-foreground',
             )}
             onClick={() => setTab('massa')}
           >
+            <HugeiconsIcon
+              icon={Upload01Icon}
+              className="size-4"
+              strokeWidth={2}
+            />
             Em Massa
           </button>
         </div>
@@ -262,7 +321,7 @@ export function CreateTeamSheet({
                     <Input
                       id={field.name}
                       name={field.name}
-                      placeholder="username do time"
+                      placeholder="Username do time"
                       value={field.state.value}
                       onBlur={field.handleBlur}
                       onChange={(event) =>
@@ -282,7 +341,7 @@ export function CreateTeamSheet({
                     <Input
                       id={field.name}
                       name={field.name}
-                      placeholder="Opcional"
+                      placeholder="Sala do time (opcional)"
                       value={field.state.value}
                       onBlur={field.handleBlur}
                       onChange={(event) =>
@@ -322,14 +381,14 @@ export function CreateTeamSheet({
               )}
             </div>
 
-            <SheetFooter className="shrink-0">
+            <SheetFooter className="shrink-0 flex flex-col sm:justify-start sm:flex-row-reverse gap-2">
               <form.Subscribe selector={(state) => state.isSubmitting}>
                 {(isSubmitting) => (
                   <Button
                     type="submit"
                     variant="green"
                     loading={isSubmitting}
-                    className="w-full"
+                    className="w-full md:w-fit"
                   >
                     <HugeiconsIcon
                       icon={CheckmarkCircle01Icon}
@@ -344,7 +403,7 @@ export function CreateTeamSheet({
                 type="button"
                 variant="white"
                 onClick={() => handleOpenChange(false)}
-                className="w-full"
+                className="w-full md:w-fit"
               >
                 <HugeiconsIcon
                   icon={EyeClosedIcon}
@@ -366,15 +425,42 @@ export function CreateTeamSheet({
                 Baixar modelo CSV
               </button>
 
-              <Field>
-                <FieldLabel htmlFor="teams-csv-upload">Arquivo CSV</FieldLabel>
-                <Input
+              <div className="flex flex-col gap-2">
+                <input
                   key={csvInputKey}
                   id="teams-csv-upload"
                   type="file"
                   accept=".csv,text/csv"
-                  onChange={(event) => void handleCsvFileChange(event)}
+                  className="sr-only"
+                  onChange={handleCsvFileChange}
                 />
+                <label
+                  htmlFor="teams-csv-upload"
+                  onDragOver={handleDragOver}
+                  onDragEnter={handleDragOver}
+                  onDragLeave={handleDragLeave}
+                  onDrop={handleDrop}
+                  className={cn(
+                    'flex cursor-pointer flex-col items-center justify-center rounded-2xl border-2 border-dashed px-6 py-12 text-center transition-colors',
+                    isDragging
+                      ? 'border-primary bg-primary/5'
+                      : 'border-border bg-muted/40 hover:bg-muted/70',
+                  )}
+                >
+                  <span className="mb-4 flex size-12 items-center justify-center rounded-full bg-muted">
+                    <HugeiconsIcon
+                      icon={Upload01Icon}
+                      className="size-6 text-foreground"
+                      strokeWidth={2}
+                    />
+                  </span>
+                  <span className="text-sm font-bold text-foreground">
+                    Arraste seu arquivo CSV aqui
+                  </span>
+                  <span className="mt-1 text-xs text-muted-foreground">
+                    ou clique para selecionar. Máximo 5MB.
+                  </span>
+                </label>
                 {csvFileName && (
                   <p className="text-sm text-muted-foreground">
                     Arquivo: {csvFileName}
@@ -383,7 +469,7 @@ export function CreateTeamSheet({
                       : null}
                   </p>
                 )}
-              </Field>
+              </div>
 
               {csvErrors.length > 0 && (
                 <div
