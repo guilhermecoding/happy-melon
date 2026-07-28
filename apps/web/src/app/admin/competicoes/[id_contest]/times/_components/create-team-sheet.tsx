@@ -48,9 +48,6 @@ type CreateTeamSheetProps = {
 
 type SheetTab = 'novo' | 'massa';
 
-const SHEET_CONTENT_CLASS =
-  'overflow-hidden data-[side=right]:md:max-w-[50vw] data-[side=right]:md:w-[50vw]';
-
 const MAX_CSV_BYTES = 5 * 1024 * 1024;
 
 function toCreatePayload(value: TeamFormValues) {
@@ -240,7 +237,7 @@ export function CreateTeamSheet({
       <SheetContent
         side="right"
         showCloseButton={false}
-        className={SHEET_CONTENT_CLASS}
+        className="overflow-hidden"
       >
         <SheetHeader className="shrink-0">
           <SheetTitle className="text-2xl font-bold">Adicionar time</SheetTitle>
@@ -383,14 +380,14 @@ export function CreateTeamSheet({
               )}
             </div>
 
-            <SheetFooter className="shrink-0 flex flex-col sm:justify-start sm:flex-row-reverse gap-2">
+            <SheetFooter className="shrink-0 flex flex-col gap-2">
               <form.Subscribe selector={(state) => state.isSubmitting}>
                 {(isSubmitting) => (
                   <Button
                     type="submit"
                     variant="green"
                     loading={isSubmitting}
-                    className="w-full md:w-fit"
+                    className="w-full"
                   >
                     <HugeiconsIcon
                       icon={CheckmarkCircle01Icon}
@@ -405,7 +402,7 @@ export function CreateTeamSheet({
                 type="button"
                 variant="white"
                 onClick={() => handleOpenChange(false)}
-                className="w-full md:w-fit"
+                className="w-full"
               >
                 <HugeiconsIcon
                   icon={EyeClosedIcon}
@@ -421,7 +418,7 @@ export function CreateTeamSheet({
             <div className="flex min-h-0 flex-1 flex-col gap-5 overflow-y-auto scrollbar-thin px-4 pb-2">
               <div className="flex justify-end">
                 <Button
-                  variant="orange"
+                  variant="blue"
                   size="sm"
                   className="w-full sm:w-fit"
                   onClick={downloadTeamCsvTemplate}
@@ -431,7 +428,7 @@ export function CreateTeamSheet({
                     className="size-5"
                     strokeWidth={3}
                   />
-                  Baixar modelo CSV
+                  Modelo CSV
                 </Button>
               </div>
 
@@ -511,12 +508,12 @@ export function CreateTeamSheet({
               )}
             </div>
 
-            <SheetFooter className="shrink-0 flex flex-col sm:justify-start sm:flex-row-reverse gap-2">
+            <SheetFooter className="shrink-0 flex flex-col gap-2">
               <Button
                 type="button"
                 variant="green"
                 loading={isBulkSubmitting}
-                className="w-full md:w-fit"
+                className="w-full"
                 onClick={() => void handleBulkSubmit()}
               >
                 <HugeiconsIcon
@@ -530,7 +527,7 @@ export function CreateTeamSheet({
                 type="button"
                 variant="white"
                 onClick={() => handleOpenChange(false)}
-                className="w-full md:w-fit"
+                className="w-full"
               >
                 <HugeiconsIcon
                   icon={EyeClosedIcon}

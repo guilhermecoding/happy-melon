@@ -38,9 +38,6 @@ type EditTeamSheetProps = {
   onDeleted: (teamId: string) => void;
 };
 
-const SHEET_CONTENT_CLASS =
-  'overflow-hidden data-[side=right]:md:max-w-[50vw] data-[side=right]:md:w-[50vw]';
-
 function toFormValues(team: Team): TeamFormValues {
   return {
     name: team.name,
@@ -153,7 +150,7 @@ export function EditTeamSheet({
         <SheetContent
           side="right"
           showCloseButton={false}
-          className={SHEET_CONTENT_CLASS}
+          className="overflow-hidden"
         >
           <SheetHeader className="shrink-0">
             <SheetTitle className="text-2xl font-bold">Editar time</SheetTitle>
@@ -258,14 +255,14 @@ export function EditTeamSheet({
               )}
             </div>
 
-            <SheetFooter className="shrink-0 flex flex-col items-end lg:justify-start lg:flex-row-reverse gap-2">
+            <SheetFooter className="shrink-0 flex flex-col gap-2">
               <form.Subscribe selector={(state) => state.isSubmitting}>
                 {(isSubmitting) => (
                   <Button
                     type="submit"
                     variant="green"
                     loading={isSubmitting}
-                    className="w-full md:w-fit"
+                    className="w-full"
                   >
                     <HugeiconsIcon
                       icon={SaveIcon}
@@ -279,7 +276,7 @@ export function EditTeamSheet({
               <Button
                 type="button"
                 variant="red"
-                className="w-full md:w-fit"
+                className="w-full"
                 onClick={() => {
                   setConfirmError(undefined);
                   setDeleteConfirmOpen(true);
@@ -296,7 +293,7 @@ export function EditTeamSheet({
                 type="button"
                 variant="white"
                 onClick={() => handleOpenChange(false)}
-                className="w-full md:w-fit"
+                className="w-full"
               >
                 <HugeiconsIcon
                   icon={EyeClosedIcon}
