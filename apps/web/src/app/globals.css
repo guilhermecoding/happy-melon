@@ -27,6 +27,7 @@
   --font-heading: var(--font-sans), cursive;
   --font-sans: var(--font-sans), cursive;
   --font-cause: var(--font-sans), cursive;
+  --font-jersey: var(--font-jersey), serif;
   --color-sidebar-ring: var(--sidebar-ring);
   --color-sidebar-border: var(--sidebar-border);
   --color-sidebar-accent-foreground: var(--sidebar-accent-foreground);

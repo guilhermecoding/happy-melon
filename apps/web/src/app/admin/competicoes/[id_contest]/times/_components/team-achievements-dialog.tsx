@@ -1,7 +1,7 @@
 "use client";
 
 import { HugeiconsIcon } from '@hugeicons/react';
-import { Award01Icon, EyeClosedIcon } from '@hugeicons/core-free-icons';
+import { Award01Icon, BalloonIcon, EyeClosedIcon } from '@hugeicons/core-free-icons';
 import type { Team } from '@/services/team/team.type';
 import { Button } from '@/components/ui/button';
 import {
@@ -12,12 +12,43 @@ import {
   DialogHeader,
   DialogTitle,
 } from '@/components/ui/dialog';
+import { cn } from '@/lib/utils';
 
 type TeamAchievementsDialogProps = {
   team: Team | null;
   open: boolean;
   onOpenChange: (open: boolean) => void;
 };
+
+function BalloonAchievement({
+  questionId,
+  color,
+  resolved,
+}: {
+  questionId: string;
+  color: string;
+  resolved: boolean;
+}) {
+  const colorResolved = resolved ? color : '#e0e0e2';
+
+  return (
+    <div className="flex flex-col items-center gap-3">
+      <HugeiconsIcon
+        icon={BalloonIcon}
+        className="size-22 shrink-0"
+        color={colorResolved}
+        strokeWidth={1.5}
+        fill="currentColor"
+      />
+      <span
+        className="text-5xl font-jersey"
+        style={{ color: colorResolved }}
+      >
+        {questionId}
+      </span>
+    </div>
+  )
+}
 
 export function TeamAchievementsDialog({
   team,
@@ -32,7 +63,7 @@ export function TeamAchievementsDialog({
       >
         <DialogHeader>
           <DialogTitle className="text-xl font-bold sm:text-2xl">
-            Conquistas
+            Balões Conquistados
           </DialogTitle>
           <DialogDescription className="text-base">
             {team ? (
@@ -46,21 +77,14 @@ export function TeamAchievementsDialog({
           </DialogDescription>
         </DialogHeader>
 
-        <div className="flex min-h-48 flex-col items-center justify-center gap-3 rounded-2xl border border-dashed bg-muted/40 px-6 py-10 text-center">
-          <span className="flex size-14 items-center justify-center rounded-full bg-muted">
-            <HugeiconsIcon
-              icon={Award01Icon}
-              className="size-7 text-muted-foreground"
-              strokeWidth={1.5}
-            />
-          </span>
-          <p className="text-sm font-medium text-foreground">
-            Nenhuma conquista disponível
-          </p>
-          <p className="max-w-sm text-sm text-muted-foreground">
-            As conquistas deste time serão exibidas aqui quando estiverem
-            disponíveis.
-          </p>
+        {/* Conteúdo */}
+        <div className="grid grid-cols-6 min-h-48 gap-3 rounded-2xl border-4 bg-muted/40 px-6 py-10 text-center">
+          <BalloonAchievement questionId="A" color="red" resolved={true} />
+          <BalloonAchievement questionId="B" color="#ffffff" resolved={true} />
+          <BalloonAchievement questionId="C" color="red" resolved={false} />
+          <BalloonAchievement questionId="D" color="red" resolved={true} />
+          <BalloonAchievement questionId="E" color="red" resolved={true} />
+          <BalloonAchievement questionId="F" color="red" resolved={true} />
         </div>
 
         <DialogFooter className="mt-4 flex-col-reverse justify-end gap-2 xl:flex-row">
