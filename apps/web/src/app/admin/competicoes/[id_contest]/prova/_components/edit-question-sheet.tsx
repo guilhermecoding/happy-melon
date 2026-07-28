@@ -12,8 +12,9 @@ import { AdminPasswordConfirmDialog } from '@/components/admin-password-confirm-
 import { questionService } from '@/services/question/question.service';
 import { getQuestionErrorMessage } from '@/services/question/question.error';
 import type { Question } from '@/services/question/question.type';
+import { COLOR, toBalloonColor, type BalloonColor } from '@/services/question/balloon-color';
 import { Button } from '@/components/ui/button';
-import { Field, FieldError, FieldLabel, FieldDescription } from '@/components/ui/field';
+import { Field, FieldError, FieldLabel } from '@/components/ui/field';
 import { Input } from '@/components/ui/input';
 import {
   Sheet,
@@ -24,6 +25,7 @@ import {
   SheetTitle,
 } from '@/components/ui/sheet';
 import { toast } from '@/components/ui/toast';
+import { BalloonColorSelect } from './balloon-color-select';
 import {
   questionFormSchema,
   type QuestionFormValues,
@@ -37,11 +39,17 @@ type EditQuestionSheetProps = {
   onDeleted: (questionId: string) => void;
 };
 
+const DEFAULT_FORM_VALUES: QuestionFormValues = {
+  label: '',
+  title: '',
+  balloonColor: COLOR.RED,
+};
+
 function toFormValues(question: Question): QuestionFormValues {
   return {
     label: question.label,
     title: question.title,
-    balloonColor: question.balloonColor.toLowerCase(),
+    balloonColor: toBalloonColor(question.balloonColor),
   };
 }
 
@@ -58,11 +66,7 @@ export function EditQuestionSheet({
   const [isConfirming, setIsConfirming] = useState(false);
 
   const form = useForm({
-    defaultValues: {
-      label: '',
-      title: '',
-      balloonColor: '#ff0000',
-    } satisfies QuestionFormValues,
+    defaultValues: DEFAULT_FORM_VALUES,
     validators: {
       onSubmit: questionFormSchema,
     },
@@ -74,7 +78,7 @@ export function EditQuestionSheet({
         const updatedQuestion = await questionService.update(question.id, {
           label: value.label.trim().toUpperCase(),
           title: value.title,
-          balloonColor: value.balloonColor.toUpperCase(),
+          balloonColor: value.balloonColor,
         });
         onUpdated(updatedQuestion);
         toast.add({
@@ -107,7 +111,7 @@ export function EditQuestionSheet({
 
   function handleOpenChange(nextOpen: boolean) {
     if (!nextOpen) {
-      form.reset();
+      form.reset(DEFAULT_FORM_VALUES);
       setRequestError(undefined);
       setDeleteConfirmOpen(false);
       setConfirmError(undefined);
@@ -208,19 +212,13 @@ export function EditQuestionSheet({
                 {(field) => (
                   <Field data-invalid={!field.state.meta.isValid}>
                     <FieldLabel htmlFor={field.name}>Cor do balão</FieldLabel>
-                    <Input
+                    <BalloonColorSelect
                       id={field.name}
-                      name={field.name}
-                      type="color"
                       value={field.state.value}
+                      invalid={!field.state.meta.isValid}
                       onBlur={field.handleBlur}
-                      onChange={(event) => field.handleChange(event.target.value)}
-                      aria-invalid={!field.state.meta.isValid}
-                      className="h-12 w-full cursor-pointer p-1"
+                      onChange={(color: BalloonColor) => field.handleChange(color)}
                     />
-                    <FieldDescription>
-                      Utilize o seletor para mudar para o padrão de cores hex.
-                    </FieldDescription>
                     <FieldError errors={field.state.meta.errors} />
                   </Field>
                 )}

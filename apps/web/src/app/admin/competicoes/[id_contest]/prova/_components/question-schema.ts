@@ -1,11 +1,19 @@
 import { z } from 'zod';
+import {
+  BALLOON_COLOR_VALUES,
+  type BalloonColor,
+} from '@/services/question/balloon-color';
 
 export const questionFormSchema = z.object({
   label: z.string().min(1, 'Informe o identificador'),
   title: z.string().min(1, 'Informe o título'),
-  balloonColor: z
-    .string()
-    .regex(/^#[0-9A-Fa-f]{6}$/, 'Informe uma cor hexadecimal válida'),
+  balloonColor: z.enum(BALLOON_COLOR_VALUES, {
+    error: 'Selecione uma cor de balão válida',
+  }),
 });
 
-export type QuestionFormValues = z.infer<typeof questionFormSchema>;
+export type QuestionFormValues = {
+  label: string;
+  title: string;
+  balloonColor: BalloonColor;
+};

@@ -1,9 +1,11 @@
+import type { BalloonColor } from './balloon-color';
+
 export type Question = {
   id: string;
   contestId: string;
   label: string;
   title: string;
-  balloonColor: string;
+  balloonColor: BalloonColor;
   createdAt: string;
   updatedAt: string;
 };
@@ -11,7 +13,7 @@ export type Question = {
 export type CreateQuestionInput = {
   label: string;
   title: string;
-  balloonColor: string;
+  balloonColor: BalloonColor;
 };
 
 export type UpdateQuestionInput = CreateQuestionInput;

@@ -1,9 +1,14 @@
 import { z } from 'zod';
+import { BALLOON_COLOR_VALUES } from '../balloon-color.js';
 
 export const balloonColorSchema = z
   .string()
-  .regex(/^#[0-9A-Fa-f]{6}$/, 'Informe uma cor hexadecimal válida.')
-  .transform((value) => value.toUpperCase());
+  .transform((value) => value.toUpperCase())
+  .pipe(
+    z.enum(BALLOON_COLOR_VALUES, {
+      error: 'Informe uma cor de balão válida.',
+    }),
+  );
 
 export const createQuestionSchema = z.object({
   label: z
