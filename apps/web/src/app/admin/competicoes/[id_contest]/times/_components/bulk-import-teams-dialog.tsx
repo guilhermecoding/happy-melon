@@ -109,7 +109,7 @@ function SquareDropzone({
       >
         <HugeiconsIcon
           icon={icon}
-          className="size-24 text-primary/10"
+          className="size-10 sm:size-24 text-primary/10"
           strokeWidth={1.5}
         />
       </label>

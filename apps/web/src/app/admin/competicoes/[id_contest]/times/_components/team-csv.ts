@@ -190,3 +190,45 @@ export function downloadTeamCsvTemplate() {
   anchor.click();
   URL.revokeObjectURL(url);
 }
+
+function escapeCsvCell(value: string) {
+  if (/[",\n\r]/.test(value)) {
+    return `"${value.replaceAll('"', '""')}"`;
+  }
+
+  return value;
+}
+
+export function downloadTeamsCsv(
+  teams: Array<{
+    id: string;
+    name: string;
+    usernameTeam: string;
+    room: string | null;
+    machine: string | null;
+  }>,
+  filename = 'times.csv',
+) {
+  const header = 'ID,Nome,Usuario,Sala,Maquina';
+  const lines = teams.map((team) =>
+    [
+      team.id,
+      team.name,
+      team.usernameTeam,
+      team.room ?? '',
+      team.machine ?? '',
+    ]
+      .map(escapeCsvCell)
+      .join(','),
+  );
+
+  const blob = new Blob([[header, ...lines].join('\n')], {
+    type: 'text/csv;charset=utf-8;',
+  });
+  const url = URL.createObjectURL(blob);
+  const anchor = document.createElement('a');
+  anchor.href = url;
+  anchor.download = filename;
+  anchor.click();
+  URL.revokeObjectURL(url);
+}

@@ -47,6 +47,19 @@ export class TeamsController {
     return this.teamsService.bulkUpsert(contestId, dto);
   }
 
+  @Post('contests/:contestId/teams/delete')
+  removeAllByContest(
+    @Req() request: RequestWithHeaders,
+    @Param('contestId') contestId: string,
+    @Body(deleteTeamPipe) dto: DeleteTeamDto,
+  ) {
+    return this.teamsService.removeAllByContest(
+      request.headers,
+      contestId,
+      dto,
+    );
+  }
+
   @Patch('teams/:id')
   update(
     @Param('id') id: string,

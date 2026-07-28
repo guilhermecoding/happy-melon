@@ -227,6 +227,24 @@ export class TeamsService {
     return { success: true as const };
   }
 
+  async removeAllByContest(
+    headers: IncomingHttpHeaders,
+    contestId: string,
+    dto: DeleteTeamDto,
+  ) {
+    await this.ensureContestExists(contestId);
+    await this.verifyAdminPassword(headers, dto.password);
+
+    const result = await prisma.team.deleteMany({
+      where: { contestId },
+    });
+
+    return {
+      success: true as const,
+      deletedCount: result.count,
+    };
+  }
+
   private async ensureUsernameAvailable(
     contestId: string,
     usernameTeam: string,

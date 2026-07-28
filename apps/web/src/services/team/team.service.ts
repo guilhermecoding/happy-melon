@@ -161,4 +161,35 @@ export const teamService = {
       );
     }
   },
+
+  async removeAll(
+    contestId: string,
+    data: DeleteTeamInput,
+  ): Promise<{ success: true; deletedCount: number }> {
+    try {
+      const response = await fetch(
+        `${API_URL}/contests/${contestId}/teams/delete`,
+        {
+          method: 'POST',
+          credentials: 'include',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(data),
+        },
+      );
+
+      if (!response.ok) {
+        throw await parseTeamError(
+          response,
+          'Não foi possível excluir os times.',
+        );
+      }
+
+      return response.json();
+    } catch (error) {
+      throw normalizeTeamError(
+        error,
+        'Não foi possível excluir os times.',
+      );
+    }
+  },
 };

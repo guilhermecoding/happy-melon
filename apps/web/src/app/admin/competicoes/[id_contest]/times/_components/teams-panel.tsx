@@ -4,11 +4,14 @@ import { useDeferredValue, useEffect, useMemo, useState } from 'react';
 import {
   ArrowLeft01Icon,
   ArrowRight01Icon,
+  Delete01Icon,
+  Download01Icon,
   PencilEdit02Icon,
   PlusSignCircleIcon,
   Search01Icon,
 } from '@hugeicons/core-free-icons';
 import { HugeiconsIcon } from '@hugeicons/react';
+import { AdminPasswordConfirmDialog } from '@/components/admin-password-confirm-dialog';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import {
@@ -19,11 +22,13 @@ import {
   TableHeader,
   TableRow,
 } from '@/components/ui/table';
+import { toast } from '@/components/ui/toast';
 import { teamService } from '@/services/team/team.service';
 import { getTeamErrorMessage } from '@/services/team/team.error';
 import type { Team } from '@/services/team/team.type';
 import { CreateTeamSheet } from './create-team-sheet';
 import { EditTeamSheet } from './edit-team-sheet';
+import { downloadTeamsCsv } from './team-csv';
 
 type TeamsPanelProps = {
   contestId: string;
@@ -59,6 +64,9 @@ export function TeamsPanel({ contestId }: TeamsPanelProps) {
   const [createOpen, setCreateOpen] = useState(false);
   const [editOpen, setEditOpen] = useState(false);
   const [selectedTeam, setSelectedTeam] = useState<Team | null>(null);
+  const [deleteAllOpen, setDeleteAllOpen] = useState(false);
+  const [deleteAllError, setDeleteAllError] = useState<string>();
+  const [isDeletingAll, setIsDeletingAll] = useState(false);
 
   const filteredTeams = useMemo(() => {
     const query = deferredSearch.trim().toLowerCase();
@@ -152,15 +160,67 @@ export function TeamsPanel({ contestId }: TeamsPanelProps) {
     setEditOpen(true);
   }
 
+  function handleDownloadTeams() {
+    if (teams.length === 0) {
+      toast.add({
+        title: 'Não há times para baixar.',
+        type: 'error',
+      });
+      return;
+    }
+
+    const orderedTeams = [...teams].sort((a, b) =>
+      a.name.localeCompare(b.name, 'pt-BR', { sensitivity: 'base' }),
+    );
+
+    downloadTeamsCsv(orderedTeams, `times-${contestId}.csv`);
+    toast.add({
+      title: `${orderedTeams.length} time(s) exportado(s).`,
+      type: 'success',
+    });
+  }
+
+  async function handleConfirmDeleteAll(password: string) {
+    setIsDeletingAll(true);
+    setDeleteAllError(undefined);
+
+    try {
+      const result = await teamService.removeAll(contestId, { password });
+      setTeams([]);
+      setSelectedTeam(null);
+      setDeleteAllOpen(false);
+      toast.add({
+        title:
+          result.deletedCount > 0
+            ? `${result.deletedCount} time(s) excluído(s) com sucesso.`
+            : 'Nenhum time para excluir.',
+        type: 'success',
+      });
+    } catch (deleteError) {
+      const message = getTeamErrorMessage(
+        deleteError,
+        'Não foi possível excluir os times.',
+      );
+      setDeleteAllError(message);
+      toast.add({
+        title: message,
+        type: 'error',
+      });
+    } finally {
+      setIsDeletingAll(false);
+    }
+  }
+
   return (
     <div className="flex flex-col gap-4">
-      <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-        <div className="w-full sm:max-w-sm">
+      <div className="flex flex-col gap-3 @5xl/main:flex-row sm:items-center sm:justify-between">
+        <div className="w-full flex justify-start">
           <Input
             value={search}
             onChange={(event) => setSearch(event.target.value)}
             placeholder="Buscar times..."
             aria-label="Buscar times"
+            className="w-full sm:max-w-86 rounded-2xl"
             icon={
               <HugeiconsIcon
                 icon={Search01Icon}
@@ -171,19 +231,54 @@ export function TeamsPanel({ contestId }: TeamsPanelProps) {
           />
         </div>
 
-        <Button
-          variant="blue"
-          size="sm"
-          className="flex w-full sm:w-fit"
-          onClick={() => setCreateOpen(true)}
-        >
-          <HugeiconsIcon
-            icon={PlusSignCircleIcon}
-            className="size-5 shrink-0"
-            strokeWidth={3}
-          />
-          Adicionar time
-        </Button>
+        <div className="w-full flex flex-col-reverse justify-start sm:flex-row @5xl/main:justify-end gap-2">
+          <Button
+            variant="orange"
+            size="sm"
+            className="flex w-full sm:w-fit"
+            disabled={loading || teams.length === 0}
+            onClick={handleDownloadTeams}
+          >
+            <HugeiconsIcon
+              icon={Download01Icon}
+              className="size-5 shrink-0"
+              strokeWidth={3}
+            />
+            Baixar times
+          </Button>
+
+          <Button
+            variant="red"
+            size="sm"
+            className="flex w-full sm:w-fit"
+            disabled={loading || teams.length === 0}
+            onClick={() => {
+              setDeleteAllError(undefined);
+              setDeleteAllOpen(true);
+            }}
+          >
+            <HugeiconsIcon
+              icon={Delete01Icon}
+              className="size-5 shrink-0"
+              strokeWidth={3}
+            />
+            Apagar times
+          </Button>
+
+          <Button
+            variant="blue"
+            size="sm"
+            className="flex w-full sm:w-fit"
+            onClick={() => setCreateOpen(true)}
+          >
+            <HugeiconsIcon
+              icon={PlusSignCircleIcon}
+              className="size-5 shrink-0"
+              strokeWidth={3}
+            />
+            Adicionar time
+          </Button>
+        </div>
       </div>
 
       {error && (
@@ -335,6 +430,29 @@ export function TeamsPanel({ contestId }: TeamsPanelProps) {
         onOpenChange={setEditOpen}
         onUpdated={handleUpdated}
         onDeleted={handleDeleted}
+      />
+
+      <AdminPasswordConfirmDialog
+        open={deleteAllOpen}
+        onOpenChange={(nextOpen) => {
+          if (!nextOpen) {
+            setDeleteAllOpen(false);
+            setDeleteAllError(undefined);
+          }
+        }}
+        title="Confirmar exclusão"
+        description={
+          <>
+            Digite a senha do administrador logado para excluir{' '}
+            <strong>todos os {teams.length} time(s)</strong> desta competição.
+            Esta ação não pode ser desfeita.
+          </>
+        }
+        confirmLabel="Apagar todos"
+        confirmVariant="red"
+        isLoading={isDeletingAll}
+        error={deleteAllError}
+        onConfirm={handleConfirmDeleteAll}
       />
     </div>
   );
