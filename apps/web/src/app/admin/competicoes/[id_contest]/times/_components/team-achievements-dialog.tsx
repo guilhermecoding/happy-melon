@@ -1,7 +1,7 @@
 "use client";
 
 import { HugeiconsIcon } from '@hugeicons/react';
-import { Award01Icon, BalloonIcon, EyeClosedIcon } from '@hugeicons/core-free-icons';
+import { BalloonIcon, EyeClosedIcon } from '@hugeicons/core-free-icons';
 import type { Team } from '@/services/team/team.type';
 import { Button } from '@/components/ui/button';
 import {
@@ -12,7 +12,6 @@ import {
   DialogHeader,
   DialogTitle,
 } from '@/components/ui/dialog';
-import { cn } from '@/lib/utils';
 
 type TeamAchievementsDialogProps = {
   team: Team | null;
@@ -29,16 +28,16 @@ function BalloonAchievement({
   color: string;
   resolved: boolean;
 }) {
-  const colorResolved = resolved ? color : '#e0e0e2';
+  const colorResolved = resolved ? color : '#ececec';
 
   return (
-    <div className="flex flex-col items-center gap-3">
+    <div className="flex flex-col items-center">
       <HugeiconsIcon
         icon={BalloonIcon}
-        className="size-22 shrink-0"
+        className='size-22 shrink-0'
         color={colorResolved}
         strokeWidth={1.5}
-        fill="currentColor"
+        fill={resolved ? 'currentColor' : 'none'}
       />
       <span
         className="text-5xl font-jersey"
@@ -84,7 +83,7 @@ export function TeamAchievementsDialog({
           <BalloonAchievement questionId="C" color="red" resolved={false} />
           <BalloonAchievement questionId="D" color="red" resolved={true} />
           <BalloonAchievement questionId="E" color="red" resolved={true} />
-          <BalloonAchievement questionId="F" color="red" resolved={true} />
+          <BalloonAchievement questionId="F" color="red" resolved={false} />
         </div>
 
         <DialogFooter className="mt-4 flex-col-reverse justify-end gap-2 xl:flex-row">
