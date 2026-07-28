@@ -98,6 +98,7 @@ model Contest {
   createdAt DateTime      @default(now())
   updatedAt DateTime      @updatedAt
   questions Question[]
+  teams     Team[]
 
   @@map("contest")
   @@schema("public")
@@ -116,5 +117,22 @@ model Question {
   @@unique([contestId, label])
   @@index([contestId])
   @@map("question")
+  @@schema("public")
+}
+
+model Team {
+  id           String   @id
+  contestId    String
+  contest      Contest  @relation(fields: [contestId], references: [id], onDelete: Cascade)
+  name         String
+  usernameTeam String
+  room         String?
+  machine      String?
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  @@unique([contestId, usernameTeam])
+  @@index([contestId])
+  @@map("team")
   @@schema("public")
 }
