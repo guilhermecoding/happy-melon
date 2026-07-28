@@ -476,6 +476,7 @@ export function TeamsPanel({ contestId }: TeamsPanelProps) {
       />
 
       <TeamAchievementsDialog
+        contestId={contestId}
         team={achievementsTeam}
         open={achievementsOpen}
         onOpenChange={(nextOpen) => {

@@ -1,7 +1,8 @@
 "use client";
 
+import { useEffect, useState } from 'react';
 import { HugeiconsIcon } from '@hugeicons/react';
-import { EyeClosedIcon } from '@hugeicons/core-free-icons';
+import { Award01Icon, EyeClosedIcon } from '@hugeicons/core-free-icons';
 import type { Team } from '@/services/team/team.type';
 import { Balloon } from '@/components/balloon';
 import { Button } from '@/components/ui/button';
@@ -13,9 +14,17 @@ import {
   DialogHeader,
   DialogTitle,
 } from '@/components/ui/dialog';
-import { type BalloonColor, COLOR } from '@/services/question/balloon-color';
+import {
+  type BalloonColor,
+  COLOR,
+  toBalloonColor,
+} from '@/services/question/balloon-color';
+import { questionService } from '@/services/question/question.service';
+import { getQuestionErrorMessage } from '@/services/question/question.error';
+import type { Question } from '@/services/question/question.type';
 
 type TeamAchievementsDialogProps = {
+  contestId: string;
   team: Team | null;
   open: boolean;
   onOpenChange: (open: boolean) => void;
@@ -37,10 +46,7 @@ function BalloonAchievement({
   return (
     <div className="flex flex-col items-center">
       <Balloon color={balloonColor} className="size-22" />
-      <span
-        className="text-5xl font-jersey"
-        style={{ color: labelColor }}
-      >
+      <span className="font-jersey text-5xl" style={{ color: labelColor }}>
         {questionId}
       </span>
     </div>
@@ -48,10 +54,51 @@ function BalloonAchievement({
 }
 
 export function TeamAchievementsDialog({
+  contestId,
   team,
   open,
   onOpenChange,
 }: TeamAchievementsDialogProps) {
+  const [questions, setQuestions] = useState<Question[]>([]);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<string>();
+
+  useEffect(() => {
+    if (!open) {
+      return;
+    }
+
+    let active = true;
+
+    async function loadQuestions() {
+      setLoading(true);
+      setError(undefined);
+
+      try {
+        const data = await questionService.list(contestId);
+        if (active) setQuestions(data);
+      } catch (loadError) {
+        if (active) {
+          setQuestions([]);
+          setError(
+            getQuestionErrorMessage(
+              loadError,
+              'Não foi possível carregar os balões da prova.',
+            ),
+          );
+        }
+      } finally {
+        if (active) setLoading(false);
+      }
+    }
+
+    void loadQuestions();
+
+    return () => {
+      active = false;
+    };
+  }, [contestId, open]);
+
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent
@@ -74,14 +121,43 @@ export function TeamAchievementsDialog({
           </DialogDescription>
         </DialogHeader>
 
-        {/* Conteúdo */}
-        <div className="grid grid-cols-6 min-h-48 gap-3 rounded-2xl border-4 bg-muted/40 px-6 py-10 text-center">
-          <BalloonAchievement questionId="A" color={COLOR.RED} resolved={true} />
-          <BalloonAchievement questionId="B" color={COLOR.WHITE} resolved={true} />
-          <BalloonAchievement questionId="C" color={COLOR.RED} resolved={false} />
-          <BalloonAchievement questionId="D" color={COLOR.RED} resolved={true} />
-          <BalloonAchievement questionId="E" color={COLOR.WHITE} resolved={true} />
-          <BalloonAchievement questionId="F" color={COLOR.RED} resolved={false} />
+        <div className="min-h-48 rounded-2xl border-4 bg-muted/40 px-6 py-10">
+          {loading ? (
+            <p className="text-center text-sm text-muted-foreground">
+              Carregando balões da prova...
+            </p>
+          ) : error ? (
+            <p role="alert" className="text-center text-sm text-destructive">
+              {error}
+            </p>
+          ) : questions.length === 0 ? (
+            <div className="flex flex-col items-center justify-center gap-3 text-center">
+              <span className="flex size-14 items-center justify-center rounded-full bg-muted">
+                <HugeiconsIcon
+                  icon={Award01Icon}
+                  className="size-7 text-muted-foreground"
+                  strokeWidth={1.5}
+                />
+              </span>
+              <p className="text-sm font-medium text-foreground">
+                Nenhum balão cadastrado na prova
+              </p>
+              <p className="max-w-sm text-sm text-muted-foreground">
+                Cadastre questões na prova para exibir os balões conquistados.
+              </p>
+            </div>
+          ) : (
+            <div className="grid grid-cols-2 gap-3 text-center sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6">
+              {questions.map((question) => (
+                <BalloonAchievement
+                  key={question.id}
+                  questionId={question.label}
+                  color={toBalloonColor(question.balloonColor)}
+                  resolved={true}
+                />
+              ))}
+            </div>
+          )}
         </div>
 
         <DialogFooter className="mt-4 flex-col-reverse justify-end gap-2 xl:flex-row">
