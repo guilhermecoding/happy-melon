@@ -4,7 +4,7 @@ import { useEffect, useState } from 'react';
 import { HugeiconsIcon } from '@hugeicons/react';
 import { Award01Icon, EyeClosedIcon } from '@hugeicons/core-free-icons';
 import type { Team } from '@/services/team/team.type';
-import { Balloon } from '@/components/balloon';
+import { BalloonAchievement } from '@/components/balloon-achievement';
 import { Button } from '@/components/ui/button';
 import {
   Dialog,
@@ -14,11 +14,7 @@ import {
   DialogHeader,
   DialogTitle,
 } from '@/components/ui/dialog';
-import {
-  type BalloonColor,
-  COLOR,
-  toBalloonColor,
-} from '@/services/question/balloon-color';
+import { toBalloonColor } from '@/services/question/balloon-color';
 import { questionService } from '@/services/question/question.service';
 import { getQuestionErrorMessage } from '@/services/question/question.error';
 import type { Question } from '@/services/question/question.type';
@@ -29,29 +25,6 @@ type TeamAchievementsDialogProps = {
   open: boolean;
   onOpenChange: (open: boolean) => void;
 };
-
-function BalloonAchievement({
-  questionId,
-  color,
-  resolved,
-}: {
-  questionId: string;
-  color: BalloonColor;
-  resolved: boolean;
-}) {
-  const balloonColor = resolved ? color : '#ececec';
-  const labelColor =
-    resolved && color === COLOR.WHITE ? COLOR.BLACK : balloonColor;
-
-  return (
-    <div className="flex flex-col items-center">
-      <Balloon color={balloonColor} className="size-22" />
-      <span className="font-jersey text-5xl" style={{ color: labelColor }}>
-        {questionId}
-      </span>
-    </div>
-  );
-}
 
 export function TeamAchievementsDialog({
   contestId,
