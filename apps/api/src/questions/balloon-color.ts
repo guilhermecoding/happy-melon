@@ -12,7 +12,7 @@ export const COLOR = {
   GREEN: '#008000',
   LIME: '#00FF00',
   RED: '#FF0000',
-  YELLOW: '#FFFF00',
+  YELLOW: '#FFD800',
 } as const;
 
 export type BalloonColor = (typeof COLOR)[keyof typeof COLOR];

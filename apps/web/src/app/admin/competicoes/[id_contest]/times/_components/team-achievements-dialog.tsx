@@ -1,8 +1,9 @@
 "use client";
 
 import { HugeiconsIcon } from '@hugeicons/react';
-import { BalloonIcon, EyeClosedIcon } from '@hugeicons/core-free-icons';
+import { EyeClosedIcon } from '@hugeicons/core-free-icons';
 import type { Team } from '@/services/team/team.type';
+import { Balloon } from '@/components/balloon';
 import { Button } from '@/components/ui/button';
 import {
   Dialog,
@@ -12,7 +13,7 @@ import {
   DialogHeader,
   DialogTitle,
 } from '@/components/ui/dialog';
-import { BalloonColor, COLOR } from '@/services/question/balloon-color';
+import { type BalloonColor, COLOR } from '@/services/question/balloon-color';
 
 type TeamAchievementsDialogProps = {
   team: Team | null;
@@ -29,24 +30,16 @@ function BalloonAchievement({
   color: BalloonColor;
   resolved: boolean;
 }) {
-  const isWhite = color === COLOR.WHITE;
-  const colorResolved = resolved ? color : '#ececec';
-  // Outline only when unsolved or white (white fill would be invisible).
-  const fill = !resolved || isWhite ? 'none' : 'currentColor';
-  const strokeColor = isWhite && resolved ? COLOR.BLACK : colorResolved;
+  const balloonColor = resolved ? color : '#ececec';
+  const labelColor =
+    resolved && color === COLOR.WHITE ? COLOR.BLACK : balloonColor;
 
   return (
     <div className="flex flex-col items-center">
-      <HugeiconsIcon
-        icon={BalloonIcon}
-        className="size-22 shrink-0"
-        color={strokeColor}
-        strokeWidth={1.5}
-        fill={fill}
-      />
+      <Balloon color={balloonColor} className="size-22" />
       <span
         className="text-5xl font-jersey"
-        style={{ color: colorResolved }}
+        style={{ color: labelColor }}
       >
         {questionId}
       </span>
