@@ -29,6 +29,7 @@ import {
   parseTeamsCsv,
   type TeamCsvRow,
 } from './team-csv';
+import { parseTeamsBoca } from './team-boca';
 import { Separator } from '@/components/ui/separator';
 
 type BulkImportTeamsDialogProps = {
@@ -129,7 +130,7 @@ export function BulkImportTeamsDialog({
   const [mode, setMode] = useState<ImportMode>(null);
   const [requestError, setRequestError] = useState<string>();
   const [fileErrors, setFileErrors] = useState<string[]>([]);
-  const [csvRows, setCsvRows] = useState<TeamCsvRow[]>([]);
+  const [importRows, setImportRows] = useState<TeamCsvRow[]>([]);
   const [fileName, setFileName] = useState<string>();
   const [csvInputKey, setCsvInputKey] = useState(0);
   const [bocaInputKey, setBocaInputKey] = useState(0);
@@ -141,7 +142,7 @@ export function BulkImportTeamsDialog({
     setMode(null);
     setRequestError(undefined);
     setFileErrors([]);
-    setCsvRows([]);
+    setImportRows([]);
     setFileName(undefined);
     setDraggingCsv(false);
     setDraggingBoca(false);
@@ -170,14 +171,14 @@ export function BulkImportTeamsDialog({
     if (!isCsvFile(file)) {
       setFileName(file.name);
       setFileErrors(['Selecione um arquivo CSV válido.']);
-      setCsvRows([]);
+      setImportRows([]);
       return;
     }
 
     if (file.size > MAX_FILE_BYTES) {
       setFileName(file.name);
       setFileErrors(['O arquivo excede o tamanho máximo de 5MB.']);
-      setCsvRows([]);
+      setImportRows([]);
       return;
     }
 
@@ -187,14 +188,14 @@ export function BulkImportTeamsDialog({
       const content = await file.text();
       const parsed = parseTeamsCsv(content);
       setFileErrors(parsed.errors);
-      setCsvRows(parsed.rows);
+      setImportRows(parsed.rows);
     } catch {
       setFileErrors(['Não foi possível ler o arquivo CSV.']);
-      setCsvRows([]);
+      setImportRows([]);
     }
   }
 
-  function processBocaFile(file: File | undefined) {
+  async function processBocaFile(file: File | undefined) {
     if (!file) {
       resetState();
       return;
@@ -202,40 +203,48 @@ export function BulkImportTeamsDialog({
 
     setMode('boca');
     setRequestError(undefined);
-    setCsvRows([]);
     setCsvInputKey((current) => current + 1);
 
     if (!isTxtFile(file)) {
       setFileName(file.name);
       setFileErrors(['Selecione um arquivo TXT válido para importação BOCA.']);
+      setImportRows([]);
       return;
     }
 
     if (file.size > MAX_FILE_BYTES) {
       setFileName(file.name);
       setFileErrors(['O arquivo excede o tamanho máximo de 5MB.']);
+      setImportRows([]);
       return;
     }
 
     setFileName(file.name);
-    setFileErrors([]);
+
+    try {
+      const content = await file.text();
+      const parsed = parseTeamsBoca(content);
+      setFileErrors(parsed.errors);
+      setImportRows(parsed.rows);
+    } catch {
+      setFileErrors(['Não foi possível ler o arquivo TXT do BOCA.']);
+      setImportRows([]);
+    }
   }
 
   async function handleSubmit() {
     setRequestError(undefined);
 
-    if (mode === 'boca') {
-      setRequestError(
-        'A importação BOCA ainda não está disponível. Em breve.',
-      );
+    if (mode !== 'csv' && mode !== 'boca') {
+      setRequestError('Selecione um arquivo CSV ou TXT para importar.');
       return;
     }
 
-    if (mode !== 'csv' || csvRows.length === 0) {
+    if (importRows.length === 0) {
       setRequestError(
         fileErrors.length > 0
-          ? 'Nenhuma linha válida para importar. Corrija os erros do CSV.'
-          : 'Selecione um arquivo CSV válido com ao menos um time.',
+          ? `Nenhuma entrada válida para importar. Corrija os erros do ${mode === 'boca' ? 'TXT' : 'CSV'}.`
+          : `Selecione um arquivo ${mode === 'boca' ? 'TXT' : 'CSV'} válido com ao menos um time.`,
       );
       return;
     }
@@ -243,7 +252,7 @@ export function BulkImportTeamsDialog({
     setIsSubmitting(true);
     try {
       const teams = await teamService.bulkUpsert(contestId, {
-        teams: csvRows,
+        teams: importRows,
       });
       onBulkUpserted(teams);
       toast.add({
@@ -270,7 +279,7 @@ export function BulkImportTeamsDialog({
     <Dialog open={open} onOpenChange={handleOpenChange}>
       <DialogContent
         showCloseButton={false}
-        className="max-h-[min(90vh,40rem)] w-full max-w-[80vw] gap-4 overflow-y-auto p-4 md:max-w-[80vw] lg:max-w-[60vw] xl:max-w-[40vw] sm:p-6"
+        className="max-h-[min(90vh,50rem)] w-full max-w-[80vw] gap-4 overflow-y-auto p-4 md:max-w-[80vw] lg:max-w-[60vw] xl:max-w-[40vw] sm:p-6"
       >
         <DialogHeader>
           <DialogTitle className="text-xl font-bold sm:text-2xl">
@@ -334,7 +343,7 @@ export function BulkImportTeamsDialog({
             accept=".txt,text/plain"
             icon={Txt01Icon}
             title="Importação BOCA"
-            description="TXT no formato de exportação do BOCA. Máx. 5MB."
+            description="TXT no formato de exportação do BOCA. Esta opção não inclui Sala e Máquina, apenas Nome (userfullname) e Usuário (username). Máx. 5MB."
             isDragging={draggingBoca}
             onDragOver={(event) => {
               event.preventDefault();
@@ -350,9 +359,9 @@ export function BulkImportTeamsDialog({
               event.preventDefault();
               event.stopPropagation();
               setDraggingBoca(false);
-              processBocaFile(event.dataTransfer.files?.[0]);
+              void processBocaFile(event.dataTransfer.files?.[0]);
             }}
-            onChange={(event) => processBocaFile(event.target.files?.[0])}
+            onChange={(event) => void processBocaFile(event.target.files?.[0])}
           />
         </div>
 
@@ -365,8 +374,8 @@ export function BulkImportTeamsDialog({
             />
             <p className="text-sm">
               Arquivo: {fileName}
-              {mode === 'csv' && csvRows.length > 0
-                ? ` · ${csvRows.length} time(s) válido(s)`
+              {importRows.length > 0
+                ? ` · ${importRows.length} time(s) válido(s)`
                 : null}
               {mode === 'boca' ? ' · Importação BOCA' : null}
             </p>

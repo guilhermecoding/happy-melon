@@ -100,7 +100,6 @@ export function CreateTeamSheet({
       <Sheet
         open={open}
         onOpenChange={handleOpenChange}
-        disablePointerDismissal
       >
         <SheetContent
           side="right"
