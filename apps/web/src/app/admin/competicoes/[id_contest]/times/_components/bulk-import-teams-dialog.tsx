@@ -279,7 +279,7 @@ export function BulkImportTeamsDialog({
     <Dialog open={open} onOpenChange={handleOpenChange}>
       <DialogContent
         showCloseButton={false}
-        className="max-h-[min(90vh,50rem)] w-full max-w-[80vw] gap-4 overflow-y-auto p-4 md:max-w-[80vw] lg:max-w-[60vw] xl:max-w-[40vw] sm:p-6"
+        className="max-h-[min(95vh,50rem)] w-full max-w-[80vw] gap-4 overflow-y-auto p-4 md:max-w-[80vw] lg:max-w-[60vw] xl:max-w-[40vw] sm:p-6"
       >
         <DialogHeader>
           <DialogTitle className="text-xl font-bold sm:text-2xl">
