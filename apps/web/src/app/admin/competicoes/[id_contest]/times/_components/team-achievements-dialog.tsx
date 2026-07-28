@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from 'react';
 import { HugeiconsIcon } from '@hugeicons/react';
-import { Award01Icon, EyeClosedIcon } from '@hugeicons/core-free-icons';
+import { Award01Icon, CheckmarkCircle02Icon, EyeClosedIcon } from '@hugeicons/core-free-icons';
 import type { Team } from '@/services/team/team.type';
 import { BalloonAchievement } from '@/components/balloon-achievement';
 import { Button } from '@/components/ui/button';
@@ -75,8 +75,8 @@ export function TeamAchievementsDialog({
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent
-        showCloseButton={false}
-        className="max-h-[min(95vh,50rem)] w-full max-w-[80vw] gap-4 overflow-y-auto p-4 md:max-w-[80vw] lg:max-w-[60vw] xl:max-w-[40vw] sm:p-6"
+        showCloseButton={true}
+        className="max-h-[min(95vh,50rem)] w-full max-w-[95vw] gap-4 overflow-y-auto p-4 sm:max-w-[95vw] md:max-w-[90vw] lg:max-w-[80vw] xl:max-w-[70vw] sm:p-6"
       >
         <DialogHeader>
           <DialogTitle className="text-xl font-bold sm:text-2xl">
@@ -120,14 +120,23 @@ export function TeamAchievementsDialog({
               </p>
             </div>
           ) : (
-            <div className="grid grid-cols-2 gap-3 text-center sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6">
+            <div className="grid grid-cols-1 gap-3 text-center sm:grid-cols-2 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-6">
               {questions.map((question) => (
-                <BalloonAchievement
+                <div
                   key={question.id}
-                  questionId={question.label}
-                  color={toBalloonColor(question.balloonColor)}
-                  resolved={true}
-                />
+                  className="min-w-0 rounded-2xl border border-border bg-background p-2"
+                >
+                  <BalloonAchievement
+                    key={question.id}
+                    questionId={question.label}
+                    color={toBalloonColor(question.balloonColor)}
+                    resolved={true}
+                  />
+                  <Button variant="green" size="sm" className="w-full shrink-0">
+                    <HugeiconsIcon icon={CheckmarkCircle02Icon} className="size-5" strokeWidth={3} />
+                    Confirmar
+                  </Button>
+                </div>
               ))}
             </div>
           )}

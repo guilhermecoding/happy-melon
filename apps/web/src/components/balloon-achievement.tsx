@@ -5,6 +5,7 @@ import {
   type BalloonColor,
   COLOR,
 } from '@/services/question/balloon-color';
+import { cn } from '@/lib/utils';
 
 type BalloonAchievementProps = {
   questionId: string;
@@ -24,9 +25,13 @@ export function BalloonAchievement({
     resolved && color === COLOR.WHITE ? COLOR.BLACK : balloonColor;
 
   return (
-    <div className={className ?? 'flex flex-col items-center'}>
+    <div className={cn('flex min-w-0 flex-col items-center', className)}>
       <Balloon color={balloonColor} className="size-22" />
-      <span className="font-jersey text-5xl" style={{ color: labelColor }}>
+      <span
+        className="block w-full max-w-full truncate text-center font-jersey text-5xl"
+        style={{ color: labelColor }}
+        title={questionId}
+      >
         {questionId}
       </span>
     </div>
