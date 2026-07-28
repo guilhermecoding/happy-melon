@@ -12,6 +12,7 @@ import {
   DialogHeader,
   DialogTitle,
 } from '@/components/ui/dialog';
+import { BalloonColor, COLOR } from '@/services/question/balloon-color';
 
 type TeamAchievementsDialogProps = {
   team: Team | null;
@@ -25,19 +26,23 @@ function BalloonAchievement({
   resolved,
 }: {
   questionId: string;
-  color: string;
+  color: BalloonColor;
   resolved: boolean;
 }) {
+  const isWhite = color === COLOR.WHITE;
   const colorResolved = resolved ? color : '#ececec';
+  // Outline only when unsolved or white (white fill would be invisible).
+  const fill = !resolved || isWhite ? 'none' : 'currentColor';
+  const strokeColor = isWhite && resolved ? COLOR.BLACK : colorResolved;
 
   return (
     <div className="flex flex-col items-center">
       <HugeiconsIcon
         icon={BalloonIcon}
-        className='size-22 shrink-0'
-        color={colorResolved}
+        className="size-22 shrink-0"
+        color={strokeColor}
         strokeWidth={1.5}
-        fill={resolved ? 'currentColor' : 'none'}
+        fill={fill}
       />
       <span
         className="text-5xl font-jersey"
@@ -46,7 +51,7 @@ function BalloonAchievement({
         {questionId}
       </span>
     </div>
-  )
+  );
 }
 
 export function TeamAchievementsDialog({
@@ -78,12 +83,12 @@ export function TeamAchievementsDialog({
 
         {/* Conteúdo */}
         <div className="grid grid-cols-6 min-h-48 gap-3 rounded-2xl border-4 bg-muted/40 px-6 py-10 text-center">
-          <BalloonAchievement questionId="A" color="red" resolved={true} />
-          <BalloonAchievement questionId="B" color="#ffffff" resolved={true} />
-          <BalloonAchievement questionId="C" color="red" resolved={false} />
-          <BalloonAchievement questionId="D" color="red" resolved={true} />
-          <BalloonAchievement questionId="E" color="red" resolved={true} />
-          <BalloonAchievement questionId="F" color="red" resolved={false} />
+          <BalloonAchievement questionId="A" color={COLOR.RED} resolved={true} />
+          <BalloonAchievement questionId="B" color={COLOR.WHITE} resolved={true} />
+          <BalloonAchievement questionId="C" color={COLOR.RED} resolved={false} />
+          <BalloonAchievement questionId="D" color={COLOR.RED} resolved={true} />
+          <BalloonAchievement questionId="E" color={COLOR.WHITE} resolved={true} />
+          <BalloonAchievement questionId="F" color={COLOR.RED} resolved={false} />
         </div>
 
         <DialogFooter className="mt-4 flex-col-reverse justify-end gap-2 xl:flex-row">
