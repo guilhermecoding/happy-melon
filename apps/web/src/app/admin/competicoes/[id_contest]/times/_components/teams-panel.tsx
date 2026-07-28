@@ -2,6 +2,8 @@
 
 import { useDeferredValue, useEffect, useMemo, useState } from 'react';
 import {
+  ArrowLeft01Icon,
+  ArrowRight01Icon,
   PencilEdit02Icon,
   PlusSignCircleIcon,
   Search01Icon,
@@ -27,6 +29,8 @@ type TeamsPanelProps = {
   contestId: string;
 };
 
+const PAGE_SIZE = 10;
+
 function matchesSearch(team: Team, query: string) {
   if (!query) {
     return true;
@@ -51,6 +55,7 @@ export function TeamsPanel({ contestId }: TeamsPanelProps) {
   const [error, setError] = useState<string>();
   const [search, setSearch] = useState('');
   const deferredSearch = useDeferredValue(search);
+  const [page, setPage] = useState(1);
   const [createOpen, setCreateOpen] = useState(false);
   const [editOpen, setEditOpen] = useState(false);
   const [selectedTeam, setSelectedTeam] = useState<Team | null>(null);
@@ -63,6 +68,28 @@ export function TeamsPanel({ contestId }: TeamsPanelProps) {
         a.name.localeCompare(b.name, 'pt-BR', { sensitivity: 'base' }),
       );
   }, [teams, deferredSearch]);
+
+  const totalPages = Math.max(1, Math.ceil(filteredTeams.length / PAGE_SIZE));
+  const currentPage = Math.min(page, totalPages);
+
+  const paginatedTeams = useMemo(() => {
+    const start = (currentPage - 1) * PAGE_SIZE;
+    return filteredTeams.slice(start, start + PAGE_SIZE);
+  }, [filteredTeams, currentPage]);
+
+  const rangeStart =
+    filteredTeams.length === 0 ? 0 : (currentPage - 1) * PAGE_SIZE + 1;
+  const rangeEnd = Math.min(currentPage * PAGE_SIZE, filteredTeams.length);
+
+  useEffect(() => {
+    setPage(1);
+  }, [deferredSearch]);
+
+  useEffect(() => {
+    if (page > totalPages) {
+      setPage(totalPages);
+    }
+  }, [page, totalPages]);
 
   useEffect(() => {
     let active = true;
@@ -207,44 +234,93 @@ export function TeamsPanel({ contestId }: TeamsPanelProps) {
                 </TableCell>
               </TableRow>
             ) : (
-              filteredTeams.map((team, index) => (
-                <TableRow
-                  key={team.id}
-                  className={index % 2 === 0 ? 'bg-white' : ''}
-                >
-                  <TableCell className="w-20 px-4 whitespace-nowrap font-mono text-xs">
-                    {team.id}
-                  </TableCell>
-                  <TableCell className="px-4">{team.name}</TableCell>
-                  <TableCell className="px-4">{team.usernameTeam}</TableCell>
-                  <TableCell className="px-4 text-muted-foreground">
-                    {team.room || '—'}
-                  </TableCell>
-                  <TableCell className="px-4 text-muted-foreground">
-                    {team.machine || '—'}
-                  </TableCell>
-                  <TableCell className="px-4 text-right">
-                    <Button
-                      type="button"
-                      variant="normal"
-                      size="icon"
-                      className="size-9"
-                      aria-label={`Editar ${team.name}`}
-                      onClick={() => openEditSheet(team)}
-                    >
-                      <HugeiconsIcon
-                        icon={PencilEdit02Icon}
-                        className="size-5"
-                        strokeWidth={1.5}
-                      />
-                    </Button>
-                  </TableCell>
-                </TableRow>
-              ))
+              paginatedTeams.map((team, index) => {
+                const absoluteIndex = (currentPage - 1) * PAGE_SIZE + index;
+
+                return (
+                  <TableRow
+                    key={team.id}
+                    className={absoluteIndex % 2 === 0 ? 'bg-white' : ''}
+                  >
+                    <TableCell className="w-20 px-4 whitespace-nowrap font-mono text-xs">
+                      {team.id}
+                    </TableCell>
+                    <TableCell className="px-4">{team.name}</TableCell>
+                    <TableCell className="px-4">{team.usernameTeam}</TableCell>
+                    <TableCell className="px-4 text-muted-foreground">
+                      {team.room || '—'}
+                    </TableCell>
+                    <TableCell className="px-4 text-muted-foreground">
+                      {team.machine || '—'}
+                    </TableCell>
+                    <TableCell className="px-4 text-right">
+                      <Button
+                        type="button"
+                        variant="normal"
+                        size="icon"
+                        className="size-9"
+                        aria-label={`Editar ${team.name}`}
+                        onClick={() => openEditSheet(team)}
+                      >
+                        <HugeiconsIcon
+                          icon={PencilEdit02Icon}
+                          className="size-5"
+                          strokeWidth={1.5}
+                        />
+                      </Button>
+                    </TableCell>
+                  </TableRow>
+                );
+              })
             )}
           </TableBody>
         </Table>
       </div>
+
+      {!loading && filteredTeams.length > 0 && (
+        <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+          <p className="text-sm text-muted-foreground">
+            Mostrando {rangeStart}–{rangeEnd} de {filteredTeams.length}
+            {totalPages > 1
+              ? ` · Página ${currentPage} de ${totalPages}`
+              : null}
+          </p>
+          <div className="flex items-center gap-2">
+            <Button
+              type="button"
+              variant="white"
+              size="sm"
+              className="w-full sm:w-fit"
+              disabled={currentPage <= 1}
+              onClick={() => setPage((current) => Math.max(1, current - 1))}
+            >
+              <HugeiconsIcon
+                icon={ArrowLeft01Icon}
+                className="size-4"
+                strokeWidth={2}
+              />
+              Anterior
+            </Button>
+            <Button
+              type="button"
+              variant="white"
+              size="sm"
+              className="w-full sm:w-fit"
+              disabled={currentPage >= totalPages}
+              onClick={() =>
+                setPage((current) => Math.min(totalPages, current + 1))
+              }
+            >
+              Próxima
+              <HugeiconsIcon
+                icon={ArrowRight01Icon}
+                className="size-4"
+                strokeWidth={2}
+              />
+            </Button>
+          </div>
+        </div>
+      )}
 
       <CreateTeamSheet
         contestId={contestId}
