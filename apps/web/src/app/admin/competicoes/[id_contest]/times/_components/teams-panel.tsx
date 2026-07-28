@@ -4,8 +4,10 @@ import { useDeferredValue, useEffect, useMemo, useState } from 'react';
 import {
   ArrowLeft01Icon,
   ArrowRight01Icon,
+  Award01Icon,
   Delete01Icon,
   Download01Icon,
+  MoreHorizontalIcon,
   PencilEdit02Icon,
   PlusSignCircleIcon,
   Search01Icon,
@@ -13,6 +15,12 @@ import {
 import { HugeiconsIcon } from '@hugeicons/react';
 import { AdminPasswordConfirmDialog } from '@/components/admin-password-confirm-dialog';
 import { Button } from '@/components/ui/button';
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from '@/components/ui/dropdown-menu';
 import { Input } from '@/components/ui/input';
 import {
   Table,
@@ -28,6 +36,7 @@ import { getTeamErrorMessage } from '@/services/team/team.error';
 import type { Team } from '@/services/team/team.type';
 import { CreateTeamSheet } from './create-team-sheet';
 import { EditTeamSheet } from './edit-team-sheet';
+import { TeamAchievementsDialog } from './team-achievements-dialog';
 import { downloadTeamsCsv } from './team-csv';
 
 type TeamsPanelProps = {
@@ -64,6 +73,8 @@ export function TeamsPanel({ contestId }: TeamsPanelProps) {
   const [createOpen, setCreateOpen] = useState(false);
   const [editOpen, setEditOpen] = useState(false);
   const [selectedTeam, setSelectedTeam] = useState<Team | null>(null);
+  const [achievementsOpen, setAchievementsOpen] = useState(false);
+  const [achievementsTeam, setAchievementsTeam] = useState<Team | null>(null);
   const [deleteAllOpen, setDeleteAllOpen] = useState(false);
   const [deleteAllError, setDeleteAllError] = useState<string>();
   const [isDeletingAll, setIsDeletingAll] = useState(false);
@@ -158,6 +169,11 @@ export function TeamsPanel({ contestId }: TeamsPanelProps) {
   function openEditSheet(team: Team) {
     setSelectedTeam(team);
     setEditOpen(true);
+  }
+
+  function openAchievementsDialog(team: Team) {
+    setAchievementsTeam(team);
+    setAchievementsOpen(true);
   }
 
   function handleDownloadTeams() {
@@ -349,20 +365,47 @@ export function TeamsPanel({ contestId }: TeamsPanelProps) {
                       {team.machine || '—'}
                     </TableCell>
                     <TableCell className="px-4 text-right">
-                      <Button
-                        type="button"
-                        variant="normal"
-                        size="icon"
-                        className="size-9"
-                        aria-label={`Editar ${team.name}`}
-                        onClick={() => openEditSheet(team)}
-                      >
-                        <HugeiconsIcon
-                          icon={PencilEdit02Icon}
-                          className="size-5"
-                          strokeWidth={1.5}
-                        />
-                      </Button>
+                      <DropdownMenu>
+                        <DropdownMenuTrigger
+                          render={
+                            <Button
+                              type="button"
+                              variant="normal"
+                              size="icon"
+                              className="size-9"
+                              aria-label={`Opções de ${team.name}`}
+                            />
+                          }
+                        >
+                          <HugeiconsIcon
+                            icon={MoreHorizontalIcon}
+                            className="size-5"
+                            strokeWidth={1.5}
+                          />
+                        </DropdownMenuTrigger>
+                        <DropdownMenuContent align="end" className="min-w-40">
+                          <DropdownMenuItem
+                            onClick={() => openEditSheet(team)}
+                          >
+                            <HugeiconsIcon
+                              icon={PencilEdit02Icon}
+                              className="size-4"
+                              strokeWidth={1.5}
+                            />
+                            Editar
+                          </DropdownMenuItem>
+                          <DropdownMenuItem
+                            onClick={() => openAchievementsDialog(team)}
+                          >
+                            <HugeiconsIcon
+                              icon={Award01Icon}
+                              className="size-4"
+                              strokeWidth={1.5}
+                            />
+                            Conquistas
+                          </DropdownMenuItem>
+                        </DropdownMenuContent>
+                      </DropdownMenu>
                     </TableCell>
                   </TableRow>
                 );
@@ -430,6 +473,17 @@ export function TeamsPanel({ contestId }: TeamsPanelProps) {
         onOpenChange={setEditOpen}
         onUpdated={handleUpdated}
         onDeleted={handleDeleted}
+      />
+
+      <TeamAchievementsDialog
+        team={achievementsTeam}
+        open={achievementsOpen}
+        onOpenChange={(nextOpen) => {
+          setAchievementsOpen(nextOpen);
+          if (!nextOpen) {
+            setAchievementsTeam(null);
+          }
+        }}
       />
 
       <AdminPasswordConfirmDialog
