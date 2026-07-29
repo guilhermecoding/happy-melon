@@ -2,7 +2,11 @@
 
 import { useEffect, useState } from 'react';
 import { HugeiconsIcon } from '@hugeicons/react';
-import { Award01Icon, EyeClosedIcon } from '@hugeicons/core-free-icons';
+import {
+  Award01Icon,
+  CheckmarkCircle02Icon,
+  EyeClosedIcon,
+} from '@hugeicons/core-free-icons';
 import type { Team } from '@/services/team/team.type';
 import { BalloonAchievement } from '@/components/balloon-achievement';
 import { Button } from '@/components/ui/button';
@@ -18,20 +22,21 @@ import { toBalloonColor } from '@/services/question/balloon-color';
 import { questionService } from '@/services/question/question.service';
 import { getQuestionErrorMessage } from '@/services/question/question.error';
 import type { Question } from '@/services/question/question.type';
+import { toast } from '@/components/ui/toast';
 
-type TeamAchievementsDialogProps = {
+type TeamBalloonsDialogProps = {
   contestId: string;
   team: Team | null;
   open: boolean;
   onOpenChange: (open: boolean) => void;
 };
 
-export function TeamAchievementsDialog({
+export function TeamBalloonsDialog({
   contestId,
   team,
   open,
   onOpenChange,
-}: TeamAchievementsDialogProps) {
+}: TeamBalloonsDialogProps) {
   const [questions, setQuestions] = useState<Question[]>([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string>();
@@ -72,6 +77,15 @@ export function TeamAchievementsDialog({
     };
   }, [contestId, open]);
 
+  function handleConfirm(question: Question) {
+    if (!team) return;
+
+    toast.add({
+      title: `Balão ${question.label} confirmado para ${team.name}.`,
+      type: 'success',
+    });
+  }
+
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent
@@ -85,11 +99,11 @@ export function TeamAchievementsDialog({
           <DialogDescription className="text-base">
             {team ? (
               <>
-                Visualize as conquistas do time <strong>{team.name}</strong> (
+                Gerencie as conquistas do time <strong>{team.name}</strong> (
                 <strong>{team.usernameTeam}</strong>).
               </>
             ) : (
-              'Visualize as conquistas do time selecionado.'
+              'Gerencie as conquistas do time selecionado.'
             )}
           </DialogDescription>
         </DialogHeader>
@@ -122,12 +136,30 @@ export function TeamAchievementsDialog({
           ) : (
             <div className="grid grid-cols-1 gap-3 text-center sm:grid-cols-2 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-6">
               {questions.map((question) => (
-                <BalloonAchievement
+                <div
                   key={question.id}
-                  questionId={question.label}
-                  color={toBalloonColor(question.balloonColor)}
-                  resolved={true}
-                />
+                  className="min-w-0 rounded-2xl border border-border bg-background p-2"
+                >
+                  <BalloonAchievement
+                    questionId={question.label}
+                    color={toBalloonColor(question.balloonColor)}
+                    resolved={true}
+                  />
+                  <Button
+                    type="button"
+                    variant="green"
+                    size="sm"
+                    className="w-full shrink-0"
+                    onClick={() => handleConfirm(question)}
+                  >
+                    <HugeiconsIcon
+                      icon={CheckmarkCircle02Icon}
+                      className="size-5"
+                      strokeWidth={3}
+                    />
+                    Confirmar
+                  </Button>
+                </div>
               ))}
             </div>
           )}

@@ -13,7 +13,7 @@ import { teamService } from '@/services/team/team.service';
 import { getTeamErrorMessage } from '@/services/team/team.error';
 import type { Team } from '@/services/team/team.type';
 import { questionService } from '@/services/question/question.service';
-import { TeamAchievementsDialog } from '@/app/admin/competicoes/[id_contest]/times/_components/team-achievements-dialog';
+import { TeamBalloonsDialog } from './team-balloons-dialog';
 import FlashCardTeam from './flash-card-team';
 
 type BoxTeamsListProps = {
@@ -230,7 +230,7 @@ export default function BoxTeamsList({ contestId }: BoxTeamsListProps) {
                 )}
             </div>
 
-            <TeamAchievementsDialog
+            <TeamBalloonsDialog
                 contestId={contestId}
                 team={selectedTeam}
                 open={achievementsOpen}
