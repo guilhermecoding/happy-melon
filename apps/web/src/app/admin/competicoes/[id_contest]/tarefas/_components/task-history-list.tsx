@@ -122,7 +122,7 @@ export default function TaskHistoryList({
     );
   }
 
-  if (entries.length !== 0) {
+  if (entries.length === 0) {
     return (
       <div className="flex h-100 flex-col items-center justify-center gap-2">
         <HugeiconsIcon icon={DocumentAttachmentIcon} className="size-14 text-muted-foreground opacity-50" strokeWidth={2} />
