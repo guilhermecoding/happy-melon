@@ -11,6 +11,11 @@ import {
   BALLOON_DELIVERY_STATUS,
   type BalloonDeliveryStatus,
 } from '@repo/shared';
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipTrigger,
+} from '@/components/ui/tooltip';
 import { cn } from '@/lib/utils';
 
 export const BALLOON_DELIVERY_STATUS_ICON = {
@@ -27,6 +32,14 @@ export const BALLOON_DELIVERY_STATUS_COLOR_CLASS = {
   [BALLOON_DELIVERY_STATUS.WITHHELD]: 'text-red-500',
 } as const satisfies Record<BalloonDeliveryStatus, string>;
 
+export const BALLOON_DELIVERY_STATUS_LABEL = {
+  [BALLOON_DELIVERY_STATUS.PENDING]:
+    'Confirmado. Ninguém pegou este balão ainda',
+  [BALLOON_DELIVERY_STATUS.PROCESSING]: 'Balão em rota de entrega',
+  [BALLOON_DELIVERY_STATUS.DELIVERED]: 'Entregue',
+  [BALLOON_DELIVERY_STATUS.WITHHELD]: 'Retido',
+} as const satisfies Record<BalloonDeliveryStatus, string>;
+
 export function getBalloonDeliveryStatusIcon(
   status: BalloonDeliveryStatus,
 ): IconSvgElement {
@@ -37,6 +50,12 @@ export function getBalloonDeliveryStatusColorClass(
   status: BalloonDeliveryStatus,
 ): string {
   return BALLOON_DELIVERY_STATUS_COLOR_CLASS[status] ?? 'text-foreground';
+}
+
+export function getBalloonDeliveryStatusLabel(
+  status: BalloonDeliveryStatus,
+): string {
+  return BALLOON_DELIVERY_STATUS_LABEL[status] ?? status;
 }
 
 type BalloonDeliveryStatusIconProps = {
@@ -51,14 +70,25 @@ export function BalloonDeliveryStatusIcon({
   strokeWidth = 2,
 }: BalloonDeliveryStatusIconProps) {
   return (
-    <HugeiconsIcon
-      icon={getBalloonDeliveryStatusIcon(status)}
-      className={cn(
-        'size-5 text-foreground',
-        getBalloonDeliveryStatusColorClass(status),
-        className,
-      )}
-      strokeWidth={strokeWidth}
-    />
+    <Tooltip>
+      <TooltipTrigger
+        type="button"
+        className={cn(
+          'inline-flex size-5 cursor-default rounded-sm outline-none focus-visible:ring-2 focus-visible:ring-ring',
+          className,
+        )}
+        aria-label={getBalloonDeliveryStatusLabel(status)}
+      >
+        <HugeiconsIcon
+          icon={getBalloonDeliveryStatusIcon(status)}
+          className={cn(
+            'size-full text-foreground',
+            getBalloonDeliveryStatusColorClass(status),
+          )}
+          strokeWidth={strokeWidth}
+        />
+      </TooltipTrigger>
+      <TooltipContent>{getBalloonDeliveryStatusLabel(status)}</TooltipContent>
+    </Tooltip>
   );
 }
