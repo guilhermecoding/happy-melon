@@ -15,6 +15,8 @@ import type { Team } from '@/services/team/team.type';
 import { questionService } from '@/services/question/question.service';
 import { TeamBalloonsDialog } from './team-balloons-dialog';
 import FlashCardTeam from './flash-card-team';
+import Spinner from '@/components/spinner';
+import EmptyIcon from '@/components/empty-icon';
 
 type BoxTeamsListProps = {
     contestId: string;
@@ -161,15 +163,16 @@ export default function BoxTeamsList({
                 )}
 
                 {loading ? (
-                    <p className="py-8 text-center text-sm text-muted-foreground">
-                        Carregando times...
-                    </p>
+                    <Spinner />
                 ) : filteredTeams.length === 0 ? (
-                    <p className="py-8 text-center text-sm text-muted-foreground">
-                        {search.trim()
-                            ? 'Nenhum time encontrado para a busca.'
-                            : 'Nenhum time cadastrado.'}
-                    </p>
+                    <div className="flex h-56 w-full flex-col items-center justify-center gap-2">
+                        <EmptyIcon className="size-14 text-muted-foreground opacity-70" />
+                        <p className="text-center text-sm text-muted-foreground">
+                            {search.trim()
+                                ? 'Nenhum time encontrado para a busca.'
+                                : 'Nenhum time cadastrado.'}
+                        </p>
+                    </div>
                 ) : (
                     <>
                         <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-3">
