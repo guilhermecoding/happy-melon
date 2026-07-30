@@ -10,7 +10,6 @@ import {
 } from '@hugeicons/core-free-icons';
 import {
   isConfirmableStatus,
-  isResolvedBalloonStatus,
   toBalloonEffectiveStatus,
   type BalloonDeliveryStatus,
   type BalloonEffectiveStatus,
@@ -99,6 +98,9 @@ export function TeamBalloonsDialog({
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string>();
   const [pendingQuestionId, setPendingQuestionId] = useState<string>();
+  const [withholdQuestion, setWithholdQuestion] = useState<Question | null>(
+    null,
+  );
 
   useEffect(() => {
     if (!open || !team) {
@@ -154,6 +156,21 @@ export function TeamBalloonsDialog({
     };
   }, [contestId, open, team]);
 
+  function handleOpenChange(nextOpen: boolean) {
+    if (!nextOpen && pendingQuestionId) return;
+    if (!nextOpen) {
+      setWithholdQuestion(null);
+    }
+    onOpenChange(nextOpen);
+  }
+
+  function handleWithholdOpenChange(nextOpen: boolean) {
+    if (!nextOpen && pendingQuestionId) return;
+    if (!nextOpen) {
+      setWithholdQuestion(null);
+    }
+  }
+
   function applyDelivery(delivery: BalloonDelivery) {
     setDeliveriesByQuestionId((current) => {
       const next = new Map(current);
@@ -191,9 +208,10 @@ export function TeamBalloonsDialog({
     }
   }
 
-  async function handleWithhold(question: Question) {
-    if (!team) return;
+  async function handleWithholdConfirm() {
+    if (!team || !withholdQuestion) return;
 
+    const question = withholdQuestion;
     setPendingQuestionId(question.id);
 
     try {
@@ -202,6 +220,7 @@ export function TeamBalloonsDialog({
         questionId: question.id,
       });
       applyDelivery(delivery);
+      setWithholdQuestion(null);
       toast.add({
         title: `Balão ${question.label} retido para ${team.name}.`,
         type: 'success',
@@ -219,121 +238,172 @@ export function TeamBalloonsDialog({
     }
   }
 
+  const isWithholding = Boolean(
+    withholdQuestion && pendingQuestionId === withholdQuestion.id,
+  );
+
   return (
-    <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent
-        showCloseButton={true}
-        className="max-h-[min(95vh,50rem)] w-full max-w-[95vw] gap-4 overflow-y-auto p-4 sm:max-w-[95vw] sm:p-6 md:max-w-[90vw] lg:max-w-[80vw] xl:max-w-[70vw]"
-      >
-        <DialogHeader>
-          <DialogTitle className="text-xl font-bold sm:text-2xl">
-            Balões Conquistados
-          </DialogTitle>
-          <DialogDescription className="text-base">
-            {team ? (
-              <>
-                Gerencie as conquistas do time <strong>{team.name}</strong> (
-                <strong>{team.usernameTeam}</strong>).
-              </>
+    <>
+      <Dialog open={open} onOpenChange={handleOpenChange}>
+        <DialogContent
+          showCloseButton={true}
+          className="max-h-[min(95vh,50rem)] w-full max-w-[95vw] gap-4 overflow-y-auto p-4 sm:max-w-[95vw] sm:p-6 md:max-w-[90vw] lg:max-w-[80vw] xl:max-w-[70vw]"
+        >
+          <DialogHeader>
+            <DialogTitle className="text-xl font-bold sm:text-2xl">
+              Balões Conquistados
+            </DialogTitle>
+            <DialogDescription className="text-base">
+              {team ? (
+                <>
+                  Gerencie as conquistas do time <strong>{team.name}</strong> (
+                  <strong>{team.usernameTeam}</strong>).
+                </>
+              ) : (
+                'Gerencie as conquistas do time selecionado.'
+              )}
+            </DialogDescription>
+          </DialogHeader>
+
+          <div className="min-h-48 rounded-2xl border-4 bg-muted/40 px-6 py-10">
+            {loading ? (
+              <p className="text-center text-sm text-muted-foreground">
+                Carregando balões da prova...
+              </p>
+            ) : error ? (
+              <p role="alert" className="text-center text-sm text-destructive">
+                {error}
+              </p>
+            ) : questions.length === 0 ? (
+              <div className="flex flex-col items-center justify-center gap-3 text-center">
+                <span className="flex size-14 items-center justify-center rounded-full bg-muted">
+                  <HugeiconsIcon
+                    icon={Award01Icon}
+                    className="size-7 text-muted-foreground"
+                    strokeWidth={1.5}
+                  />
+                </span>
+                <p className="text-sm font-medium text-foreground">
+                  Nenhum balão cadastrado na prova
+                </p>
+                <p className="max-w-sm text-sm text-muted-foreground">
+                  Cadastre questões na prova para exibir os balões conquistados.
+                </p>
+              </div>
             ) : (
-              'Gerencie as conquistas do time selecionado.'
-            )}
-          </DialogDescription>
-        </DialogHeader>
+              <div className="grid grid-cols-1 gap-3 text-center sm:grid-cols-2 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-6">
+                {questions.map((question) => {
+                  const status = getStatusForQuestion(
+                    deliveriesByQuestionId,
+                    question.id,
+                  );
+                  const canConfirm = isConfirmableStatus(status);
+                  const isPending = pendingQuestionId === question.id;
 
-        <div className="min-h-48 rounded-2xl border-4 bg-muted/40 px-6 py-10">
-          {loading ? (
-            <p className="text-center text-sm text-muted-foreground">
-              Carregando balões da prova...
-            </p>
-          ) : error ? (
-            <p role="alert" className="text-center text-sm text-destructive">
-              {error}
-            </p>
-          ) : questions.length === 0 ? (
-            <div className="flex flex-col items-center justify-center gap-3 text-center">
-              <span className="flex size-14 items-center justify-center rounded-full bg-muted">
-                <HugeiconsIcon
-                  icon={Award01Icon}
-                  className="size-7 text-muted-foreground"
-                  strokeWidth={1.5}
-                />
-              </span>
-              <p className="text-sm font-medium text-foreground">
-                Nenhum balão cadastrado na prova
-              </p>
-              <p className="max-w-sm text-sm text-muted-foreground">
-                Cadastre questões na prova para exibir os balões conquistados.
-              </p>
-            </div>
-          ) : (
-            <div className="grid grid-cols-1 gap-3 text-center sm:grid-cols-2 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-6">
-              {questions.map((question) => {
-                const status = getStatusForQuestion(
-                  deliveriesByQuestionId,
-                  question.id,
-                );
-                const canConfirm = isConfirmableStatus(status);
-                const isPending = pendingQuestionId === question.id;
-
-                return (
-                  <div
-                    key={question.id}
-                    className="min-w-0 rounded-2xl border border-border bg-background p-2"
-                  >
-                    <BalloonAchievement
-                      questionId={question.label}
-                      color={toBalloonColor(question.balloonColor)}
-                      resolved={isResolvedBalloonStatus(status)}
-                    />
-                    <Button
-                      type="button"
-                      variant={canConfirm ? 'green' : 'red'}
-                      size="sm"
-                      className="w-full shrink-0"
-                      disabled={isPending || Boolean(pendingQuestionId)}
-                      loading={isPending}
-                      onClick={() =>
-                        canConfirm
-                          ? void handleConfirm(question)
-                          : void handleWithhold(question)
-                      }
+                  return (
+                    <div
+                      key={question.id}
+                      className="min-w-0 rounded-2xl border border-border bg-background p-2"
                     >
-                      <HugeiconsIcon
-                        icon={
-                          canConfirm
-                            ? CheckmarkCircle02Icon
-                            : RemoveCircleIcon
-                        }
-                        className="size-5"
-                        strokeWidth={3}
+                      <BalloonAchievement
+                        questionId={question.label}
+                        color={toBalloonColor(question.balloonColor)}
+                        resolved={true}
                       />
-                      {canConfirm ? 'Confirmar' : 'Reter'}
-                    </Button>
-                  </div>
-                );
-              })}
-              {team && <PrintRequestCard />}
-            </div>
-          )}
-        </div>
+                      <Button
+                        type="button"
+                        variant={canConfirm ? 'green' : 'red'}
+                        size="sm"
+                        className="w-full shrink-0"
+                        disabled={
+                          isPending ||
+                          Boolean(pendingQuestionId) ||
+                          Boolean(withholdQuestion)
+                        }
+                        loading={isPending && canConfirm}
+                        onClick={() =>
+                          canConfirm
+                            ? void handleConfirm(question)
+                            : setWithholdQuestion(question)
+                        }
+                      >
+                        <HugeiconsIcon
+                          icon={
+                            canConfirm
+                              ? CheckmarkCircle02Icon
+                              : RemoveCircleIcon
+                          }
+                          className="size-5"
+                          strokeWidth={3}
+                        />
+                        {canConfirm ? 'Confirmar' : 'Reter'}
+                      </Button>
+                    </div>
+                  );
+                })}
+                {team && <PrintRequestCard />}
+              </div>
+            )}
+          </div>
 
-        <DialogFooter className="mt-4 flex-col-reverse justify-end gap-2 xl:flex-row">
-          <Button
-            type="button"
-            variant="white"
-            className="w-full sm:w-fit"
-            onClick={() => onOpenChange(false)}
-          >
-            <HugeiconsIcon
-              icon={EyeClosedIcon}
-              className="size-5"
-              strokeWidth={3}
-            />
-            Fechar
-          </Button>
-        </DialogFooter>
-      </DialogContent>
-    </Dialog>
+          <DialogFooter className="mt-4 flex-col-reverse justify-end gap-2 xl:flex-row">
+            <Button
+              type="button"
+              variant="white"
+              className="w-full sm:w-fit"
+              onClick={() => handleOpenChange(false)}
+            >
+              <HugeiconsIcon
+                icon={EyeClosedIcon}
+                className="size-5"
+                strokeWidth={3}
+              />
+              Fechar
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      <Dialog
+        open={Boolean(withholdQuestion)}
+        onOpenChange={handleWithholdOpenChange}
+      >
+        <DialogContent showCloseButton={false}>
+          <DialogHeader>
+            <DialogTitle className="text-xl font-bold">
+              Tem certeza disso?
+            </DialogTitle>
+            <DialogDescription className="text-base">
+              Deseja realmente reter o balão de{' '}
+              <strong>{team?.name}</strong>? O balão retornará ao ponto de
+              partida.
+            </DialogDescription>
+          </DialogHeader>
+
+          <DialogFooter className="flex-col justify-stretch sm:flex-row-reverse sm:justify-end">
+            <Button
+              type="button"
+              variant="red"
+              size="sm"
+              className="w-full"
+              loading={isWithholding}
+              onClick={() => void handleWithholdConfirm()}
+            >
+              Reter
+            </Button>
+            <Button
+              type="button"
+              variant="white"
+              size="sm"
+              className="w-full"
+              disabled={isWithholding}
+              onClick={() => handleWithholdOpenChange(false)}
+            >
+              Cancelar
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+    </>
   );
 }

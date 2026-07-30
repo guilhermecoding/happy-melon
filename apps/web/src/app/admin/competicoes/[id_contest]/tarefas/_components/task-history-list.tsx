@@ -38,15 +38,15 @@ function formatHistoryTime(isoDate: string): string {
   const date = new Date(isoDate);
 
   if (Number.isNaN(date.getTime())) {
-    return '--:--';
+    return '[--:--]';
   }
 
-  return new Intl.DateTimeFormat('pt-BR', {
-    day: '2-digit',
-    month: '2-digit',
+  const time = new Intl.DateTimeFormat('pt-BR', {
     hour: '2-digit',
     minute: '2-digit',
   }).format(date);
+
+  return `[${time}]`;
 }
 
 function iconForStatus(status: BalloonDeliveryStatus) {
@@ -123,7 +123,7 @@ export default function TaskHistoryList({
         <TableBody>
           {entries.map((entry) => (
             <TableRow key={entry.id}>
-              <TableCell className="w-24 text-muted-foreground tabular-nums">
+              <TableCell className="w-16 text-muted-foreground tabular-nums">
                 {formatHistoryTime(entry.createdAt)}
               </TableCell>
               <TableCell className="w-10">
