@@ -101,7 +101,7 @@ function PrintRequestCard({
                 className="size-8"
                 disabled={disabled || isEnqueueing}
                 onClick={onOpenQueue}
-                aria-label="Abrir tasks de impressão"
+                aria-label="Abrir fila de impressão"
               />
             }
           >
@@ -112,13 +112,13 @@ function PrintRequestCard({
             />
           </TooltipTrigger>
           <TooltipContent>
-            <p>Abrir tasks de impressão</p>
+            <p>Abrir fila de impressão</p>
           </TooltipContent>
         </Tooltip>
       </div>
 
       <PrintIcon className="mt-2 size-16" strokeWidth={1.5} />
-      <span className="mt-6 block w-full max-w-full truncate text-center font-space-grotesk text-2xl font-semibold text-foreground">
+      <span title="Impressão" className="mt-6 block w-full max-w-full truncate text-center font-space-grotesk text-2xl font-semibold text-foreground">
         Impressão
       </span>
       <Button
