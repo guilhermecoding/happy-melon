@@ -6,11 +6,11 @@ import BoxFeatures from '@/components/box-features';
 import BoxTeamsList from './box-teams-list';
 import TaskHistoryList from './task-history-list';
 
-type TarefasBoardProps = {
+type TasksBoardProps = {
   contestId: string;
 };
 
-export default function TarefasBoard({ contestId }: TarefasBoardProps) {
+export default function TasksBoard({ contestId }: TasksBoardProps) {
   const [historyKey, setHistoryKey] = useState(0);
 
   return (
@@ -24,7 +24,7 @@ export default function TarefasBoard({ contestId }: TarefasBoardProps) {
       <BoxFeatures
         title="Histórico"
         icon={HistoryIcon}
-        className="w-full @4xl:w-1/2"
+        className="w-full @4xl:w-1/2 h-fit min-h-[40vh]"
       >
         <TaskHistoryList contestId={contestId} refreshKey={historyKey} />
       </BoxFeatures>

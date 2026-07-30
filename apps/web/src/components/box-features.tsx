@@ -15,7 +15,7 @@ export default function BoxFeatures({
     className,
 }: BoxFeaturesProps) {
     return (
-        <div className={cn('w-full flex flex-col border-4 bg-muted border-gray-200 rounded-2xl overflow-hidden', className)}>
+        <div className={cn('w-full flex flex-col border-4 bg-muted border-gray-200 rounded-2xl overflow-hidden relative', className)}>
             <div className='flex items-center gap-2 bg-black text-white px-4 py-2 text-sm font-bold'>
                 <HugeiconsIcon
                     icon={icon}

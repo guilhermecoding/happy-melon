@@ -1,10 +1,16 @@
 "use client";
 
-import { useEffect, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { TASK_KIND } from '@repo/shared';
 import { HugeiconsIcon } from '@hugeicons/react';
-import { BalloonIcon, Attachment01Icon } from '@hugeicons/core-free-icons';
+import {
+  ArrowLeft01Icon,
+  ArrowRight01Icon,
+  Attachment01Icon,
+  BalloonIcon,
+} from '@hugeicons/core-free-icons';
 import { BalloonDeliveryStatusIcon } from '@/components/balloon-delivery-status-icon';
+import { Button } from '@/components/ui/button';
 import { balloonService } from '@/services/balloon/balloon.service';
 import { getBalloonErrorMessage } from '@/services/balloon/balloon.error';
 import type { TaskHistoryEntry } from '@/services/balloon/balloon.type';
@@ -19,6 +25,8 @@ type TaskHistoryListProps = {
   contestId: string;
   refreshKey?: number;
 };
+
+const PAGE_SIZE = 10;
 
 function formatHistoryTime(isoDate: string): string {
   const date = new Date(isoDate);
@@ -42,6 +50,29 @@ export default function TaskHistoryList({
   const [entries, setEntries] = useState<TaskHistoryEntry[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string>();
+  const [page, setPage] = useState(1);
+
+  const totalPages = Math.max(1, Math.ceil(entries.length / PAGE_SIZE));
+  const currentPage = Math.min(page, totalPages);
+
+  const paginatedEntries = useMemo(() => {
+    const start = (currentPage - 1) * PAGE_SIZE;
+    return entries.slice(start, start + PAGE_SIZE);
+  }, [entries, currentPage]);
+
+  const rangeStart =
+    entries.length === 0 ? 0 : (currentPage - 1) * PAGE_SIZE + 1;
+  const rangeEnd = Math.min(currentPage * PAGE_SIZE, entries.length);
+
+  useEffect(() => {
+    setPage(1);
+  }, [contestId, refreshKey]);
+
+  useEffect(() => {
+    if (page > totalPages) {
+      setPage(totalPages);
+    }
+  }, [page, totalPages]);
 
   useEffect(() => {
     let active = true;
@@ -100,17 +131,28 @@ export default function TaskHistoryList({
   }
 
   return (
-    <div className="p-2">
+    <div className="flex flex-col gap-4 px-2 pt-2 pb-24">
       <Table>
         <TableBody>
-          {entries.map((entry) => (
+          {paginatedEntries.map((entry) => (
             <TableRow key={entry.id}>
               <TableCell>
-                {entry.kind === TASK_KIND.PRINT_TASK ?
-                  <HugeiconsIcon icon={Attachment01Icon} className="size-5 text-muted-foreground shrink-0" strokeWidth={2} />
-                  : <HugeiconsIcon icon={BalloonIcon} className="size-5 text-muted-foreground shrink-0" strokeWidth={2} fill="currentColor" />}
+                {entry.kind === TASK_KIND.PRINT_TASK ? (
+                  <HugeiconsIcon
+                    icon={Attachment01Icon}
+                    className="size-5 shrink-0 text-muted-foreground"
+                    strokeWidth={2}
+                  />
+                ) : (
+                  <HugeiconsIcon
+                    icon={BalloonIcon}
+                    className="size-5 shrink-0 text-muted-foreground"
+                    strokeWidth={2}
+                    fill="currentColor"
+                  />
+                )}
               </TableCell>
-              <TableCell className="w-16 text-muted-foreground font-semibold tabular-nums">
+              <TableCell className="w-16 font-semibold tabular-nums text-muted-foreground">
                 {formatHistoryTime(entry.createdAt)}
               </TableCell>
               <TableCell className="w-10">
@@ -130,6 +172,49 @@ export default function TaskHistoryList({
           ))}
         </TableBody>
       </Table>
+
+      <div className="flex flex-col gap-3 px-2 pb-2 sm:flex-row sm:items-center sm:justify-between absolute bottom-0 left-0 right-0">
+        <p className="text-sm text-muted-foreground">
+          Mostrando {rangeStart}–{rangeEnd} de {entries.length}
+          {totalPages > 1
+            ? ` · Página ${currentPage} de ${totalPages}`
+            : null}
+        </p>
+        <div className="flex items-center gap-2">
+          <Button
+            type="button"
+            variant="white"
+            size="sm"
+            className="w-full sm:w-fit"
+            disabled={currentPage <= 1}
+            onClick={() => setPage((current) => Math.max(1, current - 1))}
+          >
+            <HugeiconsIcon
+              icon={ArrowLeft01Icon}
+              className="size-4"
+              strokeWidth={2}
+            />
+            Anterior
+          </Button>
+          <Button
+            type="button"
+            variant="white"
+            size="sm"
+            className="w-full sm:w-fit"
+            disabled={currentPage >= totalPages}
+            onClick={() =>
+              setPage((current) => Math.min(totalPages, current + 1))
+            }
+          >
+            Próxima
+            <HugeiconsIcon
+              icon={ArrowRight01Icon}
+              className="size-4"
+              strokeWidth={2}
+            />
+          </Button>
+        </div>
+      </div>
     </div>
   );
 }

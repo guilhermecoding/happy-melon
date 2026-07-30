@@ -5,7 +5,7 @@ import Section from '@/components/ui/section';
 import Loading from '@/app/loading';
 import { ClipboardCheckIcon } from '@hugeicons/core-free-icons';
 import { Metadata } from 'next';
-import TarefasBoard from './_components/tarefas-board';
+import TasksBoard from './_components/tasks-board';
 
 export const metadata: Metadata = {
   title: 'Tarefas',
@@ -23,7 +23,7 @@ async function AdminTasksPageContent({
       </Section>
 
       <Section className="mt-6 flex flex-col gap-4 @4xl:flex-row">
-        <TarefasBoard contestId={id_contest} />
+        <TasksBoard contestId={id_contest} />
       </Section>
     </Page>
   );
