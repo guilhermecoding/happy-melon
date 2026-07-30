@@ -109,6 +109,7 @@ model Contest {
   questions         Question[]
   teams             Team[]
   balloonDeliveries BalloonDelivery[]
+  printTasks        PrintTask[]
   taskHistories     TaskHistory[]
 
   @@map("contest")
@@ -144,6 +145,7 @@ model Team {
   createdAt         DateTime          @default(now())
   updatedAt         DateTime          @updatedAt
   balloonDeliveries BalloonDelivery[]
+  printTasks        PrintTask[]
   taskHistories     TaskHistory[]
 
   @@unique([contestId, usernameTeam])
@@ -174,10 +176,29 @@ model BalloonDelivery {
   @@schema("public")
 }
 
+model PrintTask {
+  id              String                @id
+  contestId       String
+  contest         Contest               @relation(fields: [contestId], references: [id], onDelete: Cascade)
+  teamId          String
+  team            Team                  @relation(fields: [teamId], references: [id], onDelete: Cascade)
+  status          BalloonDeliveryStatus
+  claimedByUserId String?
+  createdAt       DateTime              @default(now())
+  updatedAt       DateTime              @updatedAt
+  taskHistories   TaskHistory[]
+
+  @@index([contestId])
+  @@index([teamId, createdAt])
+  @@map("print_task")
+  @@schema("public")
+}
+
 model TaskHistory {
   id                String                @id
   contestId         String
   contest           Contest               @relation(fields: [contestId], references: [id], onDelete: Cascade)
+  kind              String                @default("balloon_task")
   type              String
   status            BalloonDeliveryStatus
   message           String
@@ -187,6 +208,8 @@ model TaskHistory {
   question          Question?             @relation(fields: [questionId], references: [id], onDelete: SetNull)
   balloonDeliveryId String?
   balloonDelivery   BalloonDelivery?      @relation(fields: [balloonDeliveryId], references: [id], onDelete: SetNull)
+  printTaskId       String?
+  printTask         PrintTask?            @relation(fields: [printTaskId], references: [id], onDelete: SetNull)
   actorUserId       String
   actorName         String
   createdAt         DateTime              @default(now())

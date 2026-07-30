@@ -6,6 +6,7 @@ import { auth } from './auth/auth.js';
 import { AdministratorsModule } from './administrators/administrators.module.js';
 import { BalloonsModule } from './balloons/balloons.module.js';
 import { ContestsModule } from './contests/contests.module.js';
+import { PrintsModule } from './prints/prints.module.js';
 import { QuestionsModule } from './questions/questions.module.js';
 import { TeamsModule } from './teams/teams.module.js';
 
@@ -15,6 +16,7 @@ import { TeamsModule } from './teams/teams.module.js';
     AdministratorsModule,
     BalloonsModule,
     ContestsModule,
+    PrintsModule,
     QuestionsModule,
     TeamsModule,
   ],

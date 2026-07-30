@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState } from 'react';
-import { HugeiconsIcon } from '@hugeicons/react';
+import { TASK_KIND } from '@repo/shared';
 import { BalloonDeliveryStatusIcon } from '@/components/balloon-delivery-status-icon';
 import { balloonService } from '@/services/balloon/balloon.service';
 import { getBalloonErrorMessage } from '@/services/balloon/balloon.error';
@@ -107,7 +107,14 @@ export default function TaskHistoryList({
                 {formatHistoryTime(entry.createdAt)}
               </TableCell>
               <TableCell className="w-10">
-                <BalloonDeliveryStatusIcon status={entry.status} />
+                <BalloonDeliveryStatusIcon
+                  status={entry.status}
+                  kind={
+                    entry.kind === TASK_KIND.PRINT_TASK
+                      ? TASK_KIND.PRINT_TASK
+                      : TASK_KIND.BALLOON_TASK
+                  }
+                />
               </TableCell>
               <TableCell className="whitespace-normal text-foreground">
                 {entry.message}

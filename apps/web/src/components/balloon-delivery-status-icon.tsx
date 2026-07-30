@@ -9,7 +9,9 @@ import {
 } from '@hugeicons/core-free-icons';
 import {
   BALLOON_DELIVERY_STATUS,
+  TASK_KIND,
   type BalloonDeliveryStatus,
+  type TaskKind,
 } from '@repo/shared';
 import {
   Tooltip,
@@ -40,6 +42,13 @@ export const BALLOON_DELIVERY_STATUS_LABEL = {
   [BALLOON_DELIVERY_STATUS.WITHHELD]: 'Retido',
 } as const satisfies Record<BalloonDeliveryStatus, string>;
 
+export const PRINT_DELIVERY_STATUS_LABEL = {
+  [BALLOON_DELIVERY_STATUS.PENDING]: 'Confirmada. Ninguém pegou esta impressão ainda',
+  [BALLOON_DELIVERY_STATUS.PROCESSING]: 'Impressão em rota de entrega',
+  [BALLOON_DELIVERY_STATUS.DELIVERED]: 'Entregue',
+  [BALLOON_DELIVERY_STATUS.WITHHELD]: 'Retida',
+} as const satisfies Record<BalloonDeliveryStatus, string>;
+
 export function getBalloonDeliveryStatusIcon(
   status: BalloonDeliveryStatus,
 ): IconSvgElement {
@@ -54,21 +63,31 @@ export function getBalloonDeliveryStatusColorClass(
 
 export function getBalloonDeliveryStatusLabel(
   status: BalloonDeliveryStatus,
+  kind: TaskKind = TASK_KIND.BALLOON_TASK,
 ): string {
-  return BALLOON_DELIVERY_STATUS_LABEL[status] ?? status;
+  const labels =
+    kind === TASK_KIND.PRINT_TASK
+      ? PRINT_DELIVERY_STATUS_LABEL
+      : BALLOON_DELIVERY_STATUS_LABEL;
+
+  return labels[status] ?? status;
 }
 
 type BalloonDeliveryStatusIconProps = {
   status: BalloonDeliveryStatus;
+  kind?: TaskKind;
   className?: string;
   strokeWidth?: number;
 };
 
 export function BalloonDeliveryStatusIcon({
   status,
+  kind = TASK_KIND.BALLOON_TASK,
   className,
   strokeWidth = 2,
 }: BalloonDeliveryStatusIconProps) {
+  const label = getBalloonDeliveryStatusLabel(status, kind);
+
   return (
     <Tooltip>
       <TooltipTrigger
@@ -77,7 +96,7 @@ export function BalloonDeliveryStatusIcon({
           'inline-flex size-5 cursor-default rounded-sm outline-none focus-visible:ring-2 focus-visible:ring-ring',
           className,
         )}
-        aria-label={getBalloonDeliveryStatusLabel(status)}
+        aria-label={label}
       >
         <HugeiconsIcon
           icon={getBalloonDeliveryStatusIcon(status)}
@@ -88,7 +107,7 @@ export function BalloonDeliveryStatusIcon({
           strokeWidth={strokeWidth}
         />
       </TooltipTrigger>
-      <TooltipContent>{getBalloonDeliveryStatusLabel(status)}</TooltipContent>
+      <TooltipContent>{label}</TooltipContent>
     </Tooltip>
   );
 }

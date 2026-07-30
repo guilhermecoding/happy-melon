@@ -5,6 +5,7 @@ import { HugeiconsIcon } from '@hugeicons/react';
 import {
   Award01Icon,
   CheckmarkCircle02Icon,
+  ExpandIcon,
   EyeClosedIcon,
   RemoveCircleIcon,
 } from '@hugeicons/core-free-icons';
@@ -34,9 +35,12 @@ import type { Question } from '@/services/question/question.type';
 import { balloonService } from '@/services/balloon/balloon.service';
 import { getBalloonErrorMessage } from '@/services/balloon/balloon.error';
 import type { BalloonDelivery } from '@/services/balloon/balloon.type';
+import { printService } from '@/services/print/print.service';
+import { getPrintErrorMessage } from '@/services/print/print.error';
 import { toast } from '@/components/ui/toast';
-import { cn } from '@/lib/utils';
 import PrintIcon from '@/components/print-icon';
+import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
+import { PrintTasksDialog } from './print-tasks-dialog';
 
 type TeamBalloonsDialogProps = {
   contestId: string;
@@ -47,26 +51,84 @@ type TeamBalloonsDialogProps = {
 };
 
 function PrintRequestCard({
-  className,
+  contestId,
+  team,
+  disabled,
+  onEnqueued,
+  onOpenQueue,
 }: {
-  className?: string;
+  contestId: string;
+  team: Team;
+  disabled?: boolean;
+  onEnqueued?: () => void;
+  onOpenQueue?: () => void;
 }) {
+  const [isEnqueueing, setIsEnqueueing] = useState(false);
+
+  async function handleEnqueue() {
+    setIsEnqueueing(true);
+
+    try {
+      await printService.enqueue(contestId, { teamId: team.id });
+      onEnqueued?.();
+      toast.add({
+        title: `Impressão encaminhada para ${team.name}.`,
+        type: 'success',
+      });
+    } catch (actionError) {
+      toast.add({
+        title: getPrintErrorMessage(
+          actionError,
+          'Não foi possível encaminhar a impressão.',
+        ),
+        type: 'error',
+      });
+    } finally {
+      setIsEnqueueing(false);
+    }
+  }
+
   return (
-    <div
-      className={cn(
-        'flex min-w-0 flex-col justify-center items-center rounded-2xl border border-border bg-background p-2',
-        className,
-      )}
-    >
-      <PrintIcon className="size-16 mt-2" strokeWidth={1.5} />
-      <span className="block w-full max-w-full truncate text-center font-space-grotesk font-semibold text-2xl text-foreground mt-6">
+    <div className="relative flex min-w-0 flex-col items-center justify-center rounded-2xl border border-border bg-background p-2">
+      <div className="absolute top-1 right-1">
+        <Tooltip>
+          <TooltipTrigger
+            render={
+              <Button
+                type="button"
+                variant="normal"
+                size="icon"
+                className="size-8"
+                disabled={disabled || isEnqueueing}
+                onClick={onOpenQueue}
+                aria-label="Abrir tasks de impressão"
+              />
+            }
+          >
+            <HugeiconsIcon
+              icon={ExpandIcon}
+              className="size-5 text-muted-foreground"
+              strokeWidth={2}
+            />
+          </TooltipTrigger>
+          <TooltipContent>
+            <p>Abrir tasks de impressão</p>
+          </TooltipContent>
+        </Tooltip>
+      </div>
+
+      <PrintIcon className="mt-2 size-16" strokeWidth={1.5} />
+      <span className="mt-6 block w-full max-w-full truncate text-center font-space-grotesk text-2xl font-semibold text-foreground">
         Impressão
       </span>
       <Button
         type="button"
         variant="blue"
         size="sm"
-        className="w-full shrink-0 mt-2"
+        className="mt-2 w-full shrink-0"
+        disabled={disabled || isEnqueueing}
+        loading={isEnqueueing}
+        onClick={() => void handleEnqueue()}
       >
         <HugeiconsIcon
           icon={CheckmarkCircle02Icon}
@@ -103,6 +165,8 @@ export function TeamBalloonsDialog({
   const [withholdQuestion, setWithholdQuestion] = useState<Question | null>(
     null,
   );
+  const [printQueueOpen, setPrintQueueOpen] = useState(false);
+  const [printQueueRefreshKey, setPrintQueueRefreshKey] = useState(0);
 
   useEffect(() => {
     if (!open || !team) {
@@ -162,6 +226,7 @@ export function TeamBalloonsDialog({
     if (!nextOpen && pendingQuestionId) return;
     if (!nextOpen) {
       setWithholdQuestion(null);
+      setPrintQueueOpen(false);
     }
     onOpenChange(nextOpen);
   }
@@ -350,7 +415,20 @@ export function TeamBalloonsDialog({
                     </div>
                   );
                 })}
-                {team && <PrintRequestCard />}
+                {team && (
+                  <PrintRequestCard
+                    contestId={contestId}
+                    team={team}
+                    disabled={
+                      Boolean(pendingQuestionId) || Boolean(withholdQuestion)
+                    }
+                    onEnqueued={() => {
+                      setPrintQueueRefreshKey((current) => current + 1);
+                      onDeliveryChanged?.();
+                    }}
+                    onOpenQueue={() => setPrintQueueOpen(true)}
+                  />
+                )}
               </div>
             )}
           </div>
@@ -413,6 +491,20 @@ export function TeamBalloonsDialog({
           </DialogFooter>
         </DialogContent>
       </Dialog>
+
+      {team ? (
+        <PrintTasksDialog
+          contestId={contestId}
+          team={team}
+          open={printQueueOpen}
+          onOpenChange={setPrintQueueOpen}
+          refreshKey={printQueueRefreshKey}
+          onTaskChanged={() => {
+            setPrintQueueRefreshKey((current) => current + 1);
+            onDeliveryChanged?.();
+          }}
+        />
+      ) : null}
     </>
   );
 }

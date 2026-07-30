@@ -13,6 +13,7 @@ import {
 } from '@repo/database';
 import {
   BALLOON_DELIVERY_STATUS,
+  TASK_KIND,
   isConfirmableStatus,
   isWithholdableStatus,
   taskTypeFromStatus,
@@ -242,7 +243,7 @@ export class BalloonsService {
     },
   ) {
     const status = this.toStatusDto(params.delivery.status);
-    const type = taskTypeFromStatus(status);
+    const type = taskTypeFromStatus(status, TASK_KIND.BALLOON_TASK);
     const colorLabel = this.getBalloonColorLabel(params.balloonColor);
     const actionLabel = STATUS_ACTION_LABEL[status];
     const message = `Balão ${colorLabel} do time ${params.teamName} ${actionLabel}`;
@@ -253,6 +254,7 @@ export class BalloonsService {
           data: {
             id: generateShortId(),
             contestId: params.contestId,
+            kind: TASK_KIND.BALLOON_TASK,
             type,
             status: params.delivery.status,
             message,
@@ -386,12 +388,14 @@ export class BalloonsService {
     return {
       id: entry.id,
       contestId: entry.contestId,
+      kind: entry.kind,
       type: entry.type,
       status: this.toStatusDto(entry.status),
       message: entry.message,
       teamId: entry.teamId,
       questionId: entry.questionId,
       balloonDeliveryId: entry.balloonDeliveryId,
+      printTaskId: entry.printTaskId,
       actorUserId: entry.actorUserId,
       actorName: entry.actorName,
       createdAt: entry.createdAt.toISOString(),

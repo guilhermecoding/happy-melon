@@ -4,7 +4,10 @@ export {
   BALLOON_EFFECTIVE_STATUS,
   BALLOON_STATUS_TO_TASK_TYPE,
   CONFIRMABLE_STATUSES,
+  PRINT_STATUS_TO_TASK_TYPE,
   RESOLVED_BALLOON_STATUSES,
+  TASK_KIND,
+  TASK_KIND_VALUES,
   TASK_TYPE,
   TASK_TYPE_VALUES,
   WITHHOLDABLE_STATUSES,
@@ -15,5 +18,6 @@ export {
   toBalloonEffectiveStatus,
   type BalloonDeliveryStatus,
   type BalloonEffectiveStatus,
+  type TaskKind,
   type TaskType,
 } from './balloon-delivery.js';
