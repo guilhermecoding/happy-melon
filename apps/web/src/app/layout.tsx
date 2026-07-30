@@ -1,6 +1,6 @@
 import type { Metadata } from 'next';
 import localFont from 'next/font/local';
-import { Jersey_10 } from 'next/font/google';
+import { Space_Grotesk } from 'next/font/google';
 import './globals.css';
 import { cn } from '@/lib/utils';
 import Providers from '@/lib/providers';
@@ -12,10 +12,10 @@ const cause = localFont({
   display: 'swap',
 });
 
-const jersey = Jersey_10({
+const spaceGrotesk = Space_Grotesk({
   weight: '400',
   subsets: ['latin'],
-  variable: '--font-jersey',
+  variable: '--font-space-grotesk',
   display: 'swap',
 });
 
@@ -33,7 +33,7 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="pt-BR" className={cn('font-sans', cause.variable, jersey.variable)}>
+    <html lang="pt-BR" className={cn('font-sans', cause.variable, spaceGrotesk.variable)}>
       <body>
         <Providers>
           {children}

@@ -5,7 +5,7 @@ import { HugeiconsIcon } from '@hugeicons/react';
 import {
   Award01Icon,
   CheckmarkCircle02Icon,
-  EyeClosedIcon,
+  EyeClosedIcon
 } from '@hugeicons/core-free-icons';
 import type { Team } from '@/services/team/team.type';
 import { BalloonAchievement } from '@/components/balloon-achievement';
@@ -23,6 +23,8 @@ import { questionService } from '@/services/question/question.service';
 import { getQuestionErrorMessage } from '@/services/question/question.error';
 import type { Question } from '@/services/question/question.type';
 import { toast } from '@/components/ui/toast';
+import { cn } from '@/lib/utils';
+import PrintIcon from '@/components/print-icon';
 
 type TeamBalloonsDialogProps = {
   contestId: string;
@@ -30,6 +32,37 @@ type TeamBalloonsDialogProps = {
   open: boolean;
   onOpenChange: (open: boolean) => void;
 };
+
+function PrintRequestCard({
+  className,
+}: {
+  className?: string;
+}) {
+
+  return (
+    <div className={cn('flex min-w-0 flex-col justify-center items-center rounded-2xl border border-border bg-background p-2', className)}>
+      <PrintIcon className="size-16 mt-2" strokeWidth={1.5} />
+      <span
+        className="block w-full max-w-full truncate text-center font-space-grotesk font-semibold text-2xl text-foreground mt-6"
+      >
+        Impressão
+      </span>
+      <Button
+        type="button"
+        variant="blue"
+        size="sm"
+        className="w-full shrink-0 mt-2"
+      >
+        <HugeiconsIcon
+          icon={CheckmarkCircle02Icon}
+          className="size-5"
+          strokeWidth={3}
+        />
+        Encaminhar
+      </Button>
+    </div>
+  );
+}
 
 export function TeamBalloonsDialog({
   contestId,
@@ -161,6 +194,7 @@ export function TeamBalloonsDialog({
                   </Button>
                 </div>
               ))}
+              {team && <PrintRequestCard />}
             </div>
           )}
         </div>

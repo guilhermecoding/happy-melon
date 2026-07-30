@@ -28,7 +28,7 @@ export function BalloonAchievement({
     <div className={cn('flex min-w-0 flex-col items-center', className)}>
       <Balloon color={balloonColor} className="size-22" />
       <span
-        className="block w-full max-w-full truncate text-center font-jersey text-5xl"
+        className="block w-full max-w-full truncate text-center font-space-grotesk font-semibold text-3xl my-2"
         style={{ color: labelColor }}
         title={questionId}
       >

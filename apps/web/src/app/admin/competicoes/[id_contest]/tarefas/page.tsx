@@ -28,7 +28,7 @@ async function AdminTasksPageContent({
       </Section>
 
       <Section className="mt-6 flex flex-col gap-4 @4xl:flex-row">
-        <BoxFeatures title="Conquistas e solicitações" icon={BalloonIcon}>
+        <BoxFeatures title="Times disponíveis" icon={BalloonIcon}>
           <BoxTeamsList contestId={id_contest} />
         </BoxFeatures>
         <BoxFeatures
