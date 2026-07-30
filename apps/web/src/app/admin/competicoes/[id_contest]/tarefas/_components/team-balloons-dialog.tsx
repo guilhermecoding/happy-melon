@@ -3,7 +3,6 @@
 import { useEffect, useState } from 'react';
 import { HugeiconsIcon } from '@hugeicons/react';
 import {
-  Award01Icon,
   BalloonIcon,
   CheckmarkCircle02Icon,
   ExpandIcon,

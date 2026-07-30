@@ -8,6 +8,7 @@ import {
   ArrowRight01Icon,
   Attachment01Icon,
   BalloonIcon,
+  DocumentAttachmentIcon,
 } from '@hugeicons/core-free-icons';
 import { BalloonDeliveryStatusIcon } from '@/components/balloon-delivery-status-icon';
 import { Button } from '@/components/ui/button';
@@ -20,6 +21,7 @@ import {
   TableCell,
   TableRow,
 } from '@/components/ui/table';
+import Spinner from '@/components/spinner';
 
 type TaskHistoryListProps = {
   contestId: string;
@@ -108,9 +110,7 @@ export default function TaskHistoryList({
 
   if (loading) {
     return (
-      <p className="p-4 text-center text-sm text-muted-foreground">
-        Carregando histórico...
-      </p>
+      <Spinner />
     );
   }
 
@@ -122,11 +122,14 @@ export default function TaskHistoryList({
     );
   }
 
-  if (entries.length === 0) {
+  if (entries.length !== 0) {
     return (
-      <p className="p-4 text-center text-sm text-muted-foreground">
-        Nenhuma tarefa registrada ainda.
-      </p>
+      <div className="flex h-100 flex-col items-center justify-center gap-2">
+        <HugeiconsIcon icon={DocumentAttachmentIcon} className="size-14 text-muted-foreground opacity-50" strokeWidth={2} />
+        <p className="text-center font-medium text-muted-foreground/80 mt-2">
+          Tudo quieto por aqui...
+        </p>
+      </div>
     );
   }
 
