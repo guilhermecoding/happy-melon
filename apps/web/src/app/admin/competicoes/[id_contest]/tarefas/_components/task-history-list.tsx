@@ -2,38 +2,21 @@
 
 import { useEffect, useState } from 'react';
 import { HugeiconsIcon } from '@hugeicons/react';
-import {
-  CheckmarkCircle02Icon,
-  RemoveCircleIcon,
-  StatusIcon,
-  WorkoutRunIcon,
-} from '@hugeicons/core-free-icons';
-import {
-  BALLOON_DELIVERY_STATUS,
-  type BalloonDeliveryStatus,
-} from '@repo/shared';
+import { BalloonDeliveryStatusIcon } from '@/components/balloon-delivery-status-icon';
+import { balloonService } from '@/services/balloon/balloon.service';
+import { getBalloonErrorMessage } from '@/services/balloon/balloon.error';
+import type { TaskHistoryEntry } from '@/services/balloon/balloon.type';
 import {
   Table,
   TableBody,
   TableCell,
   TableRow,
 } from '@/components/ui/table';
-import { balloonService } from '@/services/balloon/balloon.service';
-import { getBalloonErrorMessage } from '@/services/balloon/balloon.error';
-import type { TaskHistoryEntry } from '@/services/balloon/balloon.type';
-import { cn } from '@/lib/utils';
 
 type TaskHistoryListProps = {
   contestId: string;
   refreshKey?: number;
 };
-
-const STATUS_ICONS = {
-  [BALLOON_DELIVERY_STATUS.PENDING]: StatusIcon,
-  [BALLOON_DELIVERY_STATUS.PROCESSING]: WorkoutRunIcon,
-  [BALLOON_DELIVERY_STATUS.DELIVERED]: CheckmarkCircle02Icon,
-  [BALLOON_DELIVERY_STATUS.WITHHELD]: RemoveCircleIcon,
-} as const;
 
 function formatHistoryTime(isoDate: string): string {
   const date = new Date(isoDate);
@@ -48,10 +31,6 @@ function formatHistoryTime(isoDate: string): string {
   }).format(date);
 
   return `[${time}]`;
-}
-
-function iconForStatus(status: BalloonDeliveryStatus) {
-  return STATUS_ICONS[status] ?? StatusIcon;
 }
 
 export default function TaskHistoryList({
@@ -128,16 +107,7 @@ export default function TaskHistoryList({
                 {formatHistoryTime(entry.createdAt)}
               </TableCell>
               <TableCell className="w-10">
-                <HugeiconsIcon
-                  icon={iconForStatus(entry.status)}
-                  className={cn("size-5 text-foreground", {
-                    "text-green-500": entry.status === BALLOON_DELIVERY_STATUS.DELIVERED,
-                    "text-red-500": entry.status === BALLOON_DELIVERY_STATUS.WITHHELD,
-                    "text-blue-500": entry.status === BALLOON_DELIVERY_STATUS.PROCESSING,
-                    "text-orange-500": entry.status === BALLOON_DELIVERY_STATUS.PENDING,
-                  })}
-                  strokeWidth={2}
-                />
+                <BalloonDeliveryStatusIcon status={entry.status} />
               </TableCell>
               <TableCell className="whitespace-normal text-foreground">
                 {entry.message}

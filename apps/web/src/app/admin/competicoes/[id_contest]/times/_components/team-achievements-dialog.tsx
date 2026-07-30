@@ -3,8 +3,14 @@
 import { useEffect, useState } from 'react';
 import { HugeiconsIcon } from '@hugeicons/react';
 import { Award01Icon, EyeClosedIcon } from '@hugeicons/core-free-icons';
+import {
+  BALLOON_EFFECTIVE_STATUS,
+  toBalloonEffectiveStatus,
+  type BalloonDeliveryStatus,
+} from '@repo/shared';
 import type { Team } from '@/services/team/team.type';
 import { BalloonAchievement } from '@/components/balloon-achievement';
+import { BalloonDeliveryStatusIcon } from '@/components/balloon-delivery-status-icon';
 import { Button } from '@/components/ui/button';
 import {
   Dialog,
@@ -18,6 +24,8 @@ import { toBalloonColor } from '@/services/question/balloon-color';
 import { questionService } from '@/services/question/question.service';
 import { getQuestionErrorMessage } from '@/services/question/question.error';
 import type { Question } from '@/services/question/question.type';
+import { balloonService } from '@/services/balloon/balloon.service';
+import { getBalloonErrorMessage } from '@/services/balloon/balloon.error';
 
 type TeamAchievementsDialogProps = {
   contestId: string;
@@ -33,30 +41,51 @@ export function TeamAchievementsDialog({
   onOpenChange,
 }: TeamAchievementsDialogProps) {
   const [questions, setQuestions] = useState<Question[]>([]);
+  const [deliveriesByQuestionId, setDeliveriesByQuestionId] = useState(
+    () => new Map<string, BalloonDeliveryStatus>(),
+  );
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string>();
 
   useEffect(() => {
-    if (!open) {
+    if (!open || !team) {
       return;
     }
 
     let active = true;
 
-    async function loadQuestions() {
+    async function loadData() {
       setLoading(true);
       setError(undefined);
 
       try {
-        const data = await questionService.list(contestId);
-        if (active) setQuestions(data);
+        const [questionsData, deliveriesData] = await Promise.all([
+          questionService.list(contestId),
+          balloonService.listDeliveries(contestId, team!.id),
+        ]);
+
+        if (!active) return;
+
+        setQuestions(questionsData);
+        setDeliveriesByQuestionId(
+          new Map(
+            deliveriesData.map((delivery) => [
+              delivery.questionId,
+              delivery.status,
+            ]),
+          ),
+        );
       } catch (loadError) {
         if (active) {
           setQuestions([]);
+          setDeliveriesByQuestionId(new Map());
           setError(
             getQuestionErrorMessage(
               loadError,
-              'Não foi possível carregar os balões da prova.',
+              getBalloonErrorMessage(
+                loadError,
+                'Não foi possível carregar os balões da prova.',
+              ),
             ),
           );
         }
@@ -65,12 +94,12 @@ export function TeamAchievementsDialog({
       }
     }
 
-    void loadQuestions();
+    void loadData();
 
     return () => {
       active = false;
     };
-  }, [contestId, open]);
+  }, [contestId, open, team]);
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
@@ -121,14 +150,31 @@ export function TeamAchievementsDialog({
             </div>
           ) : (
             <div className="grid grid-cols-1 gap-3 text-center sm:grid-cols-2 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-6">
-              {questions.map((question) => (
-                <BalloonAchievement
-                  key={question.id}
-                  questionId={question.label}
-                  color={toBalloonColor(question.balloonColor)}
-                  resolved={true}
-                />
-              ))}
+              {questions.map((question) => {
+                const status = toBalloonEffectiveStatus(
+                  deliveriesByQuestionId.get(question.id),
+                );
+
+                return (
+                  <div
+                    key={question.id}
+                    className="relative min-w-0 rounded-2xl border border-border bg-background p-2"
+                  >
+                    {status !== BALLOON_EFFECTIVE_STATUS.ABSENT ? (
+                      <BalloonDeliveryStatusIcon
+                        status={status}
+                        className="absolute top-2 right-2 size-6"
+                        strokeWidth={2.5}
+                      />
+                    ) : null}
+                    <BalloonAchievement
+                      questionId={question.label}
+                      color={toBalloonColor(question.balloonColor)}
+                      resolved={true}
+                    />
+                  </div>
+                );
+              })}
             </div>
           )}
         </div>
