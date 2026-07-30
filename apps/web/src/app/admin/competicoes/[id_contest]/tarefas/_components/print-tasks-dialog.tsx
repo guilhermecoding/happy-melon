@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from 'react';
 import { HugeiconsIcon } from '@hugeicons/react';
-import { EyeClosedIcon, File02Icon } from '@hugeicons/core-free-icons';
+import { DocumentAttachmentIcon, EyeClosedIcon, File02Icon } from '@hugeicons/core-free-icons';
 import {
   isConfirmableStatus,
   TASK_KIND,
@@ -23,6 +23,8 @@ import { printService } from '@/services/print/print.service';
 import { getPrintErrorMessage } from '@/services/print/print.error';
 import type { PrintTask } from '@/services/print/print.type';
 import { toast } from '@/components/ui/toast';
+import Spinner from '@/components/spinner';
+import EmptyIcon from '@/components/empty-icon';
 
 type PrintTasksDialogProps = {
   contestId: string;
@@ -179,17 +181,18 @@ export function PrintTasksDialog({
 
           <div className="min-h-48 rounded-2xl border-4 bg-muted/40 px-4 py-6 sm:px-6">
             {loading ? (
-              <p className="text-center text-sm text-muted-foreground">
-                Carregando fila de impressão...
-              </p>
+              <Spinner />
             ) : error ? (
               <p role="alert" className="text-center text-sm text-destructive">
                 {error}
               </p>
             ) : tasks.length === 0 ? (
-              <p className="text-center text-sm text-muted-foreground">
-                Nenhuma tarefa de impressão na fila.
-              </p>
+              <div className="flex flex-col items-center justify-center gap-2">
+                <HugeiconsIcon icon={DocumentAttachmentIcon} className="size-14 text-muted-foreground opacity-50" strokeWidth={2} />
+                <p className="text-center font-medium text-muted-foreground/80 mt-2">
+                  Nenhuma tarefa de impressão na fila.
+                </p>
+              </div>
             ) : (
               <div className="flex flex-col gap-3">
                 {tasks.map((task) => {
