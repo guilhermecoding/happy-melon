@@ -24,7 +24,6 @@ import { getPrintErrorMessage } from '@/services/print/print.error';
 import type { PrintTask } from '@/services/print/print.type';
 import { toast } from '@/components/ui/toast';
 import Spinner from '@/components/spinner';
-import EmptyIcon from '@/components/empty-icon';
 
 type PrintTasksDialogProps = {
   contestId: string;

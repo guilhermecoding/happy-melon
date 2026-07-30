@@ -4,10 +4,11 @@ import { useEffect, useState } from 'react';
 import { HugeiconsIcon } from '@hugeicons/react';
 import {
   Award01Icon,
+  BalloonIcon,
   CheckmarkCircle02Icon,
   ExpandIcon,
   EyeClosedIcon,
-  RemoveCircleIcon,
+  RemoveCircleIcon
 } from '@hugeicons/core-free-icons';
 import {
   BALLOON_EFFECTIVE_STATUS,
@@ -41,6 +42,7 @@ import { toast } from '@/components/ui/toast';
 import PrintIcon from '@/components/print-icon';
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
 import { PrintTasksDialog } from './print-tasks-dialog';
+import Spinner from '@/components/spinner';
 
 type TeamBalloonsDialogProps = {
   contestId: string;
@@ -334,9 +336,7 @@ export function TeamBalloonsDialog({
 
           <div className="min-h-48 rounded-2xl border-4 bg-muted/40 px-6 py-10">
             {loading ? (
-              <p className="text-center text-sm text-muted-foreground">
-                Carregando balões da prova...
-              </p>
+              <Spinner />
             ) : error ? (
               <p role="alert" className="text-center text-sm text-destructive">
                 {error}
@@ -345,9 +345,9 @@ export function TeamBalloonsDialog({
               <div className="flex flex-col items-center justify-center gap-3 text-center">
                 <span className="flex size-14 items-center justify-center rounded-full bg-muted">
                   <HugeiconsIcon
-                    icon={Award01Icon}
-                    className="size-7 text-muted-foreground"
-                    strokeWidth={1.5}
+                    icon={BalloonIcon}
+                    className="size-10 text-muted-foreground"
+                    strokeWidth={2}
                   />
                 </span>
                 <p className="text-sm font-medium text-foreground">
