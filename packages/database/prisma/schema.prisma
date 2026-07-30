@@ -88,31 +88,44 @@ enum ContestStatus {
   @@schema("public")
 }
 
+enum BalloonDeliveryStatus {
+  PENDING
+  PROCESSING
+  DELIVERED
+  WITHHELD
+
+  @@schema("public")
+}
+
 model Contest {
-  id        String        @id
-  name      String
-  status    ContestStatus @default(ACTIVE)
-  startsAt  DateTime
-  endsAt    DateTime
-  venue     String
-  createdAt DateTime      @default(now())
-  updatedAt DateTime      @updatedAt
-  questions Question[]
-  teams     Team[]
+  id                String            @id
+  name              String
+  status            ContestStatus     @default(ACTIVE)
+  startsAt          DateTime
+  endsAt            DateTime
+  venue             String
+  createdAt         DateTime          @default(now())
+  updatedAt         DateTime          @updatedAt
+  questions         Question[]
+  teams             Team[]
+  balloonDeliveries BalloonDelivery[]
+  taskHistories     TaskHistory[]
 
   @@map("contest")
   @@schema("public")
 }
 
 model Question {
-  id           String   @id
-  contestId    String
-  contest      Contest  @relation(fields: [contestId], references: [id], onDelete: Cascade)
-  label        String
-  title        String
-  balloonColor String
-  createdAt    DateTime @default(now())
-  updatedAt    DateTime @updatedAt
+  id                String            @id
+  contestId         String
+  contest           Contest           @relation(fields: [contestId], references: [id], onDelete: Cascade)
+  label             String
+  title             String
+  balloonColor      String
+  createdAt         DateTime          @default(now())
+  updatedAt         DateTime          @updatedAt
+  balloonDeliveries BalloonDelivery[]
+  taskHistories     TaskHistory[]
 
   @@unique([contestId, label])
   @@index([contestId])
@@ -121,18 +134,64 @@ model Question {
 }
 
 model Team {
-  id           String   @id
-  contestId    String
-  contest      Contest  @relation(fields: [contestId], references: [id], onDelete: Cascade)
-  name         String
-  usernameTeam String
-  room         String?
-  machine      String?
-  createdAt    DateTime @default(now())
-  updatedAt    DateTime @updatedAt
+  id                String            @id
+  contestId         String
+  contest           Contest           @relation(fields: [contestId], references: [id], onDelete: Cascade)
+  name              String
+  usernameTeam      String
+  room              String?
+  machine           String?
+  createdAt         DateTime          @default(now())
+  updatedAt         DateTime          @updatedAt
+  balloonDeliveries BalloonDelivery[]
+  taskHistories     TaskHistory[]
 
   @@unique([contestId, usernameTeam])
   @@index([contestId])
   @@map("team")
+  @@schema("public")
+}
+
+model BalloonDelivery {
+  id              String                @id
+  contestId       String
+  contest         Contest               @relation(fields: [contestId], references: [id], onDelete: Cascade)
+  teamId          String
+  team            Team                  @relation(fields: [teamId], references: [id], onDelete: Cascade)
+  questionId      String
+  question        Question              @relation(fields: [questionId], references: [id], onDelete: Cascade)
+  status          BalloonDeliveryStatus
+  claimedByUserId String?
+  createdAt       DateTime              @default(now())
+  updatedAt       DateTime              @updatedAt
+  taskHistories   TaskHistory[]
+
+  @@unique([teamId, questionId])
+  @@index([contestId])
+  @@index([teamId])
+  @@index([questionId])
+  @@map("balloon_delivery")
+  @@schema("public")
+}
+
+model TaskHistory {
+  id                String                @id
+  contestId         String
+  contest           Contest               @relation(fields: [contestId], references: [id], onDelete: Cascade)
+  type              String
+  status            BalloonDeliveryStatus
+  message           String
+  teamId            String?
+  team              Team?                 @relation(fields: [teamId], references: [id], onDelete: SetNull)
+  questionId        String?
+  question          Question?             @relation(fields: [questionId], references: [id], onDelete: SetNull)
+  balloonDeliveryId String?
+  balloonDelivery   BalloonDelivery?      @relation(fields: [balloonDeliveryId], references: [id], onDelete: SetNull)
+  actorUserId       String
+  actorName         String
+  createdAt         DateTime              @default(now())
+
+  @@index([contestId, createdAt])
+  @@map("task_history")
   @@schema("public")
 }

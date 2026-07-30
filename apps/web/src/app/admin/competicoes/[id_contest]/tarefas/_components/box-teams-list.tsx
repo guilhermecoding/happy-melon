@@ -18,6 +18,7 @@ import FlashCardTeam from './flash-card-team';
 
 type BoxTeamsListProps = {
     contestId: string;
+    onDeliveryChanged?: () => void;
 };
 
 const PAGE_SIZE = 21;
@@ -31,7 +32,10 @@ function matchesSearch(team: Team, query: string) {
     return haystack.includes(query);
 }
 
-export default function BoxTeamsList({ contestId }: BoxTeamsListProps) {
+export default function BoxTeamsList({
+    contestId,
+    onDeliveryChanged,
+}: BoxTeamsListProps) {
     const [teams, setTeams] = useState<Team[]>([]);
     const [balloonsCount, setBalloonsCount] = useState(0);
     const [loading, setLoading] = useState(true);
@@ -234,6 +238,7 @@ export default function BoxTeamsList({ contestId }: BoxTeamsListProps) {
                 contestId={contestId}
                 team={selectedTeam}
                 open={achievementsOpen}
+                onDeliveryChanged={onDeliveryChanged}
                 onOpenChange={(nextOpen) => {
                     setAchievementsOpen(nextOpen);
                     if (!nextOpen) {
