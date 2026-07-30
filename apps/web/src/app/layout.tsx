@@ -7,15 +7,14 @@ import Providers from '@/lib/providers';
 
 const cause = localFont({
   src: '../fonts/cause-latin-wght-normal.woff2',
-  variable: '--font-sans',
+  variable: '--font-cause',
   weight: '100 900',
   display: 'swap',
 });
 
 const spaceGrotesk = Space_Grotesk({
-  weight: '400',
   subsets: ['latin'],
-  variable: '--font-space-grotesk',
+  variable: '--font-sans',
   display: 'swap',
 });
 
