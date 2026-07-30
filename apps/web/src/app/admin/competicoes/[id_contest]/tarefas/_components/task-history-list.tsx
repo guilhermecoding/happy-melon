@@ -2,6 +2,8 @@
 
 import { useEffect, useState } from 'react';
 import { TASK_KIND } from '@repo/shared';
+import { HugeiconsIcon } from '@hugeicons/react';
+import { BalloonIcon, Attachment01Icon } from '@hugeicons/core-free-icons';
 import { BalloonDeliveryStatusIcon } from '@/components/balloon-delivery-status-icon';
 import { balloonService } from '@/services/balloon/balloon.service';
 import { getBalloonErrorMessage } from '@/services/balloon/balloon.error';
@@ -103,6 +105,11 @@ export default function TaskHistoryList({
         <TableBody>
           {entries.map((entry) => (
             <TableRow key={entry.id}>
+              <TableCell>
+                {entry.kind === TASK_KIND.PRINT_TASK ?
+                  <HugeiconsIcon icon={Attachment01Icon} className="size-5 text-muted-foreground shrink-0" strokeWidth={2} />
+                  : <HugeiconsIcon icon={BalloonIcon} className="size-5 text-muted-foreground shrink-0" strokeWidth={2} fill="currentColor" />}
+              </TableCell>
               <TableCell className="w-16 text-muted-foreground font-semibold tabular-nums">
                 {formatHistoryTime(entry.createdAt)}
               </TableCell>
