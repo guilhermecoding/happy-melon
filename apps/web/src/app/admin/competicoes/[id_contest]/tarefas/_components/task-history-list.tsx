@@ -21,6 +21,7 @@ import {
 import { balloonService } from '@/services/balloon/balloon.service';
 import { getBalloonErrorMessage } from '@/services/balloon/balloon.error';
 import type { TaskHistoryEntry } from '@/services/balloon/balloon.type';
+import { cn } from '@/lib/utils';
 
 type TaskHistoryListProps = {
   contestId: string;
@@ -123,13 +124,18 @@ export default function TaskHistoryList({
         <TableBody>
           {entries.map((entry) => (
             <TableRow key={entry.id}>
-              <TableCell className="w-16 text-muted-foreground tabular-nums">
+              <TableCell className="w-16 text-muted-foreground font-semibold tabular-nums">
                 {formatHistoryTime(entry.createdAt)}
               </TableCell>
               <TableCell className="w-10">
                 <HugeiconsIcon
                   icon={iconForStatus(entry.status)}
-                  className="size-5 text-foreground"
+                  className={cn("size-5 text-foreground", {
+                    "text-green-500": entry.status === BALLOON_DELIVERY_STATUS.DELIVERED,
+                    "text-red-500": entry.status === BALLOON_DELIVERY_STATUS.WITHHELD,
+                    "text-blue-500": entry.status === BALLOON_DELIVERY_STATUS.PROCESSING,
+                    "text-orange-500": entry.status === BALLOON_DELIVERY_STATUS.PENDING,
+                  })}
                   strokeWidth={2}
                 />
               </TableCell>
