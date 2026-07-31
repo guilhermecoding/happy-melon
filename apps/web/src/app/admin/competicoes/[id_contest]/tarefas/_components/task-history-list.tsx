@@ -45,6 +45,10 @@ function formatHistoryTime(isoDate: string): string {
   return `[${time}]`;
 }
 
+function getStatusChangedTaskId(entry: TaskHistoryEntry): string | null {
+  return entry.taskId ?? entry.printTaskId ?? entry.balloonDeliveryId;
+}
+
 export default function TaskHistoryList({
   contestId,
   refreshKey = 0,
@@ -137,7 +141,10 @@ export default function TaskHistoryList({
     <div className="flex flex-col gap-4 px-2 pt-2 pb-24">
       <Table>
         <TableBody>
-          {paginatedEntries.map((entry) => (
+          {paginatedEntries.map((entry) => {
+            const taskId = getStatusChangedTaskId(entry);
+
+            return (
             <TableRow key={entry.id}>
               <TableCell>
                 {entry.kind === TASK_KIND.PRINT_TASK ? (
@@ -168,15 +175,21 @@ export default function TaskHistoryList({
                   }
                 />
               </TableCell>
-              <TableCell className="whitespace-normal text-foreground">
+              <TableCell className="whitespace-normal text-foreground flex flex-col gap-1">
                 {entry.message}
+                {taskId ? (
+                  <span className="text-xs text-muted-foreground">
+                    #{taskId}
+                  </span>
+                ) : null}
               </TableCell>
             </TableRow>
-          ))}
+            );
+          })}
         </TableBody>
       </Table>
 
-      <div className="flex flex-col gap-3 px-2 pb-2 sm:flex-row sm:items-center sm:justify-between absolute bottom-0 left-0 right-0">
+      <div className="flex flex-col-reverse gap-3 px-2 pb-2 sm:items-center sm:justify-between absolute bottom-0 left-0 right-0">
         <p className="text-sm text-muted-foreground">
           Mostrando {rangeStart}–{rangeEnd} de {entries.length}
           {totalPages > 1

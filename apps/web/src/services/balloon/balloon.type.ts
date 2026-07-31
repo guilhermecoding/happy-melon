@@ -26,6 +26,7 @@ export type TaskHistoryEntry = {
   questionId: string | null;
   balloonDeliveryId: string | null;
   printTaskId: string | null;
+  taskId: string | null;
   actorUserId: string;
   actorName: string;
   createdAt: string;

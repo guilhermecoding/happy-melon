@@ -385,6 +385,8 @@ export class BalloonsService {
   }
 
   private toHistoryResponse(entry: TaskHistory) {
+    const taskId = entry.printTaskId ?? entry.balloonDeliveryId;
+
     return {
       id: entry.id,
       contestId: entry.contestId,
@@ -396,6 +398,7 @@ export class BalloonsService {
       questionId: entry.questionId,
       balloonDeliveryId: entry.balloonDeliveryId,
       printTaskId: entry.printTaskId,
+      taskId,
       actorUserId: entry.actorUserId,
       actorName: entry.actorName,
       createdAt: entry.createdAt.toISOString(),

@@ -14,7 +14,6 @@ import {
   isConfirmableStatus,
   toBalloonEffectiveStatus,
   type BalloonDeliveryStatus,
-  type BalloonEffectiveStatus,
 } from '@repo/shared';
 import type { Team } from '@/services/team/team.type';
 import { BalloonAchievement } from '@/components/balloon-achievement';
@@ -140,13 +139,6 @@ function PrintRequestCard({
       </Button>
     </div>
   );
-}
-
-function getStatusForQuestion(
-  deliveriesByQuestionId: Map<string, BalloonDeliveryStatus>,
-  questionId: string,
-): BalloonEffectiveStatus {
-  return toBalloonEffectiveStatus(deliveriesByQuestionId.get(questionId));
 }
 
 export function TeamBalloonsDialog({
@@ -359,9 +351,8 @@ export function TeamBalloonsDialog({
             ) : (
               <div className="grid grid-cols-1 gap-3 text-center sm:grid-cols-2 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-6">
                 {questions.map((question) => {
-                  const status = getStatusForQuestion(
-                    deliveriesByQuestionId,
-                    question.id,
+                  const status = toBalloonEffectiveStatus(
+                    deliveriesByQuestionId.get(question.id),
                   );
                   const canConfirm = isConfirmableStatus(status);
                   const isPending = pendingQuestionId === question.id;
