@@ -177,7 +177,7 @@ export default function TaskHistoryList({
                   />
                 </TableCell>
                 <TableCell className="whitespace-normal text-foreground flex flex-col gap-1">
-                  {entry.message}
+                  {entry.message}.
                   {taskId ? (
                     <span className="text-xs text-muted-foreground">
                       #{taskId}

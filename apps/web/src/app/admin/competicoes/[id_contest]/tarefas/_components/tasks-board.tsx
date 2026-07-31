@@ -22,7 +22,7 @@ export default function TasksBoard({ contestId }: TasksBoardProps) {
         />
       </BoxFeatures>
       <BoxFeatures
-        title="Histórico de atividades"
+        title="Histórico de tarefas"
         icon={HistoryIcon}
         className="w-full @4xl:w-1/2 h-fit min-h-[40vh]"
       >
