@@ -8,7 +8,7 @@ import {
   ArrowRight01Icon,
   Attachment01Icon,
   BalloonIcon,
-  DocumentAttachmentIcon,
+  DocumentAttachmentIcon, ViewIcon
 } from '@hugeicons/core-free-icons';
 import { BalloonDeliveryStatusIcon } from '@/components/balloon-delivery-status-icon';
 import { Button } from '@/components/ui/button';
@@ -22,6 +22,7 @@ import {
   TableRow,
 } from '@/components/ui/table';
 import Spinner from '@/components/spinner';
+import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
 
 type TaskHistoryListProps = {
   contestId: string;
@@ -145,45 +146,64 @@ export default function TaskHistoryList({
             const taskId = getStatusChangedTaskId(entry);
 
             return (
-            <TableRow key={entry.id}>
-              <TableCell>
-                {entry.kind === TASK_KIND.PRINT_TASK ? (
-                  <HugeiconsIcon
-                    icon={Attachment01Icon}
-                    className="size-5 shrink-0 text-muted-foreground"
-                    strokeWidth={2}
+              <TableRow key={entry.id}>
+                <TableCell>
+                  {entry.kind === TASK_KIND.PRINT_TASK ? (
+                    <HugeiconsIcon
+                      icon={Attachment01Icon}
+                      className="size-5 shrink-0 text-muted-foreground"
+                      strokeWidth={2}
+                    />
+                  ) : (
+                    <HugeiconsIcon
+                      icon={BalloonIcon}
+                      className="size-5 shrink-0 text-muted-foreground"
+                      strokeWidth={2}
+                      fill="currentColor"
+                    />
+                  )}
+                </TableCell>
+                <TableCell className="w-16 font-semibold tabular-nums text-muted-foreground">
+                  {formatHistoryTime(entry.createdAt)}
+                </TableCell>
+                <TableCell className="w-10">
+                  <BalloonDeliveryStatusIcon
+                    status={entry.status}
+                    kind={
+                      entry.kind === TASK_KIND.PRINT_TASK
+                        ? TASK_KIND.PRINT_TASK
+                        : TASK_KIND.BALLOON_TASK
+                    }
                   />
-                ) : (
-                  <HugeiconsIcon
-                    icon={BalloonIcon}
-                    className="size-5 shrink-0 text-muted-foreground"
-                    strokeWidth={2}
-                    fill="currentColor"
-                  />
-                )}
-              </TableCell>
-              <TableCell className="w-16 font-semibold tabular-nums text-muted-foreground">
-                {formatHistoryTime(entry.createdAt)}
-              </TableCell>
-              <TableCell className="w-10">
-                <BalloonDeliveryStatusIcon
-                  status={entry.status}
-                  kind={
-                    entry.kind === TASK_KIND.PRINT_TASK
-                      ? TASK_KIND.PRINT_TASK
-                      : TASK_KIND.BALLOON_TASK
-                  }
-                />
-              </TableCell>
-              <TableCell className="whitespace-normal text-foreground flex flex-col gap-1">
-                {entry.message}
-                {taskId ? (
-                  <span className="text-xs text-muted-foreground">
-                    #{taskId}
-                  </span>
-                ) : null}
-              </TableCell>
-            </TableRow>
+                </TableCell>
+                <TableCell className="whitespace-normal text-foreground flex flex-col gap-1">
+                  {entry.message}
+                  {taskId ? (
+                    <span className="text-xs text-muted-foreground">
+                      #{taskId}
+                    </span>
+                  ) : null}
+                </TableCell>
+                <TableCell>
+                  <Tooltip>
+                    <TooltipTrigger
+                      render={
+                        <Button
+                          type="button"
+                          variant="normal"
+                          size="sm"
+                          className="bg-transparent hover:bg-background/80 p-1 transition-colors"
+                        />
+                      }
+                    >
+                      <HugeiconsIcon icon={ViewIcon} className="size-4" strokeWidth={2} />
+                    </TooltipTrigger>
+                    <TooltipContent>
+                      Ver tarefa completa
+                    </TooltipContent>
+                  </Tooltip>
+                </TableCell>
+              </TableRow>
             );
           })}
         </TableBody>
