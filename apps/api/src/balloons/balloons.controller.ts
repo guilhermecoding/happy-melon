@@ -39,6 +39,19 @@ export class BalloonsController {
     return this.balloonsService.listTaskHistory(contestId);
   }
 
+  @Get('contests/:contestId/task-history/by-task/:relatedTaskId')
+  listTaskTimeline(
+    @Param('contestId') contestId: string,
+    @Param('relatedTaskId') relatedTaskId: string,
+    @Query('kind') kind?: string,
+  ) {
+    return this.balloonsService.listTaskTimeline(
+      contestId,
+      relatedTaskId,
+      kind,
+    );
+  }
+
   @Post('contests/:contestId/balloon-deliveries/confirm')
   confirm(
     @Param('contestId') contestId: string,

@@ -197,6 +197,7 @@ export class PrintsService {
             message,
             teamId: params.task.teamId,
             printTaskId: params.task.id,
+            relatedTaskId: params.task.id,
             actorUserId: params.actor.userId,
             actorName: params.actor.name,
           },

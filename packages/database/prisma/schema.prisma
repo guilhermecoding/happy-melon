@@ -210,11 +210,16 @@ model TaskHistory {
   balloonDelivery   BalloonDelivery?      @relation(fields: [balloonDeliveryId], references: [id], onDelete: SetNull)
   printTaskId       String?
   printTask         PrintTask?            @relation(fields: [printTaskId], references: [id], onDelete: SetNull)
+  /// Denormalized balloonDeliveryId/printTaskId for O(log n) timeline lookups.
+  relatedTaskId     String?
   actorUserId       String
   actorName         String
   createdAt         DateTime              @default(now())
 
   @@index([contestId, createdAt])
+  @@index([contestId, relatedTaskId, createdAt])
+  @@index([balloonDeliveryId, createdAt])
+  @@index([printTaskId, createdAt])
   @@map("task_history")
   @@schema("public")
 }

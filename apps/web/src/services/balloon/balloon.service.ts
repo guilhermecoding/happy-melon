@@ -87,6 +87,41 @@ export const balloonService = {
     }
   },
 
+  async listTaskTimeline(
+    contestId: string,
+    relatedTaskId: string,
+    kind?: string,
+  ): Promise<TaskHistoryEntry[]> {
+    try {
+      const cookie = await getServerCookieHeader();
+      const search = kind
+        ? `?${new URLSearchParams({ kind }).toString()}`
+        : '';
+      const response = await fetch(
+        `${API_URL}/contests/${contestId}/task-history/by-task/${relatedTaskId}${search}`,
+        {
+          credentials: 'include',
+          headers: cookie ? { cookie } : undefined,
+          cache: 'no-store',
+        },
+      );
+
+      if (!response.ok) {
+        throw await parseBalloonError(
+          response,
+          'Não foi possível carregar o histórico da tarefa.',
+        );
+      }
+
+      return response.json();
+    } catch (error) {
+      throw normalizeBalloonError(
+        error,
+        'Não foi possível carregar o histórico da tarefa.',
+      );
+    }
+  },
+
   async confirm(
     contestId: string,
     data: TeamQuestionActionInput,

@@ -9,7 +9,6 @@ import {
   prisma,
   type BalloonDelivery,
   type Prisma,
-  type TaskHistory,
 } from '@repo/database';
 import {
   BALLOON_DELIVERY_STATUS,
@@ -83,6 +82,47 @@ export class BalloonsService {
       where: { contestId },
       orderBy: { createdAt: 'desc' },
     });
+
+    return history.map((entry) => this.toHistoryResponse(entry));
+  }
+
+  async listTaskTimeline(
+    contestId: string,
+    relatedTaskId: string,
+    kind?: string,
+  ) {
+    await this.ensureContestExists(contestId);
+
+    const history = await prisma.taskHistory.findMany({
+      where: {
+        contestId,
+        relatedTaskId,
+        ...(kind ? { kind } : {}),
+      },
+      orderBy: { createdAt: 'asc' },
+      select: {
+        id: true,
+        contestId: true,
+        kind: true,
+        type: true,
+        status: true,
+        message: true,
+        teamId: true,
+        questionId: true,
+        balloonDeliveryId: true,
+        printTaskId: true,
+        relatedTaskId: true,
+        actorUserId: true,
+        actorName: true,
+        createdAt: true,
+      },
+    });
+
+    if (history.length === 0) {
+      throw new NotFoundException(
+        'Nenhum histórico encontrado para esta tarefa.',
+      );
+    }
 
     return history.map((entry) => this.toHistoryResponse(entry));
   }
@@ -261,6 +301,7 @@ export class BalloonsService {
             teamId: params.delivery.teamId,
             questionId: params.delivery.questionId,
             balloonDeliveryId: params.delivery.id,
+            relatedTaskId: params.delivery.id,
             actorUserId: params.actor.userId,
             actorName: params.actor.name,
           },
@@ -384,8 +425,26 @@ export class BalloonsService {
     };
   }
 
-  private toHistoryResponse(entry: TaskHistory) {
-    const taskId = entry.printTaskId ?? entry.balloonDeliveryId;
+  private toHistoryResponse(entry: {
+    id: string;
+    contestId: string;
+    kind: string;
+    type: string;
+    status: PrismaBalloonDeliveryStatus;
+    message: string;
+    teamId: string | null;
+    questionId: string | null;
+    balloonDeliveryId: string | null;
+    printTaskId: string | null;
+    relatedTaskId?: string | null;
+    actorUserId: string;
+    actorName: string;
+    createdAt: Date;
+  }) {
+    const taskId =
+      entry.relatedTaskId ??
+      entry.printTaskId ??
+      entry.balloonDeliveryId;
 
     return {
       id: entry.id,
