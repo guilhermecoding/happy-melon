@@ -53,15 +53,7 @@ export class CollaboratorsService {
         return [];
       }
 
-      return [
-        {
-          id: user.id,
-          name: user.name,
-          email: user.email,
-          hasAccess: membership.hasAccess,
-          lastAccess: lastAccessByUserId.get(user.id) ?? null,
-        },
-      ];
+      return [this.toCollaborator(user, lastAccessByUserId.get(user.id) ?? null)];
     });
   }
 
@@ -140,15 +132,17 @@ export class CollaboratorsService {
       throw error;
     }
 
+    const user = await prisma.user.findUniqueOrThrow({ where: { id: userId } });
     const lastAccessByUserId = await this.getLastAccessByUserIds([userId]);
 
-    return {
-      id: userId,
-      name,
-      email: userEmail,
-      hasAccess: true,
-      lastAccess: lastAccessByUserId.get(userId) ?? null,
-    };
+    return this.toCollaborator(
+      {
+        ...user,
+        name,
+        email: userEmail,
+      },
+      lastAccessByUserId.get(userId) ?? null,
+    );
   }
 
   async update(
@@ -181,49 +175,73 @@ export class CollaboratorsService {
         },
       });
 
-      const membership = await prisma.contestCollaborator.findUniqueOrThrow({
-        where: {
-          contestId_userId: { contestId, userId },
-        },
+      const refreshed = await prisma.user.findUniqueOrThrow({
+        where: { id: userId },
       });
       const lastAccessByUserId = await this.getLastAccessByUserIds([userId]);
 
-      return {
-        id: updated.id,
-        name: updated.name,
-        email: updated.email,
-        hasAccess: membership.hasAccess,
-        lastAccess: lastAccessByUserId.get(userId) ?? null,
-      };
+      return this.toCollaborator(
+        {
+          ...refreshed,
+          name: updated.name,
+          email: updated.email,
+        },
+        lastAccessByUserId.get(userId) ?? null,
+      );
     } catch (error) {
       this.rethrowApiError(error);
     }
   }
 
-  async setAccess(contestId: string, userId: string, hasAccess: boolean) {
+  async setAccess(
+    headers: IncomingHttpHeaders,
+    contestId: string,
+    userId: string,
+    hasAccess: boolean,
+  ) {
     await this.ensureMembership(contestId, userId);
 
-    const membership = await prisma.contestCollaborator.update({
-      where: {
-        contestId_userId: { contestId, userId },
-      },
-      data: { hasAccess },
-    });
-
-    const user = await prisma.user.findUnique({ where: { id: userId } });
-    if (!user) {
+    const existing = await prisma.user.findUnique({ where: { id: userId } });
+    if (!existing) {
       throw new NotFoundException('Colaborador não encontrado.');
     }
 
-    const lastAccessByUserId = await this.getLastAccessByUserIds([userId]);
+    if (existing.role === 'admin') {
+      throw new ForbiddenException(
+        'Não é possível alterar o acesso de um administrador por esta tela.',
+      );
+    }
 
-    return {
-      id: user.id,
-      name: user.name,
-      email: user.email,
-      hasAccess: membership.hasAccess,
-      lastAccess: lastAccessByUserId.get(userId) ?? null,
-    };
+    try {
+      const authHeaders = this.toAuthHeaders(headers);
+
+      if (hasAccess) {
+        await auth.api.unbanUser({
+          headers: authHeaders,
+          body: { userId },
+        });
+      } else {
+        await auth.api.banUser({
+          headers: authHeaders,
+          body: {
+            userId,
+            banReason: 'Acesso ao sistema desabilitado',
+          },
+        });
+      }
+
+      const user = await prisma.user.findUniqueOrThrow({
+        where: { id: userId },
+      });
+      const lastAccessByUserId = await this.getLastAccessByUserIds([userId]);
+
+      return this.toCollaborator(
+        user,
+        lastAccessByUserId.get(userId) ?? null,
+      );
+    } catch (error) {
+      this.rethrowApiError(error);
+    }
   }
 
   async remove(
@@ -323,6 +341,26 @@ export class CollaboratorsService {
     throw new Error(
       `Não foi possível gerar um ID único após ${ID_MAX_ATTEMPTS} tentativas.`,
     );
+  }
+
+  private toCollaborator(
+    user: {
+      id: string;
+      name: string;
+      email: string;
+      banned?: boolean | null;
+      createdAt: Date;
+    },
+    lastAccess: string | null,
+  ) {
+    return {
+      id: user.id,
+      name: user.name,
+      email: user.email,
+      hasAccess: !user.banned,
+      lastAccess,
+      createdAt: user.createdAt.toISOString(),
+    };
   }
 
   private async getLastAccessByUserIds(

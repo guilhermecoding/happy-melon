@@ -64,9 +64,11 @@ export class CollaboratorsController {
   setAccess(
     @Param('contestId') contestId: string,
     @Param('userId') userId: string,
+    @Req() request: RequestWithHeaders,
     @Body(setAccessPipe) dto: SetCollaboratorAccessDto,
   ) {
     return this.collaboratorsService.setAccess(
+      request.headers,
       contestId,
       userId,
       dto.hasAccess,
