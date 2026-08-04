@@ -306,76 +306,76 @@ export default function BoxListCollaborators({
                 const absoluteIndex = (currentPage - 1) * PAGE_SIZE + index;
 
                 return (
-                <TableRow
-                  key={collaborator.id}
-                  className={absoluteIndex % 2 === 0 ? 'bg-white' : ''}
-                >
-                  <TableCell className="w-20 px-4 whitespace-nowrap font-mono text-xs">
-                    {collaborator.id}
-                  </TableCell>
-                  <TableCell className="px-4">{collaborator.name}</TableCell>
-                  <TableCell className="px-4">{collaborator.email}</TableCell>
-                  <TableCell className="px-4">
-                    <Switch
-                      checked={collaborator.hasAccess}
-                      disabled={updatingAccess.has(collaborator.id)}
-                      aria-label={`Acesso de ${collaborator.name}`}
-                      onCheckedChange={(checked) =>
-                        void updateAccess(collaborator, checked)
-                      }
-                    />
-                  </TableCell>
-                  <TableCell className="px-4 text-muted-foreground">
-                    {formatDateTime(collaborator.lastAccess)}
-                  </TableCell>
-                  <TableCell className="px-4 text-muted-foreground">
-                    {formatDateTime(collaborator.createdAt)}
-                  </TableCell>
-                  <TableCell className="px-4 text-right">
-                    <DropdownMenu>
-                      <DropdownMenuTrigger
-                        render={
-                          <Button
-                            type="button"
-                            variant="normal"
-                            size="icon"
-                            className="size-9"
-                            aria-label={`Opções de ${collaborator.name}`}
-                          />
+                  <TableRow
+                    key={collaborator.id}
+                    className={absoluteIndex % 2 === 0 ? 'bg-white' : ''}
+                  >
+                    <TableCell className="w-20 px-4 whitespace-nowrap font-mono text-xs">
+                      {collaborator.id}
+                    </TableCell>
+                    <TableCell className="px-4">{collaborator.name}</TableCell>
+                    <TableCell className="px-4">{collaborator.email}</TableCell>
+                    <TableCell className="px-4">
+                      <Switch
+                        checked={collaborator.hasAccess}
+                        disabled={updatingAccess.has(collaborator.id)}
+                        aria-label={`Acesso de ${collaborator.name}`}
+                        onCheckedChange={(checked) =>
+                          void updateAccess(collaborator, checked)
                         }
-                      >
-                        <HugeiconsIcon
-                          icon={MoreHorizontalIcon}
-                          className="size-5"
-                          strokeWidth={1.5}
-                        />
-                      </DropdownMenuTrigger>
-                      <DropdownMenuContent align="end" className="min-w-40">
-                        <DropdownMenuItem
-                          onClick={() => openEditSheet(collaborator)}
+                      />
+                    </TableCell>
+                    <TableCell className="px-4 text-muted-foreground">
+                      {formatDateTime(collaborator.lastAccess)}
+                    </TableCell>
+                    <TableCell className="px-4 text-muted-foreground">
+                      {formatDateTime(collaborator.createdAt)}
+                    </TableCell>
+                    <TableCell className="px-4 text-right">
+                      <DropdownMenu>
+                        <DropdownMenuTrigger
+                          render={
+                            <Button
+                              type="button"
+                              variant="normal"
+                              size="icon"
+                              className="size-9"
+                              aria-label={`Opções de ${collaborator.name}`}
+                            />
+                          }
                         >
                           <HugeiconsIcon
-                            icon={PencilEdit02Icon}
-                            className="size-4"
+                            icon={MoreHorizontalIcon}
+                            className="size-5"
                             strokeWidth={1.5}
                           />
-                          Editar
-                        </DropdownMenuItem>
-                        <DropdownMenuItem
-                          variant="destructive"
-                          onClick={() => setCollaboratorToDelete(collaborator)}
-                        >
-                          <HugeiconsIcon
-                            icon={Delete01Icon}
-                            className="size-4"
-                            strokeWidth={1.5}
-                          />
-                          Remover
-                        </DropdownMenuItem>
-                      </DropdownMenuContent>
-                    </DropdownMenu>
-                  </TableCell>
-                </TableRow>
+                        </DropdownMenuTrigger>
+                        <DropdownMenuContent align="end" className="min-w-40">
+                          <DropdownMenuItem
+                            onClick={() => openEditSheet(collaborator)}
+                          >
+                            <HugeiconsIcon
+                              icon={PencilEdit02Icon}
+                              className="size-4"
+                              strokeWidth={1.5}
+                            />
+                            Editar
+                          </DropdownMenuItem>
+                          <DropdownMenuItem
+                            variant="destructive"
+                            onClick={() => setCollaboratorToDelete(collaborator)}
+                          >
+                            <HugeiconsIcon
+                              icon={Delete01Icon}
+                              className="size-4"
+                              strokeWidth={1.5}
+                            />
+                            Remover
+                          </DropdownMenuItem>
+                        </DropdownMenuContent>
+                      </DropdownMenu>
+                    </TableCell>
+                  </TableRow>
                 );
               })
             )}
@@ -453,9 +453,9 @@ export default function BoxListCollaborators({
       >
         <DialogContent>
           <DialogHeader>
-            <DialogTitle>Excluir colaborador</DialogTitle>
+            <DialogTitle className="text-lg font-semibold">Excluir colaborador</DialogTitle>
             <DialogDescription>
-              Remover {collaboratorToDelete?.name} desta competição? Se não
+              Remover <strong>{collaboratorToDelete?.name}</strong> desta competição? Se não
               houver vínculo em outras competições, a conta será excluída.
             </DialogDescription>
           </DialogHeader>
@@ -463,6 +463,7 @@ export default function BoxListCollaborators({
             <Button
               type="button"
               variant="white"
+              size="sm"
               onClick={() => setCollaboratorToDelete(null)}
             >
               Cancelar
@@ -470,6 +471,7 @@ export default function BoxListCollaborators({
             <Button
               type="button"
               variant="red"
+              size="sm"
               loading={isDeleting}
               onClick={() => void handleDelete()}
             >
