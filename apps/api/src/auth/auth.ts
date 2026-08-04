@@ -9,6 +9,7 @@ import {
   isIdUniqueViolation,
 } from '../common/short-id.js';
 import { ac, admin, staff } from './permissions.js';
+import { staffSignIn } from './staff-sign-in.js';
 
 function withIdCollisionRetry(client: typeof prisma) {
   return client.$extends({
@@ -52,6 +53,15 @@ export const auth = betterAuth({
     enabled: true,
     disableSignUp: true,
   },
+  session: {
+    additionalFields: {
+      activeContestId: {
+        type: 'string',
+        required: false,
+        input: false,
+      },
+    },
+  },
   trustedOrigins: [process.env.WEB_ORIGIN ?? 'http://localhost:3001'],
   baseURL: process.env.BETTER_AUTH_URL ?? 'http://localhost:3000',
   secret: process.env.BETTER_AUTH_SECRET,
@@ -67,5 +77,6 @@ export const auth = betterAuth({
       defaultRole: 'staff',
       adminRoles: ['admin'],
     }),
+    staffSignIn(),
   ],
 });

@@ -30,16 +30,17 @@ model User {
 }
 
 model Session {
-  id             String   @id
-  expiresAt      DateTime
-  token          String
-  createdAt      DateTime @default(now())
-  updatedAt      DateTime @updatedAt
-  ipAddress      String?
-  userAgent      String?
-  userId         String
-  impersonatedBy String?
-  user           User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  id              String   @id
+  expiresAt       DateTime
+  token           String
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+  ipAddress       String?
+  userAgent       String?
+  userId          String
+  impersonatedBy  String?
+  activeContestId String?
+  user            User     @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@unique([token])
   @@index([userId])
@@ -98,21 +99,38 @@ enum BalloonDeliveryStatus {
 }
 
 model Contest {
-  id                String            @id
+  id                String                @id
   name              String
-  status            ContestStatus     @default(ACTIVE)
+  status            ContestStatus         @default(ACTIVE)
   startsAt          DateTime
   endsAt            DateTime
   venue             String
-  createdAt         DateTime          @default(now())
-  updatedAt         DateTime          @updatedAt
+  createdAt         DateTime              @default(now())
+  updatedAt         DateTime              @updatedAt
   questions         Question[]
   teams             Team[]
   balloonDeliveries BalloonDelivery[]
   printTasks        PrintTask[]
   taskHistories     TaskHistory[]
+  collaborators     ContestCollaborator[]
 
   @@map("contest")
+  @@schema("public")
+}
+
+model ContestCollaborator {
+  id        String   @id
+  contestId String
+  contest   Contest  @relation(fields: [contestId], references: [id], onDelete: Cascade)
+  userId    String
+  hasAccess Boolean  @default(true)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@unique([contestId, userId])
+  @@index([contestId])
+  @@index([userId])
+  @@map("contest_collaborator")
   @@schema("public")
 }
 

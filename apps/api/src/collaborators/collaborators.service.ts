@@ -1,0 +1,430 @@
+import { randomBytes } from 'node:crypto';
+import type { IncomingHttpHeaders } from 'node:http';
+import {
+  ConflictException,
+  ForbiddenException,
+  HttpException,
+  HttpStatus,
+  Injectable,
+  NotFoundException,
+} from '@nestjs/common';
+import { APIError } from 'better-auth/api';
+import { fromNodeHeaders } from 'better-auth/node';
+import { prisma } from '@repo/database';
+import { auth } from '../auth/auth.js';
+import {
+  generateShortId,
+  ID_MAX_ATTEMPTS,
+  isIdUniqueViolation,
+  isPrismaUniqueViolation,
+} from '../common/short-id.js';
+import type {
+  CreateCollaboratorDto,
+  UpdateCollaboratorDto,
+} from './dto/collaborator.dto.js';
+
+const PASSWORD_ALPHABET =
+  'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
+
+@Injectable()
+export class CollaboratorsService {
+  async list(contestId: string) {
+    await this.ensureContestExists(contestId);
+
+    const memberships = await prisma.contestCollaborator.findMany({
+      where: { contestId },
+      orderBy: { createdAt: 'asc' },
+    });
+
+    if (memberships.length === 0) {
+      return [];
+    }
+
+    const userIds = memberships.map((membership) => membership.userId);
+    const users = await prisma.user.findMany({
+      where: { id: { in: userIds } },
+    });
+    const usersById = new Map(users.map((user) => [user.id, user]));
+    const lastAccessByUserId = await this.getLastAccessByUserIds(userIds);
+
+    return memberships.flatMap((membership) => {
+      const user = usersById.get(membership.userId);
+      if (!user || user.role === 'admin') {
+        return [];
+      }
+
+      return [
+        {
+          id: user.id,
+          name: user.name,
+          email: user.email,
+          hasAccess: membership.hasAccess,
+          lastAccess: lastAccessByUserId.get(user.id) ?? null,
+        },
+      ];
+    });
+  }
+
+  async create(
+    headers: IncomingHttpHeaders,
+    contestId: string,
+    dto: CreateCollaboratorDto,
+  ) {
+    await this.ensureContestExists(contestId);
+
+    const email = dto.email.toLowerCase().trim();
+    const existingUser = await prisma.user.findUnique({ where: { email } });
+
+    if (existingUser?.role === 'admin') {
+      throw new ConflictException(
+        'Este e-mail pertence a um administrador do sistema.',
+      );
+    }
+
+    let userId: string;
+    let name = dto.name.trim();
+    let userEmail = email;
+
+    if (existingUser) {
+      const alreadyMember = await prisma.contestCollaborator.findUnique({
+        where: {
+          contestId_userId: {
+            contestId,
+            userId: existingUser.id,
+          },
+        },
+      });
+
+      if (alreadyMember) {
+        throw new ConflictException(
+          'Este colaborador já está vinculado a esta competição.',
+        );
+      }
+
+      userId = existingUser.id;
+      name = existingUser.name;
+      userEmail = existingUser.email;
+    } else {
+      const temporaryPassword = this.generateTemporaryPassword();
+
+      try {
+        const { user } = await auth.api.createUser({
+          headers: this.toAuthHeaders(headers),
+          body: {
+            name: dto.name.trim(),
+            email,
+            password: temporaryPassword,
+            role: 'staff',
+            data: {
+              emailVerified: true,
+            },
+          },
+        });
+
+        userId = user.id;
+        name = user.name;
+        userEmail = user.email;
+      } catch (error) {
+        this.rethrowApiError(error);
+      }
+    }
+
+    try {
+      await this.createMembership(contestId, userId);
+    } catch (error) {
+      if (isPrismaUniqueViolation(error)) {
+        throw new ConflictException(
+          'Este colaborador já está vinculado a esta competição.',
+        );
+      }
+      throw error;
+    }
+
+    const lastAccessByUserId = await this.getLastAccessByUserIds([userId]);
+
+    return {
+      id: userId,
+      name,
+      email: userEmail,
+      hasAccess: true,
+      lastAccess: lastAccessByUserId.get(userId) ?? null,
+    };
+  }
+
+  async update(
+    headers: IncomingHttpHeaders,
+    contestId: string,
+    userId: string,
+    dto: UpdateCollaboratorDto,
+  ) {
+    await this.ensureMembership(contestId, userId);
+
+    const user = await prisma.user.findUnique({ where: { id: userId } });
+    if (!user) {
+      throw new NotFoundException('Colaborador não encontrado.');
+    }
+
+    if (user.role === 'admin') {
+      throw new ForbiddenException(
+        'Não é possível editar um administrador por esta tela.',
+      );
+    }
+
+    try {
+      const updated = await auth.api.adminUpdateUser({
+        headers: this.toAuthHeaders(headers),
+        body: {
+          userId,
+          data: {
+            name: dto.name.trim(),
+          },
+        },
+      });
+
+      const membership = await prisma.contestCollaborator.findUniqueOrThrow({
+        where: {
+          contestId_userId: { contestId, userId },
+        },
+      });
+      const lastAccessByUserId = await this.getLastAccessByUserIds([userId]);
+
+      return {
+        id: updated.id,
+        name: updated.name,
+        email: updated.email,
+        hasAccess: membership.hasAccess,
+        lastAccess: lastAccessByUserId.get(userId) ?? null,
+      };
+    } catch (error) {
+      this.rethrowApiError(error);
+    }
+  }
+
+  async setAccess(contestId: string, userId: string, hasAccess: boolean) {
+    await this.ensureMembership(contestId, userId);
+
+    const membership = await prisma.contestCollaborator.update({
+      where: {
+        contestId_userId: { contestId, userId },
+      },
+      data: { hasAccess },
+    });
+
+    const user = await prisma.user.findUnique({ where: { id: userId } });
+    if (!user) {
+      throw new NotFoundException('Colaborador não encontrado.');
+    }
+
+    const lastAccessByUserId = await this.getLastAccessByUserIds([userId]);
+
+    return {
+      id: user.id,
+      name: user.name,
+      email: user.email,
+      hasAccess: membership.hasAccess,
+      lastAccess: lastAccessByUserId.get(userId) ?? null,
+    };
+  }
+
+  async remove(
+    headers: IncomingHttpHeaders,
+    contestId: string,
+    userId: string,
+  ) {
+    await this.ensureMembership(contestId, userId);
+
+    const user = await prisma.user.findUnique({ where: { id: userId } });
+    if (!user) {
+      throw new NotFoundException('Colaborador não encontrado.');
+    }
+
+    if (user.role === 'admin') {
+      throw new ForbiddenException(
+        'Não é possível remover um administrador por esta tela.',
+      );
+    }
+
+    await prisma.contestCollaborator.delete({
+      where: {
+        contestId_userId: { contestId, userId },
+      },
+    });
+
+    const remainingMemberships = await prisma.contestCollaborator.count({
+      where: { userId },
+    });
+
+    if (remainingMemberships === 0 && user.role === 'staff') {
+      try {
+        await auth.api.removeUser({
+          headers: this.toAuthHeaders(headers),
+          body: { userId },
+        });
+      } catch (error) {
+        this.rethrowApiError(error);
+      }
+    }
+
+    return { success: true as const };
+  }
+
+  private async ensureContestExists(contestId: string) {
+    const contest = await prisma.contest.findUnique({
+      where: { id: contestId },
+    });
+
+    if (!contest) {
+      throw new NotFoundException('Competição não encontrada.');
+    }
+
+    return contest;
+  }
+
+  private async ensureMembership(contestId: string, userId: string) {
+    await this.ensureContestExists(contestId);
+
+    const membership = await prisma.contestCollaborator.findUnique({
+      where: {
+        contestId_userId: { contestId, userId },
+      },
+    });
+
+    if (!membership) {
+      throw new NotFoundException('Colaborador não encontrado nesta competição.');
+    }
+
+    return membership;
+  }
+
+  private async createMembership(contestId: string, userId: string) {
+    for (let attempt = 0; attempt < ID_MAX_ATTEMPTS; attempt++) {
+      try {
+        return await prisma.contestCollaborator.create({
+          data: {
+            id: generateShortId(),
+            contestId,
+            userId,
+            hasAccess: true,
+          },
+        });
+      } catch (error) {
+        if (isPrismaUniqueViolation(error) && !isIdUniqueViolation(error)) {
+          throw error;
+        }
+
+        if (attempt < ID_MAX_ATTEMPTS - 1 && isIdUniqueViolation(error)) {
+          continue;
+        }
+
+        throw error;
+      }
+    }
+
+    throw new Error(
+      `Não foi possível gerar um ID único após ${ID_MAX_ATTEMPTS} tentativas.`,
+    );
+  }
+
+  private async getLastAccessByUserIds(
+    userIds: string[],
+  ): Promise<Map<string, string>> {
+    if (userIds.length === 0) {
+      return new Map();
+    }
+
+    const sessions = await prisma.session.groupBy({
+      by: ['userId'],
+      where: { userId: { in: userIds } },
+      _max: { updatedAt: true },
+    });
+
+    return new Map(
+      sessions.flatMap((session) => {
+        if (!session._max.updatedAt) {
+          return [];
+        }
+
+        return [[session.userId, session._max.updatedAt.toISOString()]];
+      }),
+    );
+  }
+
+  private toAuthHeaders(headers: IncomingHttpHeaders): Headers {
+    if (typeof fromNodeHeaders === 'function') {
+      return fromNodeHeaders(headers);
+    }
+
+    const authHeaders = new Headers();
+
+    for (const [name, value] of Object.entries(headers)) {
+      if (Array.isArray(value)) {
+        for (const item of value) {
+          authHeaders.append(name, item);
+        }
+      } else if (value !== undefined) {
+        authHeaders.set(name, value);
+      }
+    }
+
+    return authHeaders;
+  }
+
+  private generateTemporaryPassword(): string {
+    return Array.from(
+      randomBytes(16),
+      (byte) => PASSWORD_ALPHABET[byte % PASSWORD_ALPHABET.length]!,
+    ).join('');
+  }
+
+  private extractApiErrorMessage(error: APIError): string {
+    const body: unknown = error.body;
+
+    if (typeof body === 'string' && body.trim()) {
+      return body;
+    }
+
+    if (body && typeof body === 'object') {
+      const message = (body as { message?: unknown }).message;
+
+      if (typeof message === 'string' && message.trim()) {
+        return message;
+      }
+
+      if (Array.isArray(message)) {
+        return message.map(String).join(', ');
+      }
+    }
+
+    return error.message || 'Erro inesperado ao processar a solicitação.';
+  }
+
+  private isDuplicateEmailError(statusCode: number, message: string): boolean {
+    if (
+      /already exists|user.?exists|email.?already|unique constraint|duplicate/i.test(
+        message,
+      )
+    ) {
+      return true;
+    }
+
+    return statusCode === HttpStatus.CONFLICT;
+  }
+
+  private rethrowApiError(error: unknown): never {
+    if (error instanceof APIError) {
+      const statusCode =
+        typeof error.statusCode === 'number'
+          ? error.statusCode
+          : HttpStatus.INTERNAL_SERVER_ERROR;
+      const message = this.extractApiErrorMessage(error);
+
+      if (this.isDuplicateEmailError(statusCode, message)) {
+        throw new ConflictException('Já existe um usuário com este e-mail.');
+      }
+
+      throw new HttpException(message, statusCode);
+    }
+
+    throw error;
+  }
+}
