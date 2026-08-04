@@ -87,10 +87,10 @@ export default function BoxAccessControllCollab({
                                     opacity: 1,
                                     excavate: true,
                                 }}
-                                className='size-64'
+                                className='size-52 md:size-64'
                             />
                         </div>
-                        <span className="text-5xl font-semibold text-primary/70">
+                        <span className="text-4xl md:text-5xl font-semibold text-primary/70">
                             {contest.id}
                         </span>
                         <div className="flex flex-row items-center gap-2">

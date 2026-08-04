@@ -28,7 +28,7 @@ async function AdminCompetitionColaboratorsPageContent({
                 <TitlePage title="Colaboradores" icon={ThumbsUpIcon} />
             </Section>
             <Section className="mt-4">
-                <BoxFeatures title="Controle e acesso" icon={FilterVerticalIcon} className='w-2/5'>
+                <BoxFeatures title="Controle e acesso" icon={FilterVerticalIcon} className='w-full @5xl/main:w-2/5'>
                     <BoxAccessControllCollab contest={contest} />
                 </BoxFeatures>
             </Section>
