@@ -7,8 +7,11 @@ import {
     Search01Icon,
 } from '@hugeicons/core-free-icons';
 import { HugeiconsIcon } from '@hugeicons/react';
+import { isResolvedBalloonStatus } from '@repo/shared';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
+import { balloonService } from '@/services/balloon/balloon.service';
+import type { BalloonDelivery } from '@/services/balloon/balloon.type';
 import { teamService } from '@/services/team/team.service';
 import { getTeamErrorMessage } from '@/services/team/team.error';
 import type { Team } from '@/services/team/team.type';
@@ -34,12 +37,27 @@ function matchesSearch(team: Team, query: string) {
     return haystack.includes(query);
 }
 
+function countConqueredBalloons(deliveries: BalloonDelivery[]) {
+    const counts = new Map<string, number>();
+
+    for (const delivery of deliveries) {
+        if (!isResolvedBalloonStatus(delivery.status)) {
+            continue;
+        }
+
+        counts.set(delivery.teamId, (counts.get(delivery.teamId) ?? 0) + 1);
+    }
+
+    return counts;
+}
+
 export default function BoxTeamsList({
     contestId,
     onDeliveryChanged,
 }: BoxTeamsListProps) {
     const [teams, setTeams] = useState<Team[]>([]);
-    const [balloonsCount, setBalloonsCount] = useState(0);
+    const [deliveries, setDeliveries] = useState<BalloonDelivery[]>([]);
+    const [questionsCount, setQuestionsCount] = useState(0);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState<string>();
     const [search, setSearch] = useState('');
@@ -48,12 +66,26 @@ export default function BoxTeamsList({
     const [selectedTeam, setSelectedTeam] = useState<Team | null>(null);
     const [achievementsOpen, setAchievementsOpen] = useState(false);
 
+    const conqueredCountByTeamId = useMemo(
+        () => countConqueredBalloons(deliveries),
+        [deliveries],
+    );
+
     const rankedTeams = useMemo(
         () =>
-            [...teams].sort((a, b) =>
-                a.name.localeCompare(b.name, 'pt-BR', { sensitivity: 'base' }),
-            ),
-        [teams],
+            [...teams].sort((a, b) => {
+                const aCount = conqueredCountByTeamId.get(a.id) ?? 0;
+                const bCount = conqueredCountByTeamId.get(b.id) ?? 0;
+
+                if (bCount !== aCount) {
+                    return bCount - aCount;
+                }
+
+                return a.name.localeCompare(b.name, 'pt-BR', {
+                    sensitivity: 'base',
+                });
+            }),
+        [teams, conqueredCountByTeamId],
     );
 
     const filteredTeams = useMemo(() => {
@@ -103,15 +135,18 @@ export default function BoxTeamsList({
             setError(undefined);
 
             try {
-                const [teamsData, questionsData] = await Promise.all([
-                    teamService.list(contestId),
-                    questionService.list(contestId),
-                ]);
+                const [teamsData, questionsData, deliveriesData] =
+                    await Promise.all([
+                        teamService.list(contestId),
+                        questionService.list(contestId),
+                        balloonService.listDeliveries(contestId),
+                    ]);
 
                 if (!active) return;
 
                 setTeams(teamsData);
-                setBalloonsCount(questionsData.length);
+                setQuestionsCount(questionsData.length);
+                setDeliveries(deliveriesData);
             } catch (loadError) {
                 if (active) {
                     setError(
@@ -136,6 +171,28 @@ export default function BoxTeamsList({
     function openAchievements(team: Team) {
         setSelectedTeam(team);
         setAchievementsOpen(true);
+    }
+
+    function applyDelivery(delivery?: BalloonDelivery) {
+        if (delivery) {
+            setDeliveries((current) => {
+                const index = current.findIndex(
+                    (item) =>
+                        item.id === delivery.id ||
+                        (item.teamId === delivery.teamId &&
+                            item.questionId === delivery.questionId),
+                );
+
+                if (index >= 0) {
+                    const next = [...current];
+                    next[index] = delivery;
+                    return next;
+                }
+
+                return [...current, delivery];
+            });
+        }
+        onDeliveryChanged?.();
     }
 
     return (
@@ -183,7 +240,10 @@ export default function BoxTeamsList({
                                     name={team.name}
                                     usernameTeam={team.usernameTeam}
                                     teamId={team.id}
-                                    balloonsCount={balloonsCount}
+                                    balloonsCount={
+                                        conqueredCountByTeamId.get(team.id) ?? 0
+                                    }
+                                    balloonsTotal={questionsCount}
                                     onClick={() => openAchievements(team)}
                                 />
                             ))}
@@ -241,7 +301,7 @@ export default function BoxTeamsList({
                 contestId={contestId}
                 team={selectedTeam}
                 open={achievementsOpen}
-                onDeliveryChanged={onDeliveryChanged}
+                onDeliveryChanged={applyDelivery}
                 onOpenChange={(nextOpen) => {
                     setAchievementsOpen(nextOpen);
                     if (!nextOpen) {

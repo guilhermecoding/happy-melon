@@ -31,6 +31,7 @@ type FlashCardTeamProps = {
   usernameTeam: string;
   teamId: string;
   balloonsCount: number;
+  balloonsTotal?: number;
   onClick?: () => void;
 };
 
@@ -40,11 +41,16 @@ export default function FlashCardTeam({
   usernameTeam,
   teamId,
   balloonsCount,
+  balloonsTotal,
   onClick,
 }: FlashCardTeamProps) {
   const rankStyles = getRankStyles(index);
   const balloonsLabel =
-    balloonsCount === 1 ? '1 balão' : `${balloonsCount} balões`;
+    balloonsTotal !== undefined
+      ? `${balloonsCount}/${balloonsTotal} balões`
+      : balloonsCount === 1
+        ? '1 balão'
+        : `${balloonsCount} balões`;
 
   return (
     <button

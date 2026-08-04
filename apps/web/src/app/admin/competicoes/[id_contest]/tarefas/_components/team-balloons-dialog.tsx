@@ -47,7 +47,7 @@ type TeamBalloonsDialogProps = {
   team: Team | null;
   open: boolean;
   onOpenChange: (open: boolean) => void;
-  onDeliveryChanged?: () => void;
+  onDeliveryChanged?: (delivery?: BalloonDelivery) => void;
 };
 
 function PrintRequestCard({
@@ -237,7 +237,7 @@ export function TeamBalloonsDialog({
       next.set(delivery.questionId, delivery.status);
       return next;
     });
-    onDeliveryChanged?.();
+    onDeliveryChanged?.(delivery);
   }
 
   async function handleConfirm(question: Question) {
