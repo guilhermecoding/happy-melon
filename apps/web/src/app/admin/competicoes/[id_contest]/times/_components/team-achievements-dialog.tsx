@@ -4,13 +4,12 @@ import { useEffect, useState } from 'react';
 import { HugeiconsIcon } from '@hugeicons/react';
 import { Award01Icon, EyeClosedIcon } from '@hugeicons/core-free-icons';
 import {
-  BALLOON_EFFECTIVE_STATUS,
+  isResolvedBalloonStatus,
   toBalloonEffectiveStatus,
   type BalloonDeliveryStatus,
 } from '@repo/shared';
 import type { Team } from '@/services/team/team.type';
 import { BalloonAchievement } from '@/components/balloon-achievement';
-import { BalloonDeliveryStatusIcon } from '@/components/balloon-delivery-status-icon';
 import { Button } from '@/components/ui/button';
 import {
   Dialog,
@@ -154,23 +153,17 @@ export function TeamAchievementsDialog({
                 const status = toBalloonEffectiveStatus(
                   deliveriesByQuestionId.get(question.id),
                 );
+                const resolved = isResolvedBalloonStatus(status);
 
                 return (
                   <div
                     key={question.id}
                     className="relative min-w-0 rounded-2xl border border-border bg-background p-2"
                   >
-                    {status !== BALLOON_EFFECTIVE_STATUS.ABSENT ? (
-                      <BalloonDeliveryStatusIcon
-                        status={status}
-                        className="absolute top-2 right-2 size-6"
-                        strokeWidth={2.5}
-                      />
-                    ) : null}
                     <BalloonAchievement
                       questionId={question.label}
                       color={toBalloonColor(question.balloonColor)}
-                      resolved={true}
+                      resolved={resolved}
                     />
                   </div>
                 );
