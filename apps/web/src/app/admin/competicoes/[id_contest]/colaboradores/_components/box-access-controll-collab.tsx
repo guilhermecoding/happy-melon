@@ -82,8 +82,8 @@ export default function BoxAccessControllCollab({
                                     src: '/logo-icon.svg',
                                     x: undefined,
                                     y: undefined,
-                                    height: 30,
-                                    width: 20,
+                                    height: 22,
+                                    width: 13,
                                     opacity: 1,
                                     excavate: true,
                                 }}
