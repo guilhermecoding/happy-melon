@@ -10,13 +10,6 @@ import { Button } from '@/components/ui/button';
 import { Field, FieldError, FieldLabel } from '@/components/ui/field';
 import { Input } from '@/components/ui/input';
 import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from '@/components/ui/select';
-import {
   Sheet,
   SheetContent,
   SheetDescription,
@@ -26,15 +19,10 @@ import {
 } from '@/components/ui/sheet';
 import { toast } from '@/components/ui/toast';
 import {
-  contestFormSchema,
-  type ContestFormValues,
+  editContestFormSchema,
+  type EditContestFormValues,
 } from './contest-schema';
 import { EyeClosedIcon, SaveIcon } from '@hugeicons/core-free-icons';
-
-const STATUS_LABELS = {
-  active: 'Habilitada',
-  inactive: 'Desabilitada',
-} as const;
 
 type EditContestSheetProps = {
   contest: Contest | null;
@@ -55,10 +43,9 @@ function toDateTimeLocalValue(iso: string): string {
   return `${date.getFullYear()}-${pad(date.getMonth() + 1)}-${pad(date.getDate())}T${pad(date.getHours())}:${pad(date.getMinutes())}`;
 }
 
-function toFormValues(contest: Contest): ContestFormValues {
+function toFormValues(contest: Contest): EditContestFormValues {
   return {
     name: contest.name,
-    status: contest.status,
     startsAt: toDateTimeLocalValue(contest.startsAt),
     endsAt: toDateTimeLocalValue(contest.endsAt),
     venue: contest.venue,
@@ -76,13 +63,12 @@ export function EditContestSheet({
   const form = useForm({
     defaultValues: {
       name: '',
-      status: 'active' as ContestFormValues['status'],
       startsAt: '',
       endsAt: '',
       venue: '',
-    } satisfies ContestFormValues,
+    } satisfies EditContestFormValues,
     validators: {
-      onSubmit: contestFormSchema,
+      onSubmit: editContestFormSchema,
     },
     onSubmit: async ({ value }) => {
       if (!contest) return;
@@ -91,7 +77,7 @@ export function EditContestSheet({
       try {
         const updatedContest = await contestService.update(contest.id, {
           name: value.name,
-          status: value.status,
+          status: contest.status,
           startsAt: new Date(value.startsAt).toISOString(),
           endsAt: new Date(value.endsAt).toISOString(),
           venue: value.venue,
@@ -163,43 +149,6 @@ export function EditContestSheet({
                     onChange={(event) => field.handleChange(event.target.value)}
                     aria-invalid={!field.state.meta.isValid}
                   />
-                  <FieldError errors={field.state.meta.errors} />
-                </Field>
-              )}
-            </form.Field>
-
-            <form.Field name="status">
-              {(field) => (
-                <Field data-invalid={!field.state.meta.isValid}>
-                  <FieldLabel htmlFor={field.name}>Status</FieldLabel>
-                  <Select
-                    value={field.state.value}
-                    onValueChange={(value) => {
-                      if (value === 'active' || value === 'inactive') {
-                        field.handleChange(value);
-                      }
-                    }}
-                  >
-                    <SelectTrigger
-                      id={field.name}
-                      className="h-auto w-full rounded-xl border-3 border-input bg-gray-50 px-4 py-6 text-base shadow-none dark:bg-input/30"
-                      aria-invalid={!field.state.meta.isValid}
-                    >
-                      <SelectValue>
-                        {(value: string | null) =>
-                          value === 'active' || value === 'inactive'
-                            ? STATUS_LABELS[value]
-                            : null
-                        }
-                      </SelectValue>
-                    </SelectTrigger>
-                    <SelectContent alignItemWithTrigger={false} align="start">
-                      <SelectItem value="active">{STATUS_LABELS.active}</SelectItem>
-                      <SelectItem value="inactive">
-                        {STATUS_LABELS.inactive}
-                      </SelectItem>
-                    </SelectContent>
-                  </Select>
                   <FieldError errors={field.state.meta.errors} />
                 </Field>
               )}

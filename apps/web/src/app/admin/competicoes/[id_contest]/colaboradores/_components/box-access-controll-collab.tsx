@@ -1,22 +1,70 @@
 'use client'
 
-import { QRCodeSVG } from 'qrcode.react'
 import { useEffect, useState } from 'react'
+import { QRCodeSVG } from 'qrcode.react'
+import { contestService } from '@/services/contest/contest.service'
+import { getContestErrorMessage } from '@/services/contest/contest.error'
+import type { Contest, ContestStatus } from '@/services/contest/contest.type'
+import { Switch } from '@/components/ui/switch'
+import { toast } from '@/components/ui/toast'
 
 type BoxAccessControllCollabProps = {
-    contestId: string
+    contest: Contest
 }
 
 export default function BoxAccessControllCollab({
-    contestId,
+    contest: initialContest,
 }: BoxAccessControllCollabProps) {
     const [loginUrl, setLoginUrl] = useState('')
+    const [contest, setContest] = useState(initialContest)
+    const [isUpdating, setIsUpdating] = useState(false)
+
+    useEffect(() => {
+        setContest(initialContest)
+    }, [initialContest])
 
     useEffect(() => {
         setLoginUrl(
-            `${window.location.origin}/entrar?contest_code=${contestId}`,
+            `${window.location.origin}/entrar?contest_code=${contest.id}`,
         )
-    }, [contestId])
+    }, [contest.id])
+
+    async function updateAccess(checked: boolean) {
+        const nextStatus: ContestStatus = checked ? 'active' : 'inactive'
+        const previousStatus = contest.status
+
+        setContest((current) => ({ ...current, status: nextStatus }))
+        setIsUpdating(true)
+
+        try {
+            const updatedContest = await contestService.update(contest.id, {
+                name: contest.name,
+                status: nextStatus,
+                startsAt: contest.startsAt,
+                endsAt: contest.endsAt,
+                venue: contest.venue,
+            })
+            setContest(updatedContest)
+            toast.add({
+                title: checked
+                    ? 'Acesso dos colaboradores habilitado.'
+                    : 'Acesso dos colaboradores desabilitado.',
+                type: 'success',
+            })
+        } catch (error) {
+            setContest((current) => ({ ...current, status: previousStatus }))
+            const message = getContestErrorMessage(
+                error,
+                'Não foi possível atualizar o acesso dos colaboradores.',
+            )
+            toast.add({
+                title: message,
+                type: 'error',
+            })
+        } finally {
+            setIsUpdating(false)
+        }
+    }
 
     return (
         <div className="px-4 py-6">
@@ -43,8 +91,21 @@ export default function BoxAccessControllCollab({
                             />
                         </div>
                         <span className="text-5xl font-semibold text-primary/70">
-                            {contestId}
+                            {contest.id}
                         </span>
+                        <div className="flex flex-row items-center gap-2">
+                            <span className="text-muted-foreground">
+                                Acesso dos colaboradores:
+                            </span>
+                            <Switch
+                                checked={contest.status === 'active'}
+                                disabled={isUpdating}
+                                aria-label="Acesso dos colaboradores"
+                                onCheckedChange={(checked) =>
+                                    void updateAccess(checked)
+                                }
+                            />
+                        </div>
                     </div>
                 ) : null}
             </div>

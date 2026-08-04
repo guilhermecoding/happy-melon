@@ -5,6 +5,7 @@ import TitlePage from '@/components/title-page';
 import Page from '@/components/ui/page';
 import Section from '@/components/ui/section';
 import Loading from '@/app/loading';
+import { contestService } from '@/services/contest/contest.service';
 import { FilterVerticalIcon, ThumbsUpIcon } from '@hugeicons/core-free-icons';
 import { Metadata } from 'next';
 
@@ -19,6 +20,7 @@ async function AdminCompetitionColaboratorsPageContent({
     'searchParams'
 >) {
     const { id_contest } = await params;
+    const contest = await contestService.get(id_contest);
 
     return (
         <Page>
@@ -27,7 +29,7 @@ async function AdminCompetitionColaboratorsPageContent({
             </Section>
             <Section className="mt-4">
                 <BoxFeatures title="Controle e acesso" icon={FilterVerticalIcon} className='w-2/5'>
-                    <BoxAccessControllCollab contestId={id_contest} />
+                    <BoxAccessControllCollab contest={contest} />
                 </BoxFeatures>
             </Section>
         </Page>

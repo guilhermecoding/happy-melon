@@ -7,10 +7,7 @@ import { contestService } from '@/services/contest/contest.service';
 async function ContestLayoutContent({
   children,
   params,
-}: {
-  children: React.ReactNode;
-  params: Promise<{ id_contest: string }>;
-}) {
+}: LayoutProps<'/admin/competicoes/[id_contest]'>) {
   const { id_contest } = await params;
 
   try {
