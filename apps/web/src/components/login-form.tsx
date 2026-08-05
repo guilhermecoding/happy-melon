@@ -382,6 +382,7 @@ export function LoginForm({
                   <Button
                     type="button"
                     variant="white"
+                    size="sm"
                     onClick={() => {
                       setIsAdmin((prev) => !prev)
                       setNeedsRegistration(false)
