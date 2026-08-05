@@ -42,6 +42,7 @@ import {
   MoreHorizontalIcon,
   PencilEdit02Icon,
 } from '@hugeicons/core-free-icons';
+import Spinner from '@/components/spinner';
 
 const PAGE_SIZE = 5;
 
@@ -296,7 +297,7 @@ export default function BoxListCollaborators({
             {loading ? (
               <TableRow>
                 <TableCell colSpan={7} className="h-24 px-4 text-center">
-                  Carregando...
+                  <Spinner />
                 </TableCell>
               </TableRow>
             ) : error && orderedCollaborators.length === 0 ? (
@@ -305,7 +306,7 @@ export default function BoxListCollaborators({
                   colSpan={7}
                   className="h-24 px-4 text-center text-muted-foreground"
                 >
-                  Não foi possível carregar a lista.
+                  Ops! Não foi possível carregar a lista.
                 </TableCell>
               </TableRow>
             ) : orderedCollaborators.length === 0 ? (
@@ -314,7 +315,7 @@ export default function BoxListCollaborators({
                   colSpan={7}
                   className="h-24 px-4 text-center text-muted-foreground"
                 >
-                  Nenhum colaborador encontrado.
+                  Nenhum colaborador ingressou ainda.
                 </TableCell>
               </TableRow>
             ) : (
