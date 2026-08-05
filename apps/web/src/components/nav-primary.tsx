@@ -2,7 +2,7 @@
 
 import Link from "next/link"
 import { usePathname } from "next/navigation"
-import type { ComponentPropsWithoutRef, ReactNode } from "react"
+import type { ReactNode } from "react"
 
 import {
   SidebarGroup,
@@ -17,24 +17,22 @@ import {
 } from "@/lib/nav/admin-nav"
 import { HugeiconsIcon, type IconSvgElement } from "@hugeicons/react"
 
-export function NavSecondary({
+export function NavPrimary({
   items,
   icons,
-  ...props
 }: {
   items: AdminNavItem[]
   icons: Record<AdminNavItem["icon"], IconSvgElement>
-} & ComponentPropsWithoutRef<typeof SidebarGroup>) {
+}) {
   const pathname = usePathname()
 
   return (
-    <SidebarGroup {...props}>
+    <SidebarGroup>
       <SidebarGroupContent>
         <SidebarMenu>
           {items.map((item) => (
             <SidebarMenuItem key={item.url}>
               <SidebarMenuButton
-                size="sm"
                 isActive={isNavItemActive(pathname, item.url)}
                 tooltip={item.title}
                 render={<Link href={item.url} />}
