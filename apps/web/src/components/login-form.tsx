@@ -102,15 +102,19 @@ function getFetchErrorMessage(error: unknown, fallback: string) {
 
 export function LoginForm({
   className,
+  contestCode,
   ...props
-}: React.ComponentProps<'div'>) {
+}: {
+  contestCode?: string
+} & React.ComponentProps<'div'>) {
+  const contestCodeToUse = contestCode ?? '';
   const router = useRouter()
   const searchParams = useSearchParams()
   const [isAdmin, setIsAdmin] = useState(false)
   const [needsRegistration, setNeedsRegistration] = useState(false)
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
-  const [competitionCode, setCompetitionCode] = useState('')
+  const [competitionCode, setCompetitionCode] = useState(contestCodeToUse)
   const [name, setName] = useState('')
   const [error, setError] = useState<string | null>(null)
   const [isLoading, setIsLoading] = useState(false)
