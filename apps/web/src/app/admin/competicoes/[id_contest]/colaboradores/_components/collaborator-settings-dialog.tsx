@@ -163,7 +163,7 @@ export function CollaboratorSettingsDialog({
                 <div className="flex flex-col gap-0.5">
                   <span className="text-sm font-medium">Limite de balões</span>
                   <span className="text-xs text-muted-foreground">
-                    Número máximo de balões que um staff pode pegar
+                    Número máximo de balões que um staff pode pegar simultaneamente antes de ser entregue.
                   </span>
                 </div>
                 <Switch
@@ -203,7 +203,7 @@ export function CollaboratorSettingsDialog({
                   <span className="text-sm font-medium">Timeout de entrega</span>
                   <span className="text-xs text-muted-foreground">
                     Tempo máximo (em minutos) que um staff pode ficar com o
-                    balão
+                    balão antes de ser entregue.
                   </span>
                 </div>
                 <Switch
