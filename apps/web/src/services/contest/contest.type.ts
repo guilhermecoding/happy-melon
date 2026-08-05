@@ -9,6 +9,10 @@ export type Contest = {
   startsAt: string;
   endsAt: string;
   venue: string;
+  balloonLimitEnabled: boolean;
+  balloonLimit: number | null;
+  deliveryTimeoutEnabled: boolean;
+  deliveryTimeoutMinutes: number | null;
 };
 
 export type CreateContestInput = {
@@ -20,6 +24,13 @@ export type CreateContestInput = {
 };
 
 export type UpdateContestInput = CreateContestInput;
+
+export type StaffSettingsInput = {
+  balloonLimitEnabled: boolean;
+  balloonLimit: number | null;
+  deliveryTimeoutEnabled: boolean;
+  deliveryTimeoutMinutes: number | null;
+};
 
 export function getContestCondition(
   startsAt: string | Date,

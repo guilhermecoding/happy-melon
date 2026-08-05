@@ -4,13 +4,16 @@ import { ZodValidationPipe } from '../common/pipes/zod-validation.pipe.js';
 import { ContestsService } from './contests.service.js';
 import {
   createContestSchema,
+  staffSettingsSchema,
   updateContestSchema,
   type CreateContestDto,
+  type StaffSettingsDto,
   type UpdateContestDto,
 } from './dto/contest.dto.js';
 
 const createContestPipe = new ZodValidationPipe(createContestSchema);
 const updateContestPipe = new ZodValidationPipe(updateContestSchema);
+const staffSettingsPipe = new ZodValidationPipe(staffSettingsSchema);
 
 @Controller('contests')
 @Roles(['admin'])
@@ -30,6 +33,14 @@ export class ContestsController {
   @Post()
   create(@Body(createContestPipe) dto: CreateContestDto) {
     return this.contestsService.create(dto);
+  }
+
+  @Patch(':id/staff-settings')
+  updateStaffSettings(
+    @Param('id') id: string,
+    @Body(staffSettingsPipe) dto: StaffSettingsDto,
+  ) {
+    return this.contestsService.updateStaffSettings(id, dto);
   }
 
   @Patch(':id')

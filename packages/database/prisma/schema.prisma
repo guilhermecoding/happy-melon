@@ -99,20 +99,24 @@ enum BalloonDeliveryStatus {
 }
 
 model Contest {
-  id                String                @id
-  name              String
-  status            ContestStatus         @default(ACTIVE)
-  startsAt          DateTime
-  endsAt            DateTime
-  venue             String
-  createdAt         DateTime              @default(now())
-  updatedAt         DateTime              @updatedAt
-  questions         Question[]
-  teams             Team[]
-  balloonDeliveries BalloonDelivery[]
-  printTasks        PrintTask[]
-  taskHistories     TaskHistory[]
-  collaborators     ContestCollaborator[]
+  id                       String                @id
+  name                     String
+  status                   ContestStatus         @default(ACTIVE)
+  startsAt                 DateTime
+  endsAt                   DateTime
+  venue                    String
+  balloonLimitEnabled      Boolean               @default(false)
+  balloonLimit             Int?
+  deliveryTimeoutEnabled   Boolean               @default(false)
+  deliveryTimeoutMinutes   Int?
+  createdAt                DateTime              @default(now())
+  updatedAt                DateTime              @updatedAt
+  questions                Question[]
+  teams                    Team[]
+  balloonDeliveries        BalloonDelivery[]
+  printTasks               PrintTask[]
+  taskHistories            TaskHistory[]
+  collaborators            ContestCollaborator[]
 
   @@map("contest")
   @@schema("public")

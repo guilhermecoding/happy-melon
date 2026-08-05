@@ -17,6 +17,51 @@ export const createContestSchema = z
 
 export const updateContestSchema = createContestSchema;
 
+export const staffSettingsSchema = z
+  .object({
+    balloonLimitEnabled: z.boolean(),
+    balloonLimit: z.number().int().min(1).nullable(),
+    deliveryTimeoutEnabled: z.boolean(),
+    deliveryTimeoutMinutes: z.number().int().min(1).nullable(),
+  })
+  .superRefine((data, ctx) => {
+    if (data.balloonLimitEnabled && data.balloonLimit === null) {
+      ctx.addIssue({
+        code: 'custom',
+        message: 'Informe o limite de balões.',
+        path: ['balloonLimit'],
+      });
+    }
+
+    if (!data.balloonLimitEnabled && data.balloonLimit !== null) {
+      ctx.addIssue({
+        code: 'custom',
+        message: 'O limite deve ser nulo quando desabilitado.',
+        path: ['balloonLimit'],
+      });
+    }
+
+    if (data.deliveryTimeoutEnabled && data.deliveryTimeoutMinutes === null) {
+      ctx.addIssue({
+        code: 'custom',
+        message: 'Informe o timeout de entrega em minutos.',
+        path: ['deliveryTimeoutMinutes'],
+      });
+    }
+
+    if (
+      !data.deliveryTimeoutEnabled &&
+      data.deliveryTimeoutMinutes !== null
+    ) {
+      ctx.addIssue({
+        code: 'custom',
+        message: 'O timeout deve ser nulo quando desabilitado.',
+        path: ['deliveryTimeoutMinutes'],
+      });
+    }
+  });
+
 export type CreateContestDto = z.infer<typeof createContestSchema>;
 export type UpdateContestDto = z.infer<typeof updateContestSchema>;
+export type StaffSettingsDto = z.infer<typeof staffSettingsSchema>;
 export type ContestStatusDto = z.infer<typeof contestStatusSchema>;

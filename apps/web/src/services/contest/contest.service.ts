@@ -5,6 +5,7 @@ import {
 import type {
   Contest,
   CreateContestInput,
+  StaffSettingsInput,
   UpdateContestInput,
 } from './contest.type';
 
@@ -118,6 +119,34 @@ export const contestService = {
       throw normalizeContestError(
         error,
         'Não foi possível atualizar a competição.',
+      );
+    }
+  },
+
+  async updateStaffSettings(
+    id: string,
+    data: StaffSettingsInput,
+  ): Promise<Contest> {
+    try {
+      const response = await fetch(`${API_URL}/contests/${id}/staff-settings`, {
+        method: 'PATCH',
+        credentials: 'include',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(data),
+      });
+
+      if (!response.ok) {
+        throw await parseContestError(
+          response,
+          'Não foi possível atualizar os ajustes.',
+        );
+      }
+
+      return response.json();
+    } catch (error) {
+      throw normalizeContestError(
+        error,
+        'Não foi possível atualizar os ajustes.',
       );
     }
   },

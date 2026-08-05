@@ -13,6 +13,7 @@ import {
 import type {
   ContestStatusDto,
   CreateContestDto,
+  StaffSettingsDto,
   UpdateContestDto,
 } from './dto/contest.dto.js';
 
@@ -93,6 +94,28 @@ export class ContestsService {
     return this.toResponse(contest);
   }
 
+  async updateStaffSettings(id: string, dto: StaffSettingsDto) {
+    const existing = await prisma.contest.findUnique({ where: { id } });
+
+    if (!existing) {
+      throw new NotFoundException('Competição não encontrada.');
+    }
+
+    const contest = await prisma.contest.update({
+      where: { id },
+      data: {
+        balloonLimitEnabled: dto.balloonLimitEnabled,
+        balloonLimit: dto.balloonLimitEnabled ? dto.balloonLimit : null,
+        deliveryTimeoutEnabled: dto.deliveryTimeoutEnabled,
+        deliveryTimeoutMinutes: dto.deliveryTimeoutEnabled
+          ? dto.deliveryTimeoutMinutes
+          : null,
+      },
+    });
+
+    return this.toResponse(contest);
+  }
+
   private parseContestDatesAndStatus(dto: CreateContestDto | UpdateContestDto) {
     const startsAt = new Date(dto.startsAt);
     const endsAt = new Date(dto.endsAt);
@@ -121,6 +144,10 @@ export class ContestsService {
       startsAt: contest.startsAt.toISOString(),
       endsAt: contest.endsAt.toISOString(),
       venue: contest.venue,
+      balloonLimitEnabled: contest.balloonLimitEnabled,
+      balloonLimit: contest.balloonLimit,
+      deliveryTimeoutEnabled: contest.deliveryTimeoutEnabled,
+      deliveryTimeoutMinutes: contest.deliveryTimeoutMinutes,
     };
   }
 

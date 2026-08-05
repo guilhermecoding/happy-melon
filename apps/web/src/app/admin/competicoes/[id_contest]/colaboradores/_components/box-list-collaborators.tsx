@@ -31,11 +31,13 @@ import {
 } from '@/components/ui/table';
 import { CreateCollaboratorSheet } from './create-collaborator-sheet';
 import { EditCollaboratorSheet } from './edit-collaborator-sheet';
+import { CollaboratorSettingsDialog } from './collaborator-settings-dialog';
 import { HugeiconsIcon } from '@hugeicons/react';
 import {
   ArrowLeft01Icon,
   ArrowRight01Icon,
   CirclePlusIcon,
+  CustomizeIcon,
   Delete01Icon,
   MoreHorizontalIcon,
   PencilEdit02Icon,
@@ -79,6 +81,7 @@ export default function BoxListCollaborators({
   const [collaboratorToDelete, setCollaboratorToDelete] =
     useState<Collaborator | null>(null);
   const [isDeleting, setIsDeleting] = useState(false);
+  const [settingsOpen, setSettingsOpen] = useState(false);
 
   const orderedCollaborators = useMemo(
     () => orderCollaborators(collaborators),
@@ -240,7 +243,20 @@ export default function BoxListCollaborators({
 
   return (
     <div className="flex h-full flex-1 flex-col gap-4 p-4 pt-6">
-      <div className="flex justify-end">
+      <div className="flex flex-col-reverse sm:flex-row justify-end gap-2">
+        <Button
+          size="sm"
+          variant="orange"
+          className="w-full sm:w-auto"
+          onClick={() => setSettingsOpen(true)}
+        >
+          <HugeiconsIcon
+            icon={CustomizeIcon}
+            className="size-5"
+            strokeWidth={2.5}
+          />
+          Ajustes
+        </Button>
         <Button
           onClick={() => setCreateOpen(true)}
           className="w-full sm:w-auto"
@@ -443,6 +459,12 @@ export default function BoxListCollaborators({
         onOpenChange={setEditOpen}
         onUpdated={replaceCollaborator}
         onDeleted={removeCollaboratorFromList}
+      />
+
+      <CollaboratorSettingsDialog
+        contestId={contestId}
+        open={settingsOpen}
+        onOpenChange={setSettingsOpen}
       />
 
       <Dialog
