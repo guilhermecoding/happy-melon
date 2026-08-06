@@ -9,7 +9,6 @@ import {
 import { HugeiconsIcon } from '@hugeicons/react';
 import { isResolvedBalloonStatus } from '@repo/shared';
 import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
 import { balloonService } from '@/services/balloon/balloon.service';
 import type { BalloonDelivery } from '@/services/balloon/balloon.type';
 import { teamService } from '@/services/team/team.service';
@@ -20,6 +19,7 @@ import { TeamBalloonsDialog } from './team-balloons-dialog';
 import FlashCardTeam from './flash-card-team';
 import Spinner from '@/components/spinner';
 import EmptyIcon from '@/components/empty-icon';
+import { Input } from '../pouf/Input';
 
 type BoxTeamsListProps = {
     contestId: string;
@@ -198,20 +198,21 @@ export default function BoxTeamsList({
     return (
         <>
             <div className="flex flex-col gap-4 p-4">
-                <Input
-                    value={search}
-                    onChange={(event) => setSearch(event.target.value)}
-                    placeholder="Buscar por nome do time ou usuário..."
-                    aria-label="Buscar times"
-                    className="w-full @3xl/main:max-w-86 rounded-2xl"
-                    icon={
-                        <HugeiconsIcon
-                            icon={Search01Icon}
-                            className="size-5"
-                            strokeWidth={2}
-                        />
-                    }
-                />
+                <div className="w-full @3xl/main:max-w-86 flex justify-end">
+                    <Input
+                        value={search}
+                        onChange={(value) => setSearch(value)}
+                        placeholder="Buscar por nome do time ou usuário..."
+                        aria-label="Buscar times"
+                        icon={
+                            <HugeiconsIcon
+                                icon={Search01Icon}
+                                className="size-5"
+                                strokeWidth={2}
+                            />
+                        }
+                    />
+                </div>
 
                 {error && (
                     <p role="alert" className="text-sm text-destructive">

@@ -19,6 +19,7 @@ export default function TasksBoard({ contestId }: TasksBoardProps) {
         title="Times disponíveis"
         icon={BalloonIcon}
         blobSize="sm"
+        blobTone="blue"
       >
         <BoxTeamsList
           contestId={contestId}
@@ -29,7 +30,8 @@ export default function TasksBoard({ contestId }: TasksBoardProps) {
       <BoxFeatures
         title="Histórico de tarefas"
         icon={HistoryIcon}
-        blobSize="md"
+        blobSize="sm"
+        blobTone="down"
       >
         <TaskHistoryList contestId={contestId} refreshKey={historyKey} />
       </BoxFeatures>

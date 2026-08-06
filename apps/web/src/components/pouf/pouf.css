@@ -17,7 +17,7 @@
 
 @theme {
   /* -- Palette: verbatim from the reference ------------------------------ */
-  --color-bg: #ffebeb;
+  --color-bg: #ebf8ff;
   --color-ink: #3a2e5c;
   --color-muted: #71609b;
   --color-pink: #ffb3d1;
@@ -135,7 +135,7 @@
     inset 0 0 0 2px rgba(201, 168, 255, 0.2);
   --pouf-field-focus:
     inset 0 -4px 0 rgba(0, 0, 0, 0.06), inset 0 4px 0 rgba(255, 255, 255, 0.7),
-    inset 0 0 0 3px var(--purple);
+    inset 0 0 0 3px var(--blue);
 
   /* -- Cushion rows. "Every row a cushion" at 32px padding makes a 50-row
    *    log unnavigable, so rows get their own tighter scale. The shadow

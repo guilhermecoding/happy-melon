@@ -38,7 +38,7 @@ export function Field({ label, children, hint, error }: FieldProps) {
         * message rather than stretch to fill a flex/grid cell. */}
       {error && (
         <span
-          className="pouf-error text-[13px] font-extrabold text-[var(--on-accent)] bg-orange rounded-xl py-(--s2) px-(--s3) [align-self:start] max-w-full"
+          className="pouf-error text-[13px] font-extrabold text-(--on-accent) bg-orange rounded-xl py-(--s2) px-(--s3) [align-self:start] max-w-full"
           id={`${id}-err`}
           role="alert"
         >
@@ -108,6 +108,8 @@ interface InputProps
   invalid?: boolean
   disabled?: boolean
   label?: string
+  /** Leading icon rendered inside the field. */
+  icon?: ReactNode
   /** Internal: the NumberInput capsule carries the chrome. */
   bare?: boolean
 }
@@ -121,16 +123,22 @@ export const Input = forwardRef<HTMLInputElement, InputProps>(function Input(
     mono,
     invalid,
     label,
+    icon,
     bare,
     ...nativeProps
   },
   ref,
 ) {
-  return (
+  const input = (
     <input
       ref={ref}
       {...nativeProps}
-      className={inputClasses({ bare: !!bare, invalid: !!invalid, mono })}
+      className={inputClasses({
+        bare: !!bare,
+        invalid: !!invalid,
+        mono,
+        className: icon && !bare ? 'pl-12' : undefined,
+      })}
       value={value}
       onChange={(e) => onChange(e.target.value)}
       type={type}
@@ -138,6 +146,22 @@ export const Input = forwardRef<HTMLInputElement, InputProps>(function Input(
       aria-describedby={describedBy}
       aria-label={label}
     />
+  )
+
+  if (!icon || bare) {
+    return input
+  }
+
+  return (
+    <div className="relative w-full">
+      <span
+        aria-hidden
+        className="pointer-events-none absolute top-1/2 left-4 z-10 -translate-y-1/2 text-muted [&_svg]:size-5 [&_svg]:shrink-0"
+      >
+        {icon}
+      </span>
+      {input}
+    </div>
   )
 })
 
@@ -184,7 +208,7 @@ export const Textarea = forwardRef<HTMLTextAreaElement, TextareaProps>(function 
     <textarea
       ref={ref}
       {...nativeProps}
-      className={`${inputClasses({ invalid: !!invalid, mono })} pouf-textarea resize-y min-h-[100px]`}
+      className={`${inputClasses({ invalid: !!invalid, mono })} pouf-textarea resize-y min-h-25`}
       value={value}
       onChange={(e) => onChange(e.target.value)}
       rows={rows}
