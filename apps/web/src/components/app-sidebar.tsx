@@ -1,8 +1,10 @@
 "use client"
 
 import * as React from "react"
+import Link from "next/link"
+import { usePathname } from "next/navigation"
 
-import { NavProjects } from "@/components/nav-projects"
+import { NavPrimary } from "@/components/nav-primary"
 import { NavSecondary } from "@/components/nav-secondary"
 import { NavUser } from "@/components/nav-user"
 import {
@@ -14,78 +16,83 @@ import {
   SidebarMenuButton,
   SidebarMenuItem,
 } from "@/components/ui/sidebar"
-import { IconLifebuoy, IconSend, IconFrame, IconChartPie, IconMap } from "@tabler/icons-react"
 import Logo from "./logo"
+import { authClient } from "@/lib/auth-client"
+import {
+  getPrimaryNavItems,
+  secondaryNavItems,
+  type AdminNavIcon,
+} from "@/lib/nav/admin-nav"
+import {
+  BadgeInfoIcon,
+  BalloonIcon,
+  ClipboardCheckIcon,
+  Crown03Icon,
+  GoogleDocIcon,
+  Home05Icon,
+  MenuCircleIcon,
+  ThumbsUpIcon,
+  UserMultiple02Icon
+} from "@hugeicons/core-free-icons"
+import type { IconSvgElement } from "@hugeicons/react"
 
-const data = {
-  user: {
-    name: "shadcn",
-    email: "m@example.com",
-    avatar: "/avatars/shadcn.jpg",
-  },
-  navSecondary: [
-    {
-      title: "Support",
-      url: "#",
-      icon: (
-        <IconLifebuoy
-        />
-      ),
-    },
-    {
-      title: "Feedback",
-      url: "#",
-      icon: (
-        <IconSend
-        />
-      ),
-    },
-  ],
-  projects: [
-    {
-      name: "Design Engineering",
-      url: "#",
-      icon: (
-        <IconFrame
-        />
-      ),
-    },
-    {
-      name: "Sales & Marketing",
-      url: "#",
-      icon: (
-        <IconChartPie
-        />
-      ),
-    },
-    {
-      name: "Travel",
-      url: "#",
-      icon: (
-        <IconMap
-        />
-      ),
-    },
-  ],
+const navIcons: Record<AdminNavIcon, IconSvgElement> = {
+  home: Home05Icon,
+  competicoes: BalloonIcon,
+  administradores: Crown03Icon,
+  overview: MenuCircleIcon,
+  colaboradores: ThumbsUpIcon,
+  prova: GoogleDocIcon,
+  tarefas: ClipboardCheckIcon,
+  times: UserMultiple02Icon,
+  sobre: BadgeInfoIcon,
 }
+
 export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
+  const pathname = usePathname()
+  const { data: session } = authClient.useSession()
+
+  const activeContestId = session?.session?.activeContestId ?? null
+  const primaryItems = getPrimaryNavItems(pathname, {
+    role: session?.user?.role,
+    activeContestId,
+  })
+  const homeHref = activeContestId
+    ? `/admin/competicoes/${activeContestId}/tarefas`
+    : "/admin"
+  const user = session?.user
+    ? {
+      name: session.user.name,
+      email: session.user.email,
+      avatar: session.user.image ?? undefined,
+    }
+    : null
+
   return (
     <Sidebar variant="inset" {...props}>
       <SidebarHeader>
         <SidebarMenu>
           <SidebarMenuItem>
-            <SidebarMenuButton size="lg" render={<a href="/admin" />} className="flex justify-center my-4">
+            <SidebarMenuButton
+              size="lg"
+              render={<Link href={homeHref} />}
+              className="flex justify-center my-4"
+            >
               <Logo className="size-36" />
             </SidebarMenuButton>
           </SidebarMenuItem>
         </SidebarMenu>
       </SidebarHeader>
       <SidebarContent>
-        <NavProjects projects={data.projects} />
-        <NavSecondary items={data.navSecondary} className="mt-auto" />
+        <NavPrimary items={primaryItems} icons={navIcons} />
+        <NavSecondary
+          items={secondaryNavItems}
+          icons={navIcons}
+          className="mt-auto"
+        />
       </SidebarContent>
       <SidebarFooter>
-        <NavUser user={data.user} />
+        <NavUser user={user} />
       </SidebarFooter>
     </Sidebar>
   )

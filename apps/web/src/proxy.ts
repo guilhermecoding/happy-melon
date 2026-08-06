@@ -6,7 +6,9 @@ type SessionResponse = {
   user?: {
     role?: string | null;
   };
-  session?: unknown;
+  session?: {
+    activeContestId?: string | null;
+  } | null;
 } | null;
 
 async function getSession(request: NextRequest): Promise<SessionResponse> {
@@ -42,6 +44,18 @@ function hasAdminAccess(session: SessionResponse): boolean {
   return typeof role === 'string' && ADMIN_ROLES.has(role);
 }
 
+function getPostLoginRedirect(session: SessionResponse, request: NextRequest) {
+  const activeContestId = session?.session?.activeContestId;
+  if (activeContestId) {
+    return new URL(
+      `/admin/competicoes/${activeContestId}/tarefas`,
+      request.url,
+    );
+  }
+
+  return new URL('/admin', request.url);
+}
+
 export async function proxy(request: NextRequest) {
   const { pathname } = request.nextUrl;
   const session = await getSession(request);
@@ -54,7 +68,26 @@ export async function proxy(request: NextRequest) {
   }
 
   if (pathname === '/entrar' && isAuthenticatedAdmin) {
-    return NextResponse.redirect(new URL('/admin', request.url));
+    return NextResponse.redirect(getPostLoginRedirect(session, request));
+  }
+
+  // Collaborators stay on their contest task board (and Sobre).
+  const activeContestId = session?.session?.activeContestId;
+  if (
+    isAuthenticatedAdmin &&
+    activeContestId &&
+    pathname.startsWith('/admin')
+  ) {
+    if (pathname === '/admin/sobre' || pathname.startsWith('/admin/sobre/')) {
+      return NextResponse.next();
+    }
+
+    const tarefasPath = `/admin/competicoes/${activeContestId}/tarefas`;
+    const onTarefas =
+      pathname === tarefasPath || pathname.startsWith(`${tarefasPath}/`);
+    if (!onTarefas) {
+      return NextResponse.redirect(new URL(tarefasPath, request.url));
+    }
   }
 
   return NextResponse.next();

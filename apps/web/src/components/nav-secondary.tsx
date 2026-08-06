@@ -1,6 +1,8 @@
 "use client"
 
-import * as React from "react"
+import Link from "next/link"
+import { usePathname } from "next/navigation"
+import type { ComponentPropsWithoutRef, ReactNode } from "react"
 
 import {
   SidebarGroup,
@@ -9,25 +11,35 @@ import {
   SidebarMenuButton,
   SidebarMenuItem,
 } from "@/components/ui/sidebar"
+import {
+  isNavItemActive,
+  type AdminNavItem,
+} from "@/lib/nav/admin-nav"
+import { HugeiconsIcon, type IconSvgElement } from "@hugeicons/react"
 
 export function NavSecondary({
   items,
+  icons,
   ...props
 }: {
-  items: {
-    title: string
-    url: string
-    icon: React.ReactNode
-  }[]
-} & React.ComponentPropsWithoutRef<typeof SidebarGroup>) {
+  items: AdminNavItem[]
+  icons: Record<AdminNavItem["icon"], IconSvgElement>
+} & ComponentPropsWithoutRef<typeof SidebarGroup>) {
+  const pathname = usePathname()
+
   return (
     <SidebarGroup {...props}>
       <SidebarGroupContent>
         <SidebarMenu>
           {items.map((item) => (
-            <SidebarMenuItem key={item.title}>
-              <SidebarMenuButton size="sm" render={<a href={item.url} />}>
-                {item.icon}
+            <SidebarMenuItem key={item.url}>
+              <SidebarMenuButton
+                size="sm"
+                isActive={isNavItemActive(pathname, item.url)}
+                tooltip={item.title}
+                render={<Link href={item.url} />}
+              >
+                <HugeiconsIcon icon={icons[item.icon]} />
                 <span>{item.title}</span>
               </SidebarMenuButton>
             </SidebarMenuItem>
