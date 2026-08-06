@@ -1,6 +1,12 @@
+@import "tailwindcss";
+/* Scan the registry itself: this file ships next to the components, and
+ * consumers' builds (and the gallery, whose Vite root is elsewhere) must find
+ * the utility classes used in these sources. */
+@source "./";
+
 /* ============================================================================
- * POUF — the theme file. Tokens as Tailwind v4 @theme, the clay recipe as
- * custom properties, shared cushion machinery as @utility recipes.
+ * POUF — the theme file. Tokens as Tailwind v4 theme config, the clay recipe as
+ * custom properties, shared cushion machinery as utility recipes.
  *
  * Visual language adapted from novusgfx/retro-design-system (MIT),
  * styles/39-claymorphism. One deliberate deviation, kept from the fork:
@@ -8,11 +14,6 @@
  * WCAG AA (1.25:1–1.99:1 measured); its own -pink/-mint/-yellow variants
  * use ink (6.10:1–9.75:1). We follow the better instinct uniformly.
  * ========================================================================= */
-@import 'tailwindcss';
-/* Scan the registry itself: this file ships next to the components, and
- * consumers' builds (and the gallery, whose Vite root is elsewhere) must find
- * the utility classes used in these sources. */
-@source './';
 
 @theme {
   /* -- Palette: verbatim from the reference ------------------------------ */
