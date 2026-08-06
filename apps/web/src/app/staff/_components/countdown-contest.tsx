@@ -1,12 +1,11 @@
 import FlipClock from '@/components/8starlabs-ui/flip-clock'
-import React from 'react'
 
 export default function CountdownContest() {
     return (
-        <div className='w-full h-screen flex items-center justify-center relative'>
+        <div className="relative flex h-screen w-full items-center justify-center">
             <FlipClock
                 variant="default"
-                className='relative -top-1/5'
+                className="relative -top-1/5 text-5xl "
                 countdown
             />
         </div>

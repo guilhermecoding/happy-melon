@@ -12,15 +12,10 @@ import {
 } from "react";
 
 const flipUnitVariants = cva(
-  "relative subpixel-antialiased perspective-[1000px] rounded-md overflow-hidden",
+  // Sized in em so the parent font-size (size prop or className text-*) drives scale
+  "relative subpixel-antialiased perspective-[1000px] rounded-md overflow-hidden w-[1.15em] min-w-[1.15em] h-[1.65em]",
   {
     variants: {
-      size: {
-        sm: "w-10 min-w-10 h-14 text-3xl", // Small (Compact UI)
-        md: "w-14 min-w-14 h-20 text-5xl", // Medium (Standard sidebar/header)
-        lg: "w-17 min-w-17 h-24 text-6xl", // Large (Focus/Hero)
-        xl: "w-22 min-w-22 h-32 text-8xl" // Extra Large (Dashboard/Landing)
-      },
       variant: {
         default: "bg-primary text-primary-foreground",
         secondary: "bg-secondary text-secondary-foreground",
@@ -30,7 +25,6 @@ const flipUnitVariants = cva(
       }
     },
     defaultVariants: {
-      size: "md",
       variant: "default"
     }
   }
@@ -48,7 +42,6 @@ const commonCardStyle = cn(
 
 const FlipUnit: FC<FlipUnitProps> = memo(function FlipUnit({
   digit,
-  size,
   variant,
   className
 }: FlipUnitProps) {
@@ -68,7 +61,7 @@ const FlipUnit: FC<FlipUnitProps> = memo(function FlipUnit({
   }, [digit, prevDigit]);
 
   return (
-    <div className={cn(flipUnitVariants({ size, variant }), className)}>
+    <div className={cn(flipUnitVariants({ variant }), className)}>
       {/* 1. Background Top (The NEW digit waiting) */}
       <div className={cn(commonCardStyle, "rounded-t-lg top-0")}>
         <DigitSpan position="top">{digit}</DigitSpan>
@@ -172,17 +165,6 @@ interface TimeLeft {
   seconds: number;
 }
 
-type FlipClockSize = NonNullable<
-  VariantProps<typeof flipClockVariants>["size"]
->;
-
-const heightMap: Record<FlipClockSize, string> = {
-  sm: "text-4xl",
-  md: "text-5xl",
-  lg: "text-6xl",
-  xl: "text-8xl"
-};
-
 const EMPTY_TIME: TimeLeft = {
   days: 0,
   hours: 0,
@@ -190,17 +172,8 @@ const EMPTY_TIME: TimeLeft = {
   seconds: 0
 };
 
-function ClockSeparator({ size }: { size?: FlipClockSize }) {
-  return (
-    <span
-      className={cn(
-        "text-center translate-y-[-8%]",
-        size ? heightMap[size] : heightMap["md"]
-      )}
-    >
-      :
-    </span>
-  );
+function ClockSeparator() {
+  return <span className="text-center translate-y-[-8%]">:</span>;
 }
 
 export default function FlipClock({
@@ -259,49 +232,29 @@ export default function FlipClock({
       {shouldShowDays && (
         <>
           {daysStr.split("").map((digit, i) => (
-            <FlipUnit
-              key={`d-${i}`}
-              digit={digit}
-              size={size}
-              variant={variant}
-            />
+            <FlipUnit key={`d-${i}`} digit={digit} variant={variant} />
           ))}
-          <ClockSeparator size={size!} />
+          <ClockSeparator />
         </>
       )}
 
       {/* Hours */}
       {hoursStr.split("").map((digit, index) => (
-        <FlipUnit
-          key={`hour-${index}`}
-          digit={digit}
-          size={size}
-          variant={variant}
-        />
+        <FlipUnit key={`hour-${index}`} digit={digit} variant={variant} />
       ))}
 
-      <ClockSeparator size={size!} />
+      <ClockSeparator />
 
       {/* Minutes */}
       {minutesStr.split("").map((digit, index) => (
-        <FlipUnit
-          key={`minute-${index}`}
-          digit={digit}
-          size={size}
-          variant={variant}
-        />
+        <FlipUnit key={`minute-${index}`} digit={digit} variant={variant} />
       ))}
 
-      <ClockSeparator size={size!} />
+      <ClockSeparator />
 
       {/* Seconds */}
       {secondsStr.split("").map((digit, index) => (
-        <FlipUnit
-          key={`second-${index}`}
-          digit={digit}
-          size={size}
-          variant={variant}
-        />
+        <FlipUnit key={`second-${index}`} digit={digit} variant={variant} />
       ))}
 
       {/* Injected Keyframes (The Shadcn "Cheat Code") */}
