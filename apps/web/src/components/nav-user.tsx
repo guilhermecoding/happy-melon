@@ -25,6 +25,7 @@ import {
 } from "@/components/ui/sidebar"
 import { IconLogout, IconSelector } from "@tabler/icons-react"
 import { authClient } from "@/lib/auth-client"
+import { cn } from "@/lib/utils"
 
 function getInitials(name: string) {
   const parts = name.trim().split(/\s+/).filter(Boolean)
@@ -37,12 +38,14 @@ function getInitials(name: string) {
 
 export function NavUser({
   user,
+  compact = false,
 }: {
   user: {
     name: string
     email: string
     avatar?: string
-  } | null
+  } | null;
+  compact?: boolean;
 }) {
   const { isMobile } = useSidebar()
   const router = useRouter()
@@ -70,20 +73,32 @@ export function NavUser({
         <DropdownMenu>
           <DropdownMenuTrigger
             render={
-              <SidebarMenuButton size="lg" className="aria-expanded:bg-muted" />
+              <SidebarMenuButton
+                size="lg"
+                className={
+                  compact
+                    ? "aria-expanded:bg-muted justify-between gap-2 overflow-hidden"
+                    : "aria-expanded:bg-muted justify-end"
+                }
+              />
             }
           >
-            <Avatar>
+            <div className={cn("min-w-0 flex-1 text-left text-sm leading-tight", {
+              "hidden md:grid": compact,
+            })}>
+              <span className="truncate font-medium">{displayName}</span>
+              <span className="truncate text-xs text-muted-foreground">
+                {displayEmail}
+              </span>
+            </div>
+
+            <Avatar className="shrink-0">
               {user?.avatar ? (
                 <AvatarImage src={user.avatar} alt={displayName} />
               ) : null}
               <AvatarFallback>{initials}</AvatarFallback>
             </Avatar>
-            <div className="grid flex-1 text-left text-sm leading-tight">
-              <span className="truncate font-medium">{displayName}</span>
-              <span className="truncate text-xs">{displayEmail}</span>
-            </div>
-            <IconSelector className="ml-auto size-4" />
+            <IconSelector className="size-4 shrink-0" />
           </DropdownMenuTrigger>
           <DropdownMenuContent
             className="min-w-56 rounded-lg"
@@ -100,9 +115,11 @@ export function NavUser({
                     ) : null}
                     <AvatarFallback>{initials}</AvatarFallback>
                   </Avatar>
-                  <div className="grid flex-1 text-left text-sm leading-tight">
+                  <div className="grid min-w-0 flex-1 text-left text-sm leading-tight">
                     <span className="truncate font-medium">{displayName}</span>
-                    <span className="truncate text-xs">{displayEmail}</span>
+                    <span className="truncate text-xs text-muted-foreground">
+                      {displayEmail}
+                    </span>
                   </div>
                 </div>
               </DropdownMenuLabel>

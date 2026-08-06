@@ -5,36 +5,35 @@ import Section from '@/components/ui/section'
 import Loading from '@/app/loading'
 import { ClipboardCheckIcon } from '@hugeicons/core-free-icons'
 import { Metadata } from 'next'
-import TasksBoard from '@/components/contest-tasks/tasks-board'
 
 export const metadata: Metadata = {
-  title: 'Tarefas',
+    title: 'Tarefas',
 }
 
 async function StaffContestPageContent({
-  params,
+    params,
 }: Omit<PageProps<'/staff/[id_contest]'>, 'searchParams'>) {
-  const { id_contest } = await params
+    const { id_contest } = await params
 
-  return (
-    <Page>
-      <Section>
-        <TitlePage title="Tarefas" icon={ClipboardCheckIcon} />
-      </Section>
+    return (
+        <Page>
+            <Section>
+                <TitlePage title="Tarefas" icon={ClipboardCheckIcon} />
+            </Section>
 
-      <Section className="mt-6 flex flex-col gap-4 @4xl:flex-row">
-        <TasksBoard contestId={id_contest} />
-      </Section>
-    </Page>
-  )
+            <Section className="mt-6 flex flex-col gap-4 @4xl:flex-row">
+                Nada por enquanto
+            </Section>
+        </Page>
+    )
 }
 
 export default function StaffContestPage({
-  params,
+    params,
 }: PageProps<'/staff/[id_contest]'>) {
-  return (
-    <Suspense fallback={<Loading />}>
-      <StaffContestPageContent params={params} />
-    </Suspense>
-  )
+    return (
+        <Suspense fallback={<Loading />}>
+            <StaffContestPageContent params={params} />
+        </Suspense>
+    )
 }

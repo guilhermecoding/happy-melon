@@ -26,8 +26,8 @@ export function StaffShell({ children }: { children: React.ReactNode }) {
           <Link href={homeHref} className="flex items-center">
             <Logo className="size-28" />
           </Link>
-          <div className="w-56">
-            <NavUser user={user} />
+          <div className="min-w-0 max-w-56">
+            <NavUser user={user} compact />
           </div>
         </header>
         <main className="flex-1">{children}</main>
