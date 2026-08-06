@@ -27,6 +27,7 @@ export class TeamsController {
   constructor(private readonly teamsService: TeamsService) {}
 
   @Get('contests/:contestId/teams')
+  @Roles(['admin', 'staff'])
   listByContest(@Param('contestId') contestId: string) {
     return this.teamsService.listByContest(contestId);
   }

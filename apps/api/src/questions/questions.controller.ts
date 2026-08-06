@@ -32,6 +32,7 @@ export class QuestionsController {
   constructor(private readonly questionsService: QuestionsService) {}
 
   @Get('contests/:contestId/questions')
+  @Roles(['admin', 'staff'])
   listByContest(@Param('contestId') contestId: string) {
     return this.questionsService.listByContest(contestId);
   }

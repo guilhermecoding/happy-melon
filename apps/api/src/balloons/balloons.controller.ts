@@ -22,7 +22,7 @@ import {
 const teamQuestionActionPipe = new ZodValidationPipe(teamQuestionActionSchema);
 
 @Controller()
-@Roles(['admin'])
+@Roles(['admin', 'staff'])
 export class BalloonsController {
   constructor(private readonly balloonsService: BalloonsService) {}
 

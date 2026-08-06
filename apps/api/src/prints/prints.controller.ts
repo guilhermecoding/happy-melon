@@ -22,7 +22,7 @@ import {
 const printTeamActionPipe = new ZodValidationPipe(printTeamActionSchema);
 
 @Controller()
-@Roles(['admin'])
+@Roles(['admin', 'staff'])
 export class PrintsController {
   constructor(private readonly printsService: PrintsService) {}
 

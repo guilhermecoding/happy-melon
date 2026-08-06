@@ -52,7 +52,14 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
   const pathname = usePathname()
   const { data: session } = authClient.useSession()
 
-  const primaryItems = getPrimaryNavItems(pathname)
+  const activeContestId = session?.session?.activeContestId ?? null
+  const primaryItems = getPrimaryNavItems(pathname, {
+    role: session?.user?.role,
+    activeContestId,
+  })
+  const homeHref = activeContestId
+    ? `/admin/competicoes/${activeContestId}/tarefas`
+    : "/admin"
   const user = session?.user
     ? {
       name: session.user.name,
@@ -68,7 +75,7 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
           <SidebarMenuItem>
             <SidebarMenuButton
               size="lg"
-              render={<Link href="/admin" />}
+              render={<Link href={homeHref} />}
               className="flex justify-center my-4"
             >
               <Logo className="size-36" />
