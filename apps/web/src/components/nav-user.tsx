@@ -83,6 +83,13 @@ export function NavUser({
               />
             }
           >
+            <Avatar className="shrink-0">
+              {user?.avatar ? (
+                <AvatarImage src={user.avatar} alt={displayName} />
+              ) : null}
+              <AvatarFallback>{initials}</AvatarFallback>
+            </Avatar>
+
             <div className={cn("min-w-0 flex-1 text-left text-sm leading-tight", {
               "hidden md:grid": compact,
             })}>
@@ -92,12 +99,6 @@ export function NavUser({
               </span>
             </div>
 
-            <Avatar className="shrink-0">
-              {user?.avatar ? (
-                <AvatarImage src={user.avatar} alt={displayName} />
-              ) : null}
-              <AvatarFallback>{initials}</AvatarFallback>
-            </Avatar>
             <IconSelector className="size-4 shrink-0" />
           </DropdownMenuTrigger>
           <DropdownMenuContent
