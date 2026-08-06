@@ -89,6 +89,11 @@ export async function proxy(request: NextRequest) {
       return loginRedirect(request, pathname);
     }
 
+    // Allow bare /staff without forcing the contest route.
+    if (pathname === '/staff' || pathname === '/staff/') {
+      return NextResponse.next();
+    }
+
     const staffHome = `/staff/${activeContestId}`;
     const onOwnContest =
       pathname === staffHome || pathname.startsWith(`${staffHome}/`);
