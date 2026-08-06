@@ -26,6 +26,7 @@ export class ContestsController {
   }
 
   @Get(':id')
+  @Roles(['admin', 'staff'])
   findById(@Param('id') id: string) {
     return this.contestsService.findById(id);
   }
