@@ -1,31 +1,44 @@
 import { cn } from '@/lib/utils';
 import { HugeiconsIcon, type IconSvgElement } from '@hugeicons/react';
+import { Card } from './pouf/surface';
+import { Blob } from './pouf/media';
+import { ComponentPropsWithoutRef } from 'react';
 
 interface BoxFeaturesProps {
     title: string;
     icon: IconSvgElement;
+    iconSize?: ComponentPropsWithoutRef<typeof HugeiconsIcon>['size'];
+    iconStrokeWidth?: ComponentPropsWithoutRef<typeof HugeiconsIcon>['strokeWidth'];
     children: React.ReactNode;
-    className?: string;
+    blobTone?: ComponentPropsWithoutRef<typeof Blob>['tone'];
+    blobSize?: ComponentPropsWithoutRef<typeof Blob>['size'];
 }
 
 export default function BoxFeatures({
     title,
     icon,
+    iconSize,
+    iconStrokeWidth = 3,
     children,
-    className,
+    blobTone,
+    blobSize,
 }: BoxFeaturesProps) {
     return (
-        <div className={cn('w-full flex flex-col border-4 bg-muted border-gray-200 rounded-2xl overflow-hidden relative', className)}>
-            <div className='flex items-center gap-2 bg-black text-white px-4 py-2 text-sm font-bold'>
-                <HugeiconsIcon
-                    icon={icon}
-                    className="size-4 shrink-0"
-                    strokeWidth={3}
+        <Card>
+            <div className='flex items-center gap-3 text-white px-4 py-2 text-sm font-bold'>
+                <Blob
+                    icon={<HugeiconsIcon
+                        icon={icon}
+                        className={cn("size-4 shrink-0", iconSize)}
+                        strokeWidth={iconStrokeWidth}
+                    />}
+                    tone={blobTone}
+                    size={blobSize}
                 />
-                <span>{title}</span>
+                <span className='text-xl text-ink font-bold'>{title}</span>
             </div>
 
             {children}
-        </div>
+        </Card>
     )
 }
