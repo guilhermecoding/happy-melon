@@ -26,7 +26,7 @@ import {
   UserIcon,
 } from '@hugeicons/core-free-icons'
 
-const ADMIN_ROLES = new Set(['admin', 'staff'])
+const ADMIN_ROLES = new Set(['admin'])
 
 function getSignInErrorMessage(error: {
   code?: string | undefined
@@ -128,7 +128,7 @@ export function LoginForm({
   }, [searchParams])
 
   async function completeStaffLogin(contestId: string) {
-    router.push(`/admin/competicoes/${contestId}/tarefas`)
+    router.push(`/staff/${contestId}`)
     router.refresh()
   }
 
@@ -219,7 +219,7 @@ export function LoginForm({
       const role = data?.user?.role
       if (!role || !ADMIN_ROLES.has(role)) {
         await authClient.signOut()
-        setError('Acesso restrito a administradores e staff.')
+        setError('Acesso restrito a administradores.')
         return
       }
 

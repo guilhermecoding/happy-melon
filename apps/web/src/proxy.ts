@@ -1,7 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
 
-const ADMIN_ROLES = new Set(['admin', 'staff']);
-
 type SessionResponse = {
   user?: {
     role?: string | null;
@@ -39,54 +37,71 @@ async function getSession(request: NextRequest): Promise<SessionResponse> {
   }
 }
 
-function hasAdminAccess(session: SessionResponse): boolean {
+function getRole(session: SessionResponse): string | null {
   const role = session?.user?.role;
-  return typeof role === 'string' && ADMIN_ROLES.has(role);
+  return typeof role === 'string' ? role : null;
+}
+
+function loginRedirect(request: NextRequest, pathname: string) {
+  const loginUrl = new URL('/entrar', request.url);
+  loginUrl.searchParams.set('next', pathname);
+  return NextResponse.redirect(loginUrl);
 }
 
 function getPostLoginRedirect(session: SessionResponse, request: NextRequest) {
+  const role = getRole(session);
   const activeContestId = session?.session?.activeContestId;
-  if (activeContestId) {
-    return new URL(
-      `/admin/competicoes/${activeContestId}/tarefas`,
-      request.url,
-    );
+
+  if (role === 'staff' && activeContestId) {
+    return new URL(`/staff/${activeContestId}`, request.url);
   }
 
-  return new URL('/admin', request.url);
+  if (role === 'admin') {
+    return new URL('/admin', request.url);
+  }
+
+  return new URL('/entrar', request.url);
 }
 
 export async function proxy(request: NextRequest) {
   const { pathname } = request.nextUrl;
   const session = await getSession(request);
-  const isAuthenticatedAdmin = hasAdminAccess(session);
+  const role = getRole(session);
+  const activeContestId = session?.session?.activeContestId ?? null;
 
-  if (pathname.startsWith('/admin') && !isAuthenticatedAdmin) {
-    const loginUrl = new URL('/entrar', request.url);
-    loginUrl.searchParams.set('next', pathname);
-    return NextResponse.redirect(loginUrl);
+  if (pathname.startsWith('/admin')) {
+    if (role === 'staff' && activeContestId) {
+      return NextResponse.redirect(
+        new URL(`/staff/${activeContestId}`, request.url),
+      );
+    }
+    if (role !== 'admin') {
+      return loginRedirect(request, pathname);
+    }
+    return NextResponse.next();
   }
 
-  if (pathname === '/entrar' && isAuthenticatedAdmin) {
-    return NextResponse.redirect(getPostLoginRedirect(session, request));
-  }
-
-  // Collaborators stay on their contest task board (and Sobre).
-  const activeContestId = session?.session?.activeContestId;
-  if (
-    isAuthenticatedAdmin &&
-    activeContestId &&
-    pathname.startsWith('/admin')
-  ) {
-    if (pathname === '/admin/sobre' || pathname.startsWith('/admin/sobre/')) {
-      return NextResponse.next();
+  if (pathname.startsWith('/staff')) {
+    if (role === 'admin') {
+      return NextResponse.redirect(new URL('/admin', request.url));
+    }
+    if (role !== 'staff' || !activeContestId) {
+      return loginRedirect(request, pathname);
     }
 
-    const tarefasPath = `/admin/competicoes/${activeContestId}/tarefas`;
-    const onTarefas =
-      pathname === tarefasPath || pathname.startsWith(`${tarefasPath}/`);
-    if (!onTarefas) {
-      return NextResponse.redirect(new URL(tarefasPath, request.url));
+    const staffHome = `/staff/${activeContestId}`;
+    const onOwnContest =
+      pathname === staffHome || pathname.startsWith(`${staffHome}/`);
+    if (!onOwnContest) {
+      return NextResponse.redirect(new URL(staffHome, request.url));
+    }
+
+    return NextResponse.next();
+  }
+
+  if (pathname === '/entrar') {
+    if (role === 'admin' || (role === 'staff' && activeContestId)) {
+      return NextResponse.redirect(getPostLoginRedirect(session, request));
     }
   }
 
@@ -94,5 +109,5 @@ export async function proxy(request: NextRequest) {
 }
 
 export const config = {
-  matcher: ['/admin/:path*', '/entrar'],
+  matcher: ['/admin/:path*', '/staff/:path*', '/entrar'],
 };

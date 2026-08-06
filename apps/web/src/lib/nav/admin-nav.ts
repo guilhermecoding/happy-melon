@@ -49,30 +49,10 @@ export function getContestNavItems(contestId: string): AdminNavItem[] {
   ];
 }
 
-export function getPrimaryNavItems(
-  pathname: string,
-  options?: {
-    role?: string | null;
-    activeContestId?: string | null;
-  },
-): AdminNavItem[] {
-  const role = options?.role ?? null;
-  const isStaff = role === 'staff';
-  const contestId =
-    getContestIdFromPathname(pathname) ?? options?.activeContestId ?? null;
+export function getPrimaryNavItems(pathname: string): AdminNavItem[] {
+  const contestId = getContestIdFromPathname(pathname);
 
-  if (isStaff) {
-    if (!contestId) return [];
-    return [
-      {
-        title: 'Tarefas',
-        url: `/admin/competicoes/${contestId}/tarefas`,
-        icon: 'tarefas',
-      },
-    ];
-  }
-
-  if (contestId && getContestIdFromPathname(pathname)) {
+  if (contestId) {
     return [
       {
         title: 'Visão geral',

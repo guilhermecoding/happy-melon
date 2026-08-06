@@ -1,16 +1,17 @@
-import { Metadata } from "next";
+import { Metadata } from 'next'
+import { StaffShell } from './_components/staff-shell'
 
 export const metadata: Metadata = {
-    title: {
-        default: 'Happy Melon (Colaborador)',
-        template: '%s | Happy Melon (Colaborador)',
-    }
+  title: {
+    default: 'Happy Melon (Colaborador)',
+    template: '%s | Happy Melon (Colaborador)',
+  },
 }
 
 export default function StaffLayout({
-    children,
+  children,
 }: {
-    children: React.ReactNode
+  children: React.ReactNode
 }) {
-    return <div>{children}</div>
+  return <StaffShell>{children}</StaffShell>
 }
