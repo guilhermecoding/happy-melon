@@ -22,7 +22,7 @@ import {
   TableRow,
 } from '@/components/ui/table';
 import Spinner from '@/components/spinner';
-import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
+import { Tooltip } from '@/components/pouf/controls';
 import { TaskTimelineDialog } from './task-timeline-dialog';
 import { Button as ButtonPouf } from '../pouf/Button';
 
@@ -193,32 +193,27 @@ export default function TaskHistoryList({
                       ) : null}
                     </TableCell>
                     <TableCell>
-                      <Tooltip>
-                        <TooltipTrigger
-                          render={
-                            <Button
-                              type="button"
-                              variant="normal"
-                              size="sm"
-                              className="bg-transparent p-1 transition-colors hover:bg-background/80"
-                              disabled={!taskId}
-                              onClick={() => {
-                                if (!taskId) return;
-                                setTimelineTask({
-                                  taskId,
-                                  kind: entry.kind,
-                                });
-                              }}
-                            />
-                          }
+                      <Tooltip tip="Ver tarefa completa">
+                        <Button
+                          type="button"
+                          variant="normal"
+                          size="sm"
+                          className="bg-transparent p-1 transition-colors hover:bg-background/80"
+                          disabled={!taskId}
+                          onClick={() => {
+                            if (!taskId) return;
+                            setTimelineTask({
+                              taskId,
+                              kind: entry.kind,
+                            });
+                          }}
                         >
                           <HugeiconsIcon
                             icon={ViewIcon}
                             className="size-4"
                             strokeWidth={2}
                           />
-                        </TooltipTrigger>
-                        <TooltipContent>Ver tarefa completa</TooltipContent>
+                        </Button>
                       </Tooltip>
                     </TableCell>
                   </TableRow>

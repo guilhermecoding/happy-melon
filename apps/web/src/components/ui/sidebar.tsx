@@ -18,11 +18,7 @@ import {
   SheetTitle,
 } from "@/components/ui/sheet"
 import { Skeleton } from "@/components/ui/skeleton"
-import {
-  Tooltip,
-  TooltipContent,
-  TooltipTrigger,
-} from "@/components/ui/tooltip"
+import { Tooltip } from "@/components/pouf/controls"
 import { HugeiconsIcon } from "@hugeicons/react"
 import { PanelLeftOpenIcon, PanelRightCloseIcon } from "@hugeicons/core-free-icons"
 
@@ -526,7 +522,7 @@ function SidebarMenuButton({
 }: useRender.ComponentProps<"button"> &
   React.ComponentProps<"button"> & {
     isActive?: boolean
-    tooltip?: string | React.ComponentProps<typeof TooltipContent>
+    tooltip?: string
   } & VariantProps<typeof sidebarMenuButtonVariants>) {
   const { isMobile, state } = useSidebar()
   const comp = useRender({
@@ -537,7 +533,7 @@ function SidebarMenuButton({
       },
       props
     ),
-    render: !tooltip ? render : <TooltipTrigger render={render} />,
+    render,
     state: {
       slot: "sidebar-menu-button",
       sidebar: "menu-button",
@@ -546,27 +542,11 @@ function SidebarMenuButton({
     },
   })
 
-  if (!tooltip) {
+  if (!tooltip || state !== "collapsed" || isMobile) {
     return comp
   }
 
-  if (typeof tooltip === "string") {
-    tooltip = {
-      children: tooltip,
-    }
-  }
-
-  return (
-    <Tooltip>
-      {comp}
-      <TooltipContent
-        side="right"
-        align="center"
-        hidden={state !== "collapsed" || isMobile}
-        {...tooltip}
-      />
-    </Tooltip>
-  )
+  return <Tooltip tip={tooltip}>{comp}</Tooltip>
 }
 
 function SidebarMenuAction({

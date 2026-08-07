@@ -13,11 +13,7 @@ import {
   type BalloonDeliveryStatus,
   type TaskKind,
 } from '@repo/shared';
-import {
-  Tooltip,
-  TooltipContent,
-  TooltipTrigger,
-} from '@/components/ui/tooltip';
+import { Tooltip } from '@/components/pouf/controls';
 import { cn } from '@/lib/utils';
 
 export const BALLOON_DELIVERY_STATUS_ICON = {
@@ -89,13 +85,10 @@ export function BalloonDeliveryStatusIcon({
   const label = getBalloonDeliveryStatusLabel(status, kind);
 
   return (
-    <Tooltip>
-      <TooltipTrigger
+    <Tooltip tip={label} className={cn('size-5', className)}>
+      <button
         type="button"
-        className={cn(
-          'inline-flex size-5 cursor-default rounded-sm outline-none focus-visible:ring-2 focus-visible:ring-ring',
-          className,
-        )}
+        className="inline-flex size-full cursor-default rounded-sm outline-none focus-visible:ring-2 focus-visible:ring-ring"
         aria-label={label}
       >
         <HugeiconsIcon
@@ -106,8 +99,7 @@ export function BalloonDeliveryStatusIcon({
           )}
           strokeWidth={strokeWidth}
         />
-      </TooltipTrigger>
-      <TooltipContent>{label}</TooltipContent>
+      </button>
     </Tooltip>
   );
 }

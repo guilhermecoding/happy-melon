@@ -1,3 +1,5 @@
+"use client";
+
 import * as RSelect from '@radix-ui/react-select'
 import * as RSwitch from '@radix-ui/react-switch'
 import * as RTooltip from '@radix-ui/react-tooltip'
@@ -122,11 +124,20 @@ export function TooltipProvider({ children }: { children: ReactNode }) {
  * the primitives' prop surface, which trades a real guarantee for a small win.
  * Covered by the gallery snapshot gate, including the disabled case.
  */
-export function Tooltip({ tip, children }: { tip: string; children: ReactNode }) {
+export function Tooltip({
+  tip,
+  children,
+  className,
+}: {
+  tip: string
+  children: ReactNode
+  /** Applied to the tip anchor (the real Radix trigger), not the child. */
+  className?: string
+}) {
   return (
     <RTooltip.Root>
       <RTooltip.Trigger asChild>
-        <span className="pouf-tip-anchor">{children}</span>
+        <span className={clsx('pouf-tip-anchor', className)}>{children}</span>
       </RTooltip.Trigger>
       <RTooltip.Portal>
         <RTooltip.Content className="pouf-tooltip" sideOffset={8}>

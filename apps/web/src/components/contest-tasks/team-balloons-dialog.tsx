@@ -20,7 +20,7 @@ import { BalloonAchievement } from '@/components/balloon-achievement';
 import { BalloonDeliveryStatusIcon } from '@/components/balloon-delivery-status-icon';
 import { Button as SimpleButton } from '@/components/ui/button';
 import { Button as ButtonPouf } from '../pouf/Button';
-import { Confirm, Dialog } from '@/components/pouf/controls';
+import { Confirm, Dialog, Tooltip } from '@/components/pouf/controls';
 import { toBalloonColor } from '@/services/question/balloon-color';
 import { questionService } from '@/services/question/question.service';
 import { getQuestionErrorMessage } from '@/services/question/question.error';
@@ -32,7 +32,6 @@ import { printService } from '@/services/print/print.service';
 import { getPrintErrorMessage } from '@/services/print/print.error';
 import { toast } from '@/components/pouf/toaster';
 import PrintIcon from '@/components/print-icon';
-import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
 import { PrintTasksDialog } from './print-tasks-dialog';
 import Spinner from '@/components/spinner';
 import { RowCard } from '../pouf/surface';
@@ -69,9 +68,9 @@ function PrintRequestCard({
       toast.success(`Impressão encaminhada para ${team.name}.`);
     } catch (actionError) {
       toast.error(getPrintErrorMessage(
-          actionError,
-          'Não foi possível encaminhar a impressão.',
-        ));
+        actionError,
+        'Não foi possível encaminhar a impressão.',
+      ));
     } finally {
       setIsEnqueueing(false);
     }
@@ -80,29 +79,22 @@ function PrintRequestCard({
   return (
     <div className="relative flex min-w-0 flex-col items-center justify-center rounded-2xl border border-border bg-background p-2">
       <div className="absolute top-1 right-1">
-        <Tooltip>
-          <TooltipTrigger
-            render={
-              <SimpleButton
-                type="button"
-                variant="normal"
-                size="icon"
-                className="size-8"
-                disabled={disabled || isEnqueueing}
-                onClick={onOpenQueue}
-                aria-label="Abrir fila de impressão"
-              />
-            }
+        <Tooltip tip="Abrir fila de impressão">
+          <SimpleButton
+            type="button"
+            variant="normal"
+            size="icon"
+            className="size-8"
+            disabled={disabled || isEnqueueing}
+            onClick={onOpenQueue}
+            aria-label="Abrir fila de impressão"
           >
             <HugeiconsIcon
               icon={ExpandIcon}
               className="size-5 text-muted-foreground"
               strokeWidth={2}
             />
-          </TooltipTrigger>
-          <TooltipContent>
-            <p>Abrir fila de impressão</p>
-          </TooltipContent>
+          </SimpleButton>
         </Tooltip>
       </div>
 
@@ -242,9 +234,9 @@ export function TeamBalloonsDialog({
       toast.success(`Balão ${question.label} confirmado para ${team.name}.`);
     } catch (actionError) {
       toast.error(getBalloonErrorMessage(
-          actionError,
-          'Não foi possível confirmar o balão.',
-        ));
+        actionError,
+        'Não foi possível confirmar o balão.',
+      ));
     } finally {
       setPendingQuestionId(undefined);
     }
@@ -266,9 +258,9 @@ export function TeamBalloonsDialog({
       toast.success(`Balão ${question.label} retido para ${team.name}.`);
     } catch (actionError) {
       toast.error(getBalloonErrorMessage(
-          actionError,
-          'Não foi possível reter o balão.',
-        ));
+        actionError,
+        'Não foi possível reter o balão.',
+      ));
     } finally {
       setPendingQuestionId(undefined);
     }
@@ -333,13 +325,18 @@ export function TeamBalloonsDialog({
                     key={question.id}
                     className="relative min-w-0 rounded-2xl border border-border bg-background p-2"
                   >
-                    {status !== BALLOON_EFFECTIVE_STATUS.ABSENT ? (
-                      <BalloonDeliveryStatusIcon
-                        status={status}
-                        className="absolute top-2 right-2 size-6"
-                        strokeWidth={2.5}
-                      />
-                    ) : null}
+                    <BalloonDeliveryStatusIcon
+                      status={
+                        status === BALLOON_EFFECTIVE_STATUS.ABSENT
+                          ? BALLOON_EFFECTIVE_STATUS.PENDING
+                          : status
+                      }
+                      className={`absolute top-2 right-2 size-6${status === BALLOON_EFFECTIVE_STATUS.ABSENT
+                        ? ' invisible'
+                        : ''
+                        }`}
+                      strokeWidth={2.5}
+                    />
                     <BalloonAchievement
                       questionId={question.label}
                       color={toBalloonColor(question.balloonColor)}

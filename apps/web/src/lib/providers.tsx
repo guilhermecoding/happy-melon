@@ -1,4 +1,4 @@
-import { TooltipProvider } from '@/components/ui/tooltip'
+import { TooltipProvider } from '@/components/pouf/controls'
 import { Toaster } from '@/components/pouf/toaster'
 import React from 'react'
 
