@@ -105,10 +105,10 @@ export function Shell({ children }: { children: ReactNode }) {
   return (
     <div
       className={[
-        'pouf-shell grid [grid-template-columns:260px_minmax(0,1fr)] gap-(--s6) p-(--s8) max-w-[1440px] mx-auto [align-items:start]',
+        'pouf-shell grid grid-cols-[260px_minmax(0,1fr)] gap-(--s6) p-(--s8) max-w-360 mx-auto [align-items:start]',
         /* Below 900px: single column, tighter padding, and clearance for the
          * fixed bottom bar plus the home-indicator inset on iOS. */
-        'max-[900px]:[grid-template-columns:minmax(0,1fr)] max-[900px]:p-(--s4)',
+        'max-[900px]:grid-cols-[minmax(0,1fr)] max-[900px]:p-(--s4)',
         'max-[900px]:pb-[calc(96px+env(safe-area-inset-bottom,0px))]',
       ].join(' ')}
     >
