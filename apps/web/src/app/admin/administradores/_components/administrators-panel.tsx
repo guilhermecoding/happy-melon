@@ -7,7 +7,7 @@ import { getAdministratorErrorMessage } from '@/services/administrator/administr
 import type { Administrator } from '@/services/administrator/administrator.type';
 import { Button } from '@/components/ui/button';
 import { Switch } from '@/components/ui/switch';
-import { toast } from '@/components/ui/toast';
+import { toast } from '@/components/pouf/toaster';
 import {
   Table,
   TableBody,
@@ -111,12 +111,9 @@ export function AdministratorsPanel() {
           item.id === updatedAdministrator.id ? updatedAdministrator : item,
         ),
       );
-      toast.add({
-        title: hasAccess
+      toast.success(hasAccess
           ? `Acesso de ${administrator.name} ativado.`
-          : `Acesso de ${administrator.name} desativado.`,
-        type: 'success',
-      });
+          : `Acesso de ${administrator.name} desativado.`);
     } catch (updateError) {
       setAdministrators((current) =>
         current.map((item) =>
@@ -130,10 +127,7 @@ export function AdministratorsPanel() {
         'Não foi possível atualizar o acesso do administrador.',
       );
       setError(message);
-      toast.add({
-        title: message,
-        type: 'error',
-      });
+      toast.error(message);
     } finally {
       setUpdatingAccess((current) => {
         const next = new Set(current);

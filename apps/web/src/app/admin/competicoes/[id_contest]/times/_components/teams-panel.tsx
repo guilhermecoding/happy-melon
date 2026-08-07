@@ -30,7 +30,7 @@ import {
   TableHeader,
   TableRow,
 } from '@/components/ui/table';
-import { toast } from '@/components/ui/toast';
+import { toast } from '@/components/pouf/toaster';
 import { teamService } from '@/services/team/team.service';
 import { getTeamErrorMessage } from '@/services/team/team.error';
 import type { Team } from '@/services/team/team.type';
@@ -178,10 +178,7 @@ export function TeamsPanel({ contestId }: TeamsPanelProps) {
 
   function handleDownloadTeams() {
     if (teams.length === 0) {
-      toast.add({
-        title: 'Não há times para baixar.',
-        type: 'error',
-      });
+      toast.error('Não há times para baixar.');
       return;
     }
 
@@ -190,10 +187,7 @@ export function TeamsPanel({ contestId }: TeamsPanelProps) {
     );
 
     downloadTeamsCsv(orderedTeams, `times-${contestId}.csv`);
-    toast.add({
-      title: `${orderedTeams.length} time(s) exportado(s).`,
-      type: 'success',
-    });
+    toast.success(`${orderedTeams.length} time(s) exportado(s).`);
   }
 
   async function handleConfirmDeleteAll(password: string) {
@@ -205,23 +199,16 @@ export function TeamsPanel({ contestId }: TeamsPanelProps) {
       setTeams([]);
       setSelectedTeam(null);
       setDeleteAllOpen(false);
-      toast.add({
-        title:
-          result.deletedCount > 0
+      toast.success(result.deletedCount > 0
             ? `${result.deletedCount} time(s) excluído(s) com sucesso.`
-            : 'Nenhum time para excluir.',
-        type: 'success',
-      });
+            : 'Nenhum time para excluir.');
     } catch (deleteError) {
       const message = getTeamErrorMessage(
         deleteError,
         'Não foi possível excluir os times.',
       );
       setDeleteAllError(message);
-      toast.add({
-        title: message,
-        type: 'error',
-      });
+      toast.error(message);
     } finally {
       setIsDeletingAll(false);
     }

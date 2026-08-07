@@ -2,7 +2,7 @@
 
 import { useEffect, useState, type FormEvent } from 'react';
 import { useForm } from '@tanstack/react-form';
-import { toast } from '@/components/ui/toast';
+import { toast } from '@/components/pouf/toaster';
 import { authClient } from '@/lib/auth-client';
 import { administratorService } from '@/services/administrator/administrator.service';
 import { getAdministratorErrorMessage } from '@/services/administrator/administrator.error';
@@ -90,10 +90,7 @@ export function EditAdministratorSheet({
         );
         onUpdated(updatedAdministrator);
         onOpenChange(false);
-        toast.add({
-          title: 'Administrador atualizado com sucesso.',
-          type: 'success',
-        });
+        toast.success('Administrador atualizado com sucesso.');
       } catch (error) {
         setRequestError(
           getAdministratorErrorMessage(
@@ -180,10 +177,7 @@ export function EditAdministratorSheet({
         onDeleted(administrator.id);
         handleConfirmOpenChange(false);
         handleOpenChange(false);
-        toast.add({
-          title: 'Administrador excluído com sucesso.',
-          type: 'success',
-        });
+        toast.success('Administrador excluído com sucesso.');
         return;
       }
 
@@ -198,10 +192,7 @@ export function EditAdministratorSheet({
       });
       setPendingNewPassword(undefined);
       handleConfirmOpenChange(false);
-      toast.add({
-        title: 'Senha alterada com sucesso.',
-        type: 'success',
-      });
+      toast.success('Senha alterada com sucesso.');
     } catch (error) {
       const message = getAdministratorErrorMessage(
         error,
@@ -210,10 +201,7 @@ export function EditAdministratorSheet({
           : 'Não foi possível alterar a senha do administrador.',
       );
       setConfirmError(message);
-      toast.add({
-        title: message,
-        type: 'error',
-      });
+      toast.error(message);
     } finally {
       setIsConfirming(false);
     }

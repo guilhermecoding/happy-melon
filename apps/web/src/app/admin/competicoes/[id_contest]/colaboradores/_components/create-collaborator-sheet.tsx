@@ -17,7 +17,7 @@ import {
   SheetHeader,
   SheetTitle,
 } from '@/components/ui/sheet';
-import { toast } from '@/components/ui/toast';
+import { toast } from '@/components/pouf/toaster';
 import {
   collaboratorSchema,
   type CollaboratorFormValues,
@@ -54,20 +54,14 @@ export function CreateCollaboratorSheet({
         onCreated(collaborator);
         form.reset();
         onOpenChange(false);
-        toast.add({
-          title: 'Colaborador cadastrado com sucesso.',
-          type: 'success',
-        });
+        toast.success('Colaborador cadastrado com sucesso.');
       } catch (error) {
         const message = getCollaboratorErrorMessage(
           error,
           'Não foi possível criar o colaborador.',
         );
         setRequestError(message);
-        toast.add({
-          title: message,
-          type: 'error',
-        });
+        toast.error(message);
       }
     },
   });

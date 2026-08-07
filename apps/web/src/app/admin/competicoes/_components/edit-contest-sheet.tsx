@@ -17,7 +17,7 @@ import {
   SheetHeader,
   SheetTitle,
 } from '@/components/ui/sheet';
-import { toast } from '@/components/ui/toast';
+import { toast } from '@/components/pouf/toaster';
 import {
   editContestFormSchema,
   type EditContestFormValues,
@@ -83,10 +83,7 @@ export function EditContestSheet({
           venue: value.venue,
         });
         onUpdated(updatedContest);
-        toast.add({
-          title: 'Competição atualizada com sucesso.',
-          type: 'success',
-        });
+        toast.success('Competição atualizada com sucesso.');
         handleOpenChange(false);
       } catch (error) {
         const message = getContestErrorMessage(
@@ -94,10 +91,7 @@ export function EditContestSheet({
           'Não foi possível atualizar a competição.',
         );
         setRequestError(message);
-        toast.add({
-          title: message,
-          type: 'error',
-        });
+        toast.error(message);
       }
     },
   });

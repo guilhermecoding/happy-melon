@@ -16,7 +16,7 @@ import {
 import { Field, FieldLabel } from '@/components/ui/field';
 import { Input } from '@/components/ui/input';
 import { Switch } from '@/components/ui/switch';
-import { toast } from '@/components/ui/toast';
+import { toast } from '@/components/pouf/toaster';
 
 type CollaboratorSettingsDialogProps = {
   contestId: string;
@@ -73,7 +73,7 @@ export function CollaboratorSettingsDialog({
           error,
           'Não foi possível carregar os ajustes.',
         );
-        toast.add({ title: message, type: 'error' });
+        toast.error(message);
         onOpenChange(false);
       } finally {
         if (active) setLoading(false);
@@ -103,18 +103,12 @@ export function CollaboratorSettingsDialog({
       : null;
 
     if (settings.balloonLimitEnabled && balloonLimit === null) {
-      toast.add({
-        title: 'Informe um limite de balões válido (mínimo 1).',
-        type: 'error',
-      });
+      toast.error('Informe um limite de balões válido (mínimo 1).');
       return;
     }
 
     if (settings.deliveryTimeoutEnabled && deliveryTimeoutMinutes === null) {
-      toast.add({
-        title: 'Informe um timeout válido em minutos (mínimo 1).',
-        type: 'error',
-      });
+      toast.error('Informe um timeout válido em minutos (mínimo 1).');
       return;
     }
 
@@ -128,17 +122,14 @@ export function CollaboratorSettingsDialog({
     setSaving(true);
     try {
       await contestService.updateStaffSettings(contestId, payload);
-      toast.add({
-        title: 'Ajustes salvos com sucesso.',
-        type: 'success',
-      });
+      toast.success('Ajustes salvos com sucesso.');
       onOpenChange(false);
     } catch (error) {
       const message = getContestErrorMessage(
         error,
         'Não foi possível salvar os ajustes.',
       );
-      toast.add({ title: message, type: 'error' });
+      toast.error(message);
     } finally {
       setSaving(false);
     }

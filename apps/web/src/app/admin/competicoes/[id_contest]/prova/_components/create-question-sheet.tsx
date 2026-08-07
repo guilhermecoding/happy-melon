@@ -19,7 +19,7 @@ import {
   SheetHeader,
   SheetTitle,
 } from '@/components/ui/sheet';
-import { toast } from '@/components/ui/toast';
+import { toast } from '@/components/pouf/toaster';
 import { BalloonColorSelect } from './balloon-color-select';
 import {
   questionFormSchema,
@@ -61,10 +61,7 @@ export function CreateQuestionSheet({
           balloonColor: value.balloonColor,
         });
         onCreated(question);
-        toast.add({
-          title: 'Questão cadastrada com sucesso.',
-          type: 'success',
-        });
+        toast.success('Questão cadastrada com sucesso.');
         handleOpenChange(false);
       } catch (error) {
         const message = getQuestionErrorMessage(
@@ -72,10 +69,7 @@ export function CreateQuestionSheet({
           'Não foi possível criar a questão.',
         );
         setRequestError(message);
-        toast.add({
-          title: message,
-          type: 'error',
-        });
+        toast.error(message);
       }
     },
   });

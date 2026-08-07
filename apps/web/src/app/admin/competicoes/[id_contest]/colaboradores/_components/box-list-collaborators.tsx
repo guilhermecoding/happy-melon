@@ -12,7 +12,7 @@ import {
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
 import { Switch } from '@/components/ui/switch';
-import { toast } from '@/components/ui/toast';
+import { toast } from '@/components/pouf/toaster';
 import {
   Dialog,
   DialogContent,
@@ -161,12 +161,9 @@ export default function BoxListCollaborators({
       setCollaborators((current) =>
         current.map((item) => (item.id === updated.id ? updated : item)),
       );
-      toast.add({
-        title: hasAccess
+      toast.success(hasAccess
           ? `Acesso de ${collaborator.name} ativado.`
-          : `Acesso de ${collaborator.name} desativado.`,
-        type: 'success',
-      });
+          : `Acesso de ${collaborator.name} desativado.`);
     } catch (updateError) {
       setCollaborators((current) =>
         current.map((item) =>
@@ -180,10 +177,7 @@ export default function BoxListCollaborators({
         'Não foi possível atualizar o acesso do colaborador.',
       );
       setError(message);
-      toast.add({
-        title: message,
-        type: 'error',
-      });
+      toast.error(message);
     } finally {
       setUpdatingAccess((current) => {
         const next = new Set(current);
@@ -223,20 +217,14 @@ export default function BoxListCollaborators({
       await collaboratorService.remove(contestId, collaboratorToDelete.id);
       removeCollaboratorFromList(collaboratorToDelete.id);
       setCollaboratorToDelete(null);
-      toast.add({
-        title: 'Colaborador removido com sucesso.',
-        type: 'success',
-      });
+      toast.success('Colaborador removido com sucesso.');
     } catch (deleteError) {
       const message = getCollaboratorErrorMessage(
         deleteError,
         'Não foi possível excluir o colaborador.',
       );
       setError(message);
-      toast.add({
-        title: message,
-        type: 'error',
-      });
+      toast.error(message);
     } finally {
       setIsDeleting(false);
     }

@@ -22,7 +22,7 @@ import {
   SheetHeader,
   SheetTitle,
 } from '@/components/ui/sheet';
-import { toast } from '@/components/ui/toast';
+import { toast } from '@/components/pouf/toaster';
 import { BulkImportTeamsDialog } from './bulk-import-teams-dialog';
 import {
   emptyTeamFormValues,
@@ -67,10 +67,7 @@ export function CreateTeamSheet({
       try {
         const team = await teamService.create(contestId, toCreatePayload(value));
         onCreated(team);
-        toast.add({
-          title: 'Time cadastrado com sucesso.',
-          type: 'success',
-        });
+        toast.success('Time cadastrado com sucesso.');
         handleOpenChange(false);
       } catch (error) {
         const message = getTeamErrorMessage(
@@ -78,10 +75,7 @@ export function CreateTeamSheet({
           'Não foi possível criar o time.',
         );
         setRequestError(message);
-        toast.add({
-          title: message,
-          type: 'error',
-        });
+        toast.error(message);
       }
     },
   });

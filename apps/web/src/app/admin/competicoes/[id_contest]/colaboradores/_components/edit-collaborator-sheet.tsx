@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from 'react';
 import { useForm } from '@tanstack/react-form';
-import { toast } from '@/components/ui/toast';
+import { toast } from '@/components/pouf/toaster';
 import { collaboratorService } from '@/services/collaborator/collaborator.service';
 import { getCollaboratorErrorMessage } from '@/services/collaborator/collaborator.error';
 import type { Collaborator } from '@/services/collaborator/collaborator.type';
@@ -76,10 +76,7 @@ export function EditCollaboratorSheet({
         );
         onUpdated(updated);
         onOpenChange(false);
-        toast.add({
-          title: 'Colaborador atualizado com sucesso.',
-          type: 'success',
-        });
+        toast.success('Colaborador atualizado com sucesso.');
       } catch (error) {
         setRequestError(
           getCollaboratorErrorMessage(
@@ -119,18 +116,12 @@ export function EditCollaboratorSheet({
       onDeleted(collaborator.id);
       setDeleteOpen(false);
       onOpenChange(false);
-      toast.add({
-        title: 'Colaborador removido com sucesso.',
-        type: 'success',
-      });
+      toast.success('Colaborador removido com sucesso.');
     } catch (error) {
-      toast.add({
-        title: getCollaboratorErrorMessage(
+      toast.error(getCollaboratorErrorMessage(
           error,
           'Não foi possível excluir o colaborador.',
-        ),
-        type: 'error',
-      });
+        ));
     } finally {
       setIsDeleting(false);
     }

@@ -24,7 +24,7 @@ import {
   SheetHeader,
   SheetTitle,
 } from '@/components/ui/sheet';
-import { toast } from '@/components/ui/toast';
+import { toast } from '@/components/pouf/toaster';
 import { BalloonColorSelect } from './balloon-color-select';
 import {
   questionFormSchema,
@@ -81,10 +81,7 @@ export function EditQuestionSheet({
           balloonColor: value.balloonColor,
         });
         onUpdated(updatedQuestion);
-        toast.add({
-          title: 'Questão atualizada com sucesso.',
-          type: 'success',
-        });
+        toast.success('Questão atualizada com sucesso.');
         handleOpenChange(false);
       } catch (error) {
         const message = getQuestionErrorMessage(
@@ -92,10 +89,7 @@ export function EditQuestionSheet({
           'Não foi possível atualizar a questão.',
         );
         setRequestError(message);
-        toast.add({
-          title: message,
-          type: 'error',
-        });
+        toast.error(message);
       }
     },
   });
@@ -130,20 +124,14 @@ export function EditQuestionSheet({
       onDeleted(question.id);
       setDeleteConfirmOpen(false);
       handleOpenChange(false);
-      toast.add({
-        title: 'Questão excluída com sucesso.',
-        type: 'success',
-      });
+      toast.success('Questão excluída com sucesso.');
     } catch (error) {
       const message = getQuestionErrorMessage(
         error,
         'Não foi possível excluir a questão.',
       );
       setConfirmError(message);
-      toast.add({
-        title: message,
-        type: 'error',
-      });
+      toast.error(message);
     } finally {
       setIsConfirming(false);
     }

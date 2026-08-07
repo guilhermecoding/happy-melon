@@ -22,7 +22,7 @@ import {
 import { printService } from '@/services/print/print.service';
 import { getPrintErrorMessage } from '@/services/print/print.error';
 import type { PrintTask } from '@/services/print/print.type';
-import { toast } from '@/components/ui/toast';
+import { toast } from '@/components/pouf/toaster';
 import Spinner from '@/components/spinner';
 
 type PrintTasksDialogProps = {
@@ -112,18 +112,12 @@ export function PrintTasksDialog({
     try {
       const updated = await printService.confirm(contestId, task.id);
       applyTask(updated);
-      toast.add({
-        title: `Impressão ${task.id} confirmada para ${team.name}.`,
-        type: 'success',
-      });
+      toast.success(`Impressão ${task.id} confirmada para ${team.name}.`);
     } catch (actionError) {
-      toast.add({
-        title: getPrintErrorMessage(
+      toast.error(getPrintErrorMessage(
           actionError,
           'Não foi possível confirmar a impressão.',
-        ),
-        type: 'error',
-      });
+        ));
     } finally {
       setPendingTaskId(undefined);
     }
@@ -139,18 +133,12 @@ export function PrintTasksDialog({
       const updated = await printService.withhold(contestId, task.id);
       applyTask(updated);
       setWithholdTask(null);
-      toast.add({
-        title: `Impressão ${task.id} retida para ${team.name}.`,
-        type: 'success',
-      });
+      toast.success(`Impressão ${task.id} retida para ${team.name}.`);
     } catch (actionError) {
-      toast.add({
-        title: getPrintErrorMessage(
+      toast.error(getPrintErrorMessage(
           actionError,
           'Não foi possível reter a impressão.',
-        ),
-        type: 'error',
-      });
+        ));
     } finally {
       setPendingTaskId(undefined);
     }

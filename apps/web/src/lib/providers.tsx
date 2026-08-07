@@ -1,11 +1,14 @@
 import { TooltipProvider } from '@/components/ui/tooltip'
-import { Toaster } from '@/components/ui/toast'
+import { Toaster } from '@/components/pouf/toaster'
 import React from 'react'
 
 export default function Providers({ children }: { children: React.ReactNode }) {
   return (
-    <Toaster>
+    <>
       <TooltipProvider>{children}</TooltipProvider>
-    </Toaster>
+      <div className="pouf-toasts">
+        <Toaster />
+      </div>
+    </>
   )
 }

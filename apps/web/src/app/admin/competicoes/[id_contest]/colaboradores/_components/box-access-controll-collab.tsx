@@ -6,7 +6,7 @@ import { contestService } from '@/services/contest/contest.service'
 import { getContestErrorMessage } from '@/services/contest/contest.error'
 import type { Contest, ContestStatus } from '@/services/contest/contest.type'
 import { Switch } from '@/components/ui/switch'
-import { toast } from '@/components/ui/toast'
+import { toast } from '@/components/pouf/toaster'
 
 type BoxAccessControllCollabProps = {
     contest: Contest
@@ -45,22 +45,16 @@ export default function BoxAccessControllCollab({
                 venue: contest.venue,
             })
             setContest(updatedContest)
-            toast.add({
-                title: checked
+            toast.success(checked
                     ? 'Acesso dos colaboradores habilitado.'
-                    : 'Acesso dos colaboradores desabilitado.',
-                type: 'success',
-            })
+                    : 'Acesso dos colaboradores desabilitado.')
         } catch (error) {
             setContest((current) => ({ ...current, status: previousStatus }))
             const message = getContestErrorMessage(
                 error,
                 'Não foi possível atualizar o acesso dos colaboradores.',
             )
-            toast.add({
-                title: message,
-                type: 'error',
-            })
+            toast.error(message)
         } finally {
             setIsUpdating(false)
         }

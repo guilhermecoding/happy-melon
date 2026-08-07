@@ -23,7 +23,7 @@ import {
   SheetHeader,
   SheetTitle,
 } from '@/components/ui/sheet';
-import { toast } from '@/components/ui/toast';
+import { toast } from '@/components/pouf/toaster';
 import {
   emptyTeamFormValues,
   teamFormSchema,
@@ -76,10 +76,7 @@ export function EditTeamSheet({
           machine: value.machine.trim() || null,
         });
         onUpdated(updatedTeam);
-        toast.add({
-          title: 'Time atualizado com sucesso.',
-          type: 'success',
-        });
+        toast.success('Time atualizado com sucesso.');
         handleOpenChange(false);
       } catch (error) {
         const message = getTeamErrorMessage(
@@ -87,10 +84,7 @@ export function EditTeamSheet({
           'Não foi possível atualizar o time.',
         );
         setRequestError(message);
-        toast.add({
-          title: message,
-          type: 'error',
-        });
+        toast.error(message);
       }
     },
   });
@@ -125,20 +119,14 @@ export function EditTeamSheet({
       onDeleted(team.id);
       setDeleteConfirmOpen(false);
       handleOpenChange(false);
-      toast.add({
-        title: 'Time excluído com sucesso.',
-        type: 'success',
-      });
+      toast.success('Time excluído com sucesso.');
     } catch (error) {
       const message = getTeamErrorMessage(
         error,
         'Não foi possível excluir o time.',
       );
       setConfirmError(message);
-      toast.add({
-        title: message,
-        type: 'error',
-      });
+      toast.error(message);
     } finally {
       setIsConfirming(false);
     }

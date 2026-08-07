@@ -24,7 +24,7 @@ import {
   SheetHeader,
   SheetTitle,
 } from '@/components/ui/sheet';
-import { toast } from '@/components/ui/toast';
+import { toast } from '@/components/pouf/toaster';
 import {
   contestFormSchema,
   type ContestFormValues,
@@ -71,10 +71,7 @@ export function CreateContestSheet({
           venue: value.venue,
         });
         onCreated(contest);
-        toast.add({
-          title: 'Competição cadastrada com sucesso.',
-          type: 'success',
-        });
+        toast.success('Competição cadastrada com sucesso.');
         handleOpenChange(false);
       } catch (error) {
         const message = getContestErrorMessage(
@@ -82,10 +79,7 @@ export function CreateContestSheet({
           'Não foi possível criar a competição.',
         );
         setRequestError(message);
-        toast.add({
-          title: message,
-          type: 'error',
-        });
+        toast.error(message);
       }
     },
   });

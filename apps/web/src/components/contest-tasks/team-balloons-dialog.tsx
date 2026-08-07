@@ -30,7 +30,7 @@ import { getBalloonErrorMessage } from '@/services/balloon/balloon.error';
 import type { BalloonDelivery } from '@/services/balloon/balloon.type';
 import { printService } from '@/services/print/print.service';
 import { getPrintErrorMessage } from '@/services/print/print.error';
-import { toast } from '@/components/ui/toast';
+import { toast } from '@/components/pouf/toaster';
 import PrintIcon from '@/components/print-icon';
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
 import { PrintTasksDialog } from './print-tasks-dialog';
@@ -66,18 +66,12 @@ function PrintRequestCard({
     try {
       await printService.enqueue(contestId, { teamId: team.id });
       onEnqueued?.();
-      toast.add({
-        title: `Impressão encaminhada para ${team.name}.`,
-        type: 'success',
-      });
+      toast.success(`Impressão encaminhada para ${team.name}.`);
     } catch (actionError) {
-      toast.add({
-        title: getPrintErrorMessage(
+      toast.error(getPrintErrorMessage(
           actionError,
           'Não foi possível encaminhar a impressão.',
-        ),
-        type: 'error',
-      });
+        ));
     } finally {
       setIsEnqueueing(false);
     }
@@ -245,18 +239,12 @@ export function TeamBalloonsDialog({
         questionId: question.id,
       });
       applyDelivery(delivery);
-      toast.add({
-        title: `Balão ${question.label} confirmado para ${team.name}.`,
-        type: 'success',
-      });
+      toast.success(`Balão ${question.label} confirmado para ${team.name}.`);
     } catch (actionError) {
-      toast.add({
-        title: getBalloonErrorMessage(
+      toast.error(getBalloonErrorMessage(
           actionError,
           'Não foi possível confirmar o balão.',
-        ),
-        type: 'error',
-      });
+        ));
     } finally {
       setPendingQuestionId(undefined);
     }
@@ -275,18 +263,12 @@ export function TeamBalloonsDialog({
       });
       applyDelivery(delivery);
       setWithholdQuestion(null);
-      toast.add({
-        title: `Balão ${question.label} retido para ${team.name}.`,
-        type: 'success',
-      });
+      toast.success(`Balão ${question.label} retido para ${team.name}.`);
     } catch (actionError) {
-      toast.add({
-        title: getBalloonErrorMessage(
+      toast.error(getBalloonErrorMessage(
           actionError,
           'Não foi possível reter o balão.',
-        ),
-        type: 'error',
-      });
+        ));
     } finally {
       setPendingQuestionId(undefined);
     }

@@ -22,7 +22,7 @@ import {
   DialogHeader,
   DialogTitle,
 } from '@/components/ui/dialog';
-import { toast } from '@/components/ui/toast';
+import { toast } from '@/components/pouf/toaster';
 import { cn } from '@/lib/utils';
 import {
   downloadTeamCsvTemplate,
@@ -255,10 +255,7 @@ export function BulkImportTeamsDialog({
         teams: importRows,
       });
       onBulkUpserted(teams);
-      toast.add({
-        title: `${teams.length} time(s) importado(s) com sucesso.`,
-        type: 'success',
-      });
+      toast.success(`${teams.length} time(s) importado(s) com sucesso.`);
       handleOpenChange(false);
     } catch (error) {
       const message = getTeamErrorMessage(
@@ -266,10 +263,7 @@ export function BulkImportTeamsDialog({
         'Não foi possível importar os times.',
       );
       setRequestError(message);
-      toast.add({
-        title: message,
-        type: 'error',
-      });
+      toast.error(message);
     } finally {
       setIsSubmitting(false);
     }

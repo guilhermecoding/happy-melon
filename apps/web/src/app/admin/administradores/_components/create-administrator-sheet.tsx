@@ -17,7 +17,7 @@ import {
   SheetHeader,
   SheetTitle,
 } from '@/components/ui/sheet';
-import { toast } from '@/components/ui/toast';
+import { toast } from '@/components/pouf/toaster';
 import {
   administratorSchema,
   type AdministratorFormValues,
@@ -54,20 +54,14 @@ export function CreateAdministratorSheet({
         const administrator = await administratorService.create(value);
         onCreated(administrator);
         setTemporaryPassword(administrator.temporaryPassword);
-        toast.add({
-          title: 'Administrador cadastrado com sucesso.',
-          type: 'success',
-        });
+        toast.success('Administrador cadastrado com sucesso.');
       } catch (error) {
         const message = getAdministratorErrorMessage(
           error,
           'Não foi possível criar o administrador.',
         );
         setRequestError(message);
-        toast.add({
-          title: message,
-          type: 'error',
-        });
+        toast.error(message);
       }
     },
   });
