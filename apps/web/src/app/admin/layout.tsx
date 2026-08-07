@@ -7,6 +7,7 @@ import {
 } from "@/components/ui/sidebar"
 import { Metadata } from "next"
 import { AdminBreadcrumb } from "./_components/admin-breadcrumb"
+import BackgroundColors from "@/components/ui/background-colors"
 
 export const metadata: Metadata = {
   title: {
@@ -22,8 +23,9 @@ export default function AdminLayout({
 }) {
   return (
     <SidebarProvider>
+      <BackgroundColors />
       <AppSidebar variant="floating" />
-      <SidebarInset className="bg-bg">
+      <SidebarInset className="relative z-10 bg-transparent">
         <header className="flex h-16 shrink-0 items-center gap-2">
           <div className="flex items-center gap-2 px-4">
             <SidebarTrigger className="-ml-1" />
