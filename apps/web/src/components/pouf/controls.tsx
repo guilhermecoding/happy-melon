@@ -188,45 +188,48 @@ export function Dialog({
             own Presence keeps the node mounted until the [data-state='closed']
             animation finishes, so the close animates without framer — and without
             framer's inline transform, the CSS translate(-50%,-50%) centring holds
-            through both. (prefers-reduced-motion is honoured globally in pouf.css.) */}
-        <RDialog.Overlay className="pouf-overlay" />
-        <RDialog.Content
-          className={clsx(
-            size === 'xl'
-              ? 'pouf-dialog pouf-dialog--xl'
-              : size === 'lg'
-                ? 'pouf-dialog pouf-dialog--lg'
-                : 'pouf-dialog',
-            className,
-          )}
-        >
-          <Stack gap={4}>
-            <div className="pouf-dialog__head">
-              <Stack gap={1}>
-                <RDialog.Title asChild>
-                  <div>
-                    <Heading level={3}>{title}</Heading>
-                  </div>
-                </RDialog.Title>
-                {description != null && description !== '' && (
-                  <RDialog.Description asChild>
+            through both. (prefers-reduced-motion is honoured globally in pouf.css.)
+            Overlay + content share .pouf-modal-layer so nested modals dim each other. */}
+        <div className="pouf-modal-layer">
+          <RDialog.Overlay className="pouf-overlay" />
+          <RDialog.Content
+            className={clsx(
+              size === 'xl'
+                ? 'pouf-dialog pouf-dialog--xl'
+                : size === 'lg'
+                  ? 'pouf-dialog pouf-dialog--lg'
+                  : 'pouf-dialog',
+              className,
+            )}
+          >
+            <Stack gap={4}>
+              <div className="pouf-dialog__head">
+                <Stack gap={1}>
+                  <RDialog.Title asChild>
                     <div>
-                      <Text size="md" muted>
-                        {description}
-                      </Text>
+                      <Heading level={3}>{title}</Heading>
                     </div>
-                  </RDialog.Description>
-                )}
-              </Stack>
-              <RDialog.Close asChild>
-                <Button variant="quiet" size="sm" label="Close">
-                  <Icon name="close" size="sm" />
-                </Button>
-              </RDialog.Close>
-            </div>
-            <div className="pouf-dialog__body">{children}</div>
-          </Stack>
-        </RDialog.Content>
+                  </RDialog.Title>
+                  {description != null && description !== '' && (
+                    <RDialog.Description asChild>
+                      <div>
+                        <Text size="md" muted>
+                          {description}
+                        </Text>
+                      </div>
+                    </RDialog.Description>
+                  )}
+                </Stack>
+                <RDialog.Close asChild>
+                  <Button variant="quiet" size="sm" label="Close">
+                    <Icon name="close" size="sm" />
+                  </Button>
+                </RDialog.Close>
+              </div>
+              <div className="pouf-dialog__body">{children}</div>
+            </Stack>
+          </RDialog.Content>
+        </div>
       </RDialog.Portal>
     </RDialog.Root>
   )
@@ -286,40 +289,43 @@ export function Confirm({
     <RAlert.Root open={open} onOpenChange={onOpenChange}>
       {children != null ? <RAlert.Trigger asChild>{children}</RAlert.Trigger> : null}
       <RAlert.Portal>
-        {/* Enter/exit via Radix data-state CSS animations — same reasoning as Dialog. */}
-        <RAlert.Overlay className="pouf-overlay" />
-        <RAlert.Content className="pouf-dialog">
-          <Stack gap={4}>
-            <RAlert.Title asChild>
-              <div>
-                <Heading level={3}>{title}</Heading>
-              </div>
-            </RAlert.Title>
-            <RAlert.Description asChild>
-              <div>
-                <Text muted>{body}</Text>
-              </div>
-            </RAlert.Description>
-            {details}
-            <Row gap={3} justify="end">
-              <RAlert.Cancel asChild>
-                <Button variant="quiet" size="sm">
-                  {cancelLabel}
-                </Button>
-              </RAlert.Cancel>
-              <RAlert.Action asChild>
-                <Button
-                  tone={tone}
-                  size="sm"
-                  onClick={onConfirm}
-                  loading={loading}
-                >
-                  {confirmLabel}
-                </Button>
-              </RAlert.Action>
-            </Row>
-          </Stack>
-        </RAlert.Content>
+        {/* Enter/exit via Radix data-state CSS animations — same reasoning as Dialog.
+            Share .pouf-modal-layer with Dialog so this Confirm dims the dialog under it. */}
+        <div className="pouf-modal-layer">
+          <RAlert.Overlay className="pouf-overlay" />
+          <RAlert.Content className="pouf-dialog">
+            <Stack gap={4}>
+              <RAlert.Title asChild>
+                <div>
+                  <Heading level={3}>{title}</Heading>
+                </div>
+              </RAlert.Title>
+              <RAlert.Description asChild>
+                <div>
+                  <Text muted>{body}</Text>
+                </div>
+              </RAlert.Description>
+              {details}
+              <Row gap={3} justify="end">
+                <RAlert.Cancel asChild>
+                  <Button variant="quiet" size="sm">
+                    {cancelLabel}
+                  </Button>
+                </RAlert.Cancel>
+                <RAlert.Action asChild>
+                  <Button
+                    tone={tone}
+                    size="sm"
+                    onClick={onConfirm}
+                    loading={loading}
+                  >
+                    {confirmLabel}
+                  </Button>
+                </RAlert.Action>
+              </Row>
+            </Stack>
+          </RAlert.Content>
+        </div>
       </RAlert.Portal>
     </RAlert.Root>
   )

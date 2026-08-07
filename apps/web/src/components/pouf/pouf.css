@@ -368,12 +368,20 @@
 /* ============================================================================
  * OVERLAYS — radix-driven (Select, Tooltip, AlertDialog).
  * ========================================================================= */
-.pouf-overlay {
+/* One stacking context per modal portal. Overlay + content live inside the
+ * layer (absolute), so a nested Confirm paints its whole layer above the
+ * Dialog behind it — including dimming that Dialog. Split z-index (overlay 50,
+ * content 60) left nested overlays under the first dialog's content. */
+.pouf-modal-layer {
   position: fixed;
   inset: 0;
-  /* Compact portal scale: page chrome tops out at 45, then backdrop 50 →
-   * modal 60 → floating content 70 → toast 80. */
+  /* Compact portal scale: page chrome tops out at 45, then modal layer 50 →
+   * floating content 70 → toast 80. Later portal layers stack by DOM order. */
   z-index: 50;
+}
+.pouf-overlay {
+  position: absolute;
+  inset: 0;
   background: rgba(58, 46, 92, 0.35);
   backdrop-filter: blur(2px);
 }
@@ -388,8 +396,8 @@
   animation: pouf-fade-out 160ms ease forwards;
 }
 .pouf-dialog {
-  position: fixed;
-  z-index: 60;
+  position: absolute;
+  z-index: 1;
   top: 50%;
   left: 50%;
   transform: translate(-50%, -50%);
