@@ -22,7 +22,7 @@ async function AdminTasksPageContent({
         <TitlePage title="Tarefas" icon={ClipboardCheckIcon} />
       </Section>
 
-      <Section className="mt-6 flex flex-col gap-4 @4xl:flex-row">
+      <Section className="mt-6 flex flex-col gap-4 @5xl:flex-row">
         <TasksBoard contestId={id_contest} />
       </Section>
     </Page>

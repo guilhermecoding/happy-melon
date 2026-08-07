@@ -58,7 +58,7 @@ export function Field({ label, children, hint, error }: FieldProps) {
  * cascade; a focused invalid input shows the focus ring (pseudo specificity),
  * matching the original selector order. */
 export const inputClasses = cva(
-  'pouf-input font-bold text-[15px] text-ink border-none rounded-control w-full placeholder:text-muted',
+  'pouf-input font-bold text-[15px] text-ink border-none rounded-control w-full placeholder:text-ink/30',
   {
     variants: {
       bare: {
@@ -156,7 +156,7 @@ export const Input = forwardRef<HTMLInputElement, InputProps>(function Input(
     <div className="relative w-full">
       <span
         aria-hidden
-        className="pointer-events-none absolute top-1/2 left-4 z-10 -translate-y-1/2 text-muted [&_svg]:size-5 [&_svg]:shrink-0"
+        className="pointer-events-none absolute top-1/2 left-4 z-10 -translate-y-1/2 text-ink/30 [&_svg]:size-5 [&_svg]:shrink-0"
       >
         {icon}
       </span>

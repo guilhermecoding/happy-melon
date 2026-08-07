@@ -25,7 +25,7 @@ export default function BoxFeatures({
 }: BoxFeaturesProps) {
     return (
         <Card>
-            <div className='flex items-center gap-3 text-white px-4 py-2 text-sm font-bold'>
+            <div className='flex w-full shrink-0 items-center gap-3 px-4 py-2 text-sm font-bold text-white'>
                 <Blob
                     icon={<HugeiconsIcon
                         icon={icon}
@@ -35,10 +35,12 @@ export default function BoxFeatures({
                     tone={blobTone}
                     size={blobSize}
                 />
-                <span className='text-xl text-ink font-bold'>{title}</span>
+                <span className='text-xl font-bold text-ink'>{title}</span>
             </div>
 
-            {children}
+            <div className='flex min-h-0 flex-1 flex-col'>
+                {children}
+            </div>
         </Card>
     )
 }

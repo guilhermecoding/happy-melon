@@ -19,7 +19,7 @@ import FlashCardTeam from './flash-card-team';
 import Spinner from '@/components/spinner';
 import EmptyIcon from '@/components/empty-icon';
 import { Input } from '../pouf/Input';
-import { Button, IconButton } from '../pouf/Button';
+import { Button } from '../pouf/Button';
 
 type BoxTeamsListProps = {
     contestId: string;
@@ -197,8 +197,8 @@ export default function BoxTeamsList({
 
     return (
         <>
-            <div className="flex flex-col gap-4 p-4">
-                <div className="w-full @3xl/main:max-w-86 flex justify-end">
+            <div className="flex h-full min-h-100 flex-col gap-4 p-4">
+                <div className="w-full @3xl/main:max-w-86 flex shrink-0 justify-end">
                     <Input
                         value={search}
                         onChange={(value) => setSearch(value)}
@@ -223,7 +223,7 @@ export default function BoxTeamsList({
                 {loading ? (
                     <Spinner />
                 ) : filteredTeams.length === 0 ? (
-                    <div className="flex h-56 w-full flex-col items-center justify-center gap-2">
+                    <div className="flex min-h-0 flex-1 flex-col items-center justify-center gap-2">
                         <EmptyIcon className="size-14 text-muted-foreground opacity-70" />
                         <p className="text-center text-sm text-muted-foreground">
                             {search.trim()
@@ -233,24 +233,26 @@ export default function BoxTeamsList({
                     </div>
                 ) : (
                     <>
-                        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-3">
-                            {paginatedTeams.map((team) => (
-                                <FlashCardTeam
-                                    key={team.id}
-                                    index={rankByTeamId.get(team.id) ?? 0}
-                                    name={team.name}
-                                    usernameTeam={team.usernameTeam}
-                                    teamId={team.id}
-                                    balloonsCount={
-                                        conqueredCountByTeamId.get(team.id) ?? 0
-                                    }
-                                    balloonsTotal={questionsCount}
-                                    onClick={() => openAchievements(team)}
-                                />
-                            ))}
+                        <div className="min-h-0 flex-1">
+                            <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-3">
+                                {paginatedTeams.map((team) => (
+                                    <FlashCardTeam
+                                        key={team.id}
+                                        index={rankByTeamId.get(team.id) ?? 0}
+                                        name={team.name}
+                                        usernameTeam={team.usernameTeam}
+                                        teamId={team.id}
+                                        balloonsCount={
+                                            conqueredCountByTeamId.get(team.id) ?? 0
+                                        }
+                                        balloonsTotal={questionsCount}
+                                        onClick={() => openAchievements(team)}
+                                    />
+                                ))}
+                            </div>
                         </div>
 
-                        <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+                        <div className="mt-auto flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
                             <p className="text-sm text-muted-foreground">
                                 Mostrando {rangeStart}–{rangeEnd} de {filteredTeams.length}
                                 {totalPages > 1

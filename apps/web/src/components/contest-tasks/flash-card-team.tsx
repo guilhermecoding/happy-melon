@@ -57,7 +57,7 @@ export default function FlashCardTeam({
       <button
         type="button"
         onClick={onClick}
-        className="flex h-full w-full flex-row items-center justify-between gap-4 text-left cursor-pointer"
+        className="flex h-full w-full flex-row items-center justify-between gap-4 text-left cursor-pointer outline-none"
       >
         <div className="shrink-0">
           <span

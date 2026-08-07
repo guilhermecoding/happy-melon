@@ -24,6 +24,7 @@ import {
 import Spinner from '@/components/spinner';
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
 import { TaskTimelineDialog } from './task-timeline-dialog';
+import { Button as ButtonPouf } from '../pouf/Button';
 
 type TaskHistoryListProps = {
   contestId: string;
@@ -145,87 +146,89 @@ export default function TaskHistoryList({
 
   return (
     <>
-      <div className="flex flex-col gap-4 px-2 pt-2 pb-24">
-        <Table>
-          <TableBody>
-            {paginatedEntries.map((entry) => {
-              const taskId = getStatusChangedTaskId(entry);
+      <div className="flex h-full min-h-100 flex-col gap-4 px-2 pt-2 pb-2">
+        <div className="min-h-0 flex-1 overflow-auto">
+          <Table>
+            <TableBody>
+              {paginatedEntries.map((entry) => {
+                const taskId = getStatusChangedTaskId(entry);
 
-              return (
-                <TableRow key={entry.id}>
-                  <TableCell>
-                    {entry.kind === TASK_KIND.PRINT_TASK ? (
-                      <HugeiconsIcon
-                        icon={Attachment01Icon}
-                        className="size-5 shrink-0 text-muted-foreground"
-                        strokeWidth={2}
-                      />
-                    ) : (
-                      <HugeiconsIcon
-                        icon={BalloonIcon}
-                        className="size-5 shrink-0 text-muted-foreground"
-                        strokeWidth={2}
-                        fill="currentColor"
-                      />
-                    )}
-                  </TableCell>
-                  <TableCell className="w-16 font-semibold tabular-nums text-muted-foreground">
-                    {formatHistoryTime(entry.createdAt)}
-                  </TableCell>
-                  <TableCell className="w-10">
-                    <BalloonDeliveryStatusIcon
-                      status={entry.status}
-                      kind={
-                        entry.kind === TASK_KIND.PRINT_TASK
-                          ? TASK_KIND.PRINT_TASK
-                          : TASK_KIND.BALLOON_TASK
-                      }
-                    />
-                  </TableCell>
-                  <TableCell className="flex flex-col gap-1 whitespace-normal text-foreground">
-                    {entry.message}.
-                    {taskId ? (
-                      <span className="text-xs text-muted-foreground">
-                        #{taskId}
-                      </span>
-                    ) : null}
-                  </TableCell>
-                  <TableCell>
-                    <Tooltip>
-                      <TooltipTrigger
-                        render={
-                          <Button
-                            type="button"
-                            variant="normal"
-                            size="sm"
-                            className="bg-transparent p-1 transition-colors hover:bg-background/80"
-                            disabled={!taskId}
-                            onClick={() => {
-                              if (!taskId) return;
-                              setTimelineTask({
-                                taskId,
-                                kind: entry.kind,
-                              });
-                            }}
-                          />
-                        }
-                      >
+                return (
+                  <TableRow key={entry.id}>
+                    <TableCell>
+                      {entry.kind === TASK_KIND.PRINT_TASK ? (
                         <HugeiconsIcon
-                          icon={ViewIcon}
-                          className="size-4"
+                          icon={Attachment01Icon}
+                          className="size-5 shrink-0 text-muted-foreground"
                           strokeWidth={2}
                         />
-                      </TooltipTrigger>
-                      <TooltipContent>Ver tarefa completa</TooltipContent>
-                    </Tooltip>
-                  </TableCell>
-                </TableRow>
-              );
-            })}
-          </TableBody>
-        </Table>
+                      ) : (
+                        <HugeiconsIcon
+                          icon={BalloonIcon}
+                          className="size-5 shrink-0 text-muted-foreground"
+                          strokeWidth={2}
+                          fill="currentColor"
+                        />
+                      )}
+                    </TableCell>
+                    <TableCell className="w-16 font-semibold tabular-nums text-muted-foreground">
+                      {formatHistoryTime(entry.createdAt)}
+                    </TableCell>
+                    <TableCell className="w-10">
+                      <BalloonDeliveryStatusIcon
+                        status={entry.status}
+                        kind={
+                          entry.kind === TASK_KIND.PRINT_TASK
+                            ? TASK_KIND.PRINT_TASK
+                            : TASK_KIND.BALLOON_TASK
+                        }
+                      />
+                    </TableCell>
+                    <TableCell className="flex flex-col gap-1 whitespace-normal text-foreground">
+                      {entry.message}.
+                      {taskId ? (
+                        <span className="text-xs text-muted-foreground">
+                          #{taskId}
+                        </span>
+                      ) : null}
+                    </TableCell>
+                    <TableCell>
+                      <Tooltip>
+                        <TooltipTrigger
+                          render={
+                            <Button
+                              type="button"
+                              variant="normal"
+                              size="sm"
+                              className="bg-transparent p-1 transition-colors hover:bg-background/80"
+                              disabled={!taskId}
+                              onClick={() => {
+                                if (!taskId) return;
+                                setTimelineTask({
+                                  taskId,
+                                  kind: entry.kind,
+                                });
+                              }}
+                            />
+                          }
+                        >
+                          <HugeiconsIcon
+                            icon={ViewIcon}
+                            className="size-4"
+                            strokeWidth={2}
+                          />
+                        </TooltipTrigger>
+                        <TooltipContent>Ver tarefa completa</TooltipContent>
+                      </Tooltip>
+                    </TableCell>
+                  </TableRow>
+                );
+              })}
+            </TableBody>
+          </Table>
+        </div>
 
-        <div className="absolute right-0 bottom-0 left-0 flex flex-col-reverse gap-3 px-2 pb-2 sm:items-center sm:justify-between">
+        <div className="mt-auto flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
           <p className="text-sm text-muted-foreground">
             Mostrando {rangeStart}–{rangeEnd} de {entries.length}
             {totalPages > 1
@@ -233,11 +236,9 @@ export default function TaskHistoryList({
               : null}
           </p>
           <div className="flex items-center gap-2">
-            <Button
-              type="button"
-              variant="white"
+            <ButtonPouf
+              variant="quiet"
               size="sm"
-              className="w-full sm:w-fit"
               disabled={currentPage <= 1}
               onClick={() => setPage((current) => Math.max(1, current - 1))}
             >
@@ -247,12 +248,11 @@ export default function TaskHistoryList({
                 strokeWidth={2}
               />
               Anterior
-            </Button>
-            <Button
+            </ButtonPouf>
+            <ButtonPouf
               type="button"
-              variant="white"
+              variant="quiet"
               size="sm"
-              className="w-full sm:w-fit"
               disabled={currentPage >= totalPages}
               onClick={() =>
                 setPage((current) => Math.min(totalPages, current + 1))
@@ -264,7 +264,7 @@ export default function TaskHistoryList({
                 className="size-4"
                 strokeWidth={2}
               />
-            </Button>
+            </ButtonPouf>
           </div>
         </div>
       </div>
