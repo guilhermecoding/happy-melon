@@ -37,7 +37,7 @@ export function NavPrimary({
                 tooltip={item.title}
                 render={<Link href={item.url} />}
               >
-                <HugeiconsIcon icon={icons[item.icon]} />
+                <HugeiconsIcon icon={icons[item.icon]} strokeWidth={2.5} />
                 <span>{item.title}</span>
               </SidebarMenuButton>
             </SidebarMenuItem>

@@ -14,7 +14,7 @@ const contestDatesRefine = (
 
 const contestDatesRefineConfig = {
   message: 'A data de término deve ser posterior à data de início.',
-  path: ['endsAt'] as const,
+  path: ['endsAt'],
 };
 
 const contestBaseFields = {

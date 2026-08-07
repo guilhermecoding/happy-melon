@@ -38,24 +38,38 @@ export function DropdownMenu({ children, items, label }: DropdownMenuProps) {
     <RMenu.Root>
       {/* asChild places Radix's ARIA state, handlers, and ref on the actual
           focusable trigger. 1st-Pouf Button forwards those native attributes. */}
-      <RMenu.Trigger aria-label={label}>
+      <RMenu.Trigger asChild aria-label={label}>
         {children}
       </RMenu.Trigger>
       <RMenu.Portal>
-        <RMenu.Content className="pouf-menu" sideOffset={8} align="start" render={<motion.div initial={reduceMotion ? { opacity: 0 } : { opacity: 0, scale: 0.95, y: -4 }} animate={{ opacity: 1, scale: 1, y: 0 }} transition={{ duration: reduceMotion ? 0.01 : 0.14, ease: 'easeOut' }} />}>{items.map((item, i) => {
-                            if (item === 'separator') return <RMenu.Separator key={i} className="pouf-menu__sep" />
-                            return (
-                              <RMenu.Item
-                                key={i}
-                                className={clsx('pouf-menu__item', item.tone === 'down' && 'pouf-menu__item--down')}
-                                onClick={item.onClick}
-                                disabled={item.disabled}
-                              >
-                                {item.icon && renderIcon(item.icon, 'sm')}
-                                {item.label}
-                              </RMenu.Item>
-                            )
-                          })}</RMenu.Content>
+        <RMenu.Content asChild sideOffset={8} align="start">
+          <motion.div
+            className="pouf-menu"
+            initial={reduceMotion ? { opacity: 0 } : { opacity: 0, scale: 0.95, y: -4 }}
+            animate={{ opacity: 1, scale: 1, y: 0 }}
+            transition={{ duration: reduceMotion ? 0.01 : 0.14, ease: 'easeOut' }}
+          >
+            {items.map((item, i) => {
+              if (item === 'separator') {
+                return <RMenu.Separator key={i} className="pouf-menu__sep" />
+              }
+              return (
+                <RMenu.Item
+                  key={i}
+                  className={clsx(
+                    'pouf-menu__item',
+                    item.tone === 'down' && 'pouf-menu__item--down',
+                  )}
+                  onClick={item.onClick}
+                  disabled={item.disabled}
+                >
+                  {item.icon && renderIcon(item.icon, 'sm')}
+                  {item.label}
+                </RMenu.Item>
+              )
+            })}
+          </motion.div>
+        </RMenu.Content>
       </RMenu.Portal>
     </RMenu.Root>
   )
@@ -79,20 +93,34 @@ export function ContextMenu({ children, items }: ContextMenuProps) {
     <RContext.Root>
       <RContext.Trigger className="pouf-context-anchor">{children}</RContext.Trigger>
       <RContext.Portal>
-        <RContext.Content className="pouf-menu" render={<motion.div initial={reduceMotion ? { opacity: 0 } : { opacity: 0, scale: 0.95 }} animate={{ opacity: 1, scale: 1 }} transition={{ duration: reduceMotion ? 0.01 : 0.14, ease: 'easeOut' }} />}>{items.map((item, i) => {
-                            if (item === 'separator') return <RContext.Separator key={i} className="pouf-menu__sep" />
-                            return (
-                              <RContext.Item
-                                key={i}
-                                className={clsx('pouf-menu__item', item.tone === 'down' && 'pouf-menu__item--down')}
-                                onClick={item.onClick}
-                                disabled={item.disabled}
-                              >
-                                {item.icon && renderIcon(item.icon, 'sm')}
-                                {item.label}
-                              </RContext.Item>
-                            )
-                          })}</RContext.Content>
+        <RContext.Content asChild>
+          <motion.div
+            className="pouf-menu"
+            initial={reduceMotion ? { opacity: 0 } : { opacity: 0, scale: 0.95 }}
+            animate={{ opacity: 1, scale: 1 }}
+            transition={{ duration: reduceMotion ? 0.01 : 0.14, ease: 'easeOut' }}
+          >
+            {items.map((item, i) => {
+              if (item === 'separator') {
+                return <RContext.Separator key={i} className="pouf-menu__sep" />
+              }
+              return (
+                <RContext.Item
+                  key={i}
+                  className={clsx(
+                    'pouf-menu__item',
+                    item.tone === 'down' && 'pouf-menu__item--down',
+                  )}
+                  onClick={item.onClick}
+                  disabled={item.disabled}
+                >
+                  {item.icon && renderIcon(item.icon, 'sm')}
+                  {item.label}
+                </RContext.Item>
+              )
+            })}
+          </motion.div>
+        </RContext.Content>
       </RContext.Portal>
     </RContext.Root>
   )

@@ -29,10 +29,10 @@ async function AdminCompetitionColaboratorsPageContent({
                 <TitlePage title="Colaboradores" icon={ThumbsUpIcon} />
             </Section>
             <Section className="mt-4 flex flex-col @5xl/main:flex-row gap-4">
-                <BoxFeatures title="Lista de colaboradores" icon={UserIcon} className='w-full'>
+                <BoxFeatures title="Lista de colaboradores" icon={UserIcon}>
                     <BoxListCollaborators contestId={contest.id} />
                 </BoxFeatures>
-                <BoxFeatures title="Controle e acesso" icon={FilterVerticalIcon} className='w-full @5xl/main:w-1/2'>
+                <BoxFeatures title="Controle e acesso" icon={FilterVerticalIcon}>
                     <BoxAccessControllCollab contest={contest} />
                 </BoxFeatures>
             </Section>
