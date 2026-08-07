@@ -1,6 +1,6 @@
 import type { Metadata } from 'next';
 import localFont from 'next/font/local';
-import { Space_Grotesk } from 'next/font/google';
+import { Space_Grotesk, Nunito } from 'next/font/google';
 import './globals.css';
 import '@/components/pouf/pouf.css';
 import { cn } from '@/lib/utils';
@@ -19,6 +19,12 @@ const spaceGrotesk = Space_Grotesk({
   display: 'swap',
 });
 
+const nunito = Nunito({
+  subsets: ['latin'],
+  variable: '--font-pouf',
+  display: 'swap',
+});
+
 export const metadata: Metadata = {
   title: {
     default: 'Happy Melon - Otimize a organização dos staffs na entrega de balões!',
@@ -33,7 +39,7 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="pt-BR" className={cn('font-sans', cause.variable, spaceGrotesk.variable)}>
+    <html lang="pt-BR" className={cn('font-sans', cause.variable, spaceGrotesk.variable, nunito.variable)}>
       <body>
         <Providers>
           {children}

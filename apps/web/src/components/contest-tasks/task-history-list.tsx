@@ -154,7 +154,7 @@ export default function TaskHistoryList({
                 const taskId = getStatusChangedTaskId(entry);
 
                 return (
-                  <TableRow key={entry.id}>
+                  <TableRow key={entry.id} className='hover:bg-transparent'>
                     <TableCell>
                       {entry.kind === TASK_KIND.PRINT_TASK ? (
                         <HugeiconsIcon
@@ -198,7 +198,7 @@ export default function TaskHistoryList({
                           type="button"
                           variant="normal"
                           size="sm"
-                          className="bg-transparent p-1 transition-colors hover:bg-background/80"
+                          className="bg-transparent p-1 transition-colors hover:bg-bg"
                           disabled={!taskId}
                           onClick={() => {
                             if (!taskId) return;

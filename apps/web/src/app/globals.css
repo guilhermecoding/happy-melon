@@ -26,6 +26,7 @@
 @theme inline {
   --font-sans: var(--font-sans), ui-sans-serif, system-ui, sans-serif;
   --font-cause: var(--font-cause), cursive;
+  --font-pouf: var(--font-pouf), ui-sans-serif, system-ui, sans-serif;
   --font-space-grotesk: var(--font-sans), ui-sans-serif, system-ui, sans-serif;
   --color-sidebar-ring: var(--sidebar-ring);
   --color-sidebar-border: var(--sidebar-border);
