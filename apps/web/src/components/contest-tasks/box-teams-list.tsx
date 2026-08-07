@@ -234,7 +234,7 @@ export default function BoxTeamsList({
                 ) : (
                     <>
                         <div className="min-h-0 flex-1">
-                            <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-3">
+                            <div className="grid grid-cols-1 gap-4 md:grid-cols-2 xl:grid-cols-3">
                                 {paginatedTeams.map((team) => (
                                     <FlashCardTeam
                                         key={team.id}

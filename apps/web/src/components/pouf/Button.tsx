@@ -6,6 +6,7 @@ import {
   type ReactNode,
 } from 'react'
 import { toneClass, type Tone } from './tone'
+import { Dots } from '../dots'
 
 interface ButtonProps
   extends Omit<
@@ -103,10 +104,7 @@ export function buttonClasses(
 
 function LoadingSpinner() {
   return (
-    <span
-      className="size-3.75 rounded-[50%] border-[3px] border-solid border-[color-mix(in_srgb,currentColor_24%,transparent)] border-t-current animate-[pouf-spin_620ms_linear_infinite]"
-      aria-hidden="true"
-    />
+    <Dots className="size-6 text-ink" />
   )
 }
 
@@ -138,7 +136,7 @@ export const Button = forwardRef<HTMLButtonElement, ButtonProps>(function Button
       aria-label={label}
     >
       {loading && <LoadingSpinner />}
-      {children}
+      {loading ? null : children}
     </button>
   )
 })

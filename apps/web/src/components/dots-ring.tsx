@@ -51,7 +51,7 @@ function DotsRing({
       <span
         role="status"
         className={cn(
-          "@container-[size] relative inline-flex aspect-square items-center justify-center",
+          "@container-size relative inline-flex aspect-square items-center justify-center",
           className,
         )}
         style={style}

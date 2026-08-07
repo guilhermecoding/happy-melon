@@ -39,7 +39,7 @@ export function Select({ value, onChange, options, id, describedBy, placeholder,
     <RSelect.Root value={value} onValueChange={onChange} disabled={disabled}>
       <RSelect.Trigger
         id={id}
-        className={`${inputClasses()} flex flex-row items-center flex-wrap min-w-0 gap-[var(--gap,var(--s4))] justify-between`}
+        className={`${inputClasses()} flex flex-row items-center flex-wrap min-w-0 gap-(--gap,var(--s4)) justify-between`}
         aria-describedby={describedBy}
         aria-label={label}
       >
@@ -77,7 +77,7 @@ export function Switch({ checked, onChange, id, describedBy, disabled, label }: 
     <RSwitch.Root
       id={id}
       className={[
-        'pouf-switch group w-[60px] h-[34px] rounded-pill bg-bg border-none p-[3px] cursor-pointer',
+        'pouf-switch group w-15 h-8.5 rounded-pill bg-bg border-none p-0.75 cursor-pointer',
         'cushion-field flex-none [transition:background_160ms_ease]',
         'data-[state=checked]:bg-mint disabled:opacity-50 disabled:cursor-not-allowed',
       ].join(' ')}
@@ -88,11 +88,11 @@ export function Switch({ checked, onChange, id, describedBy, disabled, label }: 
       aria-label={label}
     >
       <RSwitch.Thumb className={[
-          'pouf-switch__thumb block w-7 h-7 rounded-[50%] bg-surface',
-          '[box-shadow:inset_0_-3px_0_rgba(0,0,0,0.12),inset_0_2px_0_rgba(255,255,255,0.9),0_4px_8px_rgba(58,46,92,0.2)]',
-          '[transition:transform_160ms_cubic-bezier(0.2,0.9,0.3,1.3)] [transform:translateX(0)]',
-          'group-data-[state=checked]:[transform:translateX(26px)]',
-        ].join(' ')} />
+        'pouf-switch__thumb block w-7 h-7 rounded-[50%] bg-surface',
+        '[box-shadow:inset_0_-3px_0_rgba(0,0,0,0.12),inset_0_2px_0_rgba(255,255,255,0.9),0_4px_8px_rgba(58,46,92,0.2)]',
+        '[transition:transform_160ms_cubic-bezier(0.2,0.9,0.3,1.3)] transform-[translateX(0)]',
+        'group-data-[state=checked]:transform-[translateX(26px)]',
+      ].join(' ')} />
     </RSwitch.Root>
   )
 }
@@ -125,7 +125,9 @@ export function TooltipProvider({ children }: { children: ReactNode }) {
 export function Tooltip({ tip, children }: { tip: string; children: ReactNode }) {
   return (
     <RTooltip.Root>
-      <RTooltip.Trigger render={<span className="pouf-tip-anchor" />}>{children}</RTooltip.Trigger>
+      <RTooltip.Trigger asChild>
+        <span className="pouf-tip-anchor">{children}</span>
+      </RTooltip.Trigger>
       <RTooltip.Portal>
         <RTooltip.Content className="pouf-tooltip" sideOffset={8}>
           {tip}
@@ -136,16 +138,17 @@ export function Tooltip({ tip, children }: { tip: string; children: ReactNode })
 }
 
 interface DialogProps {
-  /** The element that opens it. */
-  trigger: ReactNode
+  /** The element that opens it. Optional when `open` is controlled externally. */
+  trigger?: ReactNode
   title: string
-  description?: string
+  description?: ReactNode
   children: ReactNode
   /** Controlled open state — needed when the dialog must close in response to
    *  something inside it (picking an item), not just the close button. */
   open?: boolean
   onOpenChange?: (open: boolean) => void
-  size?: 'md' | 'lg'
+  size?: 'md' | 'lg' | 'xl'
+  className?: string
 }
 
 /** A plain modal (Radix Dialog), distinct from Confirm (Radix AlertDialog).
@@ -156,10 +159,19 @@ interface DialogProps {
  * easily. Using AlertDialog to show a plain list would train the user to
  * dismiss the same chrome that later asks them to confirm something destructive.
  */
-export function Dialog({ trigger, title, description, children, open, onOpenChange, size = 'md' }: DialogProps) {
+export function Dialog({
+  trigger,
+  title,
+  description,
+  children,
+  open,
+  onOpenChange,
+  size = 'md',
+  className,
+}: DialogProps) {
   return (
     <RDialog.Root open={open} onOpenChange={onOpenChange}>
-      <RDialog.Trigger>{trigger}</RDialog.Trigger>
+      {trigger != null ? <RDialog.Trigger>{trigger}</RDialog.Trigger> : null}
       <RDialog.Portal>
         {/* Enter AND exit are CSS animations keyed off Radix's data-state. Radix's
             own Presence keeps the node mounted until the [data-state='closed']
@@ -167,18 +179,39 @@ export function Dialog({ trigger, title, description, children, open, onOpenChan
             framer's inline transform, the CSS translate(-50%,-50%) centring holds
             through both. (prefers-reduced-motion is honoured globally in pouf.css.) */}
         <RDialog.Overlay className="pouf-overlay" />
-        <RDialog.Content className={size === 'lg' ? 'pouf-dialog pouf-dialog--lg' : 'pouf-dialog'}>
+        <RDialog.Content
+          className={clsx(
+            size === 'xl'
+              ? 'pouf-dialog pouf-dialog--xl'
+              : size === 'lg'
+                ? 'pouf-dialog pouf-dialog--lg'
+                : 'pouf-dialog',
+            className,
+          )}
+        >
           <Stack gap={4}>
             <div className="pouf-dialog__head">
               <Stack gap={1}>
-                <RDialog.Title render={<div />}><Heading level={3}>{title}</Heading></RDialog.Title>
-                {description && (
-                  <RDialog.Description render={<div />}><Text size="sm" muted>
-                                                          {description}
-                                                        </Text></RDialog.Description>
+                <RDialog.Title asChild>
+                  <div>
+                    <Heading level={3}>{title}</Heading>
+                  </div>
+                </RDialog.Title>
+                {description != null && description !== '' && (
+                  <RDialog.Description asChild>
+                    <div>
+                      <Text size="md" muted>
+                        {description}
+                      </Text>
+                    </div>
+                  </RDialog.Description>
                 )}
               </Stack>
-              <RDialog.Close render={<Button variant="quiet" size="sm" label="Close" />}><Icon name="close" size="sm" /></RDialog.Close>
+              <RDialog.Close asChild>
+                <Button variant="quiet" size="sm" label="Close">
+                  <Icon name="close" size="sm" />
+                </Button>
+              </RDialog.Close>
             </div>
             <div className="pouf-dialog__body">{children}</div>
           </Stack>
@@ -189,7 +222,8 @@ export function Dialog({ trigger, title, description, children, open, onOpenChan
 }
 
 interface ConfirmProps {
-  children: ReactNode
+  /** Optional trigger. Omit when `open` is controlled externally. */
+  children?: ReactNode
   title: string
   body: string
   /** Must name the outcome, not agree with a question: "Close 3 positions",
@@ -204,6 +238,8 @@ interface ConfirmProps {
   loading?: boolean
   /** The specific records this will affect — symbols, sizes, live P&L. */
   details?: ReactNode
+  open?: boolean
+  onOpenChange?: (open: boolean) => void
 }
 
 /** Every irreversible action routes through here — delete an account, empty a
@@ -232,21 +268,44 @@ export function Confirm({
   tone = 'orange',
   loading,
   details,
+  open,
+  onOpenChange,
 }: ConfirmProps) {
   return (
-    <RAlert.Root>
-      <RAlert.Trigger>{children}</RAlert.Trigger>
+    <RAlert.Root open={open} onOpenChange={onOpenChange}>
+      {children != null ? <RAlert.Trigger asChild>{children}</RAlert.Trigger> : null}
       <RAlert.Portal>
         {/* Enter/exit via Radix data-state CSS animations — same reasoning as Dialog. */}
         <RAlert.Overlay className="pouf-overlay" />
         <RAlert.Content className="pouf-dialog">
           <Stack gap={4}>
-            <RAlert.Title render={<div />}><Heading level={3}>{title}</Heading></RAlert.Title>
-            <RAlert.Description render={<div />}><Text muted>{body}</Text></RAlert.Description>
+            <RAlert.Title asChild>
+              <div>
+                <Heading level={3}>{title}</Heading>
+              </div>
+            </RAlert.Title>
+            <RAlert.Description asChild>
+              <div>
+                <Text muted>{body}</Text>
+              </div>
+            </RAlert.Description>
             {details}
             <Row gap={3} justify="end">
-              <RAlert.Cancel render={<Button variant="quiet" size="sm" />}>{cancelLabel}</RAlert.Cancel>
-              <RAlert.Action render={<Button tone={tone} size="sm" onClick={onConfirm} loading={loading} />}>{confirmLabel}</RAlert.Action>
+              <RAlert.Cancel asChild>
+                <Button variant="quiet" size="sm">
+                  {cancelLabel}
+                </Button>
+              </RAlert.Cancel>
+              <RAlert.Action asChild>
+                <Button
+                  tone={tone}
+                  size="sm"
+                  onClick={onConfirm}
+                  loading={loading}
+                >
+                  {confirmLabel}
+                </Button>
+              </RAlert.Action>
             </Row>
           </Stack>
         </RAlert.Content>
@@ -354,12 +413,28 @@ export function Combobox({
         }
       }}
     >
-      <RPopover.Trigger render={<button type="button" id={id} aria-haspopup="listbox" aria-expanded={open} aria-controls={open ? listboxId : undefined} aria-describedby={describedBy} aria-label={label} className={clsx(
-                      inputClasses({ mono }),
-                      /* Row's layout, inlined: the trigger borrowed .pouf-row classes,
-                       * which no longer exist as CSS rules after layout.tsx migrated. */
-                      'flex flex-row items-center flex-wrap min-w-0 gap-[var(--gap,var(--s4))] justify-between',
-                    )} />}><span className={clsx(!value && 'pouf-combobox__placeholder')}>{value || placeholder}</span><Icon name="expand" size="sm" /></RPopover.Trigger>
+      <RPopover.Trigger asChild>
+        <button
+          type="button"
+          id={id}
+          aria-haspopup="listbox"
+          aria-expanded={open}
+          aria-controls={open ? listboxId : undefined}
+          aria-describedby={describedBy}
+          aria-label={label}
+          className={clsx(
+            inputClasses({ mono }),
+            /* Row's layout, inlined: the trigger borrowed .pouf-row classes,
+             * which no longer exist as CSS rules after layout.tsx migrated. */
+            'flex flex-row items-center flex-wrap min-w-0 gap-(--gap,var(--s4)) justify-between',
+          )}
+        >
+          <span className={clsx(!value && 'pouf-combobox__placeholder')}>
+            {value || placeholder}
+          </span>
+          <Icon name="expand" size="sm" />
+        </button>
+      </RPopover.Trigger>
       <RPopover.Portal>
         <RPopover.Content className="pouf-popover pouf-popover--combobox" sideOffset={8} align="start">
           <input

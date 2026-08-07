@@ -19,7 +19,7 @@
   /* -- Palette: verbatim from the reference ------------------------------ */
   --color-bg: #ebf8ff;
   --color-ink: #2e315c;
-  --color-muted: #9ec8ff91;
+  --color-muted: #587498;
   --color-pink: #ffb3d1;
   --color-purple: #c9a8ff;
   --color-blue: #9ec8ff;
@@ -141,7 +141,7 @@
    *    log unnavigable, so rows get their own tighter scale. The shadow
    *    recipe is kept whole -- only the padding tightens. ---------------- */
   --pouf-row:
-    inset 0 calc(-1 * var(--lip-row)) 0 rgba(201, 168, 255, 0.3),
+    inset 0 calc(-1 * var(--lip-row)) 0 var(--blue),
     inset 0 4px 0 rgba(255, 255, 255, 0.9),
     0 8px 18px rgba(58, 46, 92, 0.1);
   --pouf-row-hover:
@@ -413,6 +413,10 @@
 .pouf-dialog--lg {
   width: min(720px, calc(100vw - 32px));
 }
+.pouf-dialog--xl {
+  width: min(70vw, calc(100vw - 32px));
+  max-width: 70rem;
+}
 
 /* On a phone a centred modal is the wrong shape: it wastes the edges, and its
  * content (a 37-row list, a credential form) wants the full height. So
@@ -422,7 +426,8 @@
  * navigation to a new one. */
 @media (max-width: 900px) {
   .pouf-dialog,
-  .pouf-dialog--lg {
+  .pouf-dialog--lg,
+  .pouf-dialog--xl {
     top: auto;
     bottom: 0;
     left: 0;
