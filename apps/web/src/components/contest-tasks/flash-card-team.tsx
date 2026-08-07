@@ -53,7 +53,7 @@ export default function FlashCardTeam({
         : `${balloonsCount} balões`;
 
   return (
-    <Card variant="tight">
+    <Card variant="tight" motion="lift">
       <button
         type="button"
         onClick={onClick}

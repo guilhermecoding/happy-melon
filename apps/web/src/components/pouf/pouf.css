@@ -17,7 +17,7 @@
 
 @theme {
   /* -- Palette: verbatim from the reference ------------------------------ */
-  --color-bg: #ebf8ff;
+  --color-bg: #fff7eb;
   --color-ink: #2e315c;
   --color-muted: #587498;
   --color-pink: #ffb3d1;
@@ -118,7 +118,7 @@
   --lip: 10px;
   --lip-row: 6px;
   --pouf-card:
-    inset 0 calc(-1 * var(--lip)) 0 var(--blue),
+    inset 0 calc(-1 * var(--lip)) 0 var(--bg),
     inset 0 6px 0 rgba(255, 255, 255, 0.9),
     0 20px 40px rgba(58, 46, 92, 0.15);
   --pouf-control:
@@ -135,13 +135,13 @@
     inset 0 0 0 2px rgba(201, 168, 255, 0.2);
   --pouf-field-focus:
     inset 0 -4px 0 rgba(0, 0, 0, 0.06), inset 0 4px 0 rgba(255, 255, 255, 0.7),
-    inset 0 0 0 3px var(--blue);
+    inset 0 0 0 3px var(--orange);
 
   /* -- Cushion rows. "Every row a cushion" at 32px padding makes a 50-row
    *    log unnavigable, so rows get their own tighter scale. The shadow
    *    recipe is kept whole -- only the padding tightens. ---------------- */
   --pouf-row:
-    inset 0 calc(-1 * var(--lip-row)) 0 var(--blue),
+    inset 0 calc(-1 * var(--lip-row)) 0 var(--bg),
     inset 0 4px 0 rgba(255, 255, 255, 0.9),
     0 8px 18px rgba(58, 46, 92, 0.1);
   --pouf-row-hover:
