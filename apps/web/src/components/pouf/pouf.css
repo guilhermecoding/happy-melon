@@ -118,7 +118,7 @@
   --lip: 10px;
   --lip-row: 6px;
   --pouf-card:
-    inset 0 calc(-1 * var(--lip)) 0 rgba(201, 168, 255, 0.35),
+    inset 0 calc(-1 * var(--lip)) 0 var(--blue),
     inset 0 6px 0 rgba(255, 255, 255, 0.9),
     0 20px 40px rgba(58, 46, 92, 0.15);
   --pouf-control:
