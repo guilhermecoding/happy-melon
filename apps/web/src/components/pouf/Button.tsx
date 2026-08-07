@@ -65,7 +65,7 @@ const button = cva(
         solid:
           'text-[var(--on-accent)] bg-[var(--tone,var(--purple))] cushion-control disabled:cushion-control-active disabled:[transform:translateY(2px)]',
         quiet:
-          'text-[var(--quiet-ink,var(--ink))] bg-transparent [box-shadow:inset_0_0_0_2px_rgba(201,168,255,0.55)] enabled:hover:bg-bg enabled:hover:text-ink enabled:hover:cushion-field disabled:[box-shadow:none]',
+          'text-[var(--quiet-ink,var(--ink))] bg-transparent [box-shadow:inset_0_0_0_2px_rgba(158,200,255,0.55)] enabled:hover:bg-bg enabled:hover:text-ink enabled:hover:cushion-field disabled:[box-shadow:none]',
       },
       block: {
         true: 'flex w-full',

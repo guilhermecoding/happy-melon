@@ -8,7 +8,6 @@ import {
 } from '@hugeicons/core-free-icons';
 import { HugeiconsIcon } from '@hugeicons/react';
 import { isResolvedBalloonStatus } from '@repo/shared';
-import { Button } from '@/components/ui/button';
 import { balloonService } from '@/services/balloon/balloon.service';
 import type { BalloonDelivery } from '@/services/balloon/balloon.type';
 import { teamService } from '@/services/team/team.service';
@@ -20,6 +19,7 @@ import FlashCardTeam from './flash-card-team';
 import Spinner from '@/components/spinner';
 import EmptyIcon from '@/components/empty-icon';
 import { Input } from '../pouf/Input';
+import { Button, IconButton } from '../pouf/Button';
 
 type BoxTeamsListProps = {
     contestId: string;
@@ -259,10 +259,8 @@ export default function BoxTeamsList({
                             </p>
                             <div className="flex items-center gap-2">
                                 <Button
-                                    type="button"
-                                    variant="white"
-                                    size="sm"
-                                    className="w-full sm:w-fit"
+                                    variant="quiet"
+                                    size="md"
                                     disabled={currentPage <= 1}
                                     onClick={() =>
                                         setPage((current) => Math.max(1, current - 1))
@@ -276,10 +274,8 @@ export default function BoxTeamsList({
                                     Anterior
                                 </Button>
                                 <Button
-                                    type="button"
-                                    variant="white"
-                                    size="sm"
-                                    className="w-full sm:w-fit"
+                                    variant="quiet"
+                                    size="md"
                                     disabled={currentPage >= totalPages}
                                     onClick={() =>
                                         setPage((current) => Math.min(totalPages, current + 1))
