@@ -2,7 +2,7 @@
 
 import { useEffect, useMemo, useState } from 'react';
 import { HugeiconsIcon } from '@hugeicons/react';
-import { EyeClosedIcon } from '@hugeicons/core-free-icons';
+import { ClockIcon, EyeClosedIcon } from '@hugeicons/core-free-icons';
 import { TASK_KIND, type TaskKind } from '@repo/shared';
 import {
   BalloonDeliveryStatusIcon,
@@ -46,7 +46,7 @@ export function TaskTimelineDialog({
   onOpenChange,
 }: TaskTimelineDialogProps) {
   const [entries, setEntries] = useState<TaskHistoryEntry[]>([]);
-  const [loading, setLoading] = useState(false);
+  const [loading, setLoading] = useState<boolean>(false);
   const [error, setError] = useState<string>();
 
   useEffect(() => {
@@ -152,9 +152,16 @@ export function TaskTimelineDialog({
                   </div>
 
                   <div className={cn('min-w-0 pb-6', isLast && 'pb-0')}>
-                    <p className="text-sm font-semibold tabular-nums text-muted-foreground">
-                      [{formatTimelineTime(entry.createdAt)}]
-                    </p>
+                    <div className="flex items-center gap-1">
+                      <HugeiconsIcon
+                        icon={ClockIcon}
+                        className="size-3.5 text-muted-foreground"
+                        strokeWidth={2.5}
+                      />
+                      <p className="text-sm font-semibold tabular-nums text-muted-foreground">
+                        {formatTimelineTime(entry.createdAt)}
+                      </p>
+                    </div>
                     <p className="text-sm font-medium text-foreground">
                       {getBalloonDeliveryStatusLabel(entry.status, taskKind)}
                     </p>
