@@ -90,11 +90,11 @@ export function NavUser({
               <AvatarFallback>{initials}</AvatarFallback>
             </Avatar>
 
-            <div className={cn("min-w-0 flex-1 text-left text-sm leading-tight", {
+            <div className={cn("grid min-w-0 flex-1 text-left text-sm leading-tight", {
               "hidden md:grid": compact,
             })}>
               <span className="truncate font-medium">{displayName}</span>
-              <span className="truncate text-xs text-muted-foreground">
+              <span className="truncate text-xs font-normal text-muted-foreground">
                 {displayEmail}
               </span>
             </div>
