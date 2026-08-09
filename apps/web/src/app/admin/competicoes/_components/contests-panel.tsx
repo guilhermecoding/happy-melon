@@ -56,7 +56,7 @@ export default function ContestsPanel() {
         title="Competições"
         icon={BalloonIcon}
         blobSize="sm"
-        blobTone="blue"
+        blobTone="mint"
       >
         <div className="flex h-full flex-col gap-4 p-4">
           <div className="flex justify-end">
