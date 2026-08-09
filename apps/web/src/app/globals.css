@@ -11,6 +11,15 @@
     overflow-x: hidden;
   }
 
+  /* Reserve the scrollbar's strip even when the page can't scroll. Radix's
+   * scroll lock (react-remove-scroll) hides the page scrollbar while a Dialog,
+   * Sheet or modal DropdownMenu is open; without a stable gutter the viewport
+   * grows by the bar's width and every viewport-anchored layer of the shell
+   * moves with it — the background blobs, the fixed sidebar, the toast stack. */
+  html {
+    scrollbar-gutter: stable;
+  }
+
   a {
     color: inherit;
     text-decoration: none;
@@ -193,4 +202,16 @@
   &::-webkit-scrollbar {
     display: none;
   }
+}
+
+/* react-remove-scroll pads the body by the scrollbar's width so in-flow content
+ * doesn't jump when it hides the bar. With the gutter above always reserved,
+ * nothing was lost — so that padding IS the jump, in the other direction.
+ *
+ * Unlayered and one specificity step above `body[data-scroll-locked]`: the
+ * library injects its !important rule into <head> at runtime, after this file,
+ * so matching its selector would lose on source order. */
+html body[data-scroll-locked] {
+  margin-right: 0 !important;
+  padding-right: 0 !important;
 }
