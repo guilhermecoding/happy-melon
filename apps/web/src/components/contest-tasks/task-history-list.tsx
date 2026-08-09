@@ -16,7 +16,6 @@ import { getBalloonErrorMessage } from '@/services/balloon/balloon.error';
 import type { TaskHistoryEntry } from '@/services/balloon/balloon.type';
 import Spinner from '@/components/spinner';
 import { Tooltip } from '@/components/pouf/controls';
-import { RowCard } from '@/components/pouf/surface';
 import { TaskTimelineDialog } from './task-timeline-dialog';
 import { Button as ButtonPouf, IconButton } from '../pouf/Button';
 
@@ -141,14 +140,14 @@ export default function TaskHistoryList({
   return (
     <>
       <div className="flex h-full min-h-100 flex-col gap-4 px-2 pt-2 pb-2">
-        {/* A log, not a data grid: no headers and no sortable columns, so the
-            pouf row cushion carries each entry instead of a <table>. */}
-        <div className="flex min-h-0 flex-1 flex-col gap-2 overflow-auto">
+        {/* A log, not a data grid: plain rows split by a hairline, no cushions
+            and no <table> chrome. */}
+        <div className="min-h-0 flex-1 divide-y divide-ink/10 overflow-auto">
           {paginatedEntries.map((entry) => {
             const taskId = getStatusChangedTaskId(entry);
 
             return (
-              <RowCard key={entry.id}>
+              <div key={entry.id} className="px-2 py-3">
                 <div className="flex items-center gap-3">
                   {entry.kind === TASK_KIND.PRINT_TASK ? (
                     <HugeiconsIcon
@@ -191,12 +190,8 @@ export default function TaskHistoryList({
                   </div>
 
                   <Tooltip tip="Ver tarefa completa">
-                    <IconButton
-                      size="sm"
-                      variant="quiet"
-                      label="Ver tarefa completa"
-                      /* The pouf Tooltip already says this; IconButton's
-                         default title would double it natively. */
+                    <button
+                      type="button"
                       title=""
                       disabled={!taskId}
                       onClick={() => {
@@ -206,17 +201,17 @@ export default function TaskHistoryList({
                           kind: entry.kind,
                         });
                       }}
-                      icon={
-                        <HugeiconsIcon
-                          icon={ViewIcon}
-                          className="size-4"
-                          strokeWidth={2}
-                        />
-                      }
-                    />
+                      className="flex items-center justify-center hover:bg-ink/10 rounded-full p-2 shrink-0 cursor-pointer transition-colors"
+                    >
+                      <HugeiconsIcon
+                        icon={ViewIcon}
+                        className="size-4"
+                        strokeWidth={2}
+                      />
+                    </button>
                   </Tooltip>
                 </div>
-              </RowCard>
+              </div>
             );
           })}
         </div>
