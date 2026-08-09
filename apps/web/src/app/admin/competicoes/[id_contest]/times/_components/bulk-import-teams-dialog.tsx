@@ -13,15 +13,9 @@ import {
 import { teamService } from '@/services/team/team.service';
 import { getTeamErrorMessage } from '@/services/team/team.error';
 import type { Team } from '@/services/team/team.type';
-import { Button } from '@/components/ui/button';
-import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogFooter,
-  DialogHeader,
-  DialogTitle,
-} from '@/components/ui/dialog';
+import { Button } from '@/components/pouf/Button';
+import { Dialog } from '@/components/pouf/controls';
+import { RowCard } from '@/components/pouf/surface';
 import { toast } from '@/components/pouf/toaster';
 import { cn } from '@/lib/utils';
 import {
@@ -30,7 +24,6 @@ import {
   type TeamCsvRow,
 } from './team-csv';
 import { parseTeamsBoca } from './team-boca';
-import { Separator } from '@/components/ui/separator';
 
 type BulkImportTeamsDialogProps = {
   contestId: string;
@@ -103,18 +96,18 @@ function SquareDropzone({
         className={cn(
           'flex size-28 shrink-0 cursor-pointer items-center justify-center rounded-3xl border-4 border-dashed transition-colors sm:size-54',
           isDragging
-            ? 'border-primary bg-primary/5'
+            ? 'border-purple bg-purple/5'
             : 'border-border bg-muted/40 hover:bg-muted/70',
         )}
       >
         <HugeiconsIcon
           icon={icon}
-          className="size-10 sm:size-24 text-primary/10"
+          className="size-10 text-ink/10 sm:size-24"
           strokeWidth={1.5}
         />
       </label>
       <div className="text-center">
-        <p className="text-base font-bold text-foreground">{title}</p>
+        <p className="text-base font-bold text-ink">{title}</p>
         <p className="mt-1 text-sm text-muted-foreground">{description}</p>
       </div>
     </div>
@@ -151,9 +144,10 @@ export function BulkImportTeamsDialog({
   }
 
   function handleOpenChange(nextOpen: boolean) {
+    if (!nextOpen && isSubmitting) return;
+
     if (!nextOpen) {
       resetState();
-      setIsSubmitting(false);
     }
     onOpenChange(nextOpen);
   }
@@ -256,7 +250,9 @@ export function BulkImportTeamsDialog({
       });
       onBulkUpserted(teams);
       toast.success(`${teams.length} time(s) importado(s) com sucesso.`);
+      setIsSubmitting(false);
       handleOpenChange(false);
+      return;
     } catch (error) {
       const message = getTeamErrorMessage(
         error,
@@ -264,33 +260,22 @@ export function BulkImportTeamsDialog({
       );
       setRequestError(message);
       toast.error(message);
-    } finally {
-      setIsSubmitting(false);
     }
+
+    setIsSubmitting(false);
   }
 
   return (
-    <Dialog open={open} onOpenChange={handleOpenChange}>
-      <DialogContent
-        showCloseButton={false}
-        className="max-h-[min(95vh,50rem)] w-full max-w-[80vw] gap-4 overflow-y-auto p-4 md:max-w-[80vw] lg:max-w-[60vw] xl:max-w-[40vw] sm:p-6"
-      >
-        <DialogHeader>
-          <DialogTitle className="text-xl font-bold sm:text-2xl">
-            Como deseja importar?
-          </DialogTitle>
-          <DialogDescription className="text-base">
-            Escolha o formato do arquivo para cadastrar vários times de uma vez.
-          </DialogDescription>
-        </DialogHeader>
-
+    <Dialog
+      open={open}
+      onOpenChange={handleOpenChange}
+      title="Como deseja importar?"
+      description="Escolha o formato do arquivo para cadastrar vários times de uma vez."
+      size="lg"
+    >
+      <div className="flex flex-col gap-4">
         <div className="flex justify-end">
-          <Button
-            type="button"
-            variant="blue"
-            size="sm"
-            onClick={downloadTeamCsvTemplate}
-          >
+          <Button tone="blue" size="sm" onClick={downloadTeamCsvTemplate}>
             <HugeiconsIcon
               icon={Download01Icon}
               className="size-5"
@@ -300,7 +285,7 @@ export function BulkImportTeamsDialog({
           </Button>
         </div>
 
-        <div className="grid grid-cols-1 xl:grid-cols-3 px-12 justify-items-center gap-3 sm:gap-6">
+        <div className="grid grid-cols-1 justify-items-center gap-6 xl:grid-cols-2">
           <SquareDropzone
             id="bulk-csv-upload"
             inputKey={csvInputKey}
@@ -327,9 +312,6 @@ export function BulkImportTeamsDialog({
             }}
             onChange={(event) => void processCsvFile(event.target.files?.[0])}
           />
-
-          <Separator orientation="vertical" className="h-full hidden xl:block" />
-          <Separator orientation="horizontal" className="w-full block xl:hidden" />
 
           <SquareDropzone
             id="bulk-boca-upload"
@@ -360,36 +342,37 @@ export function BulkImportTeamsDialog({
         </div>
 
         {fileName && (
-          <div className="flex items-center gap-2 rounded-2xl border-2 border-green-700 bg-green-50 p-3 font-semibold text-green-700">
-            <HugeiconsIcon
-              icon={mode === 'boca' ? Txt01Icon : Csv01Icon}
-              className="size-5 shrink-0"
-              strokeWidth={1.5}
-            />
-            <p className="text-sm">
-              Arquivo: {fileName}
-              {importRows.length > 0
-                ? ` · ${importRows.length} time(s) válido(s)`
-                : null}
-              {mode === 'boca' ? ' · Importação BOCA' : null}
-            </p>
-          </div>
+          <RowCard>
+            <div className="flex items-center gap-2 font-semibold text-ink">
+              <HugeiconsIcon
+                icon={mode === 'boca' ? Txt01Icon : Csv01Icon}
+                className="size-5 shrink-0"
+                strokeWidth={2}
+              />
+              <p className="text-sm">
+                Arquivo: {fileName}
+                {importRows.length > 0
+                  ? ` · ${importRows.length} time(s) válido(s)`
+                  : null}
+                {mode === 'boca' ? ' · Importação BOCA' : null}
+              </p>
+            </div>
+          </RowCard>
         )}
 
         {fileErrors.length > 0 && (
-          <div
-            role="alert"
-            className="rounded-xl border border-destructive/30 bg-destructive/5 p-3"
-          >
-            <p className="mb-2 text-sm font-medium text-destructive">
-              {mode === 'boca' ? 'Erros no TXT' : 'Erros no CSV'}
-            </p>
-            <ul className="flex flex-col gap-1 text-sm text-destructive">
-              {fileErrors.map((error) => (
-                <li key={error}>{error}</li>
-              ))}
-            </ul>
-          </div>
+          <RowCard>
+            <div role="alert">
+              <p className="mb-2 text-sm font-bold text-destructive">
+                {mode === 'boca' ? 'Erros no TXT' : 'Erros no CSV'}
+              </p>
+              <ul className="flex flex-col gap-1 text-sm text-destructive">
+                {fileErrors.map((error) => (
+                  <li key={error}>{error}</li>
+                ))}
+              </ul>
+            </div>
+          </RowCard>
         )}
 
         {requestError && (
@@ -397,37 +380,30 @@ export function BulkImportTeamsDialog({
             {requestError}
           </p>
         )}
+      </div>
 
-        <DialogFooter className="flex-col-reverse justify-end gap-2 xl:flex-row mt-12">
-          <Button
-            type="button"
-            variant="white"
-            className="w-full sm:w-fit"
-            onClick={() => handleOpenChange(false)}
-          >
-            <HugeiconsIcon
-              icon={EyeClosedIcon}
-              className="size-5"
-              strokeWidth={3}
-            />
-            Fechar
-          </Button>
-          <Button
-            type="button"
-            variant="green"
-            loading={isSubmitting}
-            className="w-full sm:w-fit"
-            onClick={() => void handleSubmit()}
-          >
-            <HugeiconsIcon
-              icon={Upload01Icon}
-              className="size-5"
-              strokeWidth={3}
-            />
-            Importar
-          </Button>
-        </DialogFooter>
-      </DialogContent>
+      <div className="mt-4 flex flex-col-reverse justify-end gap-2 xl:flex-row">
+        <Button variant="quiet" onClick={() => handleOpenChange(false)}>
+          <HugeiconsIcon
+            icon={EyeClosedIcon}
+            className="size-5"
+            strokeWidth={3}
+          />
+          Fechar
+        </Button>
+        <Button
+          tone="mint"
+          loading={isSubmitting}
+          onClick={() => void handleSubmit()}
+        >
+          <HugeiconsIcon
+            icon={Upload01Icon}
+            className="size-5"
+            strokeWidth={3}
+          />
+          Importar
+        </Button>
+      </div>
     </Dialog>
   );
 }

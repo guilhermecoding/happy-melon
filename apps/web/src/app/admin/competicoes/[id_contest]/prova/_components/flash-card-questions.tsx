@@ -3,6 +3,7 @@
 import { ChevronRightIcon } from '@hugeicons/core-free-icons';
 import { HugeiconsIcon } from '@hugeicons/react';
 import { Balloon } from '@/components/balloon';
+import { Card } from '@/components/pouf/surface';
 
 type FlashCardQuestionsProps = {
   label: string;
@@ -18,26 +19,28 @@ export default function FlashCardQuestions({
   onClick,
 }: FlashCardQuestionsProps) {
   return (
-    <button
-      type="button"
-      onClick={onClick}
-      className="bg-background w-full px-4 py-2 flex flex-row items-center gap-2 rounded-2xl border-2 border-black cursor-pointer hover:border-border-hover hover:bg-muted-foreground/10 transition-colors duration-300 text-left"
-    >
-      <Balloon color={balloonColor} className="size-7" />
+    <Card variant="tight" motion="lift">
+      <button
+        type="button"
+        onClick={onClick}
+        className="flex h-full w-full cursor-pointer flex-row items-center gap-2 text-left outline-none"
+      >
+        <Balloon color={balloonColor} className="size-7" />
 
-      <div className="flex flex-row justify-between items-center w-full min-w-0">
-        <div className="flex flex-col min-w-0">
-          <span className="text-sm text-muted-foreground font-semibold">
-            Questão {label}
-          </span>
-          <span className="text-lg font-semibold truncate">{title}</span>
+        <div className="flex w-full min-w-0 flex-row items-center justify-between">
+          <div className="flex min-w-0 flex-col">
+            <span className="text-sm font-semibold text-muted-foreground">
+              Questão {label}
+            </span>
+            <span className="truncate text-lg font-bold text-ink">{title}</span>
+          </div>
+          <HugeiconsIcon
+            icon={ChevronRightIcon}
+            className="ml-8 size-5 shrink-0"
+            strokeWidth={3}
+          />
         </div>
-        <HugeiconsIcon
-          icon={ChevronRightIcon}
-          className="size-5 shrink-0 ml-8"
-          strokeWidth={3}
-        />
-      </div>
-    </button>
+      </button>
+    </Card>
   );
 }

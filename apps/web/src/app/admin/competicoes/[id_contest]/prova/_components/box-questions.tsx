@@ -7,7 +7,8 @@ import {
 } from '@hugeicons/core-free-icons';
 import { HugeiconsIcon } from '@hugeicons/react';
 import BoxFeatures from '@/components/box-features';
-import { Button } from '@/components/ui/button';
+import Spinner from '@/components/spinner';
+import { Button } from '@/components/pouf/Button';
 import { questionService } from '@/services/question/question.service';
 import { getQuestionErrorMessage } from '@/services/question/question.error';
 import type { Question } from '@/services/question/question.type';
@@ -76,40 +77,38 @@ export default function BoxQuestions({ contestId }: BoxQuestionsProps) {
 
   return (
     <>
-      <div className="flex justify-end">
-        <Button
-          variant="blue"
-          size="sm"
-          className="mb-2 flex w-full sm:w-fit"
-          onClick={() => setCreateOpen(true)}
-        >
-          <HugeiconsIcon
-            icon={PlusSignCircleIcon}
-            className="size-5 shrink-0"
-            strokeWidth={3}
-          />
-          Adicionar questão
-        </Button>
-      </div>
+      <BoxFeatures
+        title="Questões da prova"
+        icon={BubbleChatQuestionIcon}
+        blobSize="sm"
+        blobTone="blue"
+      >
+        <div className="flex h-full flex-col gap-4 p-4">
+          <div className="flex justify-end">
+            <Button tone="blue" size="sm" onClick={() => setCreateOpen(true)}>
+              <HugeiconsIcon
+                icon={PlusSignCircleIcon}
+                className="size-5 shrink-0"
+                strokeWidth={3}
+              />
+              Adicionar questão
+            </Button>
+          </div>
 
-      <BoxFeatures title="Questões da prova" icon={BubbleChatQuestionIcon}>
-        <div className="p-4">
           {error && (
-            <p role="alert" className="mb-4 text-sm text-destructive">
+            <p role="alert" className="text-sm text-destructive">
               {error}
             </p>
           )}
 
           {loading ? (
-            <p className="text-sm text-muted-foreground">
-              Carregando questões...
-            </p>
+            <Spinner />
           ) : questions.length === 0 ? (
-            <p className="text-sm text-muted-foreground">
+            <p className="text-center text-sm text-muted-foreground">
               Nenhuma questão cadastrada.
             </p>
           ) : (
-            <div className="grid grid-cols-1 @lg/main:grid-cols-2 @3xl/main:grid-cols-3 @5xl/main:grid-cols-4 gap-4">
+            <div className="grid grid-cols-1 gap-4 @lg/main:grid-cols-2 @3xl/main:grid-cols-3 @5xl/main:grid-cols-4">
               {questions.map((question) => (
                 <FlashCardQuestions
                   key={question.id}

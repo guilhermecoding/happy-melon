@@ -11,18 +11,11 @@ import {
 import { teamService } from '@/services/team/team.service';
 import { getTeamErrorMessage } from '@/services/team/team.error';
 import type { Team } from '@/services/team/team.type';
-import { Button } from '@/components/ui/button';
-import { Field, FieldError, FieldLabel } from '@/components/ui/field';
-import { Input } from '@/components/ui/input';
-import {
-  Sheet,
-  SheetContent,
-  SheetDescription,
-  SheetFooter,
-  SheetHeader,
-  SheetTitle,
-} from '@/components/ui/sheet';
+import { Button } from '@/components/pouf/Button';
+import { Field, Input } from '@/components/pouf/Input';
+import { Sheet } from '@/components/pouf/sheet';
 import { toast } from '@/components/pouf/toaster';
+import { fieldError } from '@/lib/form';
 import { BulkImportTeamsDialog } from './bulk-import-teams-dialog';
 import {
   emptyTeamFormValues,
@@ -94,119 +87,104 @@ export function CreateTeamSheet({
       <Sheet
         open={open}
         onOpenChange={handleOpenChange}
+        title="Adicionar time"
+        description="Cadastre um novo time nesta competição."
       >
-        <SheetContent
-          side="right"
-          showCloseButton={false}
-          className="overflow-hidden"
+        <form
+          onSubmit={(event) => {
+            event.preventDefault();
+            event.stopPropagation();
+            void form.handleSubmit();
+          }}
         >
-          <SheetHeader className="shrink-0">
-            <SheetTitle className="text-2xl font-bold">Adicionar time</SheetTitle>
-            <SheetDescription>
-              Cadastre um novo time nesta competição.
-            </SheetDescription>
-          </SheetHeader>
-
-          <form
-            className="flex min-h-0 flex-1 flex-col"
-            onSubmit={(event) => {
-              event.preventDefault();
-              event.stopPropagation();
-              void form.handleSubmit();
-            }}
-          >
-            <div className="flex min-h-0 flex-1 flex-col gap-5 overflow-y-auto scrollbar-thin px-4 pb-2">
-              <form.Field name="name">
-                {(field) => (
-                  <Field data-invalid={!field.state.meta.isValid}>
-                    <FieldLabel htmlFor={field.name}>Nome</FieldLabel>
+          <div className="flex flex-col gap-5">
+            <form.Field name="name">
+              {(field) => (
+                <Field label="Nome" error={fieldError(field.state.meta)}>
+                  {(id, describedBy) => (
                     <Input
-                      id={field.name}
+                      id={id}
                       name={field.name}
+                      describedBy={describedBy}
                       placeholder="Nome do time"
                       value={field.state.value}
                       onBlur={field.handleBlur}
-                      onChange={(event) =>
-                        field.handleChange(event.target.value)
-                      }
-                      aria-invalid={!field.state.meta.isValid}
+                      onChange={field.handleChange}
+                      invalid={!field.state.meta.isValid}
                     />
-                    <FieldError errors={field.state.meta.errors} />
-                  </Field>
-                )}
-              </form.Field>
+                  )}
+                </Field>
+              )}
+            </form.Field>
 
-              <form.Field name="usernameTeam">
-                {(field) => (
-                  <Field data-invalid={!field.state.meta.isValid}>
-                    <FieldLabel htmlFor={field.name}>Usuário</FieldLabel>
+            <form.Field name="usernameTeam">
+              {(field) => (
+                <Field label="Usuário" error={fieldError(field.state.meta)}>
+                  {(id, describedBy) => (
                     <Input
-                      id={field.name}
+                      id={id}
                       name={field.name}
+                      describedBy={describedBy}
                       placeholder="Username do time"
                       value={field.state.value}
                       onBlur={field.handleBlur}
-                      onChange={(event) =>
-                        field.handleChange(event.target.value)
-                      }
-                      aria-invalid={!field.state.meta.isValid}
+                      onChange={field.handleChange}
+                      invalid={!field.state.meta.isValid}
                     />
-                    <FieldError errors={field.state.meta.errors} />
-                  </Field>
-                )}
-              </form.Field>
+                  )}
+                </Field>
+              )}
+            </form.Field>
 
-              <form.Field name="room">
-                {(field) => (
-                  <Field data-invalid={!field.state.meta.isValid}>
-                    <FieldLabel htmlFor={field.name}>Sala</FieldLabel>
+            <form.Field name="room">
+              {(field) => (
+                <Field label="Sala" error={fieldError(field.state.meta)}>
+                  {(id, describedBy) => (
                     <Input
-                      id={field.name}
+                      id={id}
                       name={field.name}
+                      describedBy={describedBy}
                       placeholder="Sala do time (opcional)"
                       value={field.state.value}
                       onBlur={field.handleBlur}
-                      onChange={(event) =>
-                        field.handleChange(event.target.value)
-                      }
-                      aria-invalid={!field.state.meta.isValid}
+                      onChange={field.handleChange}
+                      invalid={!field.state.meta.isValid}
                     />
-                    <FieldError errors={field.state.meta.errors} />
-                  </Field>
-                )}
-              </form.Field>
+                  )}
+                </Field>
+              )}
+            </form.Field>
 
-              <form.Field name="machine">
-                {(field) => (
-                  <Field data-invalid={!field.state.meta.isValid}>
-                    <FieldLabel htmlFor={field.name}>Máquina</FieldLabel>
+            <form.Field name="machine">
+              {(field) => (
+                <Field label="Máquina" error={fieldError(field.state.meta)}>
+                  {(id, describedBy) => (
                     <Input
-                      id={field.name}
+                      id={id}
                       name={field.name}
+                      describedBy={describedBy}
                       placeholder="Número da máquina (opcional)"
                       value={field.state.value}
                       onBlur={field.handleBlur}
-                      onChange={(event) =>
-                        field.handleChange(event.target.value)
-                      }
-                      aria-invalid={!field.state.meta.isValid}
+                      onChange={field.handleChange}
+                      invalid={!field.state.meta.isValid}
                     />
-                    <FieldError errors={field.state.meta.errors} />
-                  </Field>
-                )}
-              </form.Field>
-
-              {requestError && (
-                <p role="alert" className="text-sm text-destructive">
-                  {requestError}
-                </p>
+                  )}
+                </Field>
               )}
+            </form.Field>
 
+            {requestError && (
+              <p role="alert" className="text-sm text-destructive">
+                {requestError}
+              </p>
+            )}
+
+            <div className="flex">
               <Button
-                type="button"
-                variant="orange"
-                className="mt-2 w-full"
+                tone="orange"
                 size="sm"
+                block
                 onClick={() => setBulkOpen(true)}
               >
                 <HugeiconsIcon
@@ -217,41 +195,31 @@ export function CreateTeamSheet({
                 Importar em massa
               </Button>
             </div>
+          </div>
 
-            <SheetFooter className="shrink-0 flex flex-col gap-2">
-              <form.Subscribe selector={(state) => state.isSubmitting}>
-                {(isSubmitting) => (
-                  <Button
-                    type="submit"
-                    variant="green"
-                    loading={isSubmitting}
-                    className="w-full"
-                  >
-                    <HugeiconsIcon
-                      icon={CheckmarkCircle01Icon}
-                      className="size-5"
-                      strokeWidth={3}
-                    />
-                    Adicionar
-                  </Button>
-                )}
-              </form.Subscribe>
-              <Button
-                type="button"
-                variant="white"
-                onClick={() => handleOpenChange(false)}
-                className="w-full"
-              >
-                <HugeiconsIcon
-                  icon={EyeClosedIcon}
-                  className="size-5"
-                  strokeWidth={3}
-                />
-                Fechar
-              </Button>
-            </SheetFooter>
-          </form>
-        </SheetContent>
+          <div className="mt-4 flex flex-col-reverse justify-end gap-2 xl:flex-row">
+            <Button variant="quiet" onClick={() => handleOpenChange(false)}>
+              <HugeiconsIcon
+                icon={EyeClosedIcon}
+                className="size-5"
+                strokeWidth={3}
+              />
+              Fechar
+            </Button>
+            <form.Subscribe selector={(state) => state.isSubmitting}>
+              {(isSubmitting) => (
+                <Button type="submit" tone="mint" loading={isSubmitting}>
+                  <HugeiconsIcon
+                    icon={CheckmarkCircle01Icon}
+                    className="size-5"
+                    strokeWidth={3}
+                  />
+                  Adicionar
+                </Button>
+              )}
+            </form.Subscribe>
+          </div>
+        </form>
       </Sheet>
 
       <BulkImportTeamsDialog

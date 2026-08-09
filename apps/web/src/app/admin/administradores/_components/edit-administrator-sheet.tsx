@@ -401,7 +401,7 @@ export function EditAdministratorSheet({
           </>
         }
         confirmLabel="Confirmar"
-        confirmVariant="red"
+        confirmTone="pink"
         isLoading={isConfirming}
         error={confirmError}
         onConfirm={handleConfirmPassword}
@@ -420,7 +420,7 @@ export function EditAdministratorSheet({
           </>
         }
         confirmLabel="Confirmar"
-        confirmVariant="orange"
+        confirmTone="orange"
         isLoading={isConfirming}
         error={confirmError}
         onConfirm={handleConfirmPassword}

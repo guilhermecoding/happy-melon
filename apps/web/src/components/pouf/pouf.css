@@ -368,20 +368,18 @@
 /* ============================================================================
  * OVERLAYS — radix-driven (Select, Tooltip, AlertDialog).
  * ========================================================================= */
-/* One stacking context per modal portal. Overlay + content live inside the
- * layer (absolute), so a nested Confirm paints its whole layer above the
- * Dialog behind it — including dimming that Dialog. Split z-index (overlay 50,
- * content 60) left nested overlays under the first dialog's content. */
-.pouf-modal-layer {
+/* Every modal surface — overlay and content alike — sits on ONE z-index, so
+ * paint order is portal order: a nested Confirm's overlay lands above the
+ * Dialog that opened it and dims it. Splitting them (overlay 50, content 60)
+ * left nested overlays under the first dialog's content. A wrapper div can't
+ * do this job either: Radix's Portal gives each child its own Presence, and an
+ * un-animated wrapper unmounts instantly, cutting off the exit animation.
+ * Compact portal scale: page chrome tops out at 45, then modals 50 → floating
+ * content 70 → toast 80. */
+.pouf-overlay {
   position: fixed;
   inset: 0;
-  /* Compact portal scale: page chrome tops out at 45, then modal layer 50 →
-   * floating content 70 → toast 80. Later portal layers stack by DOM order. */
   z-index: 50;
-}
-.pouf-overlay {
-  position: absolute;
-  inset: 0;
   background: rgba(58, 46, 92, 0.35);
   backdrop-filter: blur(2px);
 }
@@ -396,8 +394,8 @@
   animation: pouf-fade-out 160ms ease forwards;
 }
 .pouf-dialog {
-  position: absolute;
-  z-index: 1;
+  position: fixed;
+  z-index: 50;
   top: 50%;
   left: 50%;
   transform: translate(-50%, -50%);
@@ -514,7 +512,7 @@
   bottom: 0;
   width: min(440px, 100vw);
   display: flex;
-  z-index: 60;
+  z-index: 50;
 }
 .pouf-sheet-panel {
   width: 100%;

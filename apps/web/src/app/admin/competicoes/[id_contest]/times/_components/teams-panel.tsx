@@ -11,25 +11,16 @@ import {
   PencilEdit02Icon,
   PlusSignCircleIcon,
   Search01Icon,
+  UserMultiple02Icon,
 } from '@hugeicons/core-free-icons';
 import { HugeiconsIcon } from '@hugeicons/react';
 import { AdminPasswordConfirmDialog } from '@/components/admin-password-confirm-dialog';
-import { Button } from '@/components/ui/button';
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuTrigger,
-} from '@/components/ui/dropdown-menu';
-import { Input } from '@/components/ui/input';
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from '@/components/ui/table';
+import BoxFeatures from '@/components/box-features';
+import Spinner from '@/components/spinner';
+import { Button, IconButton } from '@/components/pouf/Button';
+import { Input } from '@/components/pouf/Input';
+import { DropdownMenu } from '@/components/pouf/menu';
+import { Table } from '@/components/pouf/table';
 import { toast } from '@/components/pouf/toaster';
 import { teamService } from '@/services/team/team.service';
 import { getTeamErrorMessage } from '@/services/team/team.error';
@@ -214,238 +205,221 @@ export function TeamsPanel({ contestId }: TeamsPanelProps) {
     }
   }
 
-  return (
-    <div className="flex flex-col gap-4">
-      <div className="flex flex-col gap-3 @5xl/main:flex-row sm:items-center sm:justify-between">
-        <div className="w-full flex justify-start">
-          <Input
-            value={search}
-            onChange={(event) => setSearch(event.target.value)}
-            placeholder="Buscar times..."
-            aria-label="Buscar times"
-            className="w-full sm:max-w-86 rounded-2xl"
+  const columns = [
+    {
+      key: 'id',
+      header: 'ID',
+      mono: true,
+      render: (team: Team) => team.id,
+    },
+    {
+      key: 'name',
+      header: 'Nome',
+      render: (team: Team) => team.name,
+    },
+    {
+      key: 'usernameTeam',
+      header: 'Usuário',
+      render: (team: Team) => team.usernameTeam,
+    },
+    {
+      key: 'room',
+      header: 'Sala',
+      render: (team: Team) => team.room || '—',
+    },
+    {
+      key: 'machine',
+      header: 'Máquina',
+      render: (team: Team) => team.machine || '—',
+    },
+    {
+      key: 'actions',
+      header: 'Opções',
+      align: 'right' as const,
+      render: (team: Team) => (
+        <DropdownMenu
+          items={[
+            {
+              label: 'Editar',
+              icon: (
+                <HugeiconsIcon
+                  icon={PencilEdit02Icon}
+                  className="size-4"
+                  strokeWidth={2}
+                />
+              ),
+              onClick: () => openEditSheet(team),
+            },
+            {
+              label: 'Conquistas',
+              icon: (
+                <HugeiconsIcon
+                  icon={Award01Icon}
+                  className="size-4"
+                  strokeWidth={2}
+                />
+              ),
+              onClick: () => openAchievementsDialog(team),
+            },
+          ]}
+        >
+          <IconButton
+            size="sm"
+            label={`Opções de ${team.name}`}
             icon={
               <HugeiconsIcon
-                icon={Search01Icon}
+                icon={MoreHorizontalIcon}
                 className="size-5"
                 strokeWidth={2}
               />
             }
           />
-        </div>
+        </DropdownMenu>
+      ),
+    },
+  ];
 
-        <div className="w-full flex flex-col-reverse justify-start sm:flex-row @5xl/main:justify-end gap-2">
-          <Button
-            variant="orange"
-            size="sm"
-            className="flex w-full sm:w-fit"
-            disabled={loading || teams.length === 0}
-            onClick={handleDownloadTeams}
-          >
-            <HugeiconsIcon
-              icon={Download01Icon}
-              className="size-5 shrink-0"
-              strokeWidth={3}
-            />
-            Baixar times
-          </Button>
-
-          <Button
-            variant="red"
-            size="sm"
-            className="flex w-full sm:w-fit"
-            disabled={loading || teams.length === 0}
-            onClick={() => {
-              setDeleteAllError(undefined);
-              setDeleteAllOpen(true);
-            }}
-          >
-            <HugeiconsIcon
-              icon={Delete01Icon}
-              className="size-5 shrink-0"
-              strokeWidth={3}
-            />
-            Apagar times
-          </Button>
-
-          <Button
-            variant="blue"
-            size="sm"
-            className="flex w-full sm:w-fit"
-            onClick={() => setCreateOpen(true)}
-          >
-            <HugeiconsIcon
-              icon={PlusSignCircleIcon}
-              className="size-5 shrink-0"
-              strokeWidth={3}
-            />
-            Adicionar time
-          </Button>
-        </div>
-      </div>
-
-      {error && (
-        <p role="alert" className="text-sm text-destructive">
-          {error}
-        </p>
-      )}
-
-      <div className="overflow-hidden rounded-2xl border bg-muted">
-        <Table>
-          <TableHeader>
-            <TableRow>
-              <TableHead className="w-20 px-4 font-bold">ID</TableHead>
-              <TableHead className="px-4 font-bold">Nome</TableHead>
-              <TableHead className="px-4 font-bold">Usuario</TableHead>
-              <TableHead className="px-4 font-bold">Sala</TableHead>
-              <TableHead className="px-4 font-bold">Maquina</TableHead>
-              <TableHead className="w-16 px-4 text-right font-bold">
-                Opções
-              </TableHead>
-            </TableRow>
-          </TableHeader>
-          <TableBody>
-            {loading ? (
-              <TableRow>
-                <TableCell colSpan={6} className="h-24 px-4 text-center">
-                  Carregando...
-                </TableCell>
-              </TableRow>
-            ) : error && teams.length === 0 ? (
-              <TableRow>
-                <TableCell
-                  colSpan={6}
-                  className="h-24 px-4 text-center text-muted-foreground"
-                >
-                  Não foi possível carregar a lista.
-                </TableCell>
-              </TableRow>
-            ) : filteredTeams.length === 0 ? (
-              <TableRow>
-                <TableCell
-                  colSpan={6}
-                  className="h-24 px-4 text-center text-muted-foreground"
-                >
-                  {search.trim()
-                    ? 'Nenhum time encontrado para a busca.'
-                    : 'Nenhum time cadastrado.'}
-                </TableCell>
-              </TableRow>
-            ) : (
-              paginatedTeams.map((team, index) => {
-                const absoluteIndex = (currentPage - 1) * PAGE_SIZE + index;
-
-                return (
-                  <TableRow
-                    key={team.id}
-                    className={absoluteIndex % 2 === 0 ? 'bg-white' : ''}
-                  >
-                    <TableCell className="w-20 px-4 whitespace-nowrap font-mono text-xs">
-                      {team.id}
-                    </TableCell>
-                    <TableCell className="px-4">{team.name}</TableCell>
-                    <TableCell className="px-4">{team.usernameTeam}</TableCell>
-                    <TableCell className="px-4 text-muted-foreground">
-                      {team.room || '—'}
-                    </TableCell>
-                    <TableCell className="px-4 text-muted-foreground">
-                      {team.machine || '—'}
-                    </TableCell>
-                    <TableCell className="px-4 text-right">
-                      <DropdownMenu>
-                        <DropdownMenuTrigger
-                          render={
-                            <Button
-                              type="button"
-                              variant="normal"
-                              size="icon"
-                              className="size-9"
-                              aria-label={`Opções de ${team.name}`}
-                            />
-                          }
-                        >
-                          <HugeiconsIcon
-                            icon={MoreHorizontalIcon}
-                            className="size-5"
-                            strokeWidth={1.5}
-                          />
-                        </DropdownMenuTrigger>
-                        <DropdownMenuContent align="end" className="min-w-40">
-                          <DropdownMenuItem
-                            onClick={() => openEditSheet(team)}
-                          >
-                            <HugeiconsIcon
-                              icon={PencilEdit02Icon}
-                              className="size-4"
-                              strokeWidth={1.5}
-                            />
-                            Editar
-                          </DropdownMenuItem>
-                          <DropdownMenuItem
-                            onClick={() => openAchievementsDialog(team)}
-                          >
-                            <HugeiconsIcon
-                              icon={Award01Icon}
-                              className="size-4"
-                              strokeWidth={1.5}
-                            />
-                            Conquistas
-                          </DropdownMenuItem>
-                        </DropdownMenuContent>
-                      </DropdownMenu>
-                    </TableCell>
-                  </TableRow>
-                );
-              })
-            )}
-          </TableBody>
-        </Table>
-      </div>
-
-      {!loading && filteredTeams.length > 0 && (
-        <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-          <p className="text-sm text-muted-foreground">
-            Mostrando {rangeStart}–{rangeEnd} de {filteredTeams.length}
-            {totalPages > 1
-              ? ` · Página ${currentPage} de ${totalPages}`
-              : null}
-          </p>
-          <div className="flex items-center gap-2">
-            <Button
-              type="button"
-              variant="white"
-              size="sm"
-              className="w-full sm:w-fit"
-              disabled={currentPage <= 1}
-              onClick={() => setPage((current) => Math.max(1, current - 1))}
-            >
-              <HugeiconsIcon
-                icon={ArrowLeft01Icon}
-                className="size-4"
-                strokeWidth={2}
+  return (
+    <>
+      <BoxFeatures
+        title="Times"
+        icon={UserMultiple02Icon}
+        blobSize="sm"
+        blobTone="blue"
+      >
+        <div className="flex h-full flex-col gap-4 p-4">
+          <div className="flex flex-col gap-3 @5xl/main:flex-row sm:items-center sm:justify-between">
+            <div className="flex w-full justify-start sm:max-w-86">
+              <Input
+                value={search}
+                onChange={setSearch}
+                placeholder="Buscar times..."
+                label="Buscar times"
+                icon={
+                  <HugeiconsIcon
+                    icon={Search01Icon}
+                    className="size-5"
+                    strokeWidth={2}
+                  />
+                }
               />
-              Anterior
-            </Button>
-            <Button
-              type="button"
-              variant="white"
-              size="sm"
-              className="w-full sm:w-fit"
-              disabled={currentPage >= totalPages}
-              onClick={() =>
-                setPage((current) => Math.min(totalPages, current + 1))
-              }
-            >
-              Próxima
-              <HugeiconsIcon
-                icon={ArrowRight01Icon}
-                className="size-4"
-                strokeWidth={2}
-              />
-            </Button>
+            </div>
+
+            <div className="flex w-full flex-col-reverse justify-start gap-2 sm:flex-row @5xl/main:justify-end">
+              <Button
+                tone="orange"
+                size="sm"
+                disabled={loading || teams.length === 0}
+                onClick={handleDownloadTeams}
+              >
+                <HugeiconsIcon
+                  icon={Download01Icon}
+                  className="size-5 shrink-0"
+                  strokeWidth={3}
+                />
+                Baixar times
+              </Button>
+
+              <Button
+                tone="pink"
+                size="sm"
+                disabled={loading || teams.length === 0}
+                onClick={() => {
+                  setDeleteAllError(undefined);
+                  setDeleteAllOpen(true);
+                }}
+              >
+                <HugeiconsIcon
+                  icon={Delete01Icon}
+                  className="size-5 shrink-0"
+                  strokeWidth={3}
+                />
+                Apagar times
+              </Button>
+
+              <Button tone="blue" size="sm" onClick={() => setCreateOpen(true)}>
+                <HugeiconsIcon
+                  icon={PlusSignCircleIcon}
+                  className="size-5 shrink-0"
+                  strokeWidth={3}
+                />
+                Adicionar time
+              </Button>
+            </div>
           </div>
+
+          {error && (
+            <p role="alert" className="text-sm text-destructive">
+              {error}
+            </p>
+          )}
+
+          {/* The pouf Table has an English empty state, so every "no rows"
+              branch is decided here instead. */}
+          {loading ? (
+            <Spinner />
+          ) : error && teams.length === 0 ? (
+            <p className="text-center text-sm text-muted-foreground">
+              Não foi possível carregar a lista.
+            </p>
+          ) : filteredTeams.length === 0 ? (
+            <p className="text-center text-sm text-muted-foreground">
+              {search.trim()
+                ? 'Nenhum time encontrado para a busca.'
+                : 'Nenhum time cadastrado.'}
+            </p>
+          ) : (
+            <>
+              <div className="min-h-0 flex-1">
+                <Table
+                  columns={columns}
+                  rows={paginatedTeams}
+                  getKey={(team) => team.id}
+                />
+              </div>
+
+              <div className="mt-auto flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+                <p className="text-sm text-muted-foreground">
+                  Mostrando {rangeStart}–{rangeEnd} de {filteredTeams.length}
+                  {totalPages > 1
+                    ? ` · Página ${currentPage} de ${totalPages}`
+                    : null}
+                </p>
+                <div className="flex items-center gap-2">
+                  <Button
+                    variant="quiet"
+                    size="sm"
+                    disabled={currentPage <= 1}
+                    onClick={() => setPage((current) => Math.max(1, current - 1))}
+                  >
+                    <HugeiconsIcon
+                      icon={ArrowLeft01Icon}
+                      className="size-4"
+                      strokeWidth={2}
+                    />
+                    Anterior
+                  </Button>
+                  <Button
+                    variant="quiet"
+                    size="sm"
+                    disabled={currentPage >= totalPages}
+                    onClick={() =>
+                      setPage((current) => Math.min(totalPages, current + 1))
+                    }
+                  >
+                    Próxima
+                    <HugeiconsIcon
+                      icon={ArrowRight01Icon}
+                      className="size-4"
+                      strokeWidth={2}
+                    />
+                  </Button>
+                </div>
+              </div>
+            </>
+          )}
         </div>
-      )}
+      </BoxFeatures>
 
       <CreateTeamSheet
         contestId={contestId}
@@ -491,11 +465,11 @@ export function TeamsPanel({ contestId }: TeamsPanelProps) {
           </>
         }
         confirmLabel="Apagar todos"
-        confirmVariant="red"
+        confirmTone="pink"
         isLoading={isDeletingAll}
         error={deleteAllError}
         onConfirm={handleConfirmDeleteAll}
       />
-    </div>
+    </>
   );
 }

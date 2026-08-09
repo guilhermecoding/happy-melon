@@ -6,35 +6,22 @@ import { HugeiconsIcon } from '@hugeicons/react';
 import { contestService } from '@/services/contest/contest.service';
 import { getContestErrorMessage } from '@/services/contest/contest.error';
 import type { Contest } from '@/services/contest/contest.type';
-import { Button } from '@/components/ui/button';
-import { Field, FieldError, FieldLabel } from '@/components/ui/field';
-import { Input } from '@/components/ui/input';
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from '@/components/ui/select';
-import {
-  Sheet,
-  SheetContent,
-  SheetDescription,
-  SheetFooter,
-  SheetHeader,
-  SheetTitle,
-} from '@/components/ui/sheet';
+import { Button } from '@/components/pouf/Button';
+import { Select } from '@/components/pouf/controls';
+import { Field, Input } from '@/components/pouf/Input';
+import { Sheet } from '@/components/pouf/sheet';
 import { toast } from '@/components/pouf/toaster';
+import { fieldError } from '@/lib/form';
 import {
   contestFormSchema,
   type ContestFormValues,
 } from './contest-schema';
 import { CheckmarkCircle01Icon, EyeClosedIcon } from '@hugeicons/core-free-icons';
 
-const STATUS_LABELS = {
-  active: 'Habilitada',
-  inactive: 'Desabilitada',
-} as const;
+const STATUS_OPTIONS = [
+  { value: 'active', label: 'Habilitada' },
+  { value: 'inactive', label: 'Desabilitada' },
+];
 
 type CreateContestSheetProps = {
   open: boolean;
@@ -93,166 +80,148 @@ export function CreateContestSheet({
   }
 
   return (
-    <Sheet open={open} onOpenChange={handleOpenChange}>
-      <SheetContent side="right" showCloseButton={false} className="overflow-hidden">
-        <SheetHeader className="shrink-0">
-          <SheetTitle className="text-2xl font-bold">Nova competição</SheetTitle>
-          <SheetDescription>
-            Cadastre uma nova competição do sistema.
-          </SheetDescription>
-        </SheetHeader>
-
-        <form
-          className="flex min-h-0 flex-1 flex-col"
-          onSubmit={(event) => {
-            event.preventDefault();
-            event.stopPropagation();
-            void form.handleSubmit();
-          }}
-        >
-          <div className="flex min-h-0 flex-1 flex-col gap-5 overflow-y-auto scrollbar-thin px-4 pb-2">
-            <form.Field name="name">
-              {(field) => (
-                <Field data-invalid={!field.state.meta.isValid}>
-                  <FieldLabel htmlFor={field.name}>Nome</FieldLabel>
+    <Sheet
+      open={open}
+      onOpenChange={handleOpenChange}
+      title="Nova competição"
+      description="Cadastre uma nova competição do sistema."
+    >
+      <form
+        onSubmit={(event) => {
+          event.preventDefault();
+          event.stopPropagation();
+          void form.handleSubmit();
+        }}
+      >
+        <div className="flex flex-col gap-5">
+          <form.Field name="name">
+            {(field) => (
+              <Field label="Nome" error={fieldError(field.state.meta)}>
+                {(id, describedBy) => (
                   <Input
-                    id={field.name}
+                    id={id}
                     name={field.name}
+                    describedBy={describedBy}
                     placeholder="Nome da competição"
                     value={field.state.value}
                     onBlur={field.handleBlur}
-                    onChange={(event) => field.handleChange(event.target.value)}
-                    aria-invalid={!field.state.meta.isValid}
+                    onChange={field.handleChange}
+                    invalid={!field.state.meta.isValid}
                   />
-                  <FieldError errors={field.state.meta.errors} />
-                </Field>
-              )}
-            </form.Field>
+                )}
+              </Field>
+            )}
+          </form.Field>
 
-            <form.Field name="status">
-              {(field) => (
-                <Field data-invalid={!field.state.meta.isValid}>
-                  <FieldLabel htmlFor={field.name}>Status</FieldLabel>
+          <form.Field name="status">
+            {(field) => (
+              <Field label="Status" error={fieldError(field.state.meta)}>
+                {(id, describedBy) => (
                   <Select
+                    id={id}
+                    describedBy={describedBy}
                     value={field.state.value}
-                    onValueChange={(value) => {
+                    options={STATUS_OPTIONS}
+                    onChange={(value) => {
                       if (value === 'active' || value === 'inactive') {
                         field.handleChange(value);
                       }
                     }}
-                  >
-                    <SelectTrigger
-                      id={field.name}
-                      className="h-auto w-full rounded-xl border-3 border-input bg-gray-50 px-4 py-6 text-base shadow-none dark:bg-input/30"
-                      aria-invalid={!field.state.meta.isValid}
-                    >
-                      <SelectValue>
-                        {(value: string | null) =>
-                          value === 'active' || value === 'inactive'
-                            ? STATUS_LABELS[value]
-                            : null
-                        }
-                      </SelectValue>
-                    </SelectTrigger>
-                    <SelectContent alignItemWithTrigger={false} align="start">
-                      <SelectItem value="active">{STATUS_LABELS.active}</SelectItem>
-                      <SelectItem value="inactive">
-                        {STATUS_LABELS.inactive}
-                      </SelectItem>
-                    </SelectContent>
-                  </Select>
-                  <FieldError errors={field.state.meta.errors} />
-                </Field>
-              )}
-            </form.Field>
+                  />
+                )}
+              </Field>
+            )}
+          </form.Field>
 
-            <form.Field name="startsAt">
-              {(field) => (
-                <Field data-invalid={!field.state.meta.isValid}>
-                  <FieldLabel htmlFor={field.name}>Data e hora de início</FieldLabel>
+          <form.Field name="startsAt">
+            {(field) => (
+              <Field
+                label="Data e hora de início"
+                error={fieldError(field.state.meta)}
+              >
+                {(id, describedBy) => (
                   <Input
-                    id={field.name}
+                    id={id}
                     name={field.name}
+                    describedBy={describedBy}
                     type="datetime-local"
                     value={field.state.value}
                     onBlur={field.handleBlur}
-                    onChange={(event) => field.handleChange(event.target.value)}
-                    aria-invalid={!field.state.meta.isValid}
+                    onChange={field.handleChange}
+                    invalid={!field.state.meta.isValid}
                   />
-                  <FieldError errors={field.state.meta.errors} />
-                </Field>
-              )}
-            </form.Field>
+                )}
+              </Field>
+            )}
+          </form.Field>
 
-            <form.Field name="endsAt">
-              {(field) => (
-                <Field data-invalid={!field.state.meta.isValid}>
-                  <FieldLabel htmlFor={field.name}>Data e hora de término</FieldLabel>
+          <form.Field name="endsAt">
+            {(field) => (
+              <Field
+                label="Data e hora de término"
+                error={fieldError(field.state.meta)}
+              >
+                {(id, describedBy) => (
                   <Input
-                    id={field.name}
+                    id={id}
                     name={field.name}
+                    describedBy={describedBy}
                     type="datetime-local"
                     value={field.state.value}
                     onBlur={field.handleBlur}
-                    onChange={(event) => field.handleChange(event.target.value)}
-                    aria-invalid={!field.state.meta.isValid}
+                    onChange={field.handleChange}
+                    invalid={!field.state.meta.isValid}
                   />
-                  <FieldError errors={field.state.meta.errors} />
-                </Field>
-              )}
-            </form.Field>
+                )}
+              </Field>
+            )}
+          </form.Field>
 
-            <form.Field name="venue">
-              {(field) => (
-                <Field data-invalid={!field.state.meta.isValid}>
-                  <FieldLabel htmlFor={field.name}>Local da sede</FieldLabel>
+          <form.Field name="venue">
+            {(field) => (
+              <Field label="Local da sede" error={fieldError(field.state.meta)}>
+                {(id, describedBy) => (
                   <Input
-                    id={field.name}
+                    id={id}
                     name={field.name}
+                    describedBy={describedBy}
                     placeholder="Cidade, estado ou local"
                     value={field.state.value}
                     onBlur={field.handleBlur}
-                    onChange={(event) => field.handleChange(event.target.value)}
-                    aria-invalid={!field.state.meta.isValid}
+                    onChange={field.handleChange}
+                    invalid={!field.state.meta.isValid}
                   />
-                  <FieldError errors={field.state.meta.errors} />
-                </Field>
-              )}
-            </form.Field>
-
-            {requestError && (
-              <p role="alert" className="text-sm text-destructive">
-                {requestError}
-              </p>
+                )}
+              </Field>
             )}
-          </div>
+          </form.Field>
 
-          <SheetFooter className="shrink-0">
-            <form.Subscribe selector={(state) => state.isSubmitting}>
-              {(isSubmitting) => (
-                <Button
-                  type="submit"
-                  variant="green"
-                  loading={isSubmitting}
-                  className="w-full"
-                >
-                  <HugeiconsIcon icon={CheckmarkCircle01Icon} className="size-5" strokeWidth={3} />
-                  Adicionar
-                </Button>
-              )}
-            </form.Subscribe>
-            <Button
-              type="button"
-              variant="white"
-              onClick={() => handleOpenChange(false)}
-              className="w-full"
-            >
-              <HugeiconsIcon icon={EyeClosedIcon} className="size-5" strokeWidth={3} />
-              Fechar
-            </Button>
-          </SheetFooter>
-        </form>
-      </SheetContent>
+          {requestError && (
+            <p role="alert" className="text-sm text-destructive">
+              {requestError}
+            </p>
+          )}
+        </div>
+
+        <div className="mt-4 flex flex-col-reverse justify-end gap-2 xl:flex-row">
+          <Button variant="quiet" onClick={() => handleOpenChange(false)}>
+            <HugeiconsIcon icon={EyeClosedIcon} className="size-5" strokeWidth={3} />
+            Fechar
+          </Button>
+          <form.Subscribe selector={(state) => state.isSubmitting}>
+            {(isSubmitting) => (
+              <Button type="submit" tone="mint" loading={isSubmitting}>
+                <HugeiconsIcon
+                  icon={CheckmarkCircle01Icon}
+                  className="size-5"
+                  strokeWidth={3}
+                />
+                Adicionar
+              </Button>
+            )}
+          </form.Subscribe>
+        </div>
+      </form>
     </Sheet>
   );
 }
