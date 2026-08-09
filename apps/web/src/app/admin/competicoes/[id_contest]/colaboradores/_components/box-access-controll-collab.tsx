@@ -46,8 +46,8 @@ export default function BoxAccessControllCollab({
             })
             setContest(updatedContest)
             toast.success(checked
-                    ? 'Acesso dos colaboradores habilitado.'
-                    : 'Acesso dos colaboradores desabilitado.')
+                ? 'Acesso dos colaboradores habilitado.'
+                : 'Acesso dos colaboradores desabilitado.')
         } catch (error) {
             setContest((current) => ({ ...current, status: previousStatus }))
             const message = getContestErrorMessage(
@@ -72,6 +72,7 @@ export default function BoxAccessControllCollab({
                         <div className="flex items-center justify-center bg-white p-4 rounded-xl">
                             <QRCodeSVG
                                 value={loginUrl}
+                                fgColor="#32345c"
                                 imageSettings={{
                                     src: '/logo-icon.svg',
                                     x: undefined,

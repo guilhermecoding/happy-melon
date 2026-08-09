@@ -247,7 +247,7 @@ export default function BoxListCollaborators({
     },
     {
       key: 'createdAt',
-      header: 'Inscrição',
+      header: 'Ingresso',
       render: (collaborator: Collaborator) =>
         formatDateTime(collaborator.createdAt),
     },

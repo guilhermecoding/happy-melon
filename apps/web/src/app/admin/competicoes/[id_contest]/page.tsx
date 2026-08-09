@@ -25,12 +25,22 @@ async function AdminContestManagementPageContent({
                 <TitleContestPageManager idContest={id_contest} />
             </Section>
             <Section className='mt-6 flex flex-col @2xl:flex-row gap-4'>
-                <BoxFeatures title="Detalhes da competição" icon={BadgeInfoIcon}>
-                    <BoxContentContest idContest={id_contest} />
-                </BoxFeatures>
-                <BoxFeatures title="Opções" icon={CustomizeIcon}>
-                    <BoxContentOptions idContest={id_contest} />
-                </BoxFeatures>
+                <div className="w-full sm:w-3/5">
+                    <BoxFeatures title="Detalhes da competição" icon={BadgeInfoIcon}
+                        blobSize="sm"
+                        blobTone="blue"
+                    >
+                        <BoxContentContest idContest={id_contest} />
+                    </BoxFeatures>
+                </div>
+                <div className="w-full sm:w-2/5">
+                    <BoxFeatures title="Opções" icon={CustomizeIcon}
+                        blobSize="sm"
+                        blobTone="yellow"
+                    >
+                        <BoxContentOptions idContest={id_contest} />
+                    </BoxFeatures>
+                </div>
             </Section>
         </Page>
     );

@@ -25,7 +25,7 @@ export default function BoxContentOptions({
 
   return (
     <div className="flex flex-col justify-around h-full gap-4 p-4">
-      {items.map((item) => {
+      {items.map((item, index) => {
         const icon = contestCardIcons[item.icon];
         if (!icon) return null;
         return (
@@ -34,6 +34,7 @@ export default function BoxContentOptions({
             title={item.title}
             icon={icon}
             href={item.url}
+            index={index}
           />
         );
       })}

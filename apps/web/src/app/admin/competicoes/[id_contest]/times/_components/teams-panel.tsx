@@ -191,8 +191,8 @@ export function TeamsPanel({ contestId }: TeamsPanelProps) {
       setSelectedTeam(null);
       setDeleteAllOpen(false);
       toast.success(result.deletedCount > 0
-            ? `${result.deletedCount} time(s) excluído(s) com sucesso.`
-            : 'Nenhum time para excluir.');
+        ? `${result.deletedCount} time(s) excluído(s) com sucesso.`
+        : 'Nenhum time para excluir.');
     } catch (deleteError) {
       const message = getTeamErrorMessage(
         deleteError,
@@ -287,7 +287,7 @@ export function TeamsPanel({ contestId }: TeamsPanelProps) {
         title="Times"
         icon={UserMultiple02Icon}
         blobSize="sm"
-        blobTone="blue"
+        blobTone="pink"
       >
         <div className="flex h-full flex-col gap-4 p-4">
           <div className="flex flex-col gap-3 @5xl/main:flex-row sm:items-center sm:justify-between">
