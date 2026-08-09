@@ -89,7 +89,11 @@ export function EditQuestionSheet({
 
   useEffect(() => {
     if (open && question) {
-      form.reset(toFormValues(question));
+      /* keepDefaultValues: a bare reset() would ALSO promote these values to the
+         form's defaults, and useForm re-runs update() on every render — which
+         then sees the component's own defaults differ and wipes an untouched
+         form back to empty on the next render. */
+      form.reset(toFormValues(question), { keepDefaultValues: true });
       setRequestError(undefined);
       setDeleteConfirmOpen(false);
       setConfirmError(undefined);

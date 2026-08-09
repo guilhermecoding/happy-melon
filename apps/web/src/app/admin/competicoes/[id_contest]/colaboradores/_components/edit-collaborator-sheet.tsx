@@ -76,9 +76,11 @@ export function EditCollaboratorSheet({
 
   useEffect(() => {
     if (open && collaborator) {
-      form.reset({
-        name: collaborator.name,
-      });
+      /* keepDefaultValues: a bare reset() would ALSO promote these values to the
+         form's defaults, and useForm re-runs update() on every render — which
+         then sees the component's own defaults differ and wipes an untouched
+         form back to empty on the next render. */
+      form.reset({ name: collaborator.name }, { keepDefaultValues: true });
       setRequestError(undefined);
       setDeleteOpen(false);
     }
