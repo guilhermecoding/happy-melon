@@ -7,7 +7,7 @@ import { getAdministratorErrorMessage } from '@/services/administrator/administr
 import type { Administrator } from '@/services/administrator/administrator.type';
 import BoxFeatures from '@/components/box-features';
 import Spinner from '@/components/spinner';
-import { Button, IconButton } from '@/components/pouf/Button';
+import { Button } from '@/components/pouf/Button';
 import { Switch } from '@/components/pouf/controls';
 import { Badge } from '@/components/pouf/media';
 import { Table } from '@/components/pouf/table';
@@ -208,19 +208,21 @@ export function AdministratorsPanel() {
       key: 'actions',
       header: 'Editar',
       align: 'right' as const,
+      /* A bare button, not a cushion: one pill per row would outweigh the data
+         it belongs to. */
       render: (administrator: Administrator) => (
-        <IconButton
-          size="sm"
-          label={`Editar ${administrator.name}`}
+        <button
+          type="button"
+          aria-label={`Editar ${administrator.name}`}
           onClick={() => openEditSheet(administrator)}
-          icon={
-            <HugeiconsIcon
-              icon={PencilEdit02Icon}
-              className="size-5"
-              strokeWidth={2}
-            />
-          }
-        />
+          className="inline-flex size-9 shrink-0 cursor-pointer items-center justify-center rounded-full text-ink transition-colors hover:bg-ink/5 focus-visible:outline-3 focus-visible:outline-offset-2 focus-visible:outline-[rgba(155,106,255,0.55)]"
+        >
+          <HugeiconsIcon
+            icon={PencilEdit02Icon}
+            className="size-5"
+            strokeWidth={2}
+          />
+        </button>
       ),
     },
   ];

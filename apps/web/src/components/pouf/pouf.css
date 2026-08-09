@@ -1711,10 +1711,18 @@
   width: 100%;
   overflow-x: auto;
 }
+/* Cells never wrap: a broken name or a two-line row-action column reads as a
+ * layout bug long before it reads as "narrow screen". min-content sizing lets
+ * the table outgrow its container instead, and __wrap scrolls it sideways. */
 .pouf-table {
   width: 100%;
+  min-width: max-content;
   border-collapse: separate;
   border-spacing: 0;
+}
+.pouf-table th,
+.pouf-table td {
+  white-space: nowrap;
 }
 .pouf-table th {
   padding: var(--s2) var(--s3);

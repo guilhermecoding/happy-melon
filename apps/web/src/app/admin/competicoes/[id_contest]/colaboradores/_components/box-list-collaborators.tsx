@@ -4,7 +4,7 @@ import { useEffect, useMemo, useState } from 'react';
 import { collaboratorService } from '@/services/collaborator/collaborator.service';
 import { getCollaboratorErrorMessage } from '@/services/collaborator/collaborator.error';
 import type { Collaborator } from '@/services/collaborator/collaborator.type';
-import { Button, IconButton } from '@/components/pouf/Button';
+import { Button } from '@/components/pouf/Button';
 import { Confirm, Switch } from '@/components/pouf/controls';
 import { DropdownMenu } from '@/components/pouf/menu';
 import { Table } from '@/components/pouf/table';
@@ -283,17 +283,19 @@ export default function BoxListCollaborators({
             },
           ]}
         >
-          <IconButton
-            size="sm"
-            label={`Opções de ${collaborator.name}`}
-            icon={
-              <HugeiconsIcon
-                icon={MoreHorizontalIcon}
-                className="size-5"
-                strokeWidth={2}
-              />
-            }
-          />
+          {/* A bare button, not a cushion: one pill per row would outweigh the
+              data it belongs to. */}
+          <button
+            type="button"
+            aria-label={`Opções de ${collaborator.name}`}
+            className="inline-flex size-9 shrink-0 cursor-pointer items-center justify-center rounded-full text-ink transition-colors hover:bg-ink/5 focus-visible:outline-3 focus-visible:outline-offset-2 focus-visible:outline-[rgba(155,106,255,0.55)]"
+          >
+            <HugeiconsIcon
+              icon={MoreHorizontalIcon}
+              className="size-5"
+              strokeWidth={2}
+            />
+          </button>
         </DropdownMenu>
       ),
     },

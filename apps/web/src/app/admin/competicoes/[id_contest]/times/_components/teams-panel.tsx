@@ -17,7 +17,7 @@ import { HugeiconsIcon } from '@hugeicons/react';
 import { AdminPasswordConfirmDialog } from '@/components/admin-password-confirm-dialog';
 import BoxFeatures from '@/components/box-features';
 import Spinner from '@/components/spinner';
-import { Button, IconButton } from '@/components/pouf/Button';
+import { Button } from '@/components/pouf/Button';
 import { Input } from '@/components/pouf/Input';
 import { DropdownMenu } from '@/components/pouf/menu';
 import { Table } from '@/components/pouf/table';
@@ -263,17 +263,19 @@ export function TeamsPanel({ contestId }: TeamsPanelProps) {
             },
           ]}
         >
-          <IconButton
-            size="sm"
-            label={`Opções de ${team.name}`}
-            icon={
-              <HugeiconsIcon
-                icon={MoreHorizontalIcon}
-                className="size-5"
-                strokeWidth={2}
-              />
-            }
-          />
+          {/* A bare button, not a cushion: one pill per row would outweigh the
+              data it belongs to. */}
+          <button
+            type="button"
+            aria-label={`Opções de ${team.name}`}
+            className="inline-flex size-9 shrink-0 cursor-pointer items-center justify-center rounded-full text-ink transition-colors hover:bg-ink/5 focus-visible:outline-3 focus-visible:outline-offset-2 focus-visible:outline-[rgba(155,106,255,0.55)]"
+          >
+            <HugeiconsIcon
+              icon={MoreHorizontalIcon}
+              className="size-5"
+              strokeWidth={2}
+            />
+          </button>
         </DropdownMenu>
       ),
     },
