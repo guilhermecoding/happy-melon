@@ -3,14 +3,9 @@
 import { useEffect, useState } from 'react'
 import { useRouter, useSearchParams } from 'next/navigation'
 import { cn } from '@/lib/utils'
-import { Button } from '@/components/ui/button'
-import { Card, CardContent } from '@/components/ui/card'
-import {
-  Field,
-  FieldGroup,
-  FieldLabel
-} from '@/components/ui/field'
-import { Input } from '@/components/ui/input'
+import { Button } from '@/components/pouf/Button'
+import { Field, Input } from '@/components/pouf/Input'
+import { Card } from '@/components/pouf/surface'
 import Image from 'next/image'
 import {
   authClient,
@@ -245,10 +240,12 @@ export function LoginForm({
 
   return (
     <div className={cn('flex flex-col gap-6', className)} {...props}>
-      <Card className="overflow-hidden rounded-2xl border-6 p-0 shadow-none">
-        <CardContent className="grid p-0 md:grid-cols-2">
+      <Card variant="flush">
+        {/* The photo bleeds to the card edge, so the clip lives on this inner
+            wrapper — Card itself paints the cushion and must not be clipped. */}
+        <div className="grid overflow-hidden rounded-card md:grid-cols-2">
           <form className="p-6 md:p-8" onSubmit={handleSubmit}>
-            <FieldGroup>
+            <div className="flex flex-col gap-6">
               <div className="flex flex-col items-center gap-2 text-center">
                 <Image
                   src="/logo-texto.svg"
@@ -268,86 +265,79 @@ export function LoginForm({
               </div>
 
               {needsRegistration && !isAdmin ? (
-                <Field>
-                  <FieldLabel htmlFor="name" className="text-base font-bold">
-                    Nome
-                  </FieldLabel>
-                  <Input
-                    id="name"
-                    name="name"
-                    type="text"
-                    placeholder="Digite seu nome"
-                    value={name}
-                    onChange={(event) => setName(event.target.value)}
-                    autoComplete="name"
-                    autoFocus
-                    icon={
-                      <HugeiconsIcon
-                        icon={UserIcon}
-                        className="size-5 opacity-50"
-                        strokeWidth={2}
-                      />
-                    }
-                    required
-                  />
+                <Field label="Nome">
+                  {(id, describedBy) => (
+                    <Input
+                      id={id}
+                      name="name"
+                      describedBy={describedBy}
+                      type="text"
+                      placeholder="Digite seu nome"
+                      value={name}
+                      onChange={setName}
+                      autoComplete="name"
+                      autoFocus
+                      icon={
+                        <HugeiconsIcon
+                          icon={UserIcon}
+                          className="size-5"
+                          strokeWidth={2}
+                        />
+                      }
+                      required
+                    />
+                  )}
                 </Field>
               ) : (
                 <>
-                  <Field>
-                    <FieldLabel htmlFor="email" className="text-base font-bold">
-                      Email
-                    </FieldLabel>
-                    <Input
-                      id="email"
-                      name="email"
-                      type="email"
-                      placeholder="Digite seu email"
-                      value={email}
-                      onChange={(event) => setEmail(event.target.value)}
-                      autoComplete="email"
-                      icon={
-                        <HugeiconsIcon
-                          icon={MailIcon}
-                          className="size-5 opacity-50"
-                          strokeWidth={2}
-                        />
-                      }
-                      required
-                    />
+                  <Field label="Email">
+                    {(id, describedBy) => (
+                      <Input
+                        id={id}
+                        name="email"
+                        describedBy={describedBy}
+                        type="email"
+                        placeholder="Digite seu email"
+                        value={email}
+                        onChange={setEmail}
+                        autoComplete="email"
+                        icon={
+                          <HugeiconsIcon
+                            icon={MailIcon}
+                            className="size-5"
+                            strokeWidth={2}
+                          />
+                        }
+                        required
+                      />
+                    )}
                   </Field>
-                  <Field>
-                    <FieldLabel
-                      htmlFor={isAdmin ? 'password' : 'competition-code'}
-                      className="text-base font-bold"
-                    >
-                      {isAdmin ? 'Senha' : 'Código da Competição'}
-                    </FieldLabel>
-                    <Input
-                      key={isAdmin ? 'password' : 'competition-code'}
-                      id={isAdmin ? 'password' : 'competition-code'}
-                      name={isAdmin ? 'password' : 'competitionCode'}
-                      type={isAdmin ? 'password' : 'text'}
-                      placeholder={
-                        isAdmin
-                          ? 'Digite sua senha'
-                          : 'Digite o código da competição'
-                      }
-                      value={isAdmin ? password : competitionCode}
-                      onChange={
-                        isAdmin
-                          ? (event) => setPassword(event.target.value)
-                          : (event) => setCompetitionCode(event.target.value)
-                      }
-                      autoComplete={isAdmin ? 'current-password' : 'off'}
-                      icon={
-                        <HugeiconsIcon
-                          icon={isAdmin ? SquareLock01Icon : BalloonIcon}
-                          className="size-5 opacity-50"
-                          strokeWidth={2}
-                        />
-                      }
-                      required
-                    />
+                  <Field label={isAdmin ? 'Senha' : 'Código da Competição'}>
+                    {(id, describedBy) => (
+                      <Input
+                        key={isAdmin ? 'password' : 'competition-code'}
+                        id={id}
+                        name={isAdmin ? 'password' : 'competitionCode'}
+                        describedBy={describedBy}
+                        type={isAdmin ? 'password' : 'text'}
+                        placeholder={
+                          isAdmin
+                            ? 'Digite sua senha'
+                            : 'Digite o código da competição'
+                        }
+                        value={isAdmin ? password : competitionCode}
+                        onChange={isAdmin ? setPassword : setCompetitionCode}
+                        autoComplete={isAdmin ? 'current-password' : 'off'}
+                        icon={
+                          <HugeiconsIcon
+                            icon={isAdmin ? SquareLock01Icon : BalloonIcon}
+                            className="size-5"
+                            strokeWidth={2}
+                          />
+                        }
+                        required
+                      />
+                    )}
                   </Field>
                 </>
               )}
@@ -357,39 +347,39 @@ export function LoginForm({
                   {error}
                 </p>
               ) : null}
-              <Field>
+
+              <div className="flex flex-col gap-2">
                 <Button
                   type="submit"
+                  block
                   loading={isLoading}
-                  disabled={isLoading || !canSubmit}
+                  disabled={!canSubmit}
                 >
                   {needsRegistration && !isAdmin ? 'Continuar' : 'Entrar'}
                 </Button>
                 {needsRegistration && !isAdmin ? (
                   <Button
-                    type="button"
-                    variant="white"
+                    variant="quiet"
+                    block
                     onClick={() => {
                       setNeedsRegistration(false)
                       setName('')
                       setError(null)
                     }}
-                    className="w-full"
                   >
                     Voltar
                   </Button>
                 ) : (
                   <Button
-                    type="button"
-                    variant="white"
+                    variant="quiet"
                     size="sm"
+                    block
                     onClick={() => {
                       setIsAdmin((prev) => !prev)
                       setNeedsRegistration(false)
                       setName('')
                       setError(null)
                     }}
-                    className="w-full"
                   >
                     <HugeiconsIcon
                       icon={isAdmin ? BalloonIcon : Crown03Icon}
@@ -399,8 +389,8 @@ export function LoginForm({
                     {isAdmin ? 'Sou Colaborador' : 'Sou Administrador'}
                   </Button>
                 )}
-              </Field>
-            </FieldGroup>
+              </div>
+            </div>
           </form>
           <div className="relative hidden bg-muted md:block">
             <Image
@@ -412,7 +402,7 @@ export function LoginForm({
               loading="eager"
             />
           </div>
-        </CardContent>
+        </div>
       </Card>
     </div>
   )

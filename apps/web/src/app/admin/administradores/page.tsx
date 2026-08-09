@@ -15,7 +15,7 @@ export default function AdminUsersPage() {
       <Section>
         <TitlePage title="Administradores do Sistema" icon={Crown03Icon} />
       </Section>
-      <Section>
+      <Section className="mt-6 flex flex-col gap-4">
         <AdministratorsPanel />
       </Section>
     </Page>

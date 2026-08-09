@@ -5,21 +5,21 @@ import { authClient } from '@/lib/auth-client';
 import { administratorService } from '@/services/administrator/administrator.service';
 import { getAdministratorErrorMessage } from '@/services/administrator/administrator.error';
 import type { Administrator } from '@/services/administrator/administrator.type';
-import { Button } from '@/components/ui/button';
-import { Switch } from '@/components/ui/switch';
+import BoxFeatures from '@/components/box-features';
+import Spinner from '@/components/spinner';
+import { Button, IconButton } from '@/components/pouf/Button';
+import { Switch } from '@/components/pouf/controls';
+import { Badge } from '@/components/pouf/media';
+import { Table } from '@/components/pouf/table';
 import { toast } from '@/components/pouf/toaster';
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from '@/components/ui/table';
 import { CreateAdministratorSheet } from './create-administrator-sheet';
 import { EditAdministratorSheet } from './edit-administrator-sheet';
 import { HugeiconsIcon } from '@hugeicons/react';
-import { CirclePlusIcon, PencilEdit02Icon } from '@hugeicons/core-free-icons';
+import {
+  CirclePlusIcon,
+  Crown03Icon,
+  PencilEdit02Icon,
+} from '@hugeicons/core-free-icons';
 
 function formatLastAccess(lastAccess: string | null) {
   if (!lastAccess) {
@@ -161,111 +161,117 @@ export function AdministratorsPanel() {
     }
   }
 
-  return (
-    <div className="flex flex-col gap-4 mt-6">
-      <div className="flex justify-end">
-        <Button
-          onClick={() => setCreateOpen(true)}
-          className="w-full sm:w-auto"
+  const columns = [
+    {
+      key: 'id',
+      header: '#',
+      mono: true,
+      render: (administrator: Administrator) => administrator.id,
+    },
+    {
+      key: 'name',
+      header: 'Nome',
+      render: (administrator: Administrator) => (
+        <span className="inline-flex items-center gap-2">
+          {administrator.name}
+          {administrator.id === currentUserId && <Badge tone="mint">Você</Badge>}
+        </span>
+      ),
+    },
+    {
+      key: 'email',
+      header: 'Email',
+      render: (administrator: Administrator) => administrator.email,
+    },
+    {
+      key: 'access',
+      header: 'Acesso',
+      render: (administrator: Administrator) => (
+        <Switch
+          checked={administrator.hasAccess}
+          disabled={
+            administrator.id === currentUserId ||
+            updatingAccess.has(administrator.id)
+          }
+          label={`Acesso de ${administrator.name}`}
+          onChange={(checked) => void updateAccess(administrator, checked)}
+        />
+      ),
+    },
+    {
+      key: 'lastAccess',
+      header: 'Último acesso',
+      render: (administrator: Administrator) =>
+        formatLastAccess(administrator.lastAccess),
+    },
+    {
+      key: 'actions',
+      header: 'Editar',
+      align: 'right' as const,
+      render: (administrator: Administrator) => (
+        <IconButton
           size="sm"
-        >
-          <HugeiconsIcon icon={CirclePlusIcon} className="size-5" strokeWidth={3} />
-          Adicionar
-        </Button>
-      </div>
+          label={`Editar ${administrator.name}`}
+          onClick={() => openEditSheet(administrator)}
+          icon={
+            <HugeiconsIcon
+              icon={PencilEdit02Icon}
+              className="size-5"
+              strokeWidth={2}
+            />
+          }
+        />
+      ),
+    },
+  ];
 
-      {error && (
-        <p role="alert" className="text-sm text-destructive">
-          {error}
-        </p>
-      )}
+  return (
+    <>
+      <BoxFeatures
+        title="Administradores"
+        icon={Crown03Icon}
+        blobSize="sm"
+        blobTone="blue"
+      >
+        <div className="flex h-full flex-col gap-4 p-4">
+          <div className="flex justify-end">
+            <Button tone="blue" size="sm" onClick={() => setCreateOpen(true)}>
+              <HugeiconsIcon
+                icon={CirclePlusIcon}
+                className="size-5"
+                strokeWidth={3}
+              />
+              Adicionar
+            </Button>
+          </div>
 
-      <div className="overflow-hidden rounded-2xl border bg-muted">
-        <Table>
-          <TableHeader>
-            <TableRow>
-              <TableHead className="w-20 px-4 font-bold">#</TableHead>
-              <TableHead className="px-4 font-bold">Nome</TableHead>
-              <TableHead className="px-4 font-bold">Email</TableHead>
-              <TableHead className="px-4 font-bold">Acesso</TableHead>
-              <TableHead className="px-4 font-bold">Último acesso</TableHead>
-              <TableHead className="w-16 px-4 font-bold text-right">Editar</TableHead>
-            </TableRow>
-          </TableHeader>
-          <TableBody>
-            {loading ? (
-              <TableRow>
-                <TableCell colSpan={6} className="h-24 px-4 text-center">
-                  Carregando...
-                </TableCell>
-              </TableRow>
-            ) : error && orderedAdministrators.length === 0 ? (
-              <TableRow>
-                <TableCell colSpan={6} className="h-24 px-4 text-center text-muted-foreground">
-                  Não foi possível carregar a lista.
-                </TableCell>
-              </TableRow>
-            ) : orderedAdministrators.length === 0 ? (
-              <TableRow>
-                <TableCell colSpan={6} className="h-24 px-4 text-center text-muted-foreground">
-                  Nenhum administrador encontrado.
-                </TableCell>
-              </TableRow>
-            ) : (
-              orderedAdministrators.map((administrator, index) => {
-                const isCurrentUser = administrator.id === currentUserId;
+          {error && (
+            <p role="alert" className="text-sm text-destructive">
+              {error}
+            </p>
+          )}
 
-                return (
-                <TableRow key={administrator.id} className={index % 2 === 0 ? 'bg-white' : ''}>
-                  <TableCell className="w-20 px-4 whitespace-nowrap font-mono text-xs">
-                    {administrator.id}
-                  </TableCell>
-                  <TableCell className="px-4">
-                    <span className="inline-flex items-center gap-2">
-                      {administrator.name}
-                      {isCurrentUser && (
-                        <span className="rounded-md bg-primary/10 px-1.5 py-0.5 text-xs font-medium text-primary">
-                          Você
-                        </span>
-                      )}
-                    </span>
-                  </TableCell>
-                  <TableCell className="px-4">{administrator.email}</TableCell>
-                  <TableCell className="px-4">
-                    <Switch
-                      checked={administrator.hasAccess}
-                      disabled={
-                        isCurrentUser ||
-                        updatingAccess.has(administrator.id)
-                      }
-                      aria-label={`Acesso de ${administrator.name}`}
-                      onCheckedChange={(checked) =>
-                        void updateAccess(administrator, checked)
-                      }
-                    />
-                  </TableCell>
-                  <TableCell className="px-4 text-muted-foreground">
-                    {formatLastAccess(administrator.lastAccess)}
-                  </TableCell>
-                  <TableCell className="px-4 text-right">
-                    <Button
-                      type="button"
-                      variant="normal"
-                      size="icon"
-                      className="size-9"
-                      aria-label={`Editar ${administrator.name}`}
-                      onClick={() => openEditSheet(administrator)}
-                    >
-                      <HugeiconsIcon icon={PencilEdit02Icon} className="size-5" strokeWidth={1.5} />
-                    </Button>
-                  </TableCell>
-                </TableRow>
-                );
-              })
-            )}
-          </TableBody>
-        </Table>
-      </div>
+          {/* The pouf Table's empty state is English, so every "no rows" branch
+              is decided here instead. */}
+          {loading ? (
+            <Spinner />
+          ) : error && orderedAdministrators.length === 0 ? (
+            <p className="text-center text-sm text-muted-foreground">
+              Não foi possível carregar a lista.
+            </p>
+          ) : orderedAdministrators.length === 0 ? (
+            <p className="text-center text-sm text-muted-foreground">
+              Nenhum administrador encontrado.
+            </p>
+          ) : (
+            <Table
+              columns={columns}
+              rows={orderedAdministrators}
+              getKey={(administrator) => administrator.id}
+            />
+          )}
+        </div>
+      </BoxFeatures>
 
       <CreateAdministratorSheet
         open={createOpen}
@@ -281,6 +287,6 @@ export function AdministratorsPanel() {
         onUpdated={replaceAdministrator}
         onDeleted={removeAdministrator}
       />
-    </div>
+    </>
   );
 }

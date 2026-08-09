@@ -1,21 +1,16 @@
 'use client';
 
 import { useEffect, useState } from 'react';
+import { HugeiconsIcon } from '@hugeicons/react';
+import { EyeClosedIcon, SaveIcon } from '@hugeicons/core-free-icons';
 import { contestService } from '@/services/contest/contest.service';
 import { getContestErrorMessage } from '@/services/contest/contest.error';
 import type { StaffSettingsInput } from '@/services/contest/contest.type';
-import { Button } from '@/components/ui/button';
-import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogFooter,
-  DialogHeader,
-  DialogTitle,
-} from '@/components/ui/dialog';
-import { Field, FieldLabel } from '@/components/ui/field';
-import { Input } from '@/components/ui/input';
-import { Switch } from '@/components/ui/switch';
+import { Button } from '@/components/pouf/Button';
+import { Dialog, Switch } from '@/components/pouf/controls';
+import { Field, Input } from '@/components/pouf/Input';
+import { RowCard } from '@/components/pouf/surface';
+import Spinner from '@/components/spinner';
 import { toast } from '@/components/pouf/toaster';
 
 type CollaboratorSettingsDialogProps = {
@@ -86,6 +81,11 @@ export function CollaboratorSettingsDialog({
     };
   }, [contestId, open, onOpenChange]);
 
+  function handleOpenChange(nextOpen: boolean) {
+    if (!nextOpen && saving) return;
+    onOpenChange(nextOpen);
+  }
+
   function parsePositiveInt(value: string): number | null {
     const parsed = Number.parseInt(value, 10);
     if (!Number.isFinite(parsed) || parsed < 1) {
@@ -123,44 +123,46 @@ export function CollaboratorSettingsDialog({
     try {
       await contestService.updateStaffSettings(contestId, payload);
       toast.success('Ajustes salvos com sucesso.');
-      onOpenChange(false);
+      setSaving(false);
+      handleOpenChange(false);
+      return;
     } catch (error) {
-      const message = getContestErrorMessage(
+      toast.error(getContestErrorMessage(
         error,
         'Não foi possível salvar os ajustes.',
-      );
-      toast.error(message);
-    } finally {
-      setSaving(false);
+      ));
     }
+
+    setSaving(false);
   }
 
   return (
-    <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent>
-        <DialogHeader>
-          <DialogTitle className="text-lg font-semibold">Ajustes</DialogTitle>
-          <DialogDescription>
-            Configure limites para os colaboradores desta competição.
-          </DialogDescription>
-        </DialogHeader>
-
-        {loading ? (
-          <p className="text-sm text-muted-foreground">Carregando...</p>
-        ) : (
-          <div className="flex flex-col gap-5">
+    <Dialog
+      open={open}
+      onOpenChange={handleOpenChange}
+      title="Ajustes"
+      description="Configure limites para os colaboradores desta competição."
+    >
+      {loading ? (
+        <Spinner />
+      ) : (
+        <div className="flex flex-col gap-3">
+          <RowCard>
             <div className="flex flex-col gap-3">
               <div className="flex items-center justify-between gap-4">
                 <div className="flex flex-col gap-0.5">
-                  <span className="text-sm font-medium">Limite de balões</span>
+                  <span className="text-sm font-bold text-ink">
+                    Limite de balões
+                  </span>
                   <span className="text-xs text-muted-foreground">
-                    Número máximo de balões que um staff pode pegar simultaneamente antes de ser entregue.
+                    Número máximo de balões que um staff pode pegar
+                    simultaneamente antes de ser entregue.
                   </span>
                 </div>
                 <Switch
                   checked={settings.balloonLimitEnabled}
-                  aria-label="Limite de balões"
-                  onCheckedChange={(checked) =>
+                  label="Limite de balões"
+                  onChange={(checked) =>
                     setSettings((current) => ({
                       ...current,
                       balloonLimitEnabled: checked,
@@ -170,28 +172,32 @@ export function CollaboratorSettingsDialog({
                 />
               </div>
               {settings.balloonLimitEnabled ? (
-                <Field>
-                  <FieldLabel htmlFor="balloon-limit">Quantidade</FieldLabel>
-                  <Input
-                    id="balloon-limit"
-                    type="number"
-                    min={1}
-                    step={1}
-                    inputMode="numeric"
-                    value={balloonLimitInput}
-                    onChange={(event) =>
-                      setBalloonLimitInput(event.target.value)
-                    }
-                    placeholder="Ex: 3"
-                  />
+                <Field label="Quantidade">
+                  {(id, describedBy) => (
+                    <Input
+                      id={id}
+                      describedBy={describedBy}
+                      type="number"
+                      min={1}
+                      step={1}
+                      inputMode="numeric"
+                      value={balloonLimitInput}
+                      onChange={setBalloonLimitInput}
+                      placeholder="Ex: 3"
+                    />
+                  )}
                 </Field>
               ) : null}
             </div>
+          </RowCard>
 
+          <RowCard>
             <div className="flex flex-col gap-3">
               <div className="flex items-center justify-between gap-4">
                 <div className="flex flex-col gap-0.5">
-                  <span className="text-sm font-medium">Timeout de entrega</span>
+                  <span className="text-sm font-bold text-ink">
+                    Timeout de entrega
+                  </span>
                   <span className="text-xs text-muted-foreground">
                     Tempo máximo (em minutos) que um staff pode ficar com o
                     balão antes de ser entregue.
@@ -199,8 +205,8 @@ export function CollaboratorSettingsDialog({
                 </div>
                 <Switch
                   checked={settings.deliveryTimeoutEnabled}
-                  aria-label="Timeout de entrega"
-                  onCheckedChange={(checked) =>
+                  label="Timeout de entrega"
+                  onChange={(checked) =>
                     setSettings((current) => ({
                       ...current,
                       deliveryTimeoutEnabled: checked,
@@ -212,47 +218,50 @@ export function CollaboratorSettingsDialog({
                 />
               </div>
               {settings.deliveryTimeoutEnabled ? (
-                <Field>
-                  <FieldLabel htmlFor="delivery-timeout">
-                    Minutos
-                  </FieldLabel>
-                  <Input
-                    id="delivery-timeout"
-                    type="number"
-                    min={1}
-                    step={1}
-                    inputMode="numeric"
-                    value={timeoutInput}
-                    onChange={(event) => setTimeoutInput(event.target.value)}
-                    placeholder="Ex: 10"
-                  />
+                <Field label="Minutos">
+                  {(id, describedBy) => (
+                    <Input
+                      id={id}
+                      describedBy={describedBy}
+                      type="number"
+                      min={1}
+                      step={1}
+                      inputMode="numeric"
+                      value={timeoutInput}
+                      onChange={setTimeoutInput}
+                      placeholder="Ex: 10"
+                    />
+                  )}
                 </Field>
               ) : null}
             </div>
-          </div>
-        )}
+          </RowCard>
+        </div>
+      )}
 
-        <DialogFooter>
-          <Button
-            type="button"
-            variant="white"
-            size="sm"
-            disabled={saving}
-            onClick={() => onOpenChange(false)}
-          >
-            Cancelar
-          </Button>
-          <Button
-            type="button"
-            size="sm"
-            loading={saving}
-            disabled={loading || saving}
-            onClick={() => void handleSave()}
-          >
-            Salvar
-          </Button>
-        </DialogFooter>
-      </DialogContent>
+      <div className="mt-4 flex flex-col-reverse justify-end gap-2 xl:flex-row">
+        <Button
+          variant="quiet"
+          disabled={saving}
+          onClick={() => handleOpenChange(false)}
+        >
+          <HugeiconsIcon
+            icon={EyeClosedIcon}
+            className="size-5"
+            strokeWidth={3}
+          />
+          Cancelar
+        </Button>
+        <Button
+          tone="mint"
+          loading={saving}
+          disabled={loading}
+          onClick={() => void handleSave()}
+        >
+          <HugeiconsIcon icon={SaveIcon} className="size-5" strokeWidth={3} />
+          Salvar
+        </Button>
+      </div>
     </Dialog>
   );
 }

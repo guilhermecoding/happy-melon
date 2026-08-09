@@ -8,26 +8,11 @@ import { administratorService } from '@/services/administrator/administrator.ser
 import { getAdministratorErrorMessage } from '@/services/administrator/administrator.error';
 import type { Administrator } from '@/services/administrator/administrator.type';
 import { AdminPasswordConfirmDialog } from '@/components/admin-password-confirm-dialog';
-import { Button } from '@/components/ui/button';
-import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogFooter,
-  DialogHeader,
-  DialogTitle,
-} from '@/components/ui/dialog';
-import { Field, FieldError, FieldLabel } from '@/components/ui/field';
-import { Input } from '@/components/ui/input';
-import { Separator } from '@/components/ui/separator';
-import {
-  Sheet,
-  SheetContent,
-  SheetDescription,
-  SheetFooter,
-  SheetHeader,
-  SheetTitle,
-} from '@/components/ui/sheet';
+import { Button } from '@/components/pouf/Button';
+import { Dialog } from '@/components/pouf/controls';
+import { Field, Input } from '@/components/pouf/Input';
+import { Sheet } from '@/components/pouf/sheet';
+import { fieldError } from '@/lib/form';
 import {
   administratorSchema,
   type AdministratorFormValues,
@@ -89,15 +74,15 @@ export function EditAdministratorSheet({
           value,
         );
         onUpdated(updatedAdministrator);
-        onOpenChange(false);
         toast.success('Administrador atualizado com sucesso.');
+        handleOpenChange(false);
       } catch (error) {
-        setRequestError(
-          getAdministratorErrorMessage(
-            error,
-            'Não foi possível atualizar o administrador.',
-          ),
+        const message = getAdministratorErrorMessage(
+          error,
+          'Não foi possível atualizar o administrador.',
         );
+        setRequestError(message);
+        toast.error(message);
       }
     },
   });
@@ -119,6 +104,8 @@ export function EditAdministratorSheet({
   }, [administrator, form, open]);
 
   function handleOpenChange(nextOpen: boolean) {
+    if (!nextOpen && isConfirming) return;
+
     if (!nextOpen) {
       form.reset();
       setRequestError(undefined);
@@ -176,6 +163,7 @@ export function EditAdministratorSheet({
         await administratorService.remove(administrator.id, { password });
         onDeleted(administrator.id);
         handleConfirmOpenChange(false);
+        setIsConfirming(false);
         handleOpenChange(false);
         toast.success('Administrador excluído com sucesso.');
         return;
@@ -183,6 +171,7 @@ export function EditAdministratorSheet({
 
       if (!pendingNewPassword) {
         setConfirmError('Informe a nova senha antes de confirmar.');
+        setIsConfirming(false);
         return;
       }
 
@@ -202,65 +191,62 @@ export function EditAdministratorSheet({
       );
       setConfirmError(message);
       toast.error(message);
-    } finally {
-      setIsConfirming(false);
     }
+
+    setIsConfirming(false);
   }
 
   return (
     <>
-      <Sheet open={open} onOpenChange={handleOpenChange}>
-        <SheetContent side="right" showCloseButton={false}>
-          <SheetHeader>
-            <SheetTitle className="text-2xl font-bold">
-              Editar administrador
-            </SheetTitle>
-            <SheetDescription>
-              Atualize o nome e o e-mail do administrador.
-            </SheetDescription>
-          </SheetHeader>
-
-          <form
-            className="flex flex-1 flex-col gap-5 px-4"
-            onSubmit={(event) => {
-              event.preventDefault();
-              event.stopPropagation();
-              void form.handleSubmit();
-            }}
-          >
+      <Sheet
+        open={open}
+        onOpenChange={handleOpenChange}
+        title="Editar administrador"
+        description="Atualize o nome e o e-mail do administrador."
+      >
+        <form
+          onSubmit={(event) => {
+            event.preventDefault();
+            event.stopPropagation();
+            void form.handleSubmit();
+          }}
+        >
+          <div className="flex flex-col gap-5">
             <form.Field name="name">
               {(field) => (
-                <Field data-invalid={!field.state.meta.isValid}>
-                  <FieldLabel htmlFor={field.name}>Nome</FieldLabel>
-                  <Input
-                    id={field.name}
-                    name={field.name}
-                    value={field.state.value}
-                    placeholder="Nome do administrador"
-                    onBlur={field.handleBlur}
-                    onChange={(event) => field.handleChange(event.target.value)}
-                    aria-invalid={!field.state.meta.isValid}
-                  />
-                  <FieldError errors={field.state.meta.errors} />
+                <Field label="Nome" error={fieldError(field.state.meta)}>
+                  {(id, describedBy) => (
+                    <Input
+                      id={id}
+                      name={field.name}
+                      describedBy={describedBy}
+                      placeholder="Nome do administrador"
+                      value={field.state.value}
+                      onBlur={field.handleBlur}
+                      onChange={field.handleChange}
+                      invalid={!field.state.meta.isValid}
+                    />
+                  )}
                 </Field>
               )}
             </form.Field>
 
             <form.Field name="email">
               {(field) => (
-                <Field data-invalid={!field.state.meta.isValid}>
-                  <FieldLabel htmlFor={field.name}>Email</FieldLabel>
-                  <Input
-                    id={field.name}
-                    name={field.name}
-                    type="email"
-                    value={field.state.value}
-                    placeholder="E-mail do administrador"
-                    onBlur={field.handleBlur}
-                    onChange={(event) => field.handleChange(event.target.value)}
-                    aria-invalid={!field.state.meta.isValid}
-                  />
-                  <FieldError errors={field.state.meta.errors} />
+                <Field label="Email" error={fieldError(field.state.meta)}>
+                  {(id, describedBy) => (
+                    <Input
+                      id={id}
+                      name={field.name}
+                      describedBy={describedBy}
+                      type="email"
+                      placeholder="E-mail do administrador"
+                      value={field.state.value}
+                      onBlur={field.handleBlur}
+                      onChange={field.handleChange}
+                      invalid={!field.state.meta.isValid}
+                    />
+                  )}
                 </Field>
               )}
             </form.Field>
@@ -271,14 +257,13 @@ export function EditAdministratorSheet({
               </p>
             )}
 
-            <Separator className="my-1 bg-black/15" />
+            <div className="h-0.5 rounded-full bg-ink/10" />
 
-            <div className="flex flex-col gap-2">
+            <div className="flex">
               <Button
-                type="button"
-                variant="orange"
+                tone="orange"
                 size="sm"
-                className="w-full"
+                block
                 onClick={() => {
                   setNewPasswordError(undefined);
                   setNewPassword('');
@@ -293,98 +278,89 @@ export function EditAdministratorSheet({
                 Alterar senha
               </Button>
             </div>
+          </div>
 
-            <SheetFooter className="mt-auto px-0 gap-3">
-              <form.Subscribe selector={(state) => state.isSubmitting}>
-                {(isSubmitting) => (
-                  <Button type="submit" loading={isSubmitting} className="w-full">
-                    <HugeiconsIcon icon={SaveIcon} className="size-5" strokeWidth={3} />
-                    Salvar
-                  </Button>
-                )}
-              </form.Subscribe>
-              {!isCurrentUser && (
-                <Button
-                  type="button"
-                  variant="red"
-                  className="w-full"
-                  onClick={() => {
-                    setConfirmError(undefined);
-                    setConfirmAction('delete');
-                  }}
-                >
-                  <HugeiconsIcon icon={Delete01Icon} className="size-5" strokeWidth={3} />
-                  Apagar
+          <div className="mt-4 flex flex-col-reverse justify-end gap-2 xl:flex-row">
+            <Button variant="quiet" onClick={() => handleOpenChange(false)}>
+              <HugeiconsIcon
+                icon={EyeClosedIcon}
+                className="size-5"
+                strokeWidth={3}
+              />
+              Fechar
+            </Button>
+            {!isCurrentUser && (
+              <Button
+                tone="pink"
+                onClick={() => {
+                  setConfirmError(undefined);
+                  setConfirmAction('delete');
+                }}
+              >
+                <HugeiconsIcon
+                  icon={Delete01Icon}
+                  className="size-5"
+                  strokeWidth={3}
+                />
+                Apagar
+              </Button>
+            )}
+            <form.Subscribe selector={(state) => state.isSubmitting}>
+              {(isSubmitting) => (
+                <Button type="submit" tone="mint" loading={isSubmitting}>
+                  <HugeiconsIcon
+                    icon={SaveIcon}
+                    className="size-5"
+                    strokeWidth={3}
+                  />
+                  Salvar
                 </Button>
               )}
-              <Button
-                type="button"
-                variant="white"
-                onClick={() => handleOpenChange(false)}
-                className="w-full"
-              >
-                <HugeiconsIcon icon={EyeClosedIcon} className="size-5" strokeWidth={3} />
-                Fechar
-              </Button>
-            </SheetFooter>
-          </form>
-        </SheetContent>
+            </form.Subscribe>
+          </div>
+        </form>
       </Sheet>
 
-      <Dialog open={newPasswordOpen} onOpenChange={handleNewPasswordOpenChange}>
-        <DialogContent showCloseButton={false}>
-          <DialogHeader>
-            <DialogTitle className="text-xl font-bold">
-              Alterar senha
-            </DialogTitle>
-            <DialogDescription className="text-base">
-              Informe a nova senha para{' '}
-              <strong>{administrator?.name}</strong>. Mínimo de 8 caracteres.
-            </DialogDescription>
-          </DialogHeader>
-
-          <form
-            className="flex flex-col gap-6"
-            onSubmit={handleNewPasswordSubmit}
-          >
-            <Field data-invalid={Boolean(newPasswordError)}>
+      <Dialog
+        open={newPasswordOpen}
+        onOpenChange={handleNewPasswordOpenChange}
+        title="Alterar senha"
+        description={
+          <>
+            Informe a nova senha para <strong>{administrator?.name}</strong>.
+            Mínimo de 8 caracteres.
+          </>
+        }
+      >
+        <form onSubmit={handleNewPasswordSubmit}>
+          <Field label="Nova senha" error={newPasswordError}>
+            {(id, describedBy) => (
               <Input
-                id="admin-new-password"
+                id={id}
+                describedBy={describedBy}
                 type="password"
                 autoComplete="new-password"
                 placeholder="Nova senha"
                 value={newPassword}
-                onChange={(event) => setNewPassword(event.target.value)}
-                aria-invalid={Boolean(newPasswordError)}
+                onChange={setNewPassword}
+                invalid={Boolean(newPasswordError)}
               />
-              {newPasswordError && (
-                <p role="alert" className="text-sm text-destructive">
-                  {newPasswordError}
-                </p>
-              )}
-            </Field>
+            )}
+          </Field>
 
-            <DialogFooter className="flex-col justify-stretch sm:flex-row-reverse sm:justify-end">
-              <Button
-                type="submit"
-                variant="orange"
-                size="sm"
-                className="w-full"
-              >
-                Continuar
-              </Button>
-              <Button
-                type="button"
-                variant="white"
-                size="sm"
-                className="w-full"
-                onClick={() => handleNewPasswordOpenChange(false)}
-              >
-                Cancelar
-              </Button>
-            </DialogFooter>
-          </form>
-        </DialogContent>
+          <div className="mt-4 flex flex-col-reverse justify-end gap-2 xl:flex-row">
+            <Button
+              variant="quiet"
+              size="sm"
+              onClick={() => handleNewPasswordOpenChange(false)}
+            >
+              Cancelar
+            </Button>
+            <Button type="submit" tone="orange" size="sm">
+              Continuar
+            </Button>
+          </div>
+        </form>
       </Dialog>
 
       <AdminPasswordConfirmDialog

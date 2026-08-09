@@ -5,7 +5,7 @@ import { QRCodeSVG } from 'qrcode.react'
 import { contestService } from '@/services/contest/contest.service'
 import { getContestErrorMessage } from '@/services/contest/contest.error'
 import type { Contest, ContestStatus } from '@/services/contest/contest.type'
-import { Switch } from '@/components/ui/switch'
+import { Switch } from '@/components/pouf/controls'
 import { toast } from '@/components/pouf/toaster'
 
 type BoxAccessControllCollabProps = {
@@ -94,10 +94,8 @@ export default function BoxAccessControllCollab({
                             <Switch
                                 checked={contest.status === 'active'}
                                 disabled={isUpdating}
-                                aria-label="Acesso dos colaboradores"
-                                onCheckedChange={(checked) =>
-                                    void updateAccess(checked)
-                                }
+                                label="Acesso dos colaboradores"
+                                onChange={(checked) => void updateAccess(checked)}
                             />
                         </div>
                     </div>

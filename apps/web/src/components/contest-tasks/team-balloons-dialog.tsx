@@ -18,8 +18,7 @@ import {
 import type { Team } from '@/services/team/team.type';
 import { BalloonAchievement } from '@/components/balloon-achievement';
 import { BalloonDeliveryStatusIcon } from '@/components/balloon-delivery-status-icon';
-import { Button as SimpleButton } from '@/components/ui/button';
-import { Button as ButtonPouf } from '../pouf/Button';
+import { Button as ButtonPouf, IconButton } from '../pouf/Button';
 import { Confirm, Dialog, Tooltip } from '@/components/pouf/controls';
 import { toBalloonColor } from '@/services/question/balloon-color';
 import { questionService } from '@/services/question/question.service';
@@ -80,21 +79,23 @@ function PrintRequestCard({
     <div className="relative flex min-w-0 flex-col items-center justify-center rounded-2xl border border-border bg-background p-2">
       <div className="absolute top-1 right-1">
         <Tooltip tip="Abrir fila de impressão">
-          <SimpleButton
-            type="button"
-            variant="normal"
-            size="icon"
-            className="size-8"
+          <IconButton
+            size="sm"
+            variant="quiet"
+            label="Abrir fila de impressão"
+            /* The pouf Tooltip already says this; IconButton's default title
+               would double it natively. */
+            title=""
             disabled={disabled || isEnqueueing}
             onClick={onOpenQueue}
-            aria-label="Abrir fila de impressão"
-          >
-            <HugeiconsIcon
-              icon={ExpandIcon}
-              className="size-5 text-muted-foreground"
-              strokeWidth={2}
-            />
-          </SimpleButton>
+            icon={
+              <HugeiconsIcon
+                icon={ExpandIcon}
+                className="size-5 text-muted-foreground"
+                strokeWidth={2}
+              />
+            }
+          />
         </Tooltip>
       </div>
 

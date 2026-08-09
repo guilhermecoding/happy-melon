@@ -11,20 +11,14 @@ import {
   DocumentAttachmentIcon, ViewIcon
 } from '@hugeicons/core-free-icons';
 import { BalloonDeliveryStatusIcon } from '@/components/balloon-delivery-status-icon';
-import { Button } from '@/components/ui/button';
 import { balloonService } from '@/services/balloon/balloon.service';
 import { getBalloonErrorMessage } from '@/services/balloon/balloon.error';
 import type { TaskHistoryEntry } from '@/services/balloon/balloon.type';
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableRow,
-} from '@/components/ui/table';
 import Spinner from '@/components/spinner';
 import { Tooltip } from '@/components/pouf/controls';
+import { RowCard } from '@/components/pouf/surface';
 import { TaskTimelineDialog } from './task-timeline-dialog';
-import { Button as ButtonPouf } from '../pouf/Button';
+import { Button as ButtonPouf, IconButton } from '../pouf/Button';
 
 type TaskHistoryListProps = {
   contestId: string;
@@ -147,80 +141,84 @@ export default function TaskHistoryList({
   return (
     <>
       <div className="flex h-full min-h-100 flex-col gap-4 px-2 pt-2 pb-2">
-        <div className="min-h-0 flex-1 overflow-auto">
-          <Table>
-            <TableBody>
-              {paginatedEntries.map((entry) => {
-                const taskId = getStatusChangedTaskId(entry);
+        {/* A log, not a data grid: no headers and no sortable columns, so the
+            pouf row cushion carries each entry instead of a <table>. */}
+        <div className="flex min-h-0 flex-1 flex-col gap-2 overflow-auto">
+          {paginatedEntries.map((entry) => {
+            const taskId = getStatusChangedTaskId(entry);
 
-                return (
-                  <TableRow key={entry.id} className='hover:bg-transparent'>
-                    <TableCell>
-                      {entry.kind === TASK_KIND.PRINT_TASK ? (
-                        <HugeiconsIcon
-                          icon={Attachment01Icon}
-                          className="size-5 shrink-0 text-muted-foreground"
-                          strokeWidth={2}
-                        />
-                      ) : (
-                        <HugeiconsIcon
-                          icon={BalloonIcon}
-                          className="size-5 shrink-0 text-muted-foreground"
-                          strokeWidth={2}
-                          fill="currentColor"
-                        />
-                      )}
-                    </TableCell>
-                    <TableCell className="w-16 font-semibold tabular-nums text-muted-foreground">
-                      {formatHistoryTime(entry.createdAt)}
-                    </TableCell>
-                    <TableCell className="w-10">
-                      <BalloonDeliveryStatusIcon
-                        status={entry.status}
-                        kind={
-                          entry.kind === TASK_KIND.PRINT_TASK
-                            ? TASK_KIND.PRINT_TASK
-                            : TASK_KIND.BALLOON_TASK
-                        }
-                      />
-                    </TableCell>
-                    <TableCell className="flex flex-col gap-1 whitespace-normal text-foreground">
+            return (
+              <RowCard key={entry.id}>
+                <div className="flex items-center gap-3">
+                  {entry.kind === TASK_KIND.PRINT_TASK ? (
+                    <HugeiconsIcon
+                      icon={Attachment01Icon}
+                      className="size-5 shrink-0 text-muted-foreground"
+                      strokeWidth={2}
+                    />
+                  ) : (
+                    <HugeiconsIcon
+                      icon={BalloonIcon}
+                      className="size-5 shrink-0 text-muted-foreground"
+                      strokeWidth={2}
+                      fill="currentColor"
+                    />
+                  )}
+
+                  <span className="w-16 shrink-0 text-sm font-semibold tabular-nums text-muted-foreground">
+                    {formatHistoryTime(entry.createdAt)}
+                  </span>
+
+                  <BalloonDeliveryStatusIcon
+                    status={entry.status}
+                    kind={
+                      entry.kind === TASK_KIND.PRINT_TASK
+                        ? TASK_KIND.PRINT_TASK
+                        : TASK_KIND.BALLOON_TASK
+                    }
+                    className="shrink-0"
+                  />
+
+                  <div className="flex min-w-0 flex-1 flex-col gap-1">
+                    <span className="text-sm font-semibold text-ink">
                       {entry.message}.
-                      {taskId ? (
-                        <span className="text-xs text-muted-foreground">
-                          #{taskId}
-                        </span>
-                      ) : null}
-                    </TableCell>
-                    <TableCell>
-                      <Tooltip tip="Ver tarefa completa">
-                        <Button
-                          type="button"
-                          variant="normal"
-                          size="sm"
-                          className="bg-transparent p-1 transition-colors hover:bg-bg"
-                          disabled={!taskId}
-                          onClick={() => {
-                            if (!taskId) return;
-                            setTimelineTask({
-                              taskId,
-                              kind: entry.kind,
-                            });
-                          }}
-                        >
-                          <HugeiconsIcon
-                            icon={ViewIcon}
-                            className="size-4"
-                            strokeWidth={2}
-                          />
-                        </Button>
-                      </Tooltip>
-                    </TableCell>
-                  </TableRow>
-                );
-              })}
-            </TableBody>
-          </Table>
+                    </span>
+                    {taskId ? (
+                      <span className="text-xs text-muted-foreground">
+                        #{taskId}
+                      </span>
+                    ) : null}
+                  </div>
+
+                  <Tooltip tip="Ver tarefa completa">
+                    <IconButton
+                      size="sm"
+                      variant="quiet"
+                      label="Ver tarefa completa"
+                      /* The pouf Tooltip already says this; IconButton's
+                         default title would double it natively. */
+                      title=""
+                      disabled={!taskId}
+                      onClick={() => {
+                        if (!taskId) return;
+                        setTimelineTask({
+                          taskId,
+                          kind: entry.kind,
+                        });
+                      }}
+                      icon={
+                        <HugeiconsIcon
+                          icon={ViewIcon}
+                          className="size-4"
+                          strokeWidth={2}
+                        />
+                      }
+                    />
+                  </Tooltip>
+                </div>
+              </RowCard>
+            );
+          })}
         </div>
 
         <div className="mt-auto flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">

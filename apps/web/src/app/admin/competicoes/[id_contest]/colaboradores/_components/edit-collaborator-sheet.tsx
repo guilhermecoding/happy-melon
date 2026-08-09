@@ -6,25 +6,11 @@ import { toast } from '@/components/pouf/toaster';
 import { collaboratorService } from '@/services/collaborator/collaborator.service';
 import { getCollaboratorErrorMessage } from '@/services/collaborator/collaborator.error';
 import type { Collaborator } from '@/services/collaborator/collaborator.type';
-import { Button } from '@/components/ui/button';
-import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogFooter,
-  DialogHeader,
-  DialogTitle,
-} from '@/components/ui/dialog';
-import { Field, FieldError, FieldLabel } from '@/components/ui/field';
-import { Input } from '@/components/ui/input';
-import {
-  Sheet,
-  SheetContent,
-  SheetDescription,
-  SheetFooter,
-  SheetHeader,
-  SheetTitle,
-} from '@/components/ui/sheet';
+import { Button } from '@/components/pouf/Button';
+import { Confirm } from '@/components/pouf/controls';
+import { Field, Input } from '@/components/pouf/Input';
+import { Sheet } from '@/components/pouf/sheet';
+import { fieldError } from '@/lib/form';
 import {
   collaboratorNameSchema,
   type CollaboratorNameFormValues,
@@ -75,15 +61,15 @@ export function EditCollaboratorSheet({
           value,
         );
         onUpdated(updated);
-        onOpenChange(false);
         toast.success('Colaborador atualizado com sucesso.');
+        handleOpenChange(false);
       } catch (error) {
-        setRequestError(
-          getCollaboratorErrorMessage(
-            error,
-            'Não foi possível atualizar o colaborador.',
-          ),
+        const message = getCollaboratorErrorMessage(
+          error,
+          'Não foi possível atualizar o colaborador.',
         );
+        setRequestError(message);
+        toast.error(message);
       }
     },
   });
@@ -99,6 +85,8 @@ export function EditCollaboratorSheet({
   }, [collaborator, form, open]);
 
   function handleOpenChange(nextOpen: boolean) {
+    if (!nextOpen && isDeleting) return;
+
     if (!nextOpen) {
       form.reset();
       setRequestError(undefined);
@@ -115,65 +103,65 @@ export function EditCollaboratorSheet({
       await collaboratorService.remove(contestId, collaborator.id);
       onDeleted(collaborator.id);
       setDeleteOpen(false);
-      onOpenChange(false);
+      setIsDeleting(false);
+      handleOpenChange(false);
       toast.success('Colaborador removido com sucesso.');
+      return;
     } catch (error) {
       toast.error(getCollaboratorErrorMessage(
           error,
           'Não foi possível excluir o colaborador.',
         ));
-    } finally {
-      setIsDeleting(false);
     }
+
+    setIsDeleting(false);
   }
 
   return (
     <>
-      <Sheet open={open} onOpenChange={handleOpenChange}>
-        <SheetContent side="right" showCloseButton={false}>
-          <SheetHeader>
-            <SheetTitle className="text-2xl font-bold">
-              Editar colaborador
-            </SheetTitle>
-            <SheetDescription>
-              Atualize os dados do colaborador nesta competição.
-            </SheetDescription>
-          </SheetHeader>
-
-          <form
-            className="flex flex-1 flex-col gap-5 px-4"
-            onSubmit={(event) => {
-              event.preventDefault();
-              event.stopPropagation();
-              void form.handleSubmit();
-            }}
-          >
+      <Sheet
+        open={open}
+        onOpenChange={handleOpenChange}
+        title="Editar colaborador"
+        description="Atualize os dados do colaborador nesta competição."
+      >
+        <form
+          onSubmit={(event) => {
+            event.preventDefault();
+            event.stopPropagation();
+            void form.handleSubmit();
+          }}
+        >
+          <div className="flex flex-col gap-5">
             <form.Field name="name">
               {(field) => (
-                <Field data-invalid={!field.state.meta.isValid}>
-                  <FieldLabel htmlFor={field.name}>Nome</FieldLabel>
-                  <Input
-                    id={field.name}
-                    name={field.name}
-                    placeholder="Nome do colaborador"
-                    value={field.state.value}
-                    onBlur={field.handleBlur}
-                    onChange={(event) => field.handleChange(event.target.value)}
-                    aria-invalid={!field.state.meta.isValid}
-                  />
-                  <FieldError errors={field.state.meta.errors} />
+                <Field label="Nome" error={fieldError(field.state.meta)}>
+                  {(id, describedBy) => (
+                    <Input
+                      id={id}
+                      name={field.name}
+                      describedBy={describedBy}
+                      placeholder="Nome do colaborador"
+                      value={field.state.value}
+                      onBlur={field.handleBlur}
+                      onChange={field.handleChange}
+                      invalid={!field.state.meta.isValid}
+                    />
+                  )}
                 </Field>
               )}
             </form.Field>
 
-            <Field>
-              <FieldLabel htmlFor="collaborator-email">Email</FieldLabel>
-              <Input
-                id="collaborator-email"
-                value={collaborator?.email ?? ''}
-                disabled
-                readOnly
-              />
+            <Field label="Email">
+              {(id) => (
+                <Input
+                  id={id}
+                  value={collaborator?.email ?? ''}
+                  onChange={() => undefined}
+                  disabled
+                  readOnly
+                />
+              )}
             </Field>
 
             {requestError && (
@@ -181,84 +169,55 @@ export function EditCollaboratorSheet({
                 {requestError}
               </p>
             )}
+          </div>
 
-            <SheetFooter className="mt-auto px-0">
-              <form.Subscribe selector={(state) => state.isSubmitting}>
-                {(isSubmitting) => (
-                  <Button
-                    type="submit"
-                    variant="green"
-                    loading={isSubmitting}
-                    className="w-full"
-                  >
-                    <HugeiconsIcon
-                      icon={SaveIcon}
-                      className="size-5"
-                      strokeWidth={3}
-                    />
-                    Salvar
-                  </Button>
-                )}
-              </form.Subscribe>
-              <Button
-                type="button"
-                variant="red"
-                onClick={() => setDeleteOpen(true)}
-                className="w-full"
-              >
-                <HugeiconsIcon
-                  icon={Delete01Icon}
-                  className="size-5"
-                  strokeWidth={3}
-                />
-                Excluir
-              </Button>
-              <Button
-                type="button"
-                variant="white"
-                onClick={() => handleOpenChange(false)}
-                className="w-full"
-              >
-                <HugeiconsIcon
-                  icon={EyeClosedIcon}
-                  className="size-5"
-                  strokeWidth={3}
-                />
-                Fechar
-              </Button>
-            </SheetFooter>
-          </form>
-        </SheetContent>
-      </Sheet>
-
-      <Dialog open={deleteOpen} onOpenChange={setDeleteOpen}>
-        <DialogContent>
-          <DialogHeader>
-            <DialogTitle>Excluir colaborador</DialogTitle>
-            <DialogDescription>
-              Remover {collaborator?.name} desta competição? Se não houver
-              vínculo em outras competições, a conta será excluída.
-            </DialogDescription>
-          </DialogHeader>
-          <DialogFooter>
-            <Button
-              type="button"
-              variant="white"
-              onClick={() => setDeleteOpen(false)}
-            >
-              Cancelar
+          <div className="mt-4 flex flex-col-reverse justify-end gap-2 xl:flex-row">
+            <Button variant="quiet" onClick={() => handleOpenChange(false)}>
+              <HugeiconsIcon
+                icon={EyeClosedIcon}
+                className="size-5"
+                strokeWidth={3}
+              />
+              Fechar
             </Button>
-            <Button
-              type="button"
-              variant="red"
-              loading={isDeleting}
-              onClick={() => void handleDelete()}
-            >
+            <Button tone="pink" onClick={() => setDeleteOpen(true)}>
+              <HugeiconsIcon
+                icon={Delete01Icon}
+                className="size-5"
+                strokeWidth={3}
+              />
               Excluir
             </Button>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
+            <form.Subscribe selector={(state) => state.isSubmitting}>
+              {(isSubmitting) => (
+                <Button type="submit" tone="mint" loading={isSubmitting}>
+                  <HugeiconsIcon
+                    icon={SaveIcon}
+                    className="size-5"
+                    strokeWidth={3}
+                  />
+                  Salvar
+                </Button>
+              )}
+            </form.Subscribe>
+          </div>
+        </form>
+      </Sheet>
+
+      <Confirm
+        open={deleteOpen}
+        onOpenChange={(nextOpen) => {
+          if (!nextOpen && isDeleting) return;
+          setDeleteOpen(nextOpen);
+        }}
+        title="Excluir colaborador"
+        body={`Remover ${collaborator?.name ?? 'o colaborador'} desta competição? Se não houver vínculo em outras competições, a conta será excluída.`}
+        confirmLabel="Excluir"
+        cancelLabel="Cancelar"
+        tone="pink"
+        loading={isDeleting}
+        onConfirm={() => void handleDelete()}
+      />
     </>
   );
 }
