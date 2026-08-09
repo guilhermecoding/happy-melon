@@ -780,7 +780,7 @@
   cursor: not-allowed;
 }
 .pouf-menu__item--down {
-  color: var(--down);
+  color: var(--destructive);
 }
 .pouf-menu__sep {
   height: 1px;

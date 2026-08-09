@@ -142,8 +142,8 @@ export default function BoxListCollaborators({
         current.map((item) => (item.id === updated.id ? updated : item)),
       );
       toast.success(hasAccess
-          ? `Acesso de ${collaborator.name} ativado.`
-          : `Acesso de ${collaborator.name} desativado.`);
+        ? `Acesso de ${collaborator.name} ativado.`
+        : `Acesso de ${collaborator.name} desativado.`);
     } catch (updateError) {
       setCollaborators((current) =>
         current.map((item) =>
