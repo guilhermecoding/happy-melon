@@ -114,13 +114,37 @@ export function LoginForm({
   const [error, setError] = useState<string | null>(null)
   const [isLoading, setIsLoading] = useState(false)
 
+  function clearForm(nextContestCode = '') {
+    setEmail('')
+    setPassword('')
+    setName('')
+    setError(null)
+    setNeedsRegistration(false)
+    setIsLoading(false)
+    setIsAdmin(false)
+    setCompetitionCode(nextContestCode)
+  }
+
+  /* Wipe credentials whenever this screen is shown again — soft nav remount,
+   * sign-out redirect, or the browser restoring the page from bfcache. Keep
+   * only a contest_code from the URL, if present. */
   useEffect(() => {
-    const contestCode = searchParams.get('contest_code')
-    if (contestCode) {
-      setCompetitionCode(contestCode)
-      setIsAdmin(false)
+    const codeFromUrl = searchParams.get('contest_code') ?? contestCodeToUse
+    clearForm(codeFromUrl)
+
+    function handlePageShow(event: PageTransitionEvent) {
+      if (!event.persisted) return
+      const code =
+        new URLSearchParams(window.location.search).get('contest_code') ??
+        contestCodeToUse
+      clearForm(code)
     }
-  }, [searchParams])
+
+    window.addEventListener('pageshow', handlePageShow)
+    return () => window.removeEventListener('pageshow', handlePageShow)
+    // Intentionally mount-only: returning to /entrar remounts this form.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [])
 
   async function completeStaffLogin(contestId: string) {
     router.push(`/staff/${contestId}`)
@@ -396,7 +420,7 @@ export function LoginForm({
             <Image
               src="/thumb_todos.jpg"
               alt="Imagem de login"
-              className="absolute inset-0 h-full w-full object-cover dark:brightness-[0.2] dark:grayscale"
+              className="absolute inset-0 h-full w-full object-cover"
               width={1000}
               height={1000}
               loading="eager"

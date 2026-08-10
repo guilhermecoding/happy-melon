@@ -30,7 +30,7 @@ export function Highlight({ children, tone = 'yellow' }: { children: ReactNode; 
   return (
     <span
       className={cx(
-        'pouf-highlight inline-block px-[14px] rounded-control text-[var(--on-accent)] bg-[var(--tone,var(--yellow))]',
+        'pouf-highlight inline-block px-3.5 rounded-control text-(--on-accent) bg-(--tone,var(--yellow))',
         '[box-shadow:inset_0_-6px_0_rgba(0,0,0,0.08)]',
         toneClass(tone),
       )}
