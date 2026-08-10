@@ -27,24 +27,47 @@ export function toBalloonDeliveryStatusDto(
   }
 }
 
+type TeamFields = {
+  teamName: string;
+  teamUsername: string;
+  teamRoom: string | null;
+  teamMachine: string | null;
+};
+
+export function teamFieldsFrom(team: {
+  name: string;
+  usernameTeam: string;
+  room: string | null;
+  machine: string | null;
+}): TeamFields {
+  return {
+    teamName: team.name,
+    teamUsername: team.usernameTeam,
+    teamRoom: team.room,
+    teamMachine: team.machine,
+  };
+}
+
 export function toBalloonStaffTask(params: {
   id: string;
   contestId: string;
   teamId: string;
-  teamName: string;
   questionId: string;
   balloonColor: string;
   questionLabel: string;
   status: PrismaBalloonDeliveryStatus;
   claimedByUserId: string | null;
   createdAt: Date;
-}): StaffTask {
+} & TeamFields): StaffTask {
   return {
     id: params.id,
     kind: TASK_KIND.BALLOON_TASK,
     contestId: params.contestId,
     teamId: params.teamId,
     teamName: params.teamName,
+    teamUsername: params.teamUsername,
+    teamRoom: params.teamRoom,
+    teamMachine: params.teamMachine,
     status: toBalloonDeliveryStatusDto(params.status),
     claimedByUserId: params.claimedByUserId,
     createdAt: params.createdAt.toISOString(),
@@ -58,17 +81,19 @@ export function toPrintStaffTask(params: {
   id: string;
   contestId: string;
   teamId: string;
-  teamName: string;
   status: PrismaBalloonDeliveryStatus;
   claimedByUserId: string | null;
   createdAt: Date;
-}): StaffTask {
+} & TeamFields): StaffTask {
   return {
     id: params.id,
     kind: TASK_KIND.PRINT_TASK,
     contestId: params.contestId,
     teamId: params.teamId,
     teamName: params.teamName,
+    teamUsername: params.teamUsername,
+    teamRoom: params.teamRoom,
+    teamMachine: params.teamMachine,
     status: toBalloonDeliveryStatusDto(params.status),
     claimedByUserId: params.claimedByUserId,
     createdAt: params.createdAt.toISOString(),

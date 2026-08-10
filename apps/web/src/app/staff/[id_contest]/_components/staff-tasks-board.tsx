@@ -11,6 +11,7 @@ import { toast } from '@/components/pouf/toaster';
 import { authClient } from '@/lib/auth-client';
 import {
   CLAIM_SUCCESS_MESSAGE,
+  DELIVER_SUCCESS_MESSAGE,
   staffTasksService,
 } from '@/services/staff-tasks/staff-tasks.service';
 import LobbyArea from './lobby-area';
@@ -43,6 +44,7 @@ export default function StaffTasksBoard({ contestId }: StaffTasksBoardProps) {
   const [queue, setQueue] = useState<StaffTask[]>([]);
   const [lobby, setLobby] = useState<StaffTask[]>([]);
   const [claimingIds, setClaimingIds] = useState<Set<string>>(new Set());
+  const [deliveringIds, setDeliveringIds] = useState<Set<string>>(new Set());
   const [, startTransition] = useTransition();
   const userIdRef = useRef(userId);
   userIdRef.current = userId;
@@ -154,6 +156,27 @@ export default function StaffTasksBoard({ contestId }: StaffTasksBoardProps) {
     }
   }
 
+  async function handleDeliver(task: StaffTask) {
+    if (deliveringIds.has(task.id)) return;
+
+    setDeliveringIds((prev) => new Set(prev).add(task.id));
+    setLobby((prev) => removeTask(prev, task.id));
+
+    try {
+      await staffTasksService.deliver(contestId, task);
+      toast.success(DELIVER_SUCCESS_MESSAGE);
+    } catch (error) {
+      setLobby((prev) => upsertTask(prev, task));
+      toast.error(staffTasksService.getDeliverErrorMessage(error));
+    } finally {
+      setDeliveringIds((prev) => {
+        const next = new Set(prev);
+        next.delete(task.id);
+        return next;
+      });
+    }
+  }
+
   return (
     <>
       <QueueTask
@@ -161,7 +184,11 @@ export default function StaffTasksBoard({ contestId }: StaffTasksBoardProps) {
         claimingIds={claimingIds}
         onClaim={handleClaim}
       />
-      <LobbyArea tasks={lobby} />
+      <LobbyArea
+        tasks={lobby}
+        deliveringIds={deliveringIds}
+        onDeliver={handleDeliver}
+      />
     </>
   );
 }

@@ -5,6 +5,7 @@ import {
 } from '@repo/database';
 import type { StaffTask, StaffTasksSnapshot } from '@repo/shared';
 import {
+  teamFieldsFrom,
   toBalloonStaffTask,
   toPrintStaffTask,
 } from './staff-task.mapper.js';
@@ -63,7 +64,7 @@ export class ContestTasksService {
           id: delivery.id,
           contestId: delivery.contestId,
           teamId: delivery.teamId,
-          teamName: delivery.team.name,
+          ...teamFieldsFrom(delivery.team),
           questionId: delivery.questionId,
           balloonColor: delivery.question.balloonColor,
           questionLabel: delivery.question.label,
@@ -77,7 +78,7 @@ export class ContestTasksService {
           id: task.id,
           contestId: task.contestId,
           teamId: task.teamId,
-          teamName: task.team.name,
+          ...teamFieldsFrom(task.team),
           status: task.status,
           claimedByUserId: task.claimedByUserId,
           createdAt: task.createdAt,
@@ -91,7 +92,7 @@ export class ContestTasksService {
           id: delivery.id,
           contestId: delivery.contestId,
           teamId: delivery.teamId,
-          teamName: delivery.team.name,
+          ...teamFieldsFrom(delivery.team),
           questionId: delivery.questionId,
           balloonColor: delivery.question.balloonColor,
           questionLabel: delivery.question.label,
@@ -105,7 +106,7 @@ export class ContestTasksService {
           id: task.id,
           contestId: task.contestId,
           teamId: task.teamId,
-          teamName: task.team.name,
+          ...teamFieldsFrom(task.team),
           status: task.status,
           claimedByUserId: task.claimedByUserId,
           createdAt: task.createdAt,

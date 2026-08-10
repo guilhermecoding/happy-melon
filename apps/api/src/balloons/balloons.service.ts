@@ -27,7 +27,10 @@ import {
   isIdUniqueViolation,
 } from '../common/short-id.js';
 import { ContestTasksEventsService } from '../contest-tasks/contest-tasks.events.js';
-import { toBalloonStaffTask } from '../contest-tasks/staff-task.mapper.js';
+import {
+  teamFieldsFrom,
+  toBalloonStaffTask,
+} from '../contest-tasks/staff-task.mapper.js';
 import type { TeamQuestionActionDto } from './dto/balloon.dto.js';
 
 const BALLOON_COLOR_LABELS: Record<string, string> = {
@@ -207,7 +210,7 @@ export class BalloonsService {
             id: delivery.id,
             contestId: delivery.contestId,
             teamId: delivery.teamId,
-            teamName: team.name,
+            ...teamFieldsFrom(team),
             questionId: delivery.questionId,
             balloonColor: question.balloonColor,
             questionLabel: question.label,
@@ -299,7 +302,7 @@ export class BalloonsService {
         id: delivery.id,
         contestId: delivery.contestId,
         teamId: delivery.teamId,
-        teamName: team.name,
+        ...teamFieldsFrom(team),
         questionId: delivery.questionId,
         balloonColor: question.balloonColor,
         questionLabel: question.label,
@@ -364,7 +367,7 @@ export class BalloonsService {
       id: delivery.id,
       contestId: delivery.contestId,
       teamId: delivery.teamId,
-      teamName: delivery.team.name,
+      ...teamFieldsFrom(delivery.team),
       questionId: delivery.questionId,
       balloonColor: delivery.question.balloonColor,
       questionLabel: delivery.question.label,
@@ -375,6 +378,76 @@ export class BalloonsService {
 
     this.contestTasksEvents.emit(contestId, {
       type: STAFF_TASK_EVENT_TYPE.CLAIMED,
+      task: staffTask,
+    });
+
+    return staffTask;
+  }
+
+  async deliver(
+    contestId: string,
+    taskId: string,
+    actor: Actor,
+  ): Promise<StaffTask> {
+    await this.ensureContestExists(contestId);
+
+    const processingStatus = this.toPrismaStatus(
+      BALLOON_DELIVERY_STATUS.PROCESSING,
+    );
+    const deliveredStatus = this.toPrismaStatus(
+      BALLOON_DELIVERY_STATUS.DELIVERED,
+    );
+
+    const delivery = await prisma.$transaction(async (tx) => {
+      const updated = await tx.balloonDelivery.updateMany({
+        where: {
+          id: taskId,
+          contestId,
+          status: processingStatus,
+          claimedByUserId: actor.userId,
+        },
+        data: {
+          status: deliveredStatus,
+        },
+      });
+
+      if (updated.count !== 1) {
+        throw new BadRequestException(
+          'Esta tarefa não pode ser marcada como entregue.',
+        );
+      }
+
+      const saved = await tx.balloonDelivery.findFirstOrThrow({
+        where: { id: taskId, contestId },
+        include: { team: true, question: true },
+      });
+
+      await this.createHistoryEntry(tx, {
+        contestId,
+        delivery: saved,
+        teamName: saved.team.name,
+        balloonColor: saved.question.balloonColor,
+        actor,
+      });
+
+      return saved;
+    });
+
+    const staffTask = toBalloonStaffTask({
+      id: delivery.id,
+      contestId: delivery.contestId,
+      teamId: delivery.teamId,
+      ...teamFieldsFrom(delivery.team),
+      questionId: delivery.questionId,
+      balloonColor: delivery.question.balloonColor,
+      questionLabel: delivery.question.label,
+      status: delivery.status,
+      claimedByUserId: delivery.claimedByUserId,
+      createdAt: delivery.createdAt,
+    });
+
+    this.contestTasksEvents.emit(contestId, {
+      type: STAFF_TASK_EVENT_TYPE.REMOVED,
       task: staffTask,
     });
 

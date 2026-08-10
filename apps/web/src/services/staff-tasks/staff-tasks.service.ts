@@ -24,6 +24,8 @@ export const CLAIM_RACE_ERROR_MESSAGE =
 export const CLAIM_SUCCESS_MESSAGE =
   'Agora é com você! Tarefa adicionada ao seu lobby.';
 
+export const DELIVER_SUCCESS_MESSAGE = 'Tarefa marcada como entregue.';
+
 async function getServerCookieHeader(): Promise<string | undefined> {
   if (typeof window !== 'undefined') {
     return undefined;
@@ -36,6 +38,21 @@ async function getServerCookieHeader(): Promise<string | undefined> {
     .map(({ name, value }) => `${name}=${value}`)
     .join('; ');
   return cookieHeader || undefined;
+}
+
+function getErrorMessage(error: unknown, fallback: string): string {
+  if (
+    error instanceof PrintServiceError ||
+    error instanceof BalloonServiceError
+  ) {
+    return error.message;
+  }
+
+  if (error instanceof Error && error.message.trim()) {
+    return error.message;
+  }
+
+  return fallback;
 }
 
 export const staffTasksService = {
@@ -140,6 +157,58 @@ export const staffTasksService = {
     }
   },
 
+  async deliver(contestId: string, task: StaffTask): Promise<StaffTask> {
+    if (task.kind === TASK_KIND.PRINT_TASK) {
+      try {
+        const response = await fetch(
+          `${API_URL}/contests/${contestId}/print-tasks/${task.id}/deliver`,
+          {
+            method: 'POST',
+            credentials: 'include',
+          },
+        );
+
+        if (!response.ok) {
+          throw await parsePrintError(
+            response,
+            'Não foi possível marcar a tarefa como entregue.',
+          );
+        }
+
+        return response.json();
+      } catch (error) {
+        throw normalizePrintError(
+          error,
+          'Não foi possível marcar a tarefa como entregue.',
+        );
+      }
+    }
+
+    try {
+      const response = await fetch(
+        `${API_URL}/contests/${contestId}/balloon-deliveries/${task.id}/deliver`,
+        {
+          method: 'POST',
+          credentials: 'include',
+        },
+      );
+
+      if (!response.ok) {
+        throw await parseBalloonError(
+          response,
+          'Não foi possível marcar a tarefa como entregue.',
+        );
+      }
+
+      return response.json();
+    } catch (error) {
+      throw normalizeBalloonError(
+        error,
+        'Não foi possível marcar a tarefa como entregue.',
+      );
+    }
+  },
+
   isClaimRaceError(error: unknown): boolean {
     if (
       error instanceof PrintServiceError ||
@@ -156,17 +225,13 @@ export const staffTasksService = {
       return CLAIM_RACE_ERROR_MESSAGE;
     }
 
-    if (
-      error instanceof PrintServiceError ||
-      error instanceof BalloonServiceError
-    ) {
-      return error.message;
-    }
+    return getErrorMessage(error, 'Não foi possível pegar a tarefa.');
+  },
 
-    if (error instanceof Error && error.message.trim()) {
-      return error.message;
-    }
-
-    return 'Não foi possível pegar a tarefa.';
+  getDeliverErrorMessage(error: unknown): string {
+    return getErrorMessage(
+      error,
+      'Não foi possível marcar a tarefa como entregue.',
+    );
   },
 };

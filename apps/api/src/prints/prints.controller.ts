@@ -81,4 +81,16 @@ export class PrintsController {
       name: session.user.name,
     });
   }
+
+  @Post('contests/:contestId/print-tasks/:taskId/deliver')
+  deliver(
+    @Param('contestId') contestId: string,
+    @Param('taskId') taskId: string,
+    @Session() session: UserSession<typeof auth>,
+  ) {
+    return this.printsService.deliver(contestId, taskId, {
+      userId: session.user.id,
+      name: session.user.name,
+    });
+  }
 }

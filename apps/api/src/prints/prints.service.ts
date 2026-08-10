@@ -27,7 +27,10 @@ import {
   isIdUniqueViolation,
 } from '../common/short-id.js';
 import { ContestTasksEventsService } from '../contest-tasks/contest-tasks.events.js';
-import { toPrintStaffTask } from '../contest-tasks/staff-task.mapper.js';
+import {
+  teamFieldsFrom,
+  toPrintStaffTask,
+} from '../contest-tasks/staff-task.mapper.js';
 import type { PrintTeamActionDto } from './dto/print.dto.js';
 
 const STATUS_ACTION_LABEL = {
@@ -103,7 +106,7 @@ export class PrintsService {
             id: task.id,
             contestId: task.contestId,
             teamId: task.teamId,
-            teamName: team.name,
+            ...teamFieldsFrom(team),
             status: task.status,
             claimedByUserId: task.claimedByUserId,
             createdAt: task.createdAt,
@@ -163,7 +166,7 @@ export class PrintsService {
         id: saved.id,
         contestId: saved.contestId,
         teamId: saved.teamId,
-        teamName: team.name,
+        ...teamFieldsFrom(team),
         status: saved.status,
         claimedByUserId: saved.claimedByUserId,
         createdAt: saved.createdAt,
@@ -208,7 +211,7 @@ export class PrintsService {
         id: saved.id,
         contestId: saved.contestId,
         teamId: saved.teamId,
-        teamName: team.name,
+        ...teamFieldsFrom(team),
         status: saved.status,
         claimedByUserId: saved.claimedByUserId,
         createdAt: saved.createdAt,
@@ -269,7 +272,7 @@ export class PrintsService {
       id: task.id,
       contestId: task.contestId,
       teamId: task.teamId,
-      teamName: task.team.name,
+      ...teamFieldsFrom(task.team),
       status: task.status,
       claimedByUserId: task.claimedByUserId,
       createdAt: task.createdAt,
@@ -277,6 +280,72 @@ export class PrintsService {
 
     this.contestTasksEvents.emit(contestId, {
       type: STAFF_TASK_EVENT_TYPE.CLAIMED,
+      task: staffTask,
+    });
+
+    return staffTask;
+  }
+
+  async deliver(
+    contestId: string,
+    taskId: string,
+    actor: Actor,
+  ): Promise<StaffTask> {
+    await this.ensureContestExists(contestId);
+
+    const processingStatus = this.toPrismaStatus(
+      BALLOON_DELIVERY_STATUS.PROCESSING,
+    );
+    const deliveredStatus = this.toPrismaStatus(
+      BALLOON_DELIVERY_STATUS.DELIVERED,
+    );
+
+    const task = await prisma.$transaction(async (tx) => {
+      const updated = await tx.printTask.updateMany({
+        where: {
+          id: taskId,
+          contestId,
+          status: processingStatus,
+          claimedByUserId: actor.userId,
+        },
+        data: {
+          status: deliveredStatus,
+        },
+      });
+
+      if (updated.count !== 1) {
+        throw new BadRequestException(
+          'Esta tarefa não pode ser marcada como entregue.',
+        );
+      }
+
+      const saved = await tx.printTask.findFirstOrThrow({
+        where: { id: taskId, contestId },
+        include: { team: true },
+      });
+
+      await this.createHistoryEntry(tx, {
+        contestId,
+        task: saved,
+        teamName: saved.team.name,
+        actor,
+      });
+
+      return saved;
+    });
+
+    const staffTask = toPrintStaffTask({
+      id: task.id,
+      contestId: task.contestId,
+      teamId: task.teamId,
+      ...teamFieldsFrom(task.team),
+      status: task.status,
+      claimedByUserId: task.claimedByUserId,
+      createdAt: task.createdAt,
+    });
+
+    this.contestTasksEvents.emit(contestId, {
+      type: STAFF_TASK_EVENT_TYPE.REMOVED,
       task: staffTask,
     });
 

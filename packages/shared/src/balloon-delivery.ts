@@ -124,6 +124,9 @@ export type StaffTask = {
   contestId: string;
   teamId: string;
   teamName: string;
+  teamUsername: string;
+  teamRoom: string | null;
+  teamMachine: string | null;
   status: BalloonDeliveryStatus;
   claimedByUserId: string | null;
   createdAt: string;

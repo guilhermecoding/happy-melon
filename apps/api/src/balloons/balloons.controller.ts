@@ -87,4 +87,16 @@ export class BalloonsController {
       name: session.user.name,
     });
   }
+
+  @Post('contests/:contestId/balloon-deliveries/:taskId/deliver')
+  deliver(
+    @Param('contestId') contestId: string,
+    @Param('taskId') taskId: string,
+    @Session() session: UserSession<typeof auth>,
+  ) {
+    return this.balloonsService.deliver(contestId, taskId, {
+      userId: session.user.id,
+      name: session.user.name,
+    });
+  }
 }
