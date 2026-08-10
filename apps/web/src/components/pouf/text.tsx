@@ -44,7 +44,7 @@ export function Highlight({ children, tone = 'yellow' }: { children: ReactNode; 
  * AA contrast on both the page background and white surfaces. */
 export function Eyebrow({ children }: { children: ReactNode }) {
   return (
-    <div className="pouf-eyebrow text-[14px] tracking-[2px] uppercase font-extrabold text-muted">
+    <div className="pouf-eyebrow text-[14px] tracking-[2px] uppercase font-extrabold text-pouf-muted">
       {children}
     </div>
   )
@@ -63,7 +63,7 @@ interface TextProps {
 const text = cva('pouf-text font-bold [overflow-wrap:anywhere]', {
   variants: {
     size: { md: 'text-[15px]', sm: 'text-[13px]' },
-    muted: { true: 'text-muted' },
+    muted: { true: 'text-pouf-muted' },
     num: { true: '[font-variant-numeric:tabular-nums] [font-feature-settings:"tnum"]' },
     mono: { true: "[font-family:ui-monospace,'SF_Mono',Menlo,monospace] [font-variant-numeric:tabular-nums]" },
     /* Truncation needs a real box. On an inline span the parent can be 120px

@@ -28,7 +28,7 @@ export function Field({ label, children, hint, error }: FieldProps) {
       </label>
       {children(id, describedBy)}
       {hint && !error && (
-        <span className="pouf-hint text-[13px] font-bold text-muted" id={`${id}-hint`}>
+        <span className="pouf-hint text-[13px] font-bold text-pouf-muted" id={`${id}-hint`}>
           {hint}
         </span>
       )}

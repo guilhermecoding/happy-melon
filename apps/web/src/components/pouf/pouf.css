@@ -19,7 +19,10 @@
   /* -- Palette: verbatim from the reference ------------------------------ */
   --color-bg: #f0e9ff;
   --color-ink: #2e315c;
-  --color-muted: #587498;
+  /* Namespaced: `--color-muted` belongs to the app theme in globals.css
+   * (shadcn `bg-muted` / soft surface). Pouf's secondary copy colour is a
+   * stronger blue-grey and must not steal that token. */
+  --color-pouf-muted: #587498;
   --color-pink: #ffb3d1;
   --color-purple: #c9a8ff;
   --color-blue: #9ec8ff;
@@ -53,7 +56,7 @@
    *    to the same values. -------------------------------------------- */
   --bg: var(--color-bg);
   --ink: var(--color-ink);
-  --muted: var(--color-muted);
+  --pouf-muted: var(--color-pouf-muted);
   --pink: var(--color-pink);
   --purple: var(--color-purple);
   --blue: var(--color-blue);
@@ -76,8 +79,8 @@
    *    puts #efe9ff on #c9a8ff, which is unreadable. In light mode this
    *    resolves to exactly --ink, so every computed colour is unchanged. --- */
   --on-accent: var(--ink);
-  /* Secondary copy on a pastel fill. Fixed dark ink rather than `--muted`,
-   * because `--muted` follows the page theme and becomes lavender in dark
+  /* Secondary copy on a pastel fill. Fixed dark ink rather than `--pouf-muted`,
+   * because `--pouf-muted` follows the page theme and becomes lavender in dark
    * mode. #493b64 clears 5.03:1 on the lowest-contrast brand accent. */
   --on-accent-muted: #493b64;
   /* Inverse and code surfaces intentionally diverge in dark mode. Simply
@@ -182,14 +185,14 @@
   --color-bg: #12111a;
   --color-surface: #211f2b;
   --color-ink: #f7f3ff;
-  --color-muted: #b8afcb;
+  --color-pouf-muted: #b8afcb;
   /* Accents deliberately unchanged: they are the brand, they carry
    * --on-accent text, and re-tinting them would be a different product. */
 
   --bg: var(--color-bg);
   --surface: var(--color-surface);
   --ink: var(--color-ink);
-  --muted: var(--color-muted);
+  --pouf-muted: var(--color-pouf-muted);
 
   /* Pinned, not inherited: --ink is light here, and this must stay dark. */
   --on-accent: #2a2145;
@@ -650,12 +653,12 @@
 .pouf-combobox__note {
   font-size: 13px;
   font-weight: 700;
-  color: var(--muted);
+  color: var(--pouf-muted);
   padding: var(--s2) var(--s3);
 }
 
 .pouf-combobox__placeholder {
-  color: var(--muted);
+  color: var(--pouf-muted);
 }
 
 
@@ -900,7 +903,7 @@
 .pouf-rowcard[data-selected='true'] .pouf-text {
   color: var(--on-accent);
 }
-.pouf-rowcard[data-selected='true'] .text-muted {
+.pouf-rowcard[data-selected='true'] .text-pouf-muted {
   color: var(--on-accent-muted);
 }
 
@@ -1022,7 +1025,7 @@
   /* Inactive tabs recede. --muted is only safe on white (4.64:1, AA at this
    * size) and the bar's background IS --surface — see the contrast note at the
    * top of this file. It must not be used if this bar ever sits on --bg. */
-  color: var(--muted);
+  color: var(--pouf-muted);
   text-decoration: none;
   cursor: pointer;
   transition:
@@ -1811,7 +1814,7 @@
   font-size: 12px;
   line-height: 1;
   opacity: 0.55;
-  color: var(--muted);
+  color: var(--pouf-muted);
 }
 th[aria-sort='ascending'] .pouf-table__caret,
 th[aria-sort='descending'] .pouf-table__caret {
@@ -1842,7 +1845,7 @@ th[aria-sort='descending'] .pouf-table__caret {
   gap: var(--s2);
 }
 .pouf-breadcrumb__sep {
-  color: var(--muted);
+  color: var(--pouf-muted);
 }
 .pouf-breadcrumb__link {
   color: var(--ink);
@@ -1899,7 +1902,7 @@ th[aria-sort='descending'] .pouf-table__caret {
   display: flex;
   align-items: center;
   gap: var(--s2);
-  color: var(--muted);
+  color: var(--pouf-muted);
 }
 .pouf-chart__tooltip__swatch {
   width: 10px;
@@ -1917,10 +1920,10 @@ th[aria-sort='descending'] .pouf-table__caret {
   font-family: var(--font);
   font-size: 12px;
   font-weight: 700;
-  fill: var(--muted);
+  fill: var(--pouf-muted);
 }
 .pouf-chart .recharts-cartesian-axis-tick-value {
-  fill: var(--muted);
+  fill: var(--pouf-muted);
 }
 .pouf-chart .recharts-tooltip-cursor {
   stroke: rgba(201, 168, 255, 0.3);

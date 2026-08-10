@@ -19,8 +19,8 @@ export default function AdminHomePage() {
                 </Suspense>
             </Section>
             <Section className='flex flex-col md:flex-row gap-8 mt-6'>
-                <BoxOption title='Administradores' type='users' />
-                <BoxOption title='Competições' type='contests' />
+                <BoxOption title='Administradores' type='users' tone='purple' />
+                <BoxOption title='Competições' type='contests' tone='mint' />
             </Section>
         </Page>
     )
