@@ -9,7 +9,7 @@ import {
 import { cn } from '@/lib/utils';
 
 type BalloonProps = {
-  color: typeof COLOR[keyof typeof COLOR];
+  color: typeof COLOR[keyof typeof COLOR] | string;
   className?: string;
 };
 

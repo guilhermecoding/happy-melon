@@ -69,4 +69,16 @@ export class PrintsController {
       name: session.user.name,
     });
   }
+
+  @Post('contests/:contestId/print-tasks/:taskId/claim')
+  claim(
+    @Param('contestId') contestId: string,
+    @Param('taskId') taskId: string,
+    @Session() session: UserSession<typeof auth>,
+  ) {
+    return this.printsService.claim(contestId, taskId, {
+      userId: session.user.id,
+      name: session.user.name,
+    });
+  }
 }

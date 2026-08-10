@@ -75,4 +75,16 @@ export class BalloonsController {
       name: session.user.name,
     });
   }
+
+  @Post('contests/:contestId/balloon-deliveries/:taskId/claim')
+  claim(
+    @Param('contestId') contestId: string,
+    @Param('taskId') taskId: string,
+    @Session() session: UserSession<typeof auth>,
+  ) {
+    return this.balloonsService.claim(contestId, taskId, {
+      userId: session.user.id,
+      name: session.user.name,
+    });
+  }
 }

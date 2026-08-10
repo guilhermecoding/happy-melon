@@ -12,18 +12,22 @@ import {
 } from '@repo/database';
 import {
   BALLOON_DELIVERY_STATUS,
+  STAFF_TASK_EVENT_TYPE,
   TASK_KIND,
   isConfirmableStatus,
   isWithholdableStatus,
   taskTypeFromStatus,
   toBalloonEffectiveStatus,
   type BalloonDeliveryStatus,
+  type StaffTask,
 } from '@repo/shared';
 import {
   generateShortId,
   ID_MAX_ATTEMPTS,
   isIdUniqueViolation,
 } from '../common/short-id.js';
+import { ContestTasksEventsService } from '../contest-tasks/contest-tasks.events.js';
+import { toBalloonStaffTask } from '../contest-tasks/staff-task.mapper.js';
 import type { TeamQuestionActionDto } from './dto/balloon.dto.js';
 
 const BALLOON_COLOR_LABELS: Record<string, string> = {
@@ -57,6 +61,10 @@ type Actor = {
 
 @Injectable()
 export class BalloonsService {
+  constructor(
+    private readonly contestTasksEvents: ContestTasksEventsService,
+  ) {}
+
   async listByContest(contestId: string, teamId?: string) {
     await this.ensureContestExists(contestId);
 
@@ -193,6 +201,22 @@ export class BalloonsService {
           return saved;
         });
 
+        this.contestTasksEvents.emit(contestId, {
+          type: STAFF_TASK_EVENT_TYPE.QUEUED,
+          task: toBalloonStaffTask({
+            id: delivery.id,
+            contestId: delivery.contestId,
+            teamId: delivery.teamId,
+            teamName: team.name,
+            questionId: delivery.questionId,
+            balloonColor: question.balloonColor,
+            questionLabel: question.label,
+            status: delivery.status,
+            claimedByUserId: delivery.claimedByUserId,
+            createdAt: delivery.createdAt,
+          }),
+        });
+
         return this.toDeliveryResponse(delivery);
       } catch (error) {
         if (
@@ -269,7 +293,92 @@ export class BalloonsService {
       return saved;
     });
 
+    this.contestTasksEvents.emit(contestId, {
+      type: STAFF_TASK_EVENT_TYPE.REMOVED,
+      task: toBalloonStaffTask({
+        id: delivery.id,
+        contestId: delivery.contestId,
+        teamId: delivery.teamId,
+        teamName: team.name,
+        questionId: delivery.questionId,
+        balloonColor: question.balloonColor,
+        questionLabel: question.label,
+        status: delivery.status,
+        claimedByUserId: delivery.claimedByUserId,
+        createdAt: delivery.createdAt,
+      }),
+    });
+
     return this.toDeliveryResponse(delivery);
+  }
+
+  async claim(
+    contestId: string,
+    taskId: string,
+    actor: Actor,
+  ): Promise<StaffTask> {
+    await this.ensureContestExists(contestId);
+
+    const pendingStatus = this.toPrismaStatus(BALLOON_DELIVERY_STATUS.PENDING);
+    const processingStatus = this.toPrismaStatus(
+      BALLOON_DELIVERY_STATUS.PROCESSING,
+    );
+
+    const delivery = await prisma.$transaction(async (tx) => {
+      const updated = await tx.balloonDelivery.updateMany({
+        where: {
+          id: taskId,
+          contestId,
+          status: pendingStatus,
+          claimedByUserId: null,
+        },
+        data: {
+          status: processingStatus,
+          claimedByUserId: actor.userId,
+        },
+      });
+
+      if (updated.count !== 1) {
+        throw new BadRequestException(
+          'Esta tarefa não está disponível para claim.',
+        );
+      }
+
+      const saved = await tx.balloonDelivery.findFirstOrThrow({
+        where: { id: taskId, contestId },
+        include: { team: true, question: true },
+      });
+
+      await this.createHistoryEntry(tx, {
+        contestId,
+        delivery: saved,
+        teamName: saved.team.name,
+        balloonColor: saved.question.balloonColor,
+        actor,
+      });
+
+      return saved;
+    });
+
+    const staffTask = toBalloonStaffTask({
+      id: delivery.id,
+      contestId: delivery.contestId,
+      teamId: delivery.teamId,
+      teamName: delivery.team.name,
+      questionId: delivery.questionId,
+      balloonColor: delivery.question.balloonColor,
+      questionLabel: delivery.question.label,
+      status: delivery.status,
+      claimedByUserId: delivery.claimedByUserId,
+      createdAt: delivery.createdAt,
+    });
+
+    this.contestTasksEvents.emit(contestId, {
+      type: STAFF_TASK_EVENT_TYPE.CLAIMED,
+      task: staffTask,
+    });
+
+    return staffTask;
   }
 
   private async createHistoryEntry(

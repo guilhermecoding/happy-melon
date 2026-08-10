@@ -1,67 +1,149 @@
-import { Balloon } from "@/components/balloon";
-import { IconButton } from "@/components/pouf/Button";
-import { Blob } from "@/components/pouf/media";
-import { Card } from "@/components/pouf/surface";
-import { COLOR } from "@/services/question/balloon-color";
-import { BalloonIcon, Clock01Icon, HandIcon } from "@hugeicons/core-free-icons";
-import { HugeiconsIcon } from "@hugeicons/react";
+'use client';
 
-function TaskItem() {
-    return (
-        <Card variant="flush">
-            <div className="flex items-center gap-2 px-5 py-6">
-                <Balloon color={COLOR.BLUE} className="size-10" />
-                <div className="flex flex-col">
-                    <span className="text-xl font-bold">Aoooo Powtência</span>
-                    <span className="text-sm text-muted-foreground">Levantou um balão azul!</span>
-                    <div className="flex items-center gap-1 mt-1">
-                        <HugeiconsIcon icon={Clock01Icon} className="size-3" />
-                        <span className="text-xs text-muted-foreground">Há 2 minutos</span>
-                    </div>
-                </div>
-                <div className="ml-auto">
-                    <IconButton
-                        tone="mint"
-                        size="md"
-                        variant="solid"
-                        icon={<HugeiconsIcon icon={HandIcon} />}
-                        label="Levantar balão"
-                    >
-                    </IconButton>
-                </div>
-            </div>
-        </Card>
-    )
+import { useEffect, useState } from 'react';
+import {
+  TASK_KIND,
+  type StaffTask,
+} from '@repo/shared';
+import { Balloon } from '@/components/balloon';
+import PrintIcon from '@/components/print-icon';
+import { IconButton } from '@/components/pouf/Button';
+import { Blob } from '@/components/pouf/media';
+import { Card } from '@/components/pouf/surface';
+import {
+  getBalloonColorLabel,
+  toBalloonColor,
+} from '@/services/question/balloon-color';
+import { BalloonIcon, Clock01Icon, HandIcon } from '@hugeicons/core-free-icons';
+import { HugeiconsIcon } from '@hugeicons/react';
+
+function formatRelativeTime(isoDate: string, nowMs: number): string {
+  const diffSeconds = Math.round(
+    (new Date(isoDate).getTime() - nowMs) / 1000,
+  );
+  const formatter = new Intl.RelativeTimeFormat('pt-BR', { numeric: 'auto' });
+  const abs = Math.abs(diffSeconds);
+
+  if (abs < 60) {
+    return formatter.format(diffSeconds, 'second');
+  }
+  if (abs < 3600) {
+    return formatter.format(Math.round(diffSeconds / 60), 'minute');
+  }
+  if (abs < 86400) {
+    return formatter.format(Math.round(diffSeconds / 3600), 'hour');
+  }
+  return formatter.format(Math.round(diffSeconds / 86400), 'day');
 }
 
-export default function QueueTask() {
-    return (
-        <div className="flex w-full flex-col gap-4">
-            <Card variant="tight">
-                <div className="flex items-center gap-3">
-                    <Blob
-                        icon={
-                            <HugeiconsIcon
-                                icon={BalloonIcon}
-                                strokeWidth={2.5}
-                            />
-                        }
-                        size="sm"
-                        tone="blue"
-                    />
-                    <span className="text-xl font-bold">Tarefas</span>
-                </div>
-            </Card>
+function getTaskSubtitle(task: StaffTask): string {
+  if (task.kind === TASK_KIND.PRINT_TASK) {
+    return 'Solicitou uma impressão!';
+  }
 
-            <div className="flex flex-col gap-3">
-                <TaskItem />
-                <TaskItem />
-                <TaskItem />
-                <TaskItem />
-                <TaskItem />
-                <TaskItem />
-                <TaskItem />
-            </div>
+  const color = toBalloonColor(task.balloonColor ?? '');
+  const label = getBalloonColorLabel(color).toLowerCase();
+  return `Levantou um balão ${label}!`;
+}
+
+type TaskItemProps = {
+  task: StaffTask;
+  claiming: boolean;
+  onClaim: (task: StaffTask) => void;
+  nowMs: number;
+};
+
+function TaskItem({ task, claiming, onClaim, nowMs }: TaskItemProps) {
+  const isPrint = task.kind === TASK_KIND.PRINT_TASK;
+  const balloonColor = toBalloonColor(task.balloonColor ?? '');
+
+  return (
+    <Card variant="flush">
+      <div className="flex items-center gap-2 px-5 py-6">
+        {isPrint ? (
+          <PrintIcon className="size-10" strokeWidth={1.5} />
+        ) : (
+          <Balloon color={balloonColor} className="size-10" />
+        )}
+        <div className="flex flex-col min-w-0">
+          <span className="text-xl font-bold truncate">{task.teamName}</span>
+          <span className="text-sm text-muted-foreground">
+            {getTaskSubtitle(task)}
+          </span>
+          <div className="flex items-center gap-1 mt-1">
+            <HugeiconsIcon icon={Clock01Icon} className="size-3" />
+            <span className="text-xs text-muted-foreground">
+              {formatRelativeTime(task.createdAt, nowMs)}
+            </span>
+          </div>
         </div>
-    )
+        <div className="ml-auto shrink-0">
+          <IconButton
+            tone="mint"
+            size="md"
+            variant="solid"
+            icon={<HugeiconsIcon icon={HandIcon} />}
+            label={isPrint ? 'Pegar impressão' : 'Levantar balão'}
+            disabled={claiming}
+            loading={claiming}
+            onClick={() => onClaim(task)}
+          />
+        </div>
+      </div>
+    </Card>
+  );
+}
+
+type QueueTaskProps = {
+  tasks: StaffTask[];
+  claimingIds: Set<string>;
+  onClaim: (task: StaffTask) => void;
+};
+
+export default function QueueTask({
+  tasks,
+  claimingIds,
+  onClaim,
+}: QueueTaskProps) {
+  const [nowMs, setNowMs] = useState(() => Date.now());
+
+  useEffect(() => {
+    const id = window.setInterval(() => setNowMs(Date.now()), 30_000);
+    return () => window.clearInterval(id);
+  }, []);
+
+  return (
+    <div className="flex w-full flex-col gap-4">
+      <Card variant="tight">
+        <div className="flex items-center gap-3">
+          <Blob
+            icon={
+              <HugeiconsIcon icon={BalloonIcon} strokeWidth={2.5} />
+            }
+            size="sm"
+            tone="blue"
+          />
+          <span className="text-xl font-bold">Tarefas</span>
+        </div>
+      </Card>
+
+      <div className="flex flex-col gap-3">
+        {tasks.length === 0 ? (
+          <p className="text-sm text-muted-foreground px-1">
+            Nenhuma tarefa na fila.
+          </p>
+        ) : (
+          tasks.map((task) => (
+            <TaskItem
+              key={`${task.kind}-${task.id}`}
+              task={task}
+              claiming={claimingIds.has(task.id)}
+              onClaim={onClaim}
+              nowMs={nowMs}
+            />
+          ))
+        )}
+      </div>
+    </div>
+  );
 }

@@ -117,3 +117,36 @@ export function taskTypeFromStatus(
 
   return BALLOON_STATUS_TO_TASK_TYPE[status];
 }
+
+export type StaffTask = {
+  id: string;
+  kind: TaskKind;
+  contestId: string;
+  teamId: string;
+  teamName: string;
+  status: BalloonDeliveryStatus;
+  claimedByUserId: string | null;
+  createdAt: string;
+  questionId?: string | null;
+  balloonColor?: string | null;
+  questionLabel?: string | null;
+};
+
+export const STAFF_TASK_EVENT_TYPE = {
+  QUEUED: 'task.queued',
+  CLAIMED: 'task.claimed',
+  REMOVED: 'task.removed',
+} as const;
+
+export type StaffTaskEventType =
+  (typeof STAFF_TASK_EVENT_TYPE)[keyof typeof STAFF_TASK_EVENT_TYPE];
+
+export type StaffTaskEvent = {
+  type: StaffTaskEventType;
+  task: StaffTask;
+};
+
+export type StaffTasksSnapshot = {
+  queue: StaffTask[];
+  mine: StaffTask[];
+};

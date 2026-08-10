@@ -3,8 +3,7 @@ import Page from '@/components/ui/page'
 import Section from '@/components/ui/section'
 import Loading from '@/app/loading'
 import { Metadata } from 'next'
-import QueueTask from './_components/queue-task'
-import LobbyArea from './_components/lobby-area'
+import StaffTasksBoard from './_components/staff-tasks-board'
 
 export const metadata: Metadata = {
   title: 'Tarefas',
@@ -24,10 +23,8 @@ async function StaffContestPageContent({
       </Section>
 
       <Section className="mt-4 pb-40 lg:pb-8">
-        <QueueTask />
+        <StaffTasksBoard contestId={id_contest} />
       </Section>
-
-      <LobbyArea />
     </Page>
   )
 }

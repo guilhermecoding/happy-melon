@@ -12,18 +12,22 @@ import {
 } from '@repo/database';
 import {
   BALLOON_DELIVERY_STATUS,
+  STAFF_TASK_EVENT_TYPE,
   TASK_KIND,
   isConfirmableStatus,
   isWithholdableStatus,
   taskTypeFromStatus,
   toBalloonEffectiveStatus,
   type BalloonDeliveryStatus,
+  type StaffTask,
 } from '@repo/shared';
 import {
   generateShortId,
   ID_MAX_ATTEMPTS,
   isIdUniqueViolation,
 } from '../common/short-id.js';
+import { ContestTasksEventsService } from '../contest-tasks/contest-tasks.events.js';
+import { toPrintStaffTask } from '../contest-tasks/staff-task.mapper.js';
 import type { PrintTeamActionDto } from './dto/print.dto.js';
 
 const STATUS_ACTION_LABEL = {
@@ -40,6 +44,10 @@ type Actor = {
 
 @Injectable()
 export class PrintsService {
+  constructor(
+    private readonly contestTasksEvents: ContestTasksEventsService,
+  ) {}
+
   async listByContest(contestId: string, teamId?: string) {
     await this.ensureContestExists(contestId);
 
@@ -89,6 +97,19 @@ export class PrintsService {
           return saved;
         });
 
+        this.contestTasksEvents.emit(contestId, {
+          type: STAFF_TASK_EVENT_TYPE.QUEUED,
+          task: toPrintStaffTask({
+            id: task.id,
+            contestId: task.contestId,
+            teamId: task.teamId,
+            teamName: team.name,
+            status: task.status,
+            claimedByUserId: task.claimedByUserId,
+            createdAt: task.createdAt,
+          }),
+        });
+
         return this.toTaskResponse(task);
       } catch (error) {
         if (
@@ -136,6 +157,19 @@ export class PrintsService {
       return updated;
     });
 
+    this.contestTasksEvents.emit(contestId, {
+      type: STAFF_TASK_EVENT_TYPE.QUEUED,
+      task: toPrintStaffTask({
+        id: saved.id,
+        contestId: saved.contestId,
+        teamId: saved.teamId,
+        teamName: team.name,
+        status: saved.status,
+        claimedByUserId: saved.claimedByUserId,
+        createdAt: saved.createdAt,
+      }),
+    });
+
     return this.toTaskResponse(saved);
   }
 
@@ -168,7 +202,85 @@ export class PrintsService {
       return updated;
     });
 
+    this.contestTasksEvents.emit(contestId, {
+      type: STAFF_TASK_EVENT_TYPE.REMOVED,
+      task: toPrintStaffTask({
+        id: saved.id,
+        contestId: saved.contestId,
+        teamId: saved.teamId,
+        teamName: team.name,
+        status: saved.status,
+        claimedByUserId: saved.claimedByUserId,
+        createdAt: saved.createdAt,
+      }),
+    });
+
     return this.toTaskResponse(saved);
+  }
+
+  async claim(
+    contestId: string,
+    taskId: string,
+    actor: Actor,
+  ): Promise<StaffTask> {
+    await this.ensureContestExists(contestId);
+
+    const pendingStatus = this.toPrismaStatus(BALLOON_DELIVERY_STATUS.PENDING);
+    const processingStatus = this.toPrismaStatus(
+      BALLOON_DELIVERY_STATUS.PROCESSING,
+    );
+
+    const task = await prisma.$transaction(async (tx) => {
+      const updated = await tx.printTask.updateMany({
+        where: {
+          id: taskId,
+          contestId,
+          status: pendingStatus,
+          claimedByUserId: null,
+        },
+        data: {
+          status: processingStatus,
+          claimedByUserId: actor.userId,
+        },
+      });
+
+      if (updated.count !== 1) {
+        throw new BadRequestException(
+          'Esta tarefa não está disponível para claim.',
+        );
+      }
+
+      const saved = await tx.printTask.findFirstOrThrow({
+        where: { id: taskId, contestId },
+        include: { team: true },
+      });
+
+      await this.createHistoryEntry(tx, {
+        contestId,
+        task: saved,
+        teamName: saved.team.name,
+        actor,
+      });
+
+      return saved;
+    });
+
+    const staffTask = toPrintStaffTask({
+      id: task.id,
+      contestId: task.contestId,
+      teamId: task.teamId,
+      teamName: task.team.name,
+      status: task.status,
+      claimedByUserId: task.claimedByUserId,
+      createdAt: task.createdAt,
+    });
+
+    this.contestTasksEvents.emit(contestId, {
+      type: STAFF_TASK_EVENT_TYPE.CLAIMED,
+      task: staffTask,
+    });
+
+    return staffTask;
   }
 
   private async createHistoryEntry(
