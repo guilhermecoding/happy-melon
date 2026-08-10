@@ -16,10 +16,10 @@ import {
   toBalloonColor,
 } from '@/services/question/balloon-color';
 import {
-  BadgeInfoIcon,
+  ArrowUp01Icon, BadgeInfoIcon,
   CheckmarkCircle02Icon,
   Clock01Icon,
-  WorkoutRunIcon,
+  WorkoutRunIcon
 } from '@hugeicons/core-free-icons';
 import { HugeiconsIcon } from '@hugeicons/react';
 
@@ -133,6 +133,7 @@ export default function LobbyArea({
 }: LobbyAreaProps) {
   const [nowMs, setNowMs] = useState(() => Date.now());
   const [infoTask, setInfoTask] = useState<StaffTask | null>(null);
+  const [expanded, setExpanded] = useState(false);
 
   useEffect(() => {
     const id = window.setInterval(() => setNowMs(Date.now()), 30_000);
@@ -143,18 +144,37 @@ export default function LobbyArea({
     <>
       <div
         className={cn(
-          'fixed z-50 flex h-72 w-[min(100%-2rem,26rem)] flex-col gap-3 overflow-hidden rounded-3xl border-4 border-slate-700 bg-slate-700 p-2',
+          'fixed z-50 flex w-[min(100%-2rem,26rem)] flex-col gap-3 overflow-hidden rounded-3xl border-4 border-slate-700 bg-slate-700 p-2 transition-[height] duration-300 ease-out',
           'bottom-4 left-1/2 -translate-x-1/2',
           'lg:bottom-6 lg:left-auto lg:right-6 lg:translate-x-0',
+          expanded ? 'h-[50dvh]' : 'h-40',
         )}
       >
-        <div className="flex shrink-0 items-center gap-1 text-white">
-          <HugeiconsIcon
-            icon={WorkoutRunIcon}
-            strokeWidth={2.5}
-            className="size-6"
-          />
-          <span className="font-bold text-xl">Lobby</span>
+        <div className="flex items-center justify-between">
+          <div className="flex shrink-0 items-center gap-1 text-white">
+            <HugeiconsIcon
+              icon={WorkoutRunIcon}
+              strokeWidth={2.5}
+              className="size-6"
+            />
+            <span className="font-bold text-xl">Lobby</span>
+          </div>
+          <button
+            type="button"
+            aria-expanded={expanded}
+            aria-label={expanded ? 'Reduzir lobby' : 'Expandir lobby'}
+            className="mr-2 rounded-lg p-1 transition-colors hover:bg-white/10"
+            onClick={() => setExpanded((value) => !value)}
+          >
+            <HugeiconsIcon
+              icon={ArrowUp01Icon}
+              className={cn(
+                'size-8 text-white transition-transform duration-300 ease-out',
+                expanded && 'rotate-180',
+              )}
+              strokeWidth={2.5}
+            />
+          </button>
         </div>
 
         <div className="min-h-0 flex-1 overflow-y-auto rounded-2xl bg-white p-2">
