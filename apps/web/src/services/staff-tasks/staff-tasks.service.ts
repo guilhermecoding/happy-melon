@@ -24,7 +24,7 @@ export const CLAIM_RACE_ERROR_MESSAGE =
 export const CLAIM_SUCCESS_MESSAGE =
   'Agora é com você! Tarefa adicionada ao seu lobby.';
 
-export const DELIVER_SUCCESS_MESSAGE = 'Tarefa marcada como entregue.';
+export const DELIVER_SUCCESS_MESSAGE = 'Que massa! Você arrasou nessa tarefa do início ao fim!';
 
 async function getServerCookieHeader(): Promise<string | undefined> {
   if (typeof window !== 'undefined') {

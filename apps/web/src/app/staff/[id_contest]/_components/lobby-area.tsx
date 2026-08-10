@@ -144,10 +144,10 @@ export default function LobbyArea({
     <>
       <div
         className={cn(
-          'fixed z-50 flex w-[min(100%-2rem,26rem)] flex-col gap-3 overflow-hidden rounded-3xl border-4 border-slate-700 bg-slate-700 p-2 transition-[height] duration-300 ease-out',
+          'fixed z-50 flex w-[min(100%-2rem,40rem)] flex-col gap-3 overflow-hidden rounded-3xl border-4 border-slate-700 bg-slate-700 p-2 transition-[height] duration-300 ease-out',
           'bottom-4 left-1/2 -translate-x-1/2',
           'lg:bottom-6 lg:left-auto lg:right-6 lg:translate-x-0',
-          expanded ? 'h-[50dvh]' : 'h-40',
+          expanded ? 'h-[50dvh]' : 'h-48',
         )}
       >
         <div className="flex items-center justify-between">
@@ -177,7 +177,7 @@ export default function LobbyArea({
           </button>
         </div>
 
-        <div className="min-h-0 flex-1 overflow-y-auto rounded-2xl bg-white p-2">
+        <div className="min-h-0 flex-1 overflow-y-auto rounded-2xl bg-white px-2 py-4">
           {tasks.length === 0 ? (
             <p className="px-1 py-2 text-xs text-muted-foreground">
               Nenhuma tarefa em andamento.
