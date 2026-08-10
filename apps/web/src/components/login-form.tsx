@@ -11,6 +11,7 @@ import {
   authClient,
   type StaffSignInResult,
 } from '@/lib/auth-client'
+import { toast } from '@/components/pouf/toaster'
 
 import { HugeiconsIcon } from '@hugeicons/react'
 import {
@@ -22,6 +23,11 @@ import {
 } from '@hugeicons/core-free-icons'
 
 const ADMIN_ROLES = new Set(['admin'])
+
+function firstName(fullName: string) {
+  const part = fullName.trim().split(/\s+/)[0]
+  return part || fullName.trim()
+}
 
 function getSignInErrorMessage(error: {
   code?: string | undefined
@@ -146,7 +152,8 @@ export function LoginForm({
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
 
-  async function completeStaffLogin(contestId: string) {
+  async function completeStaffLogin(contestId: string, userName: string) {
+    toast.success(`Que bom ter você aqui, ${firstName(userName)}!`)
     router.push(`/staff/${contestId}`)
     router.refresh()
   }
@@ -179,7 +186,7 @@ export function LoginForm({
       return
     }
 
-    await completeStaffLogin(data.contestId)
+    await completeStaffLogin(data.contestId, data.user.name)
   }
 
   async function handleStaffRegister() {
@@ -207,7 +214,7 @@ export function LoginForm({
       return
     }
 
-    await completeStaffLogin(data.contestId)
+    await completeStaffLogin(data.contestId, data.user.name)
   }
 
   async function handleSubmit(event: React.FormEvent<HTMLFormElement>) {

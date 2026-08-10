@@ -1,11 +1,10 @@
 import { Suspense } from 'react'
-import TitlePage from '@/components/title-page'
 import Page from '@/components/ui/page'
 import Section from '@/components/ui/section'
 import Loading from '@/app/loading'
-import { ClipboardCheckIcon } from '@hugeicons/core-free-icons'
 import { Metadata } from 'next'
-import TasksBoard from '@/components/contest-tasks/tasks-board'
+import QueueTask from './_components/queue-task'
+import LobbyArea from './_components/lobby-area'
 
 export const metadata: Metadata = {
   title: 'Tarefas',
@@ -17,13 +16,14 @@ async function StaffContestPageContent({
   const { id_contest } = await params
 
   return (
-    <Page>
-      <Section>
-        <TitlePage title="Tarefas" icon={ClipboardCheckIcon} />
+    <Page className="flex min-h-0 flex-1 flex-col overflow-hidden pb-6">
+      <Section className="shrink-0">
+        <h1 className="text-xl sm:text-5xl font-black text-center">Maratona Mineira de Programação</h1>
       </Section>
 
-      <Section className="mt-6 flex flex-col gap-4 @4xl:flex-row">
-        <TasksBoard contestId={id_contest} />
+      <Section className="mt-4 flex min-h-0 flex-1 flex-col gap-2 overflow-hidden @4xl:flex-row">
+        <QueueTask />
+        <LobbyArea />
       </Section>
     </Page>
   )
