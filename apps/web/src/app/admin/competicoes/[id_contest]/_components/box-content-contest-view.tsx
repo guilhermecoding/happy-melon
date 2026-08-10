@@ -10,8 +10,8 @@ import {
   EditIcon,
 } from '@hugeicons/core-free-icons';
 import { formatDateTime } from '@/lib/format-data';
-import { cn } from '@/lib/utils';
-import { Button } from '@/components/ui/button';
+import { Button } from '@/components/pouf/Button';
+import { Badge } from '@/components/pouf/media';
 import type { Contest } from '@/services/contest/contest.type';
 import { EditContestSheet } from '../../_components/edit-contest-sheet';
 
@@ -67,14 +67,9 @@ export default function BoxContentContestView({
             />
             <span>Status</span>
           </div>
-          <span
-            className={cn(
-              'text-lg font-bold',
-              contest.status === 'active' ? 'text-green-500' : 'text-red-500',
-            )}
-          >
+          <Badge tone={contest.status === 'active' ? 'mint' : 'pink'}>
             {contest.status === 'active' ? 'Habilitada' : 'Desabilitada'}
-          </span>
+          </Badge>
         </div>
 
         <div className="flex flex-col">
@@ -91,13 +86,8 @@ export default function BoxContentContestView({
             {formatDateTime(new Date(contest.endsAt))}
           </span>
         </div>
-        <div className="flex justify-end">
-          <Button
-            variant="orange"
-            size="sm"
-            className="w-full @md:w-fit"
-            onClick={() => setEditOpen(true)}
-          >
+        <div className="mt-2 flex justify-end">
+          <Button tone="orange" size="sm" onClick={() => setEditOpen(true)}>
             <HugeiconsIcon
               icon={EditIcon}
               className="size-4 shrink-0"

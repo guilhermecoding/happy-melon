@@ -18,11 +18,7 @@ import {
   SheetTitle,
 } from "@/components/ui/sheet"
 import { Skeleton } from "@/components/ui/skeleton"
-import {
-  Tooltip,
-  TooltipContent,
-  TooltipTrigger,
-} from "@/components/ui/tooltip"
+import { Tooltip } from "@/components/pouf/controls"
 import { HugeiconsIcon } from "@hugeicons/react"
 import { PanelLeftOpenIcon, PanelRightCloseIcon } from "@hugeicons/core-free-icons"
 
@@ -243,7 +239,7 @@ function Sidebar({
         <div
           data-sidebar="sidebar"
           data-slot="sidebar-inner"
-          className="flex size-full flex-col bg-sidebar group-data-[variant=floating]:rounded-lg group-data-[variant=floating]:shadow-sm group-data-[variant=floating]:ring-1 group-data-[variant=floating]:ring-sidebar-border"
+          className="flex size-full flex-col bg-sidebar group-data-[variant=floating]:rounded-3xl ml-1 group-data-[variant=floating]:shadow-sm group-data-[variant=floating]:ring-1 group-data-[variant=floating]:ring-sidebar-border"
         >
           {children}
         </div>
@@ -476,7 +472,7 @@ function SidebarMenu({ className, ...props }: React.ComponentProps<"ul">) {
     <ul
       data-slot="sidebar-menu"
       data-sidebar="menu"
-      className={cn("flex w-full min-w-0 flex-col gap-1", className)}
+      className={cn("flex w-full min-w-0 flex-col gap-2", className)}
       {...props}
     />
   )
@@ -494,18 +490,37 @@ function SidebarMenuItem({ className, ...props }: React.ComponentProps<"li">) {
 }
 
 const sidebarMenuButtonVariants = cva(
-  "peer/menu-button group/menu-button relative flex w-full items-center gap-2 overflow-hidden rounded-md p-2 text-left text-sm ring-sidebar-ring outline-hidden transition-[width,height,padding] group-has-data-[sidebar=menu-action]/menu-item:pr-8 group-data-[collapsible=icon]:size-8! group-data-[collapsible=icon]:p-2! hover:bg-sidebar-accent hover:text-sidebar-accent-foreground focus-visible:ring-2 active:bg-sidebar-accent active:text-sidebar-accent-foreground disabled:pointer-events-none disabled:opacity-50 aria-disabled:pointer-events-none aria-disabled:opacity-50 data-open:hover:bg-sidebar-accent data-open:hover:text-sidebar-accent-foreground data-active:bg-sidebar-accent data-active:font-medium data-active:text-sidebar-accent-foreground data-active:after:absolute data-active:after:inset-y-1.5 data-active:after:right-0 data-active:after:w-[3px] data-active:after:rounded-full data-active:after:bg-red-500 [&_svg]:size-4 [&_svg]:shrink-0 [&>span:last-child]:truncate",
+  [
+    "peer/menu-button group/menu-button relative flex w-full items-center gap-2.5",
+    "overflow-visible rounded-2xl px-5 text-left font-extrabold",
+    "text-[var(--ink)] ring-sidebar-ring outline-hidden",
+    "transition-[width,height,padding,box-shadow,background-color,color]",
+    "group-has-data-[sidebar=menu-action]/menu-item:pr-8",
+    "group-data-[collapsible=icon]:size-9! group-data-[collapsible=icon]:rounded-full! group-data-[collapsible=icon]:p-2!",
+    "hover:bg-sidebar-accent/70 hover:text-[var(--ink)]",
+    "focus-visible:ring-2",
+    "active:bg-sidebar-accent",
+    "disabled:pointer-events-none disabled:opacity-50",
+    "aria-disabled:pointer-events-none aria-disabled:opacity-50",
+    "data-open:hover:bg-sidebar-accent",
+    /* Selected: pouf clay pill — purple fill, ink on accent, raised cushion. */
+    "data-active:bg-pink data-active:text-[var(--on-accent)]",
+    "data-active:shadow-[var(--pouf-control)]",
+    "data-active:hover:bg-pink data-active:hover:text-[var(--on-accent)]",
+    "[&_svg]:size-5 [&_svg]:shrink-0",
+    "[&>span:last-child]:truncate",
+  ].join(" "),
   {
     variants: {
       variant: {
-        default: "hover:bg-red-500/3 hover:text-sidebar-accent-foreground border-dashed border-2 border-transparent hover:border-red-500/50",
+        default: "",
         outline:
-          "bg-background shadow-[0_0_0_1px_var(--sidebar-border)] hover:bg-sidebar-accent hover:text-sidebar-accent-foreground hover:shadow-[0_0_0_1px_var(--sidebar-accent)]",
+          "bg-background shadow-[0_0_0_1px_var(--sidebar-border)] hover:bg-sidebar-accent hover:shadow-[0_0_0_1px_var(--sidebar-accent)]",
       },
       size: {
-        default: "h-8 text-sm",
-        sm: "h-7 text-xs",
-        lg: "h-12 text-sm group-data-[collapsible=icon]:p-0!",
+        default: "h-10 text-base",
+        sm: "h-9 text-sm [&_svg]:size-4",
+        lg: "h-12 text-base group-data-[collapsible=icon]:p-0!",
       },
     },
     defaultVariants: {
@@ -526,7 +541,7 @@ function SidebarMenuButton({
 }: useRender.ComponentProps<"button"> &
   React.ComponentProps<"button"> & {
     isActive?: boolean
-    tooltip?: string | React.ComponentProps<typeof TooltipContent>
+    tooltip?: string
   } & VariantProps<typeof sidebarMenuButtonVariants>) {
   const { isMobile, state } = useSidebar()
   const comp = useRender({
@@ -537,7 +552,7 @@ function SidebarMenuButton({
       },
       props
     ),
-    render: !tooltip ? render : <TooltipTrigger render={render} />,
+    render,
     state: {
       slot: "sidebar-menu-button",
       sidebar: "menu-button",
@@ -546,27 +561,11 @@ function SidebarMenuButton({
     },
   })
 
-  if (!tooltip) {
+  if (!tooltip || state !== "collapsed" || isMobile) {
     return comp
   }
 
-  if (typeof tooltip === "string") {
-    tooltip = {
-      children: tooltip,
-    }
-  }
-
-  return (
-    <Tooltip>
-      {comp}
-      <TooltipContent
-        side="right"
-        align="center"
-        hidden={state !== "collapsed" || isMobile}
-        {...tooltip}
-      />
-    </Tooltip>
-  )
+  return <Tooltip tip={tooltip}>{comp}</Tooltip>
 }
 
 function SidebarMenuAction({

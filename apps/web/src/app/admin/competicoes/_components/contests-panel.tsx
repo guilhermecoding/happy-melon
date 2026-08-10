@@ -1,9 +1,11 @@
 "use client";
 
 import { useEffect, useState } from 'react';
-import { Button } from '@/components/ui/button';
-import { PlusSignCircleIcon } from '@hugeicons/core-free-icons';
+import { BalloonIcon, PlusSignCircleIcon } from '@hugeicons/core-free-icons';
 import { HugeiconsIcon } from '@hugeicons/react';
+import BoxFeatures from '@/components/box-features';
+import { Button } from '@/components/pouf/Button';
+import Spinner from '@/components/spinner';
 import { contestService } from '@/services/contest/contest.service';
 import { getContestErrorMessage } from '@/services/contest/contest.error';
 import type { Contest } from '@/services/contest/contest.type';
@@ -49,55 +51,57 @@ export default function ContestsPanel() {
   }
 
   return (
-    <div className="flex flex-col gap-4">
-      <div className="flex justify-end">
-        <Button
-          variant="blue"
-          size="sm"
-          className="w-full md:w-fit"
-          onClick={() => setCreateOpen(true)}
-        >
-          <HugeiconsIcon
-            icon={PlusSignCircleIcon}
-            className="size-5"
-            strokeWidth={3}
-          />
-          Nova Competição
-        </Button>
-      </div>
+    <>
+      <BoxFeatures
+        title="Competições"
+        icon={BalloonIcon}
+        blobSize="sm"
+        blobTone="mint"
+      >
+        <div className="flex h-full flex-col gap-4 p-4">
+          <div className="flex justify-end">
+            <Button tone="blue" size="sm" onClick={() => setCreateOpen(true)}>
+              <HugeiconsIcon
+                icon={PlusSignCircleIcon}
+                className="size-5"
+                strokeWidth={3}
+              />
+              Nova Competição
+            </Button>
+          </div>
 
-      {error && (
-        <p role="alert" className="text-sm text-destructive">
-          {error}
-        </p>
-      )}
-
-      {loading ? (
-        <p className="text-sm text-muted-foreground">Carregando competições...</p>
-      ) : contests.length === 0 ? (
-        <p className="text-sm text-muted-foreground">
-          Nenhuma competição cadastrada.
-        </p>
-      ) : (
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 2xl:grid-cols-4 gap-4">
-          {contests.map((contest) => (
-            <ContestCard
-              key={contest.id}
-              id={contest.id}
-              name={contest.name}
-              status={contest.status}
-              startsAt={contest.startsAt}
-              endsAt={contest.endsAt}
-            />
-          ))}
+          {loading ? (
+            <Spinner />
+          ) : error ? (
+            <p role="alert" className="text-center text-sm text-destructive">
+              {error}
+            </p>
+          ) : contests.length === 0 ? (
+            <p className="text-center text-sm text-muted-foreground">
+              Nenhuma competição cadastrada.
+            </p>
+          ) : (
+            <div className="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-3 2xl:grid-cols-4">
+              {contests.map((contest) => (
+                <ContestCard
+                  key={contest.id}
+                  id={contest.id}
+                  name={contest.name}
+                  status={contest.status}
+                  startsAt={contest.startsAt}
+                  endsAt={contest.endsAt}
+                />
+              ))}
+            </div>
+          )}
         </div>
-      )}
+      </BoxFeatures>
 
       <CreateContestSheet
         open={createOpen}
         onOpenChange={setCreateOpen}
         onCreated={handleCreated}
       />
-    </div>
+    </>
   );
 }

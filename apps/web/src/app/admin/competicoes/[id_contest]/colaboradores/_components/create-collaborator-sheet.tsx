@@ -6,18 +6,11 @@ import { HugeiconsIcon } from '@hugeicons/react';
 import { collaboratorService } from '@/services/collaborator/collaborator.service';
 import { getCollaboratorErrorMessage } from '@/services/collaborator/collaborator.error';
 import type { Collaborator } from '@/services/collaborator/collaborator.type';
-import { Button } from '@/components/ui/button';
-import { Field, FieldError, FieldLabel } from '@/components/ui/field';
-import { Input } from '@/components/ui/input';
-import {
-  Sheet,
-  SheetContent,
-  SheetDescription,
-  SheetFooter,
-  SheetHeader,
-  SheetTitle,
-} from '@/components/ui/sheet';
-import { toast } from '@/components/ui/toast';
+import { Button } from '@/components/pouf/Button';
+import { Field, Input } from '@/components/pouf/Input';
+import { Sheet } from '@/components/pouf/sheet';
+import { toast } from '@/components/pouf/toaster';
+import { fieldError } from '@/lib/form';
 import {
   collaboratorSchema,
   type CollaboratorFormValues,
@@ -52,22 +45,15 @@ export function CreateCollaboratorSheet({
       try {
         const collaborator = await collaboratorService.create(contestId, value);
         onCreated(collaborator);
-        form.reset();
-        onOpenChange(false);
-        toast.add({
-          title: 'Colaborador cadastrado com sucesso.',
-          type: 'success',
-        });
+        toast.success('Colaborador cadastrado com sucesso.');
+        handleOpenChange(false);
       } catch (error) {
         const message = getCollaboratorErrorMessage(
           error,
           'Não foi possível criar o colaborador.',
         );
         setRequestError(message);
-        toast.add({
-          title: message,
-          type: 'error',
-        });
+        toast.error(message);
       }
     },
   });
@@ -81,59 +67,55 @@ export function CreateCollaboratorSheet({
   }
 
   return (
-    <Sheet open={open} onOpenChange={handleOpenChange}>
-      <SheetContent side="right" showCloseButton={false}>
-        <SheetHeader>
-          <SheetTitle className="text-2xl font-bold">
-            Adicionar colaborador
-          </SheetTitle>
-          <SheetDescription>
-            Cadastre um colaborador para esta competição. Ele entrará com e-mail
-            e o código da competição.
-          </SheetDescription>
-        </SheetHeader>
-
-        <form
-          className="flex flex-1 flex-col gap-5 px-4"
-          onSubmit={(event) => {
-            event.preventDefault();
-            event.stopPropagation();
-            void form.handleSubmit();
-          }}
-        >
+    <Sheet
+      open={open}
+      onOpenChange={handleOpenChange}
+      title="Adicionar colaborador"
+      description="Cadastre um colaborador para esta competição. Ele entrará com e-mail e o código da competição."
+    >
+      <form
+        onSubmit={(event) => {
+          event.preventDefault();
+          event.stopPropagation();
+          void form.handleSubmit();
+        }}
+      >
+        <div className="flex flex-col gap-5">
           <form.Field name="name">
             {(field) => (
-              <Field data-invalid={!field.state.meta.isValid}>
-                <FieldLabel htmlFor={field.name}>Nome</FieldLabel>
-                <Input
-                  id={field.name}
-                  name={field.name}
-                  placeholder="Nome do colaborador"
-                  value={field.state.value}
-                  onBlur={field.handleBlur}
-                  onChange={(event) => field.handleChange(event.target.value)}
-                  aria-invalid={!field.state.meta.isValid}
-                />
-                <FieldError errors={field.state.meta.errors} />
+              <Field label="Nome" error={fieldError(field.state.meta)}>
+                {(id, describedBy) => (
+                  <Input
+                    id={id}
+                    name={field.name}
+                    describedBy={describedBy}
+                    placeholder="Nome do colaborador"
+                    value={field.state.value}
+                    onBlur={field.handleBlur}
+                    onChange={field.handleChange}
+                    invalid={!field.state.meta.isValid}
+                  />
+                )}
               </Field>
             )}
           </form.Field>
 
           <form.Field name="email">
             {(field) => (
-              <Field data-invalid={!field.state.meta.isValid}>
-                <FieldLabel htmlFor={field.name}>Email</FieldLabel>
-                <Input
-                  id={field.name}
-                  name={field.name}
-                  type="email"
-                  placeholder="exemplo@email.com"
-                  value={field.state.value}
-                  onBlur={field.handleBlur}
-                  onChange={(event) => field.handleChange(event.target.value)}
-                  aria-invalid={!field.state.meta.isValid}
-                />
-                <FieldError errors={field.state.meta.errors} />
+              <Field label="Email" error={fieldError(field.state.meta)}>
+                {(id, describedBy) => (
+                  <Input
+                    id={id}
+                    name={field.name}
+                    describedBy={describedBy}
+                    type="email"
+                    placeholder="exemplo@email.com"
+                    value={field.state.value}
+                    onBlur={field.handleBlur}
+                    onChange={field.handleChange}
+                    invalid={!field.state.meta.isValid}
+                  />
+                )}
               </Field>
             )}
           </form.Field>
@@ -143,41 +125,31 @@ export function CreateCollaboratorSheet({
               {requestError}
             </p>
           )}
+        </div>
 
-          <SheetFooter className="mt-auto px-0">
-            <form.Subscribe selector={(state) => state.isSubmitting}>
-              {(isSubmitting) => (
-                <Button
-                  type="submit"
-                  variant="green"
-                  loading={isSubmitting}
-                  className="w-full"
-                >
-                  <HugeiconsIcon
-                    icon={CheckmarkCircle01Icon}
-                    className="size-5"
-                    strokeWidth={3}
-                  />
-                  Adicionar
-                </Button>
-              )}
-            </form.Subscribe>
-            <Button
-              type="button"
-              variant="white"
-              onClick={() => handleOpenChange(false)}
-              className="w-full"
-            >
-              <HugeiconsIcon
-                icon={EyeClosedIcon}
-                className="size-5"
-                strokeWidth={3}
-              />
-              Fechar
-            </Button>
-          </SheetFooter>
-        </form>
-      </SheetContent>
+        <div className="mt-4 flex flex-col-reverse justify-end gap-2 xl:flex-row">
+          <Button variant="quiet" onClick={() => handleOpenChange(false)}>
+            <HugeiconsIcon
+              icon={EyeClosedIcon}
+              className="size-5"
+              strokeWidth={3}
+            />
+            Fechar
+          </Button>
+          <form.Subscribe selector={(state) => state.isSubmitting}>
+            {(isSubmitting) => (
+              <Button type="submit" tone="mint" loading={isSubmitting}>
+                <HugeiconsIcon
+                  icon={CheckmarkCircle01Icon}
+                  className="size-5"
+                  strokeWidth={3}
+                />
+                Adicionar
+              </Button>
+            )}
+          </form.Subscribe>
+        </div>
+      </form>
     </Sheet>
   );
 }

@@ -11,19 +11,13 @@ import {
   DocumentAttachmentIcon, ViewIcon
 } from '@hugeicons/core-free-icons';
 import { BalloonDeliveryStatusIcon } from '@/components/balloon-delivery-status-icon';
-import { Button } from '@/components/ui/button';
 import { balloonService } from '@/services/balloon/balloon.service';
 import { getBalloonErrorMessage } from '@/services/balloon/balloon.error';
 import type { TaskHistoryEntry } from '@/services/balloon/balloon.type';
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableRow,
-} from '@/components/ui/table';
 import Spinner from '@/components/spinner';
-import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
+import { Tooltip } from '@/components/pouf/controls';
 import { TaskTimelineDialog } from './task-timeline-dialog';
+import { Button as ButtonPouf } from '../pouf/Button';
 
 type TaskHistoryListProps = {
   contestId: string;
@@ -145,87 +139,84 @@ export default function TaskHistoryList({
 
   return (
     <>
-      <div className="flex flex-col gap-4 px-2 pt-2 pb-24">
-        <Table>
-          <TableBody>
-            {paginatedEntries.map((entry) => {
-              const taskId = getStatusChangedTaskId(entry);
+      <div className="flex h-full min-h-100 flex-col gap-4 px-2 pt-2 pb-2">
+        {/* A log, not a data grid: plain rows split by a hairline, no cushions
+            and no <table> chrome. */}
+        <div className="min-h-0 flex-1 divide-y divide-ink/10 overflow-auto">
+          {paginatedEntries.map((entry) => {
+            const taskId = getStatusChangedTaskId(entry);
 
-              return (
-                <TableRow key={entry.id}>
-                  <TableCell>
-                    {entry.kind === TASK_KIND.PRINT_TASK ? (
-                      <HugeiconsIcon
-                        icon={Attachment01Icon}
-                        className="size-5 shrink-0 text-muted-foreground"
-                        strokeWidth={2}
-                      />
-                    ) : (
-                      <HugeiconsIcon
-                        icon={BalloonIcon}
-                        className="size-5 shrink-0 text-muted-foreground"
-                        strokeWidth={2}
-                        fill="currentColor"
-                      />
-                    )}
-                  </TableCell>
-                  <TableCell className="w-16 font-semibold tabular-nums text-muted-foreground">
-                    {formatHistoryTime(entry.createdAt)}
-                  </TableCell>
-                  <TableCell className="w-10">
-                    <BalloonDeliveryStatusIcon
-                      status={entry.status}
-                      kind={
-                        entry.kind === TASK_KIND.PRINT_TASK
-                          ? TASK_KIND.PRINT_TASK
-                          : TASK_KIND.BALLOON_TASK
-                      }
+            return (
+              <div key={entry.id} className="px-2 py-3">
+                <div className="flex items-center gap-3">
+                  {entry.kind === TASK_KIND.PRINT_TASK ? (
+                    <HugeiconsIcon
+                      icon={Attachment01Icon}
+                      className="size-5 shrink-0 text-muted-foreground"
+                      strokeWidth={2}
                     />
-                  </TableCell>
-                  <TableCell className="flex flex-col gap-1 whitespace-normal text-foreground">
-                    {entry.message}.
+                  ) : (
+                    <HugeiconsIcon
+                      icon={BalloonIcon}
+                      className="size-5 shrink-0 text-muted-foreground"
+                      strokeWidth={2}
+                      fill="currentColor"
+                    />
+                  )}
+
+                  <span className="w-16 shrink-0 text-sm font-semibold tabular-nums text-muted-foreground">
+                    {formatHistoryTime(entry.createdAt)}
+                  </span>
+
+                  <BalloonDeliveryStatusIcon
+                    status={entry.status}
+                    kind={
+                      entry.kind === TASK_KIND.PRINT_TASK
+                        ? TASK_KIND.PRINT_TASK
+                        : TASK_KIND.BALLOON_TASK
+                    }
+                    className="shrink-0"
+                  />
+
+                  <div className="flex min-w-0 flex-1 flex-col gap-1">
+                    <span className="text-sm font-semibold text-ink">
+                      {entry.message}.
+                    </span>
                     {taskId ? (
                       <span className="text-xs text-muted-foreground">
                         #{taskId}
                       </span>
                     ) : null}
-                  </TableCell>
-                  <TableCell>
-                    <Tooltip>
-                      <TooltipTrigger
-                        render={
-                          <Button
-                            type="button"
-                            variant="normal"
-                            size="sm"
-                            className="bg-transparent p-1 transition-colors hover:bg-background/80"
-                            disabled={!taskId}
-                            onClick={() => {
-                              if (!taskId) return;
-                              setTimelineTask({
-                                taskId,
-                                kind: entry.kind,
-                              });
-                            }}
-                          />
-                        }
-                      >
-                        <HugeiconsIcon
-                          icon={ViewIcon}
-                          className="size-4"
-                          strokeWidth={2}
-                        />
-                      </TooltipTrigger>
-                      <TooltipContent>Ver tarefa completa</TooltipContent>
-                    </Tooltip>
-                  </TableCell>
-                </TableRow>
-              );
-            })}
-          </TableBody>
-        </Table>
+                  </div>
 
-        <div className="absolute right-0 bottom-0 left-0 flex flex-col-reverse gap-3 px-2 pb-2 sm:items-center sm:justify-between">
+                  <Tooltip tip="Ver tarefa completa">
+                    <button
+                      type="button"
+                      title=""
+                      disabled={!taskId}
+                      onClick={() => {
+                        if (!taskId) return;
+                        setTimelineTask({
+                          taskId,
+                          kind: entry.kind,
+                        });
+                      }}
+                      className="flex items-center justify-center hover:bg-ink/10 rounded-full p-2 shrink-0 cursor-pointer transition-colors"
+                    >
+                      <HugeiconsIcon
+                        icon={ViewIcon}
+                        className="size-4"
+                        strokeWidth={2}
+                      />
+                    </button>
+                  </Tooltip>
+                </div>
+              </div>
+            );
+          })}
+        </div>
+
+        <div className="mt-auto flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
           <p className="text-sm text-muted-foreground">
             Mostrando {rangeStart}–{rangeEnd} de {entries.length}
             {totalPages > 1
@@ -233,11 +224,9 @@ export default function TaskHistoryList({
               : null}
           </p>
           <div className="flex items-center gap-2">
-            <Button
-              type="button"
-              variant="white"
+            <ButtonPouf
+              variant="quiet"
               size="sm"
-              className="w-full sm:w-fit"
               disabled={currentPage <= 1}
               onClick={() => setPage((current) => Math.max(1, current - 1))}
             >
@@ -247,12 +236,11 @@ export default function TaskHistoryList({
                 strokeWidth={2}
               />
               Anterior
-            </Button>
-            <Button
+            </ButtonPouf>
+            <ButtonPouf
               type="button"
-              variant="white"
+              variant="quiet"
               size="sm"
-              className="w-full sm:w-fit"
               disabled={currentPage >= totalPages}
               onClick={() =>
                 setPage((current) => Math.min(totalPages, current + 1))
@@ -264,7 +252,7 @@ export default function TaskHistoryList({
                 className="size-4"
                 strokeWidth={2}
               />
-            </Button>
+            </ButtonPouf>
           </div>
         </div>
       </div>

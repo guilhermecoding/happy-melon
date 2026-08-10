@@ -8,18 +8,11 @@ import { questionService } from '@/services/question/question.service';
 import { getQuestionErrorMessage } from '@/services/question/question.error';
 import type { Question } from '@/services/question/question.type';
 import { COLOR, type BalloonColor } from '@/services/question/balloon-color';
-import { Button } from '@/components/ui/button';
-import { Field, FieldError, FieldLabel } from '@/components/ui/field';
-import { Input } from '@/components/ui/input';
-import {
-  Sheet,
-  SheetContent,
-  SheetDescription,
-  SheetFooter,
-  SheetHeader,
-  SheetTitle,
-} from '@/components/ui/sheet';
-import { toast } from '@/components/ui/toast';
+import { Button } from '@/components/pouf/Button';
+import { Field, Input } from '@/components/pouf/Input';
+import { Sheet } from '@/components/pouf/sheet';
+import { toast } from '@/components/pouf/toaster';
+import { fieldError } from '@/lib/form';
 import { BalloonColorSelect } from './balloon-color-select';
 import {
   questionFormSchema,
@@ -61,10 +54,7 @@ export function CreateQuestionSheet({
           balloonColor: value.balloonColor,
         });
         onCreated(question);
-        toast.add({
-          title: 'Questão cadastrada com sucesso.',
-          type: 'success',
-        });
+        toast.success('Questão cadastrada com sucesso.');
         handleOpenChange(false);
       } catch (error) {
         const message = getQuestionErrorMessage(
@@ -72,10 +62,7 @@ export function CreateQuestionSheet({
           'Não foi possível criar a questão.',
         );
         setRequestError(message);
-        toast.add({
-          title: message,
-          type: 'error',
-        });
+        toast.error(message);
       }
     },
   });
@@ -89,116 +76,102 @@ export function CreateQuestionSheet({
   }
 
   return (
-    <Sheet open={open} onOpenChange={handleOpenChange}>
-      <SheetContent side="right" showCloseButton={false} className="overflow-hidden">
-        <SheetHeader className="shrink-0">
-          <SheetTitle className="text-2xl font-bold">Nova questão</SheetTitle>
-          <SheetDescription>
-            Cadastre uma nova questão da prova.
-          </SheetDescription>
-        </SheetHeader>
-
-        <form
-          className="flex min-h-0 flex-1 flex-col"
-          onSubmit={(event) => {
-            event.preventDefault();
-            event.stopPropagation();
-            void form.handleSubmit();
-          }}
-        >
-          <div className="flex min-h-0 flex-1 flex-col gap-5 overflow-y-auto scrollbar-thin px-4 pb-2">
-            <form.Field name="label">
-              {(field) => (
-                <Field data-invalid={!field.state.meta.isValid}>
-                  <FieldLabel htmlFor={field.name}>Identificador</FieldLabel>
+    <Sheet
+      open={open}
+      onOpenChange={handleOpenChange}
+      title="Nova questão"
+      description="Cadastre uma nova questão da prova."
+    >
+      <form
+        onSubmit={(event) => {
+          event.preventDefault();
+          event.stopPropagation();
+          void form.handleSubmit();
+        }}
+      >
+        <div className="flex flex-col gap-5">
+          <form.Field name="label">
+            {(field) => (
+              <Field label="Identificador" error={fieldError(field.state.meta)}>
+                {(id, describedBy) => (
                   <Input
-                    id={field.name}
+                    id={id}
                     name={field.name}
+                    describedBy={describedBy}
                     placeholder="Ex: A, B, 1, 2"
                     value={field.state.value}
                     onBlur={field.handleBlur}
-                    onChange={(event) =>
-                      field.handleChange(event.target.value.toUpperCase())
-                    }
-                    aria-invalid={!field.state.meta.isValid}
-                    className="uppercase"
+                    onChange={(value) => field.handleChange(value.toUpperCase())}
+                    invalid={!field.state.meta.isValid}
+                    autoCapitalize="characters"
                   />
-                  <FieldError errors={field.state.meta.errors} />
-                </Field>
-              )}
-            </form.Field>
+                )}
+              </Field>
+            )}
+          </form.Field>
 
-            <form.Field name="title">
-              {(field) => (
-                <Field data-invalid={!field.state.meta.isValid}>
-                  <FieldLabel htmlFor={field.name}>Título</FieldLabel>
+          <form.Field name="title">
+            {(field) => (
+              <Field label="Título" error={fieldError(field.state.meta)}>
+                {(id, describedBy) => (
                   <Input
-                    id={field.name}
+                    id={id}
                     name={field.name}
+                    describedBy={describedBy}
                     placeholder="Título da questão"
                     value={field.state.value}
                     onBlur={field.handleBlur}
-                    onChange={(event) => field.handleChange(event.target.value)}
-                    aria-invalid={!field.state.meta.isValid}
+                    onChange={field.handleChange}
+                    invalid={!field.state.meta.isValid}
                   />
-                  <FieldError errors={field.state.meta.errors} />
-                </Field>
-              )}
-            </form.Field>
+                )}
+              </Field>
+            )}
+          </form.Field>
 
-            <form.Field name="balloonColor">
-              {(field) => (
-                <Field data-invalid={!field.state.meta.isValid}>
-                  <FieldLabel htmlFor={field.name}>Cor do balão</FieldLabel>
+          <form.Field name="balloonColor">
+            {(field) => (
+              <Field label="Cor do balão" error={fieldError(field.state.meta)}>
+                {(id, describedBy) => (
                   <BalloonColorSelect
-                    id={field.name}
+                    id={id}
+                    describedBy={describedBy}
                     value={field.state.value}
                     invalid={!field.state.meta.isValid}
                     onBlur={field.handleBlur}
                     onChange={(color: BalloonColor) => field.handleChange(color)}
                   />
-                  <FieldError errors={field.state.meta.errors} />
-                </Field>
-              )}
-            </form.Field>
-
-            {requestError && (
-              <p role="alert" className="text-sm text-destructive">
-                {requestError}
-              </p>
+                )}
+              </Field>
             )}
-          </div>
+          </form.Field>
 
-          <SheetFooter className="shrink-0">
-            <form.Subscribe selector={(state) => state.isSubmitting}>
-              {(isSubmitting) => (
-                <Button
-                  type="submit"
-                  variant="green"
-                  loading={isSubmitting}
-                  className="w-full"
-                >
-                  <HugeiconsIcon
-                    icon={CheckmarkCircle01Icon}
-                    className="size-5"
-                    strokeWidth={3}
-                  />
-                  Adicionar
-                </Button>
-              )}
-            </form.Subscribe>
-            <Button
-              type="button"
-              variant="white"
-              onClick={() => handleOpenChange(false)}
-              className="w-full"
-            >
-              <HugeiconsIcon icon={EyeClosedIcon} className="size-5" strokeWidth={3} />
-              Fechar
-            </Button>
-          </SheetFooter>
-        </form>
-      </SheetContent>
+          {requestError && (
+            <p role="alert" className="text-sm text-destructive">
+              {requestError}
+            </p>
+          )}
+        </div>
+
+        <div className="mt-4 flex flex-col-reverse justify-end gap-2 xl:flex-row">
+          <Button variant="quiet" onClick={() => handleOpenChange(false)}>
+            <HugeiconsIcon icon={EyeClosedIcon} className="size-5" strokeWidth={3} />
+            Fechar
+          </Button>
+          <form.Subscribe selector={(state) => state.isSubmitting}>
+            {(isSubmitting) => (
+              <Button type="submit" tone="mint" loading={isSubmitting}>
+                <HugeiconsIcon
+                  icon={CheckmarkCircle01Icon}
+                  className="size-5"
+                  strokeWidth={3}
+                />
+                Adicionar
+              </Button>
+            )}
+          </form.Subscribe>
+        </div>
+      </form>
     </Sheet>
   );
 }

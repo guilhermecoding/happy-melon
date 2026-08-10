@@ -12,18 +12,11 @@ import { AdminPasswordConfirmDialog } from '@/components/admin-password-confirm-
 import { teamService } from '@/services/team/team.service';
 import { getTeamErrorMessage } from '@/services/team/team.error';
 import type { Team } from '@/services/team/team.type';
-import { Button } from '@/components/ui/button';
-import { Field, FieldError, FieldLabel } from '@/components/ui/field';
-import { Input } from '@/components/ui/input';
-import {
-  Sheet,
-  SheetContent,
-  SheetDescription,
-  SheetFooter,
-  SheetHeader,
-  SheetTitle,
-} from '@/components/ui/sheet';
-import { toast } from '@/components/ui/toast';
+import { Button } from '@/components/pouf/Button';
+import { Field, Input } from '@/components/pouf/Input';
+import { Sheet } from '@/components/pouf/sheet';
+import { toast } from '@/components/pouf/toaster';
+import { fieldError } from '@/lib/form';
 import {
   emptyTeamFormValues,
   teamFormSchema,
@@ -76,10 +69,7 @@ export function EditTeamSheet({
           machine: value.machine.trim() || null,
         });
         onUpdated(updatedTeam);
-        toast.add({
-          title: 'Time atualizado com sucesso.',
-          type: 'success',
-        });
+        toast.success('Time atualizado com sucesso.');
         handleOpenChange(false);
       } catch (error) {
         const message = getTeamErrorMessage(
@@ -87,17 +77,18 @@ export function EditTeamSheet({
           'Não foi possível atualizar o time.',
         );
         setRequestError(message);
-        toast.add({
-          title: message,
-          type: 'error',
-        });
+        toast.error(message);
       }
     },
   });
 
   useEffect(() => {
     if (open && team) {
-      form.reset(toFormValues(team));
+      /* keepDefaultValues: a bare reset() would ALSO promote these values to the
+         form's defaults, and useForm re-runs update() on every render — which
+         then sees the component's own defaults differ and wipes an untouched
+         form back to empty on the next render. */
+      form.reset(toFormValues(team), { keepDefaultValues: true });
       setRequestError(undefined);
       setDeleteConfirmOpen(false);
       setConfirmError(undefined);
@@ -105,6 +96,8 @@ export function EditTeamSheet({
   }, [team, form, open]);
 
   function handleOpenChange(nextOpen: boolean) {
+    if (!nextOpen && isConfirming) return;
+
     if (!nextOpen) {
       form.reset();
       setRequestError(undefined);
@@ -124,187 +117,158 @@ export function EditTeamSheet({
       await teamService.remove(team.id, { password });
       onDeleted(team.id);
       setDeleteConfirmOpen(false);
+      setIsConfirming(false);
       handleOpenChange(false);
-      toast.add({
-        title: 'Time excluído com sucesso.',
-        type: 'success',
-      });
+      toast.success('Time excluído com sucesso.');
+      return;
     } catch (error) {
       const message = getTeamErrorMessage(
         error,
         'Não foi possível excluir o time.',
       );
       setConfirmError(message);
-      toast.add({
-        title: message,
-        type: 'error',
-      });
-    } finally {
-      setIsConfirming(false);
+      toast.error(message);
     }
+
+    setIsConfirming(false);
   }
 
   return (
     <>
-      <Sheet open={open} onOpenChange={handleOpenChange}>
-        <SheetContent
-          side="right"
-          showCloseButton={false}
-          className="overflow-hidden"
+      <Sheet
+        open={open}
+        onOpenChange={handleOpenChange}
+        title="Editar time"
+        description="Atualize os dados do time selecionado."
+      >
+        <form
+          onSubmit={(event) => {
+            event.preventDefault();
+            event.stopPropagation();
+            void form.handleSubmit();
+          }}
         >
-          <SheetHeader className="shrink-0">
-            <SheetTitle className="text-2xl font-bold">Editar time</SheetTitle>
-            <SheetDescription>
-              Atualize os dados do time selecionado.
-            </SheetDescription>
-          </SheetHeader>
-
-          <form
-            className="flex min-h-0 flex-1 flex-col"
-            onSubmit={(event) => {
-              event.preventDefault();
-              event.stopPropagation();
-              void form.handleSubmit();
-            }}
-          >
-            <div className="flex min-h-0 flex-1 flex-col gap-5 overflow-y-auto scrollbar-thin px-4 pb-2">
-              <form.Field name="name">
-                {(field) => (
-                  <Field data-invalid={!field.state.meta.isValid}>
-                    <FieldLabel htmlFor={field.name}>Nome</FieldLabel>
+          <div className="flex flex-col gap-5">
+            <form.Field name="name">
+              {(field) => (
+                <Field label="Nome" error={fieldError(field.state.meta)}>
+                  {(id, describedBy) => (
                     <Input
-                      id={field.name}
+                      id={id}
                       name={field.name}
+                      describedBy={describedBy}
                       placeholder="Nome do time"
                       value={field.state.value}
                       onBlur={field.handleBlur}
-                      onChange={(event) =>
-                        field.handleChange(event.target.value)
-                      }
-                      aria-invalid={!field.state.meta.isValid}
+                      onChange={field.handleChange}
+                      invalid={!field.state.meta.isValid}
                     />
-                    <FieldError errors={field.state.meta.errors} />
-                  </Field>
-                )}
-              </form.Field>
+                  )}
+                </Field>
+              )}
+            </form.Field>
 
-              <form.Field name="usernameTeam">
-                {(field) => (
-                  <Field data-invalid={!field.state.meta.isValid}>
-                    <FieldLabel htmlFor={field.name}>Usuário</FieldLabel>
+            <form.Field name="usernameTeam">
+              {(field) => (
+                <Field label="Usuário" error={fieldError(field.state.meta)}>
+                  {(id, describedBy) => (
                     <Input
-                      id={field.name}
+                      id={id}
                       name={field.name}
+                      describedBy={describedBy}
                       placeholder="Username do time"
                       value={field.state.value}
                       onBlur={field.handleBlur}
-                      onChange={(event) =>
-                        field.handleChange(event.target.value)
-                      }
-                      aria-invalid={!field.state.meta.isValid}
+                      onChange={field.handleChange}
+                      invalid={!field.state.meta.isValid}
                     />
-                    <FieldError errors={field.state.meta.errors} />
-                  </Field>
-                )}
-              </form.Field>
+                  )}
+                </Field>
+              )}
+            </form.Field>
 
-              <form.Field name="room">
-                {(field) => (
-                  <Field data-invalid={!field.state.meta.isValid}>
-                    <FieldLabel htmlFor={field.name}>Sala</FieldLabel>
+            <form.Field name="room">
+              {(field) => (
+                <Field label="Sala" error={fieldError(field.state.meta)}>
+                  {(id, describedBy) => (
                     <Input
-                      id={field.name}
+                      id={id}
                       name={field.name}
+                      describedBy={describedBy}
                       placeholder="Sala do time (opcional)"
                       value={field.state.value}
                       onBlur={field.handleBlur}
-                      onChange={(event) =>
-                        field.handleChange(event.target.value)
-                      }
-                      aria-invalid={!field.state.meta.isValid}
+                      onChange={field.handleChange}
+                      invalid={!field.state.meta.isValid}
                     />
-                    <FieldError errors={field.state.meta.errors} />
-                  </Field>
-                )}
-              </form.Field>
+                  )}
+                </Field>
+              )}
+            </form.Field>
 
-              <form.Field name="machine">
-                {(field) => (
-                  <Field data-invalid={!field.state.meta.isValid}>
-                    <FieldLabel htmlFor={field.name}>Máquina</FieldLabel>
+            <form.Field name="machine">
+              {(field) => (
+                <Field label="Máquina" error={fieldError(field.state.meta)}>
+                  {(id, describedBy) => (
                     <Input
-                      id={field.name}
+                      id={id}
                       name={field.name}
+                      describedBy={describedBy}
                       placeholder="Número da máquina (opcional)"
                       value={field.state.value}
                       onBlur={field.handleBlur}
-                      onChange={(event) =>
-                        field.handleChange(event.target.value)
-                      }
-                      aria-invalid={!field.state.meta.isValid}
+                      onChange={field.handleChange}
+                      invalid={!field.state.meta.isValid}
                     />
-                    <FieldError errors={field.state.meta.errors} />
-                  </Field>
-                )}
-              </form.Field>
-
-              {requestError && (
-                <p role="alert" className="text-sm text-destructive">
-                  {requestError}
-                </p>
+                  )}
+                </Field>
               )}
-            </div>
+            </form.Field>
 
-            <SheetFooter className="shrink-0 flex flex-col gap-2">
-              <form.Subscribe selector={(state) => state.isSubmitting}>
-                {(isSubmitting) => (
-                  <Button
-                    type="submit"
-                    variant="green"
-                    loading={isSubmitting}
-                    className="w-full"
-                  >
-                    <HugeiconsIcon
-                      icon={SaveIcon}
-                      className="size-5"
-                      strokeWidth={3}
-                    />
-                    Salvar
-                  </Button>
-                )}
-              </form.Subscribe>
-              <Button
-                type="button"
-                variant="red"
-                className="w-full"
-                onClick={() => {
-                  setConfirmError(undefined);
-                  setDeleteConfirmOpen(true);
-                }}
-              >
-                <HugeiconsIcon
-                  icon={Delete01Icon}
-                  className="size-5"
-                  strokeWidth={3}
-                />
-                Apagar
-              </Button>
-              <Button
-                type="button"
-                variant="white"
-                onClick={() => handleOpenChange(false)}
-                className="w-full"
-              >
-                <HugeiconsIcon
-                  icon={EyeClosedIcon}
-                  className="size-5"
-                  strokeWidth={3}
-                />
-                Fechar
-              </Button>
-            </SheetFooter>
-          </form>
-        </SheetContent>
+            {requestError && (
+              <p role="alert" className="text-sm text-destructive">
+                {requestError}
+              </p>
+            )}
+          </div>
+
+          <div className="mt-4 flex flex-col-reverse justify-end gap-2 xl:flex-row">
+            <Button variant="quiet" onClick={() => handleOpenChange(false)}>
+              <HugeiconsIcon
+                icon={EyeClosedIcon}
+                className="size-5"
+                strokeWidth={3}
+              />
+              Fechar
+            </Button>
+            <Button
+              tone="pink"
+              onClick={() => {
+                setConfirmError(undefined);
+                setDeleteConfirmOpen(true);
+              }}
+            >
+              <HugeiconsIcon
+                icon={Delete01Icon}
+                className="size-5"
+                strokeWidth={3}
+              />
+              Apagar
+            </Button>
+            <form.Subscribe selector={(state) => state.isSubmitting}>
+              {(isSubmitting) => (
+                <Button type="submit" tone="mint" loading={isSubmitting}>
+                  <HugeiconsIcon
+                    icon={SaveIcon}
+                    className="size-5"
+                    strokeWidth={3}
+                  />
+                  Salvar
+                </Button>
+              )}
+            </form.Subscribe>
+          </div>
+        </form>
       </Sheet>
 
       <AdminPasswordConfirmDialog
@@ -330,7 +294,7 @@ export function EditTeamSheet({
           </>
         }
         confirmLabel="Confirmar"
-        confirmVariant="red"
+        confirmTone="pink"
         isLoading={isConfirming}
         error={confirmError}
         onConfirm={handleConfirmDelete}

@@ -4,31 +4,11 @@ import { useEffect, useMemo, useState } from 'react';
 import { collaboratorService } from '@/services/collaborator/collaborator.service';
 import { getCollaboratorErrorMessage } from '@/services/collaborator/collaborator.error';
 import type { Collaborator } from '@/services/collaborator/collaborator.type';
-import { Button } from '@/components/ui/button';
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuTrigger,
-} from '@/components/ui/dropdown-menu';
-import { Switch } from '@/components/ui/switch';
-import { toast } from '@/components/ui/toast';
-import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogFooter,
-  DialogHeader,
-  DialogTitle,
-} from '@/components/ui/dialog';
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from '@/components/ui/table';
+import { Button } from '@/components/pouf/Button';
+import { Confirm, Switch } from '@/components/pouf/controls';
+import { DropdownMenu } from '@/components/pouf/menu';
+import { Table } from '@/components/pouf/table';
+import { toast } from '@/components/pouf/toaster';
 import { CreateCollaboratorSheet } from './create-collaborator-sheet';
 import { EditCollaboratorSheet } from './edit-collaborator-sheet';
 import { CollaboratorSettingsDialog } from './collaborator-settings-dialog';
@@ -161,12 +141,9 @@ export default function BoxListCollaborators({
       setCollaborators((current) =>
         current.map((item) => (item.id === updated.id ? updated : item)),
       );
-      toast.add({
-        title: hasAccess
-          ? `Acesso de ${collaborator.name} ativado.`
-          : `Acesso de ${collaborator.name} desativado.`,
-        type: 'success',
-      });
+      toast.success(hasAccess
+        ? `Acesso de ${collaborator.name} ativado.`
+        : `Acesso de ${collaborator.name} desativado.`);
     } catch (updateError) {
       setCollaborators((current) =>
         current.map((item) =>
@@ -180,10 +157,7 @@ export default function BoxListCollaborators({
         'Não foi possível atualizar o acesso do colaborador.',
       );
       setError(message);
-      toast.add({
-        title: message,
-        type: 'error',
-      });
+      toast.error(message);
     } finally {
       setUpdatingAccess((current) => {
         const next = new Set(current);
@@ -223,34 +197,114 @@ export default function BoxListCollaborators({
       await collaboratorService.remove(contestId, collaboratorToDelete.id);
       removeCollaboratorFromList(collaboratorToDelete.id);
       setCollaboratorToDelete(null);
-      toast.add({
-        title: 'Colaborador removido com sucesso.',
-        type: 'success',
-      });
+      toast.success('Colaborador removido com sucesso.');
     } catch (deleteError) {
       const message = getCollaboratorErrorMessage(
         deleteError,
         'Não foi possível excluir o colaborador.',
       );
       setError(message);
-      toast.add({
-        title: message,
-        type: 'error',
-      });
+      toast.error(message);
     } finally {
       setIsDeleting(false);
     }
   }
 
-  return (
-    <div className="flex h-full flex-1 flex-col gap-4 p-4 pt-6">
-      <div className="flex flex-col-reverse sm:flex-row justify-end gap-2">
-        <Button
-          size="sm"
-          variant="orange"
-          className="w-full sm:w-auto"
-          onClick={() => setSettingsOpen(true)}
+  const columns = [
+    {
+      key: 'id',
+      header: 'ID',
+      mono: true,
+      render: (collaborator: Collaborator) => collaborator.id,
+    },
+    {
+      key: 'name',
+      header: 'Nome',
+      render: (collaborator: Collaborator) => collaborator.name,
+    },
+    {
+      key: 'email',
+      header: 'Email',
+      render: (collaborator: Collaborator) => collaborator.email,
+    },
+    {
+      key: 'access',
+      header: 'Acesso',
+      render: (collaborator: Collaborator) => (
+        <Switch
+          checked={collaborator.hasAccess}
+          disabled={updatingAccess.has(collaborator.id)}
+          label={`Acesso de ${collaborator.name}`}
+          onChange={(checked) => void updateAccess(collaborator, checked)}
+        />
+      ),
+    },
+    {
+      key: 'lastAccess',
+      header: 'Último acesso',
+      render: (collaborator: Collaborator) =>
+        formatDateTime(collaborator.lastAccess),
+    },
+    {
+      key: 'createdAt',
+      header: 'Ingresso',
+      render: (collaborator: Collaborator) =>
+        formatDateTime(collaborator.createdAt),
+    },
+    {
+      key: 'actions',
+      header: 'Ações',
+      align: 'right' as const,
+      render: (collaborator: Collaborator) => (
+        <DropdownMenu
+          items={[
+            {
+              label: 'Editar',
+              icon: (
+                <HugeiconsIcon
+                  icon={PencilEdit02Icon}
+                  className="size-4"
+                  strokeWidth={2}
+                />
+              ),
+              onClick: () => openEditSheet(collaborator),
+            },
+            {
+              label: 'Remover',
+              tone: 'down' as const,
+              icon: (
+                <HugeiconsIcon
+                  icon={Delete01Icon}
+                  className="size-4"
+                  strokeWidth={2}
+                />
+              ),
+              onClick: () => setCollaboratorToDelete(collaborator),
+            },
+          ]}
         >
+          {/* A bare button, not a cushion: one pill per row would outweigh the
+              data it belongs to. */}
+          <button
+            type="button"
+            aria-label={`Opções de ${collaborator.name}`}
+            className="inline-flex size-9 shrink-0 cursor-pointer items-center justify-center rounded-full text-ink transition-colors hover:bg-ink/5 focus-visible:outline-3 focus-visible:outline-offset-2 focus-visible:outline-[rgba(155,106,255,0.55)]"
+          >
+            <HugeiconsIcon
+              icon={MoreHorizontalIcon}
+              className="size-5"
+              strokeWidth={2}
+            />
+          </button>
+        </DropdownMenu>
+      ),
+    },
+  ];
+
+  return (
+    <div className="flex h-full flex-1 flex-col gap-4 p-4">
+      <div className="flex flex-col-reverse justify-end gap-2 sm:flex-row">
+        <Button tone="orange" size="sm" onClick={() => setSettingsOpen(true)}>
           <HugeiconsIcon
             icon={CustomizeIcon}
             className="size-5"
@@ -258,11 +312,7 @@ export default function BoxListCollaborators({
           />
           Ajustes
         </Button>
-        <Button
-          onClick={() => setCreateOpen(true)}
-          className="w-full sm:w-auto"
-          size="sm"
-        >
+        <Button tone="blue" size="sm" onClick={() => setCreateOpen(true)}>
           <HugeiconsIcon
             icon={CirclePlusIcon}
             className="size-5"
@@ -278,171 +328,67 @@ export default function BoxListCollaborators({
         </p>
       )}
 
-      <div className="overflow-hidden rounded-2xl border bg-muted">
-        <Table>
-          <TableHeader>
-            <TableRow>
-              <TableHead className="w-20 px-4 font-bold">ID</TableHead>
-              <TableHead className="px-4 font-bold">Nome</TableHead>
-              <TableHead className="px-4 font-bold">Email</TableHead>
-              <TableHead className="px-4 font-bold">Acesso</TableHead>
-              <TableHead className="px-4 font-bold">Último acesso</TableHead>
-              <TableHead className="px-4 font-bold">Inscrição</TableHead>
-              <TableHead className="w-24 px-4 font-bold text-right">
-                Ações
-              </TableHead>
-            </TableRow>
-          </TableHeader>
-          <TableBody>
-            {loading ? (
-              <TableRow>
-                <TableCell colSpan={7} className="h-24 px-4 text-center">
-                  <Spinner />
-                </TableCell>
-              </TableRow>
-            ) : error && orderedCollaborators.length === 0 ? (
-              <TableRow>
-                <TableCell
-                  colSpan={7}
-                  className="h-24 px-4 text-center text-muted-foreground"
-                >
-                  Ops! Não foi possível carregar a lista.
-                </TableCell>
-              </TableRow>
-            ) : orderedCollaborators.length === 0 ? (
-              <TableRow>
-                <TableCell
-                  colSpan={7}
-                  className="h-24 px-4 text-center text-muted-foreground"
-                >
-                  Nenhum colaborador ingressou ainda.
-                </TableCell>
-              </TableRow>
-            ) : (
-              paginatedCollaborators.map((collaborator, index) => {
-                const absoluteIndex = (currentPage - 1) * PAGE_SIZE + index;
-
-                return (
-                  <TableRow
-                    key={collaborator.id}
-                    className={absoluteIndex % 2 === 0 ? 'bg-white' : ''}
-                  >
-                    <TableCell className="w-20 px-4 whitespace-nowrap font-mono text-xs">
-                      {collaborator.id}
-                    </TableCell>
-                    <TableCell className="px-4">{collaborator.name}</TableCell>
-                    <TableCell className="px-4">{collaborator.email}</TableCell>
-                    <TableCell className="px-4">
-                      <Switch
-                        checked={collaborator.hasAccess}
-                        disabled={updatingAccess.has(collaborator.id)}
-                        aria-label={`Acesso de ${collaborator.name}`}
-                        onCheckedChange={(checked) =>
-                          void updateAccess(collaborator, checked)
-                        }
-                      />
-                    </TableCell>
-                    <TableCell className="px-4 text-muted-foreground">
-                      {formatDateTime(collaborator.lastAccess)}
-                    </TableCell>
-                    <TableCell className="px-4 text-muted-foreground">
-                      {formatDateTime(collaborator.createdAt)}
-                    </TableCell>
-                    <TableCell className="px-4 text-right">
-                      <DropdownMenu>
-                        <DropdownMenuTrigger
-                          render={
-                            <Button
-                              type="button"
-                              variant="normal"
-                              size="icon"
-                              className="size-9"
-                              aria-label={`Opções de ${collaborator.name}`}
-                            />
-                          }
-                        >
-                          <HugeiconsIcon
-                            icon={MoreHorizontalIcon}
-                            className="size-5"
-                            strokeWidth={1.5}
-                          />
-                        </DropdownMenuTrigger>
-                        <DropdownMenuContent align="end" className="min-w-40">
-                          <DropdownMenuItem
-                            onClick={() => openEditSheet(collaborator)}
-                          >
-                            <HugeiconsIcon
-                              icon={PencilEdit02Icon}
-                              className="size-4"
-                              strokeWidth={1.5}
-                            />
-                            Editar
-                          </DropdownMenuItem>
-                          <DropdownMenuItem
-                            variant="destructive"
-                            onClick={() => setCollaboratorToDelete(collaborator)}
-                          >
-                            <HugeiconsIcon
-                              icon={Delete01Icon}
-                              className="size-4"
-                              strokeWidth={1.5}
-                            />
-                            Remover
-                          </DropdownMenuItem>
-                        </DropdownMenuContent>
-                      </DropdownMenu>
-                    </TableCell>
-                  </TableRow>
-                );
-              })
-            )}
-          </TableBody>
-        </Table>
-      </div>
-
-      {!loading && orderedCollaborators.length > 0 && (
-        <div className="mt-auto flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-          <p className="text-sm text-muted-foreground">
-            Mostrando {rangeStart}–{rangeEnd} de {orderedCollaborators.length}
-            {totalPages > 1
-              ? ` · Página ${currentPage} de ${totalPages}`
-              : null}
-          </p>
-          <div className="flex items-center gap-2">
-            <Button
-              type="button"
-              variant="white"
-              size="sm"
-              className="w-full sm:w-fit"
-              disabled={currentPage <= 1}
-              onClick={() => setPage((current) => Math.max(1, current - 1))}
-            >
-              <HugeiconsIcon
-                icon={ArrowLeft01Icon}
-                className="size-4"
-                strokeWidth={2}
-              />
-              Anterior
-            </Button>
-            <Button
-              type="button"
-              variant="white"
-              size="sm"
-              className="w-full sm:w-fit"
-              disabled={currentPage >= totalPages}
-              onClick={() =>
-                setPage((current) => Math.min(totalPages, current + 1))
-              }
-            >
-              Próxima
-              <HugeiconsIcon
-                icon={ArrowRight01Icon}
-                className="size-4"
-                strokeWidth={2}
-              />
-            </Button>
+      {/* The pouf Table's empty state is English, so every "no rows" branch is
+          decided here instead. */}
+      {loading ? (
+        <Spinner />
+      ) : error && orderedCollaborators.length === 0 ? (
+        <p className="text-center text-sm text-muted-foreground">
+          Ops! Não foi possível carregar a lista.
+        </p>
+      ) : orderedCollaborators.length === 0 ? (
+        <p className="text-center text-sm text-muted-foreground">
+          Nenhum colaborador ingressou ainda.
+        </p>
+      ) : (
+        <>
+          <div className="min-h-0 flex-1">
+            <Table
+              columns={columns}
+              rows={paginatedCollaborators}
+              getKey={(collaborator) => collaborator.id}
+            />
           </div>
-        </div>
+
+          <div className="mt-auto flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+            <p className="text-sm text-muted-foreground">
+              Mostrando {rangeStart}–{rangeEnd} de {orderedCollaborators.length}
+              {totalPages > 1
+                ? ` · Página ${currentPage} de ${totalPages}`
+                : null}
+            </p>
+            <div className="flex items-center gap-2">
+              <Button
+                variant="quiet"
+                size="sm"
+                disabled={currentPage <= 1}
+                onClick={() => setPage((current) => Math.max(1, current - 1))}
+              >
+                <HugeiconsIcon
+                  icon={ArrowLeft01Icon}
+                  className="size-4"
+                  strokeWidth={2}
+                />
+                Anterior
+              </Button>
+              <Button
+                variant="quiet"
+                size="sm"
+                disabled={currentPage >= totalPages}
+                onClick={() =>
+                  setPage((current) => Math.min(totalPages, current + 1))
+                }
+              >
+                Próxima
+                <HugeiconsIcon
+                  icon={ArrowRight01Icon}
+                  className="size-4"
+                  strokeWidth={2}
+                />
+              </Button>
+            </div>
+          </div>
+        </>
       )}
 
       <CreateCollaboratorSheet
@@ -468,41 +414,20 @@ export default function BoxListCollaborators({
         onOpenChange={setSettingsOpen}
       />
 
-      <Dialog
+      <Confirm
         open={collaboratorToDelete !== null}
-        onOpenChange={(open) => {
-          if (!open) setCollaboratorToDelete(null);
+        onOpenChange={(nextOpen) => {
+          if (!nextOpen && isDeleting) return;
+          if (!nextOpen) setCollaboratorToDelete(null);
         }}
-      >
-        <DialogContent>
-          <DialogHeader>
-            <DialogTitle className="text-lg font-semibold">Excluir colaborador</DialogTitle>
-            <DialogDescription>
-              Remover <strong>{collaboratorToDelete?.name}</strong> desta competição? Se não
-              houver vínculo em outras competições, a conta será excluída.
-            </DialogDescription>
-          </DialogHeader>
-          <DialogFooter>
-            <Button
-              type="button"
-              variant="white"
-              size="sm"
-              onClick={() => setCollaboratorToDelete(null)}
-            >
-              Cancelar
-            </Button>
-            <Button
-              type="button"
-              variant="red"
-              size="sm"
-              loading={isDeleting}
-              onClick={() => void handleDelete()}
-            >
-              Excluir
-            </Button>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
+        title="Excluir colaborador"
+        body={`Remover ${collaboratorToDelete?.name ?? 'o colaborador'} desta competição? Se não houver vínculo em outras competições, a conta será excluída.`}
+        confirmLabel="Excluir"
+        cancelLabel="Cancelar"
+        tone="pink"
+        loading={isDeleting}
+        onConfirm={() => void handleDelete()}
+      />
     </div>
   );
 }

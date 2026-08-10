@@ -13,18 +13,11 @@ import { questionService } from '@/services/question/question.service';
 import { getQuestionErrorMessage } from '@/services/question/question.error';
 import type { Question } from '@/services/question/question.type';
 import { COLOR, toBalloonColor, type BalloonColor } from '@/services/question/balloon-color';
-import { Button } from '@/components/ui/button';
-import { Field, FieldError, FieldLabel } from '@/components/ui/field';
-import { Input } from '@/components/ui/input';
-import {
-  Sheet,
-  SheetContent,
-  SheetDescription,
-  SheetFooter,
-  SheetHeader,
-  SheetTitle,
-} from '@/components/ui/sheet';
-import { toast } from '@/components/ui/toast';
+import { Button } from '@/components/pouf/Button';
+import { Field, Input } from '@/components/pouf/Input';
+import { Sheet } from '@/components/pouf/sheet';
+import { toast } from '@/components/pouf/toaster';
+import { fieldError } from '@/lib/form';
 import { BalloonColorSelect } from './balloon-color-select';
 import {
   questionFormSchema,
@@ -81,10 +74,7 @@ export function EditQuestionSheet({
           balloonColor: value.balloonColor,
         });
         onUpdated(updatedQuestion);
-        toast.add({
-          title: 'Questão atualizada com sucesso.',
-          type: 'success',
-        });
+        toast.success('Questão atualizada com sucesso.');
         handleOpenChange(false);
       } catch (error) {
         const message = getQuestionErrorMessage(
@@ -92,17 +82,18 @@ export function EditQuestionSheet({
           'Não foi possível atualizar a questão.',
         );
         setRequestError(message);
-        toast.add({
-          title: message,
-          type: 'error',
-        });
+        toast.error(message);
       }
     },
   });
 
   useEffect(() => {
     if (open && question) {
-      form.reset(toFormValues(question));
+      /* keepDefaultValues: a bare reset() would ALSO promote these values to the
+         form's defaults, and useForm re-runs update() on every render — which
+         then sees the component's own defaults differ and wipes an untouched
+         form back to empty on the next render. */
+      form.reset(toFormValues(question), { keepDefaultValues: true });
       setRequestError(undefined);
       setDeleteConfirmOpen(false);
       setConfirmError(undefined);
@@ -110,6 +101,8 @@ export function EditQuestionSheet({
   }, [question, form, open]);
 
   function handleOpenChange(nextOpen: boolean) {
+    if (!nextOpen && isConfirming) return;
+
     if (!nextOpen) {
       form.reset(DEFAULT_FORM_VALUES);
       setRequestError(undefined);
@@ -129,146 +122,126 @@ export function EditQuestionSheet({
       await questionService.remove(question.id, { password });
       onDeleted(question.id);
       setDeleteConfirmOpen(false);
+      setIsConfirming(false);
       handleOpenChange(false);
-      toast.add({
-        title: 'Questão excluída com sucesso.',
-        type: 'success',
-      });
+      toast.success('Questão excluída com sucesso.');
+      return;
     } catch (error) {
       const message = getQuestionErrorMessage(
         error,
         'Não foi possível excluir a questão.',
       );
       setConfirmError(message);
-      toast.add({
-        title: message,
-        type: 'error',
-      });
-    } finally {
-      setIsConfirming(false);
+      toast.error(message);
     }
+
+    setIsConfirming(false);
   }
 
   return (
     <>
-      <Sheet open={open} onOpenChange={handleOpenChange}>
-        <SheetContent side="right" showCloseButton={false} className="overflow-hidden">
-          <SheetHeader className="shrink-0">
-            <SheetTitle className="text-2xl font-bold">Editar questão</SheetTitle>
-            <SheetDescription>
-              Atualize os dados da questão selecionada.
-            </SheetDescription>
-          </SheetHeader>
-
-          <form
-            className="flex min-h-0 flex-1 flex-col"
-            onSubmit={(event) => {
-              event.preventDefault();
-              event.stopPropagation();
-              void form.handleSubmit();
-            }}
-          >
-            <div className="flex min-h-0 flex-1 flex-col gap-5 overflow-y-auto scrollbar-thin px-4 pb-2">
-              <form.Field name="label">
-                {(field) => (
-                  <Field data-invalid={!field.state.meta.isValid}>
-                    <FieldLabel htmlFor={field.name}>Identificador</FieldLabel>
+      <Sheet
+        open={open}
+        onOpenChange={handleOpenChange}
+        title="Editar questão"
+        description="Atualize os dados da questão selecionada."
+      >
+        <form
+          onSubmit={(event) => {
+            event.preventDefault();
+            event.stopPropagation();
+            void form.handleSubmit();
+          }}
+        >
+          <div className="flex flex-col gap-5">
+            <form.Field name="label">
+              {(field) => (
+                <Field label="Identificador" error={fieldError(field.state.meta)}>
+                  {(id, describedBy) => (
                     <Input
-                      id={field.name}
+                      id={id}
                       name={field.name}
+                      describedBy={describedBy}
                       placeholder="Ex: A, B, 1, 2"
                       value={field.state.value}
                       onBlur={field.handleBlur}
-                      onChange={(event) =>
-                        field.handleChange(event.target.value.toUpperCase())
-                      }
-                      aria-invalid={!field.state.meta.isValid}
-                      className="uppercase"
+                      onChange={(value) => field.handleChange(value.toUpperCase())}
+                      invalid={!field.state.meta.isValid}
+                      autoCapitalize="characters"
                     />
-                    <FieldError errors={field.state.meta.errors} />
-                  </Field>
-                )}
-              </form.Field>
+                  )}
+                </Field>
+              )}
+            </form.Field>
 
-              <form.Field name="title">
-                {(field) => (
-                  <Field data-invalid={!field.state.meta.isValid}>
-                    <FieldLabel htmlFor={field.name}>Título</FieldLabel>
+            <form.Field name="title">
+              {(field) => (
+                <Field label="Título" error={fieldError(field.state.meta)}>
+                  {(id, describedBy) => (
                     <Input
-                      id={field.name}
+                      id={id}
                       name={field.name}
+                      describedBy={describedBy}
                       placeholder="Título da questão"
                       value={field.state.value}
                       onBlur={field.handleBlur}
-                      onChange={(event) => field.handleChange(event.target.value)}
-                      aria-invalid={!field.state.meta.isValid}
+                      onChange={field.handleChange}
+                      invalid={!field.state.meta.isValid}
                     />
-                    <FieldError errors={field.state.meta.errors} />
-                  </Field>
-                )}
-              </form.Field>
+                  )}
+                </Field>
+              )}
+            </form.Field>
 
-              <form.Field name="balloonColor">
-                {(field) => (
-                  <Field data-invalid={!field.state.meta.isValid}>
-                    <FieldLabel htmlFor={field.name}>Cor do balão</FieldLabel>
+            <form.Field name="balloonColor">
+              {(field) => (
+                <Field label="Cor do balão" error={fieldError(field.state.meta)}>
+                  {(id, describedBy) => (
                     <BalloonColorSelect
-                      id={field.name}
+                      id={id}
+                      describedBy={describedBy}
                       value={field.state.value}
                       invalid={!field.state.meta.isValid}
                       onBlur={field.handleBlur}
                       onChange={(color: BalloonColor) => field.handleChange(color)}
                     />
-                    <FieldError errors={field.state.meta.errors} />
-                  </Field>
-                )}
-              </form.Field>
-
-              {requestError && (
-                <p role="alert" className="text-sm text-destructive">
-                  {requestError}
-                </p>
+                  )}
+                </Field>
               )}
-            </div>
+            </form.Field>
 
-            <SheetFooter className="shrink-0">
-              <form.Subscribe selector={(state) => state.isSubmitting}>
-                {(isSubmitting) => (
-                  <Button
-                    type="submit"
-                    variant="green"
-                    loading={isSubmitting}
-                    className="w-full"
-                  >
-                    <HugeiconsIcon icon={SaveIcon} className="size-5" strokeWidth={3} />
-                    Salvar
-                  </Button>
-                )}
-              </form.Subscribe>
-              <Button
-                type="button"
-                variant="red"
-                className="w-full"
-                onClick={() => {
-                  setConfirmError(undefined);
-                  setDeleteConfirmOpen(true);
-                }}
-              >
-                <HugeiconsIcon icon={Delete01Icon} className="size-5" strokeWidth={3} />
-                Apagar
-              </Button>
-              <Button
-                type="button"
-                variant="white"
-                onClick={() => handleOpenChange(false)}
-                className="w-full"
-              >
-                <HugeiconsIcon icon={EyeClosedIcon} className="size-5" strokeWidth={3} />
-                Fechar
-              </Button>
-            </SheetFooter>
-          </form>
-        </SheetContent>
+            {requestError && (
+              <p role="alert" className="text-sm text-destructive">
+                {requestError}
+              </p>
+            )}
+          </div>
+
+          <div className="mt-4 flex flex-col-reverse justify-end gap-2 xl:flex-row">
+            <Button variant="quiet" onClick={() => handleOpenChange(false)}>
+              <HugeiconsIcon icon={EyeClosedIcon} className="size-5" strokeWidth={3} />
+              Fechar
+            </Button>
+            <Button
+              tone="pink"
+              onClick={() => {
+                setConfirmError(undefined);
+                setDeleteConfirmOpen(true);
+              }}
+            >
+              <HugeiconsIcon icon={Delete01Icon} className="size-5" strokeWidth={3} />
+              Apagar
+            </Button>
+            <form.Subscribe selector={(state) => state.isSubmitting}>
+              {(isSubmitting) => (
+                <Button type="submit" tone="mint" loading={isSubmitting}>
+                  <HugeiconsIcon icon={SaveIcon} className="size-5" strokeWidth={3} />
+                  Salvar
+                </Button>
+              )}
+            </form.Subscribe>
+          </div>
+        </form>
       </Sheet>
 
       <AdminPasswordConfirmDialog
@@ -294,7 +267,7 @@ export function EditQuestionSheet({
           </>
         }
         confirmLabel="Confirmar"
-        confirmVariant="red"
+        confirmTone="pink"
         isLoading={isConfirming}
         error={confirmError}
         onConfirm={handleConfirmDelete}

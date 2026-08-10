@@ -1,12 +1,8 @@
 'use client';
 
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from '@/components/ui/select';
+import * as RSelect from '@radix-ui/react-select';
+import { Icon } from '@/components/pouf/Icon';
+import { inputClasses } from '@/components/pouf/Input';
 import {
   BALLOON_COLOR_OPTIONS,
   type BalloonColor,
@@ -18,6 +14,7 @@ import { cn } from '@/lib/utils';
 
 type BalloonColorSelectProps = {
   id?: string;
+  describedBy?: string;
   value: string;
   invalid?: boolean;
   onBlur?: () => void;
@@ -42,55 +39,74 @@ function BalloonColorOptionContent({ option }: { option: BalloonColorOption }) {
     <span className="flex min-w-0 items-center gap-2">
       <ColorSwatch color={option.value} />
       <span className="flex min-w-0 flex-col items-start leading-tight">
-        <span className="truncate font-medium">{option.label}</span>
+        <span className="truncate font-bold">{option.label}</span>
         <span className="text-xs text-muted-foreground/70">{option.value}</span>
       </span>
     </span>
   );
 }
 
+/** Radix Select wearing the pouf field chrome by hand: the pouf `Select` only
+ *  takes `{value,label}` pairs, which would drop the colour swatches. */
 export function BalloonColorSelect({
   id,
+  describedBy,
   value,
   invalid,
   onBlur,
   onChange,
 }: BalloonColorSelectProps) {
   const selectedValue = toBalloonColor(value);
+  const selectedOption = BALLOON_COLOR_OPTIONS.find(
+    (option) => option.value === selectedValue,
+  );
 
   return (
-    <Select
+    <RSelect.Root
       value={selectedValue}
       onValueChange={(nextValue) => {
-        if (typeof nextValue === 'string' && isBalloonColor(nextValue)) {
+        if (isBalloonColor(nextValue)) {
           onChange(nextValue);
         }
       }}
     >
-      <SelectTrigger
+      <RSelect.Trigger
         id={id}
-        className="h-auto w-full rounded-2xl border-3 border-input bg-gray-50 px-4 py-6 text-base shadow-none dark:bg-input/30"
-        aria-invalid={invalid}
+        className={`${inputClasses({ invalid: !!invalid })} flex min-w-0 flex-row flex-wrap items-center justify-between gap-(--gap,var(--s4))`}
+        aria-describedby={describedBy}
+        aria-invalid={invalid || undefined}
         onBlur={onBlur}
       >
-        <SelectValue placeholder="Selecione a cor do balão">
-          {(current: string | null) => {
-            const currentValue =
-              current && isBalloonColor(current) ? current : selectedValue;
-            const option = BALLOON_COLOR_OPTIONS.find(
-              (item) => item.value === currentValue,
-            );
-            return option ? <BalloonColorOptionContent option={option} /> : null;
-          }}
-        </SelectValue>
-      </SelectTrigger>
-      <SelectContent alignItemWithTrigger={false} align="start">
-        {BALLOON_COLOR_OPTIONS.map((option) => (
-          <SelectItem key={option.value} value={option.value} className="py-2">
-            <BalloonColorOptionContent option={option} />
-          </SelectItem>
-        ))}
-      </SelectContent>
-    </Select>
+        <RSelect.Value placeholder="Selecione a cor do balão">
+          {selectedOption ? (
+            <BalloonColorOptionContent option={selectedOption} />
+          ) : null}
+        </RSelect.Value>
+        <RSelect.Icon>
+          <Icon name="expand" size="sm" />
+        </RSelect.Icon>
+      </RSelect.Trigger>
+      <RSelect.Portal>
+        <RSelect.Content
+          className="pouf-popover pouf-popover--select"
+          position="popper"
+          sideOffset={8}
+        >
+          <RSelect.Viewport>
+            {BALLOON_COLOR_OPTIONS.map((option) => (
+              <RSelect.Item
+                key={option.value}
+                value={option.value}
+                className="pouf-option"
+              >
+                <RSelect.ItemText>
+                  <BalloonColorOptionContent option={option} />
+                </RSelect.ItemText>
+              </RSelect.Item>
+            ))}
+          </RSelect.Viewport>
+        </RSelect.Content>
+      </RSelect.Portal>
+    </RSelect.Root>
   );
 }
