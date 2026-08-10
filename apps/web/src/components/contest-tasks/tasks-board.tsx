@@ -29,7 +29,7 @@ export default function TasksBoard({ contestId }: TasksBoardProps) {
         </BoxFeatures>
       </div>
 
-      <div className="w-full sm:w-2/5">
+      <div className="w-full lg:w-2/5">
         <BoxFeatures
           title="Histórico de tarefas"
           icon={HistoryIcon}
