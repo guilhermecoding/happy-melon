@@ -18,6 +18,12 @@ import {
 
 const API_URL = getApiBaseUrl();
 
+export const CLAIM_RACE_ERROR_MESSAGE =
+  'Ops! Alguém foi ligeiro e já pegou essa task. Tente outra!';
+
+export const CLAIM_SUCCESS_MESSAGE =
+  'Agora é com você! Tarefa adicionada ao seu lobby.';
+
 async function getServerCookieHeader(): Promise<string | undefined> {
   if (typeof window !== 'undefined') {
     return undefined;
@@ -134,7 +140,22 @@ export const staffTasksService = {
     }
   },
 
+  isClaimRaceError(error: unknown): boolean {
+    if (
+      error instanceof PrintServiceError ||
+      error instanceof BalloonServiceError
+    ) {
+      return error.status === 400;
+    }
+
+    return false;
+  },
+
   getClaimErrorMessage(error: unknown): string {
+    if (this.isClaimRaceError(error)) {
+      return CLAIM_RACE_ERROR_MESSAGE;
+    }
+
     if (
       error instanceof PrintServiceError ||
       error instanceof BalloonServiceError

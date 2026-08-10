@@ -9,7 +9,10 @@ import {
 } from '@repo/shared';
 import { toast } from '@/components/pouf/toaster';
 import { authClient } from '@/lib/auth-client';
-import { staffTasksService } from '@/services/staff-tasks/staff-tasks.service';
+import {
+  CLAIM_SUCCESS_MESSAGE,
+  staffTasksService,
+} from '@/services/staff-tasks/staff-tasks.service';
 import LobbyArea from './lobby-area';
 import QueueTask from './queue-task';
 
@@ -132,9 +135,15 @@ export default function StaffTasksBoard({ contestId }: StaffTasksBoardProps) {
     try {
       const claimed = await staffTasksService.claim(contestId, task);
       setLobby((prev) => upsertTask(prev, claimed));
+      toast.success(CLAIM_SUCCESS_MESSAGE);
     } catch (error) {
       setLobby((prev) => removeTask(prev, task.id));
-      setQueue((prev) => upsertTask(prev, task));
+      if (staffTasksService.isClaimRaceError(error)) {
+        // Another staff won the race — keep it out of the queue.
+        setQueue((prev) => removeTask(prev, task.id));
+      } else {
+        setQueue((prev) => upsertTask(prev, task));
+      }
       toast.error(staffTasksService.getClaimErrorMessage(error));
     } finally {
       setClaimingIds((prev) => {

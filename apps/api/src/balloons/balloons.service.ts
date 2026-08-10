@@ -340,7 +340,7 @@ export class BalloonsService {
 
       if (updated.count !== 1) {
         throw new BadRequestException(
-          'Esta tarefa não está disponível para claim.',
+          'Ops! Alguém foi ligeiro e já pegou essa task. Tente outra!',
         );
       }
 
