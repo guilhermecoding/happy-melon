@@ -242,8 +242,8 @@ export function LoginForm({
         return
       }
 
-      router.push('/admin')
-      router.refresh()
+      // Full navigation so the session cookie is available to the proxy/middleware
+      window.location.assign('/admin')
     } catch {
       setError('Não foi possível conectar ao servidor de autenticação.')
     } finally {

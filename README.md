@@ -1,124 +1,188 @@
-# Turborepo starter
+# Happy Melon
 
-This is a community-maintained example. If you experience a problem, please submit a pull request with a fix. GitHub Issues will be closed.
+Monorepo [Turborepo](https://turborepo.dev) com:
 
-## Using this example
+| App / pacote | Descrição |
+| --- | --- |
+| `apps/api` | API NestJS (Fastify) + Better Auth — porta `3000` |
+| `apps/web` | Frontend Next.js — porta `3001` |
+| `packages/database` | Prisma (PostgreSQL) |
+| `packages/shared` | Tipos/utilitários compartilhados |
 
-Run the following command:
+## Pré-requisitos
+
+- **Node.js** 18+ (recomendado 22)
+- **pnpm** via Corepack (`corepack enable`)
+- **Docker** + Docker Compose (banco e/ou stack completa)
+
+## Configuração rápida (Docker — recomendado para deploy)
+
+1. Copie o arquivo de ambiente da raiz:
 
 ```bash
-npx create-turbo@latest -e with-nestjs
+cp .env.example .env
 ```
 
-## What's inside?
+2. Edite o `.env`:
 
-This Turborepo includes the following packages & apps:
+- Defina `POSTGRES_PASSWORD` e um `BETTER_AUTH_SECRET` forte (`openssl rand -base64 32`)
+- Ajuste `DATABASE_URL` para usar a mesma senha (host `postgres` dentro do Compose)
+- Em produção, aponte `BETTER_AUTH_URL`, `WEB_ORIGIN` e `NEXT_PUBLIC_API_URL` para as URLs públicas (HTTPS)
 
-### Apps and Packages
+3. Suba a stack (Postgres + API + Web):
 
-```shell
+```bash
+docker compose up -d --build
+```
+
+- Web: [http://localhost:3001](http://localhost:3001)
+- API: [http://localhost:3000](http://localhost:3000)
+- Postgres: `localhost:5432` (senha do `.env`)
+
+Na subida, a API aplica as migrations (`prisma migrate deploy`) automaticamente.
+
+> **Senha do Postgres:** `POSTGRES_PASSWORD` só vale na **primeira** criação do volume. Se mudar a senha no `.env` depois, ou alinhe `DATABASE_URL` à senha antiga, ou recrie o volume com `docker compose down -v` (apaga os dados).
+
+### Seed do primeiro admin
+
+Com a stack no ar e `ADMIN_EMAIL` / `ADMIN_PASSWORD` preenchidos no `.env`:
+
+```bash
+# recomendado (não usa Corepack/pnpm)
+docker compose exec api /app/apps/api/docker-seed-admin.sh
+
+# alternativa
+docker compose exec -u root api pnpm --filter api seed:admin
+```
+
+Se a imagem for antiga e o seed script ainda não existir:
+
+```bash
+docker compose build api && docker compose up -d api
+docker compose exec api /app/apps/api/docker-seed-admin.sh
+```
+
+### Comandos úteis
+
+```bash
+docker compose logs -f api web
+docker compose ps
+docker compose down          # para containers (mantém volume do banco)
+docker compose down -v       # apaga também os dados do Postgres
+```
+
+### Mudou a URL pública da API?
+
+`NEXT_PUBLIC_API_URL` é embutida no build do Next. Depois de alterar no `.env`:
+
+```bash
+docker compose build --no-cache web
+docker compose up -d web
+```
+
+Atualize também `BETTER_AUTH_URL` e `WEB_ORIGIN` no `.env` e reinicie a API (`docker compose up -d api`).
+
+## Desenvolvimento local (hot reload)
+
+Use o Compose só para o banco e rode API/Web no host.
+
+1. Suba o Postgres:
+
+```bash
+cp .env.example .env
+# No .env de desenvolvimento, use localhost na DATABASE_URL:
+# DATABASE_URL=postgresql://postgres:change-me@localhost:5432/hm-db
+docker compose up -d postgres
+```
+
+2. Configure os envs dos apps (além do `.env` da raiz, se quiser):
+
+```bash
+cp packages/database/.env.example packages/database/.env
+cp apps/api/.env.example apps/api/.env
+cp apps/web/.env.example apps/web/.env
+```
+
+Preencha `DATABASE_URL` (host `localhost`), `BETTER_AUTH_*`, `WEB_ORIGIN` e `NEXT_PUBLIC_API_URL`.
+
+3. Instale e rode:
+
+```bash
+corepack enable
+pnpm install
+pnpm db:migrate
+pnpm dev
+```
+
+- API: [http://localhost:3000](http://localhost:3000)
+- Web: [http://localhost:3001](http://localhost:3001)
+
+Scripts úteis na raiz: `pnpm build`, `pnpm lint`, `pnpm test`, `pnpm db:studio`.
+
+## Deploy em VPS
+
+O mesmo `docker-compose.yml` serve para produção.
+
+1. Clone o repositório na VPS e crie o `.env` a partir de `.env.example`.
+2. Use senhas/secrets fortes e URLs públicas, por exemplo:
+
+```env
+BETTER_AUTH_URL=https://api.seudominio.com
+WEB_ORIGIN=https://seudominio.com
+NEXT_PUBLIC_API_URL=https://api.seudominio.com
+DATABASE_URL=postgresql://postgres:SENHA_FORTE@postgres:5432/hm-db
+```
+
+3. Build e suba:
+
+```bash
+docker compose up -d --build
+```
+
+4. Coloque um reverse proxy (Caddy ou Nginx) na frente das portas `3000`/`3001` com TLS. Os containers já escutam em `0.0.0.0`.
+
+5. Dados do Postgres ficam no volume Docker `pgdata` — faça backup desse volume.
+
+6. Após o primeiro deploy, rode o seed do admin (seção acima).
+
+### Checklist de produção
+
+- [ ] `BETTER_AUTH_SECRET` único e longo
+- [ ] `POSTGRES_PASSWORD` forte; `DATABASE_URL` coerente
+- [ ] URLs HTTPS alinhadas em `BETTER_AUTH_URL`, `WEB_ORIGIN` e `NEXT_PUBLIC_API_URL`
+- [ ] Rebuild do serviço `web` se `NEXT_PUBLIC_API_URL` mudar
+- [ ] Proxy reverso + firewall (expor só 80/443)
+- [ ] Backup do volume `pgdata`
+
+## Estrutura
+
+```text
 .
 ├── apps
-│   ├── api                       # NestJS app (https://nestjs.com).
-│   └── web                       # Next.js app (https://nextjs.org).
-└── packages
-    ├── @repo/api                 # Shared `NestJS` resources.
-    ├── @repo/eslint-config       # `eslint` configurations (includes `prettier`)
-    ├── @repo/jest-config         # `jest` configurations
-    ├── @repo/typescript-config   # `tsconfig.json`s used throughout the monorepo
-    └── @repo/ui                  # Shareable stub React component library.
+│   ├── api          # NestJS
+│   └── web          # Next.js
+├── packages
+│   ├── database     # Prisma + PostgreSQL
+│   ├── shared
+│   ├── eslint-config
+│   ├── jest-config
+│   └── typescript-config
+├── docker-compose.yml
+├── .env.example
+└── package.json
 ```
 
-Each package and application are mostly written in [TypeScript](https://www.typescriptlang.org/).
+## Variáveis de ambiente
 
-### Utilities
+| Variável | Serviço | Quando |
+| --- | --- | --- |
+| `POSTGRES_USER` / `PASSWORD` / `DB` | postgres | runtime |
+| `DATABASE_URL` | api (+ migrate) | runtime |
+| `BETTER_AUTH_SECRET` | api | runtime |
+| `BETTER_AUTH_URL` | api | runtime |
+| `WEB_ORIGIN` | api (CORS / Auth) | runtime |
+| `NEXT_PUBLIC_API_URL` | web (browser) | **build** (ARG) |
+| `INTERNAL_API_URL` | web (servidor Next → API) | runtime no Compose (`http://api:3000`) |
+| `ADMIN_EMAIL` / `PASSWORD` / `NAME` | api | seed manual |
 
-This `Turborepo` has some additional tools already set for you:
-
-- [TypeScript](https://www.typescriptlang.org/) for static type-safety
-- [ESLint](https://eslint.org/) for code linting
-- [Prettier](https://prettier.io) for code formatting
-- [Jest](https://prettier.io) & [Playwright](https://playwright.dev/) for testing
-
-### Commands
-
-This `Turborepo` already configured useful commands for all your apps and packages.
-
-#### Build
-
-```bash
-# Will build all the app & packages with the supported `build` script.
-pnpm run build
-
-# ℹ️ If you plan to only build apps individually,
-# Please make sure you've built the packages first.
-```
-
-#### Develop
-
-```bash
-# Will run the development server for all the app & packages with the supported `dev` script.
-pnpm run dev
-```
-
-#### test
-
-```bash
-# Will launch a test suites for all the app & packages with the supported `test` script.
-pnpm run test
-
-# You can launch e2e testes with `test:e2e`
-pnpm run test:e2e
-
-# See `@repo/jest-config` to customize the behavior.
-```
-
-#### Lint
-
-```bash
-# Will lint all the app & packages with the supported `lint` script.
-# See `@repo/eslint-config` to customize the behavior.
-pnpm run lint
-```
-
-#### Format
-
-```bash
-# Will format all the supported `.ts,.js,json,.tsx,.jsx` files.
-# See `@repo/eslint-config/prettier-base.js` to customize the behavior.
-pnpm format
-```
-
-### Remote Caching
-
-> [!TIP]
-> Vercel Remote Cache is free for all plans. Get started today at [vercel.com](https://vercel.com/signup?/signup?utm_source=remote-cache-sdk&utm_campaign=free_remote_cache).
-
-Turborepo can use a technique known as [Remote Caching](https://turborepo.dev/docs/core-concepts/remote-caching) to share cache artifacts across machines, enabling you to share build caches with your team and CI/CD pipelines.
-
-By default, Turborepo will cache locally. To enable Remote Caching you will need an account with Vercel. If you don't have an account you can [create one](https://vercel.com/signup?utm_source=turborepo-examples), then enter the following commands:
-
-```bash
-npx turbo login
-```
-
-This will authenticate the Turborepo CLI with your [Vercel account](https://vercel.com/docs/concepts/personal-accounts/overview).
-
-Next, you can link your Turborepo to your Remote Cache by running the following command from the root of your Turborepo:
-
-```bash
-npx turbo link
-```
-
-## Useful Links
-
-This example take some inspiration the [with-nextjs](https://github.com/vercel/turborepo/tree/main/examples/with-nextjs) `Turbo` example and [01-cats-app](https://github.com/nestjs/nest/tree/master/sample/01-cats-app) `NestJs` sample.
-
-Learn more about the power of Turborepo:
-
-- [Tasks](https://turborepo.dev/docs/crafting-your-repository/running-tasks)
-- [Caching](https://turborepo.dev/docs/crafting-your-repository/caching)
-- [Remote Caching](https://turborepo.dev/docs/core-concepts/remote-caching)
-- [Filtering](https://turborepo.dev/docs/crafting-your-repository/running-tasks#using-filters)
-- [Configuration Options](https://turborepo.dev/docs/reference/configuration)
-- [CLI Usage](https://turborepo.dev/docs/reference/command-line-reference)
+Os `.env.example` em `apps/*` e `packages/database` cobrem o fluxo de desenvolvimento no host.

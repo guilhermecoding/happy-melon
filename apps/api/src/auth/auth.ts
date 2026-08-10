@@ -65,7 +65,18 @@ export const auth = betterAuth({
   trustedOrigins: [process.env.WEB_ORIGIN ?? 'http://localhost:3001'],
   baseURL: process.env.BETTER_AUTH_URL ?? 'http://localhost:3000',
   secret: process.env.BETTER_AUTH_SECRET,
+  // HTTP local/Docker: Secure cookies are rejected by the browser and login
+  // appears to succeed (200) while the session never sticks. HTTPS → secure.
   advanced: {
+    useSecureCookies: (
+      process.env.BETTER_AUTH_URL ?? 'http://localhost:3000'
+    ).startsWith('https://'),
+    defaultCookieAttributes: {
+      sameSite: 'lax',
+      secure: (
+        process.env.BETTER_AUTH_URL ?? 'http://localhost:3000'
+      ).startsWith('https://'),
+    },
     database: {
       generateId: () => generateShortId(),
     },

@@ -11,7 +11,9 @@ import type {
   UpdateAdministratorInput,
 } from './administrator.type';
 
-const API_URL = process.env.NEXT_PUBLIC_API_URL ?? 'http://localhost:3000';
+import { getApiBaseUrl } from '@/lib/api-url';
+
+const API_URL = getApiBaseUrl();
 
 export const administratorService = {
   async list(): Promise<Administrator[]> {

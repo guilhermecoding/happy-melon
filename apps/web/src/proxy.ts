@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
+import { getApiBaseUrl } from '@/lib/api-url';
 
 type SessionResponse = {
   user?: {
@@ -10,7 +11,7 @@ type SessionResponse = {
 } | null;
 
 async function getSession(request: NextRequest): Promise<SessionResponse> {
-  const apiUrl = process.env.NEXT_PUBLIC_API_URL ?? 'http://localhost:3000';
+  const apiUrl = getApiBaseUrl();
   const cookie = request.headers.get('cookie') ?? '';
 
   if (!cookie) {

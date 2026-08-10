@@ -4,7 +4,9 @@ import {
 } from './print.error';
 import type { EnqueuePrintTaskInput, PrintTask } from './print.type';
 
-const API_URL = process.env.NEXT_PUBLIC_API_URL ?? 'http://localhost:3000';
+import { getApiBaseUrl } from '@/lib/api-url';
+
+const API_URL = getApiBaseUrl();
 
 async function getServerCookieHeader(): Promise<string | undefined> {
   if (typeof window !== 'undefined') {

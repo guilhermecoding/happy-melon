@@ -1,4 +1,5 @@
 import { cookies } from 'next/headers';
+import { getApiBaseUrl } from '@/lib/api-url';
 
 export type ServerSession = {
   user?: {
@@ -14,7 +15,7 @@ export type ServerSession = {
 } | null;
 
 export async function getServerSession(): Promise<ServerSession> {
-  const apiUrl = process.env.NEXT_PUBLIC_API_URL ?? 'http://localhost:3000';
+  const apiUrl = getApiBaseUrl();
   const cookieStore = await cookies();
   const cookie = cookieStore
     .getAll()
