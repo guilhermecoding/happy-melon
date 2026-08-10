@@ -124,6 +124,10 @@
     inset 0 calc(-1 * var(--lip)) 0 var(--bg),
     inset 0 6px 0 rgba(255, 255, 255, 0.9),
     0 20px 40px rgba(58, 46, 92, 0.15);
+  /* Lip only — safe inside overflow scrollers where cast shadows clip. */
+  --pouf-card-inset:
+    inset 0 calc(-1 * var(--lip)) 0 var(--bg),
+    inset 0 6px 0 rgba(255, 255, 255, 0.9);
   --pouf-control:
     inset 0 -6px 0 rgba(0, 0, 0, 0.15), inset 0 4px 0 rgba(255, 255, 255, 0.35),
     0 8px 16px rgba(58, 46, 92, 0.2);
@@ -206,6 +210,9 @@
     inset 0 calc(-1 * var(--lip)) 0 rgba(156, 124, 220, 0.16),
     inset 0 6px 0 rgba(255, 255, 255, 0.07),
     0 20px 40px rgba(0, 0, 0, 0.38);
+  --pouf-card-inset:
+    inset 0 calc(-1 * var(--lip)) 0 rgba(156, 124, 220, 0.16),
+    inset 0 6px 0 rgba(255, 255, 255, 0.07);
   --pouf-row:
     inset 0 calc(-1 * var(--lip-row)) 0 rgba(156, 124, 220, 0.14),
     inset 0 4px 0 rgba(255, 255, 255, 0.06),
@@ -323,6 +330,9 @@
 }
 @utility cushion-card {
   box-shadow: var(--pouf-card);
+}
+@utility cushion-card-inset {
+  box-shadow: var(--pouf-card-inset);
 }
 @utility cushion-blob {
   box-shadow: var(--pouf-blob);

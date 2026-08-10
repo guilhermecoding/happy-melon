@@ -16,15 +16,18 @@ async function StaffContestPageContent({
   const { id_contest } = await params
 
   return (
-    <Page className="flex min-h-0 flex-1 flex-col overflow-hidden pb-6">
-      <Section className="shrink-0">
-        <h1 className="text-xl sm:text-5xl font-black text-center">Maratona Mineira de Programação</h1>
+    <Page>
+      <Section>
+        <h1 className="text-xl sm:text-5xl font-black text-center">
+          Maratona Mineira de Programação
+        </h1>
       </Section>
 
-      <Section className="mt-4 flex min-h-0 flex-1 flex-col gap-2 overflow-hidden @4xl:flex-row">
+      <Section className="mt-4 pb-40 lg:pb-8">
         <QueueTask />
-        <LobbyArea />
       </Section>
+
+      <LobbyArea />
     </Page>
   )
 }

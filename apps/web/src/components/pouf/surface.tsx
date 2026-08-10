@@ -4,7 +4,7 @@ import type { ReactNode } from 'react'
 /* Vertical padding is biased by half the lip on every padded variant: the
  * cushion's floor inset paints INSIDE the box, so symmetric padding reads
  * bottom-heavy. Same total height, optically centred content. */
-const card = cva('pouf-card bg-surface rounded-card cushion-card', {
+const card = cva('pouf-card bg-surface rounded-card', {
   variants: {
     variant: {
       default: 'px-(--s7) pt-[calc(var(--s7)-var(--lip)/2)] pb-[calc(var(--s7)+var(--lip)/2)]',
@@ -20,8 +20,14 @@ const card = cva('pouf-card bg-surface rounded-card cushion-card', {
       'tilt-right':
         '[transform:rotate(0.6deg)] [transition:transform_160ms_ease] hover:[transform:rotate(0deg)_translateY(-4px)] motion-reduce:[transform:none] motion-reduce:hover:[transform:none]',
     },
+    shadow: {
+      true: 'cushion-card',
+      false: '[box-shadow:none]',
+      /** Lip only — no outer cast. Use inside overflow scrollers. */
+      inset: 'cushion-card-inset',
+    },
   },
-  defaultVariants: { variant: 'default', motion: 'none' },
+  defaultVariants: { variant: 'default', motion: 'none', shadow: true },
 })
 
 interface CardProps {
@@ -31,10 +37,16 @@ interface CardProps {
   variant?: 'default' | 'flush' | 'tight'
   /** Playful, composited hover motion for linked or featured cards. */
   motion?: 'none' | 'lift' | 'tilt-left' | 'tilt-right'
+  /**
+   * true: full cushion (default).
+   * false: no shadows.
+   * inset: lip only, safe when a parent clips overflow.
+   */
+  shadow?: boolean | 'inset'
 }
 
-export function Card({ children, variant, motion }: CardProps) {
-  return <div className={card({ variant, motion })}>{children}</div>
+export function Card({ children, variant, motion, shadow = true }: CardProps) {
+  return <div className={card({ variant, motion, shadow })}>{children}</div>
 }
 
 interface RowCardProps {
