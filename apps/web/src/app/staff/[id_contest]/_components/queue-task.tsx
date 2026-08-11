@@ -82,7 +82,7 @@ function TaskItem({ task, claiming, onClaim, nowMs }: TaskItemProps) {
             tone="mint"
             size="md"
             variant="solid"
-            icon={<HugeiconsIcon icon={HandIcon} />}
+            icon={<HugeiconsIcon icon={HandIcon} strokeWidth={2} />}
             label={isPrint ? 'Pegar impressão' : 'Levantar balão'}
             disabled={claiming}
             loading={claiming}

@@ -100,7 +100,7 @@ function LobbyTaskItem({
             tone="blue"
             size="sm"
             variant="solid"
-            icon={<HugeiconsIcon icon={BadgeInfoIcon} />}
+            icon={<HugeiconsIcon icon={BadgeInfoIcon} strokeWidth={2} />}
             label="Detalhes do time"
             onClick={() => onOpenInfo(task)}
           />
@@ -108,7 +108,7 @@ function LobbyTaskItem({
             tone="mint"
             size="sm"
             variant="solid"
-            icon={<HugeiconsIcon icon={CheckmarkCircle02Icon} />}
+            icon={<HugeiconsIcon icon={CheckmarkCircle02Icon} strokeWidth={2} />}
             label="Marcar como entregue"
             disabled={delivering}
             loading={delivering}
