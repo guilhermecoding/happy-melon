@@ -10,6 +10,7 @@ import {
 } from '@nestjs/common';
 import { APIError } from 'better-auth/api';
 import { fromNodeHeaders } from 'better-auth/node';
+import { COLLABORATOR_EVENT_TYPE } from '@repo/shared';
 import { prisma } from '@repo/database';
 import { auth } from '../auth/auth.js';
 import {
@@ -22,12 +23,17 @@ import type {
   CreateCollaboratorDto,
   UpdateCollaboratorDto,
 } from './dto/collaborator.dto.js';
+import { CollaboratorsEventsService } from './collaborators.events.js';
 
 const PASSWORD_ALPHABET =
   'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
 
 @Injectable()
 export class CollaboratorsService {
+  constructor(
+    private readonly collaboratorsEvents: CollaboratorsEventsService,
+  ) {}
+
   async list(contestId: string) {
     await this.ensureContestExists(contestId);
 
@@ -135,7 +141,7 @@ export class CollaboratorsService {
     const user = await prisma.user.findUniqueOrThrow({ where: { id: userId } });
     const lastAccessByUserId = await this.getLastAccessByUserIds([userId]);
 
-    return this.toCollaborator(
+    const collaborator = this.toCollaborator(
       {
         ...user,
         name,
@@ -143,6 +149,13 @@ export class CollaboratorsService {
       },
       lastAccessByUserId.get(userId) ?? null,
     );
+
+    this.collaboratorsEvents.emit(contestId, {
+      type: COLLABORATOR_EVENT_TYPE.JOINED,
+      collaborator,
+    });
+
+    return collaborator;
   }
 
   async update(

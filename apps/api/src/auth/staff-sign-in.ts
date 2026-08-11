@@ -3,6 +3,7 @@ import type { BetterAuthPlugin } from 'better-auth';
 import { APIError, createAuthEndpoint } from 'better-auth/api';
 import { setSessionCookie } from 'better-auth/cookies';
 import { ContestStatus, prisma } from '@repo/database';
+import { COLLABORATOR_EVENT_TYPE } from '@repo/shared';
 import { z } from 'zod';
 import {
   generateShortId,
@@ -10,6 +11,7 @@ import {
   isIdUniqueViolation,
   isPrismaUniqueViolation,
 } from '../common/short-id.js';
+import { collaboratorsEventsBus } from '../collaborators/collaborators.events-bus.js';
 
 const PASSWORD_ALPHABET =
   'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
@@ -30,6 +32,34 @@ function generateRandomPassword(): string {
     randomBytes(24),
     (byte) => PASSWORD_ALPHABET[byte % PASSWORD_ALPHABET.length]!,
   ).join('');
+}
+
+function emitCollaboratorJoined(
+  contestId: string,
+  user: {
+    id: string;
+    name: string;
+    email: string;
+    banned?: boolean | null;
+    createdAt: Date | string;
+  },
+) {
+  const createdAt =
+    user.createdAt instanceof Date
+      ? user.createdAt.toISOString()
+      : new Date(user.createdAt).toISOString();
+
+  collaboratorsEventsBus.emit(contestId, {
+    type: COLLABORATOR_EVENT_TYPE.JOINED,
+    collaborator: {
+      id: user.id,
+      name: user.name,
+      email: user.email,
+      hasAccess: !user.banned,
+      lastAccess: new Date().toISOString(),
+      createdAt,
+    },
+  });
 }
 
 async function createCollaboratorMembership(
@@ -157,11 +187,13 @@ export const staffSignIn = () =>
             },
           });
 
+          let isNewMembership = false;
           if (!membership) {
             membership = await createCollaboratorMembership(
               contest.id,
               user.id,
             );
+            isNewMembership = true;
           }
 
           if (!membership.hasAccess) {
@@ -189,6 +221,10 @@ export const staffSignIn = () =>
             session,
             user: found.user,
           });
+
+          if (isNewMembership) {
+            emitCollaboratorJoined(contest.id, user);
+          }
 
           return ctx.json({
             status: 'authenticated' as const,
@@ -285,6 +321,11 @@ export const staffSignIn = () =>
             session,
             user: createdUser,
           });
+
+          const persistedUser = await prisma.user.findUniqueOrThrow({
+            where: { id: createdUser.id },
+          });
+          emitCollaboratorJoined(contest.id, persistedUser);
 
           return ctx.json({
             status: 'authenticated' as const,

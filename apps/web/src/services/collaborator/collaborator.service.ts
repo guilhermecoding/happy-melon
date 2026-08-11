@@ -1,4 +1,8 @@
 import {
+  COLLABORATOR_EVENT_TYPE,
+  type CollaboratorJoinedEvent,
+} from '@repo/shared';
+import {
   normalizeCollaboratorError,
   parseCollaboratorError,
 } from './collaborator.error';
@@ -35,6 +39,28 @@ export const collaboratorService = {
         error,
         'Não foi possível carregar os colaboradores.',
       );
+    }
+  },
+
+  getEventsUrl(contestId: string): string {
+    return `${API_URL}/contests/${contestId}/collaborators/events`;
+  },
+
+  parseEventData(raw: string): CollaboratorJoinedEvent | null {
+    try {
+      const parsed: unknown = JSON.parse(raw);
+      if (
+        parsed &&
+        typeof parsed === 'object' &&
+        'type' in parsed &&
+        parsed.type === COLLABORATOR_EVENT_TYPE.JOINED &&
+        'collaborator' in parsed
+      ) {
+        return parsed as CollaboratorJoinedEvent;
+      }
+      return null;
+    } catch {
+      return null;
     }
   },
 

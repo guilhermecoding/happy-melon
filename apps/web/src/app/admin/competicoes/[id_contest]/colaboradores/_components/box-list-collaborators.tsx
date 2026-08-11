@@ -117,8 +117,43 @@ export default function BoxListCollaborators({
     }
 
     void loadCollaborators();
+
+    const source = new EventSource(
+      collaboratorService.getEventsUrl(contestId),
+      { withCredentials: true },
+    );
+
+    source.onmessage = (message) => {
+      const event = collaboratorService.parseEventData(message.data);
+      if (!event) return;
+
+      setCollaborators((current) => {
+        const exists = current.some(
+          (item) => item.id === event.collaborator.id,
+        );
+        if (exists) {
+          return current.map((item) =>
+            item.id === event.collaborator.id ? event.collaborator : item,
+          );
+        }
+
+        queueMicrotask(() => {
+          if (active) {
+            toast.success(`${event.collaborator.name} ingressou.`);
+          }
+        });
+
+        return [...current, event.collaborator];
+      });
+    };
+
+    source.onerror = () => {
+      // Browser reconnects EventSource automatically.
+    };
+
     return () => {
       active = false;
+      source.close();
     };
   }, [contestId]);
 
@@ -396,7 +431,14 @@ export default function BoxListCollaborators({
         open={createOpen}
         onOpenChange={setCreateOpen}
         onCreated={(collaborator) =>
-          setCollaborators((current) => [...current, collaborator])
+          setCollaborators((current) => {
+            if (current.some((item) => item.id === collaborator.id)) {
+              return current.map((item) =>
+                item.id === collaborator.id ? collaborator : item,
+              );
+            }
+            return [...current, collaborator];
+          })
         }
       />
       <EditCollaboratorSheet

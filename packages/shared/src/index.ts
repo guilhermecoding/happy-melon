@@ -26,3 +26,10 @@ export {
   type TaskKind,
   type TaskType,
 } from './balloon-delivery.js';
+
+export {
+  COLLABORATOR_EVENT_TYPE,
+  type CollaboratorEventType,
+  type CollaboratorJoinedEvent,
+  type CollaboratorListItem,
+} from './collaborator.js';
