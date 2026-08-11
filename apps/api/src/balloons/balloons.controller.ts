@@ -2,16 +2,20 @@ import {
   Body,
   Controller,
   Get,
+  MessageEvent,
   Param,
   Post,
   Query,
+  Sse,
 } from '@nestjs/common';
 import {
   Roles,
   Session,
   type UserSession,
 } from '@thallesp/nestjs-better-auth';
+import { map, type Observable } from 'rxjs';
 import type { auth } from '../auth/auth.js';
+import { TaskHistoryEventsService } from '../contest-tasks/task-history.events.js';
 import { ZodValidationPipe } from '../common/pipes/zod-validation.pipe.js';
 import { BalloonsService } from './balloons.service.js';
 import {
@@ -24,7 +28,10 @@ const teamQuestionActionPipe = new ZodValidationPipe(teamQuestionActionSchema);
 @Controller()
 @Roles(['admin', 'staff'])
 export class BalloonsController {
-  constructor(private readonly balloonsService: BalloonsService) {}
+  constructor(
+    private readonly balloonsService: BalloonsService,
+    private readonly taskHistoryEvents: TaskHistoryEventsService,
+  ) {}
 
   @Get('contests/:contestId/balloon-deliveries')
   listByContest(
@@ -37,6 +44,17 @@ export class BalloonsController {
   @Get('contests/:contestId/task-history')
   listTaskHistory(@Param('contestId') contestId: string) {
     return this.balloonsService.listTaskHistory(contestId);
+  }
+
+  @Sse('contests/:contestId/task-history/events')
+  streamTaskHistory(
+    @Param('contestId') contestId: string,
+  ): Observable<MessageEvent> {
+    return this.taskHistoryEvents.subscribe(contestId).pipe(
+      map((event) => ({
+        data: event,
+      })),
+    );
   }
 
   @Get('contests/:contestId/task-history/by-task/:relatedTaskId')

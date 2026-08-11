@@ -1,4 +1,8 @@
 import {
+  TASK_HISTORY_EVENT_TYPE,
+  type TaskHistoryCreatedEvent,
+} from '@repo/shared';
+import {
   normalizeBalloonError,
   parseBalloonError,
 } from './balloon.error';
@@ -86,6 +90,28 @@ export const balloonService = {
         error,
         'Não foi possível carregar o histórico.',
       );
+    }
+  },
+
+  getTaskHistoryEventsUrl(contestId: string): string {
+    return `${API_URL}/contests/${contestId}/task-history/events`;
+  },
+
+  parseTaskHistoryEventData(raw: string): TaskHistoryCreatedEvent | null {
+    try {
+      const parsed: unknown = JSON.parse(raw);
+      if (
+        parsed &&
+        typeof parsed === 'object' &&
+        'type' in parsed &&
+        parsed.type === TASK_HISTORY_EVENT_TYPE.CREATED &&
+        'entry' in parsed
+      ) {
+        return parsed as TaskHistoryCreatedEvent;
+      }
+      return null;
+    } catch {
+      return null;
     }
   },
 

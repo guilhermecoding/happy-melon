@@ -107,8 +107,28 @@ export default function TaskHistoryList({
 
     void loadHistory();
 
+    const source = new EventSource(
+      balloonService.getTaskHistoryEventsUrl(contestId),
+      { withCredentials: true },
+    );
+
+    source.onmessage = (message) => {
+      const event = balloonService.parseTaskHistoryEventData(message.data);
+      if (!event) return;
+
+      setEntries((current) => {
+        const without = current.filter((item) => item.id !== event.entry.id);
+        return [event.entry, ...without];
+      });
+    };
+
+    source.onerror = () => {
+      // Browser reconnects EventSource automatically.
+    };
+
     return () => {
       active = false;
+      source.close();
     };
   }, [contestId, refreshKey]);
 

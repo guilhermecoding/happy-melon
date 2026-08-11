@@ -33,3 +33,10 @@ export {
   type CollaboratorJoinedEvent,
   type CollaboratorListItem,
 } from './collaborator.js';
+
+export {
+  TASK_HISTORY_EVENT_TYPE,
+  type TaskHistoryCreatedEvent,
+  type TaskHistoryEntryDto,
+  type TaskHistoryEventType,
+} from './task-history.js';

@@ -1,5 +1,6 @@
 import type {
   BalloonDeliveryStatus,
+  TaskHistoryEntryDto,
   TaskKind,
   TaskType,
 } from '@repo/shared';
@@ -15,24 +16,12 @@ export type BalloonDelivery = {
   updatedAt: string;
 };
 
-export type TaskHistoryEntry = {
-  id: string;
-  contestId: string;
-  kind: TaskKind | string;
-  type: TaskType | string;
-  status: BalloonDeliveryStatus;
-  message: string;
-  teamId: string | null;
-  questionId: string | null;
-  balloonDeliveryId: string | null;
-  printTaskId: string | null;
-  taskId: string | null;
-  actorUserId: string;
-  actorName: string;
-  createdAt: string;
-};
+export type TaskHistoryEntry = TaskHistoryEntryDto;
 
 export type TeamQuestionActionInput = {
   teamId: string;
   questionId: string;
 };
+
+// Keep TaskKind/TaskType re-exports available for local imports if needed.
+export type { TaskKind, TaskType };

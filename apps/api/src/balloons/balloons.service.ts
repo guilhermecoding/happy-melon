@@ -13,6 +13,7 @@ import {
 import {
   BALLOON_DELIVERY_STATUS,
   STAFF_TASK_EVENT_TYPE,
+  TASK_HISTORY_EVENT_TYPE,
   TASK_KIND,
   isConfirmableStatus,
   isWithholdableStatus,
@@ -31,6 +32,8 @@ import {
   teamFieldsFrom,
   toBalloonStaffTask,
 } from '../contest-tasks/staff-task.mapper.js';
+import { TaskHistoryEventsService } from '../contest-tasks/task-history.events.js';
+import { toTaskHistoryEntryDto } from '../contest-tasks/task-history.mapper.js';
 import type { TeamQuestionActionDto } from './dto/balloon.dto.js';
 
 const BALLOON_COLOR_LABELS: Record<string, string> = {
@@ -66,6 +69,7 @@ type Actor = {
 export class BalloonsService {
   constructor(
     private readonly contestTasksEvents: ContestTasksEventsService,
+    private readonly taskHistoryEvents: TaskHistoryEventsService,
   ) {}
 
   async listByContest(contestId: string, teamId?: string) {
@@ -94,7 +98,7 @@ export class BalloonsService {
       orderBy: { createdAt: 'desc' },
     });
 
-    return history.map((entry) => this.toHistoryResponse(entry));
+    return history.map((entry) => toTaskHistoryEntryDto(entry));
   }
 
   async listTaskTimeline(
@@ -135,7 +139,7 @@ export class BalloonsService {
       );
     }
 
-    return history.map((entry) => this.toHistoryResponse(entry));
+    return history.map((entry) => toTaskHistoryEntryDto(entry));
   }
 
   async confirm(
@@ -173,7 +177,7 @@ export class BalloonsService {
 
     for (let attempt = 0; attempt < ID_MAX_ATTEMPTS; attempt++) {
       try {
-        const delivery = await prisma.$transaction(async (tx) => {
+        const { delivery, history } = await prisma.$transaction(async (tx) => {
           const saved = existing
             ? await tx.balloonDelivery.update({
                 where: { id: existing.id },
@@ -193,7 +197,7 @@ export class BalloonsService {
                 },
               });
 
-          await this.createHistoryEntry(tx, {
+          const history = await this.createHistoryEntry(tx, {
             contestId,
             delivery: saved,
             teamName: team.name,
@@ -201,7 +205,7 @@ export class BalloonsService {
             actor,
           });
 
-          return saved;
+          return { delivery: saved, history };
         });
 
         this.contestTasksEvents.emit(contestId, {
@@ -219,6 +223,8 @@ export class BalloonsService {
             createdAt: delivery.createdAt,
           }),
         });
+
+        this.emitHistoryCreated(contestId, history);
 
         return this.toDeliveryResponse(delivery);
       } catch (error) {
@@ -276,7 +282,7 @@ export class BalloonsService {
     }
 
     const targetStatus = BALLOON_DELIVERY_STATUS.WITHHELD;
-    const delivery = await prisma.$transaction(async (tx) => {
+    const { delivery, history } = await prisma.$transaction(async (tx) => {
       const saved = await tx.balloonDelivery.update({
         where: { id: existing.id },
         data: {
@@ -285,7 +291,7 @@ export class BalloonsService {
         },
       });
 
-      await this.createHistoryEntry(tx, {
+      const history = await this.createHistoryEntry(tx, {
         contestId,
         delivery: saved,
         teamName: team.name,
@@ -293,7 +299,7 @@ export class BalloonsService {
         actor,
       });
 
-      return saved;
+      return { delivery: saved, history };
     });
 
     this.contestTasksEvents.emit(contestId, {
@@ -312,6 +318,8 @@ export class BalloonsService {
       }),
     });
 
+    this.emitHistoryCreated(contestId, history);
+
     return this.toDeliveryResponse(delivery);
   }
 
@@ -327,7 +335,7 @@ export class BalloonsService {
       BALLOON_DELIVERY_STATUS.PROCESSING,
     );
 
-    const delivery = await prisma.$transaction(async (tx) => {
+    const { delivery, history } = await prisma.$transaction(async (tx) => {
       const updated = await tx.balloonDelivery.updateMany({
         where: {
           id: taskId,
@@ -352,7 +360,7 @@ export class BalloonsService {
         include: { team: true, question: true },
       });
 
-      await this.createHistoryEntry(tx, {
+      const history = await this.createHistoryEntry(tx, {
         contestId,
         delivery: saved,
         teamName: saved.team.name,
@@ -360,7 +368,7 @@ export class BalloonsService {
         actor,
       });
 
-      return saved;
+      return { delivery: saved, history };
     });
 
     const staffTask = toBalloonStaffTask({
@@ -381,6 +389,8 @@ export class BalloonsService {
       task: staffTask,
     });
 
+    this.emitHistoryCreated(contestId, history);
+
     return staffTask;
   }
 
@@ -398,7 +408,7 @@ export class BalloonsService {
       BALLOON_DELIVERY_STATUS.DELIVERED,
     );
 
-    const delivery = await prisma.$transaction(async (tx) => {
+    const { delivery, history } = await prisma.$transaction(async (tx) => {
       const updated = await tx.balloonDelivery.updateMany({
         where: {
           id: taskId,
@@ -422,7 +432,7 @@ export class BalloonsService {
         include: { team: true, question: true },
       });
 
-      await this.createHistoryEntry(tx, {
+      const history = await this.createHistoryEntry(tx, {
         contestId,
         delivery: saved,
         teamName: saved.team.name,
@@ -430,7 +440,7 @@ export class BalloonsService {
         actor,
       });
 
-      return saved;
+      return { delivery: saved, history };
     });
 
     const staffTask = toBalloonStaffTask({
@@ -450,6 +460,8 @@ export class BalloonsService {
       type: STAFF_TASK_EVENT_TYPE.REMOVED,
       task: staffTask,
     });
+
+    this.emitHistoryCreated(contestId, history);
 
     return staffTask;
   }
@@ -472,7 +484,7 @@ export class BalloonsService {
 
     for (let attempt = 0; attempt < ID_MAX_ATTEMPTS; attempt++) {
       try {
-        await tx.taskHistory.create({
+        return await tx.taskHistory.create({
           data: {
             id: generateShortId(),
             contestId: params.contestId,
@@ -488,7 +500,6 @@ export class BalloonsService {
             actorName: params.actor.name,
           },
         });
-        return;
       } catch (error) {
         if (
           attempt < ID_MAX_ATTEMPTS - 1 &&
@@ -504,6 +515,16 @@ export class BalloonsService {
     throw new InternalServerErrorException(
       `Não foi possível gerar um ID único após ${ID_MAX_ATTEMPTS} tentativas.`,
     );
+  }
+
+  private emitHistoryCreated(
+    contestId: string,
+    history: Parameters<typeof toTaskHistoryEntryDto>[0],
+  ) {
+    this.taskHistoryEvents.emit(contestId, {
+      type: TASK_HISTORY_EVENT_TYPE.CREATED,
+      entry: toTaskHistoryEntryDto(history),
+    });
   }
 
   private async resolveTeamAndQuestion(
@@ -604,45 +625,6 @@ export class BalloonsService {
       claimedByUserId: delivery.claimedByUserId,
       createdAt: delivery.createdAt.toISOString(),
       updatedAt: delivery.updatedAt.toISOString(),
-    };
-  }
-
-  private toHistoryResponse(entry: {
-    id: string;
-    contestId: string;
-    kind: string;
-    type: string;
-    status: PrismaBalloonDeliveryStatus;
-    message: string;
-    teamId: string | null;
-    questionId: string | null;
-    balloonDeliveryId: string | null;
-    printTaskId: string | null;
-    relatedTaskId?: string | null;
-    actorUserId: string;
-    actorName: string;
-    createdAt: Date;
-  }) {
-    const taskId =
-      entry.relatedTaskId ??
-      entry.printTaskId ??
-      entry.balloonDeliveryId;
-
-    return {
-      id: entry.id,
-      contestId: entry.contestId,
-      kind: entry.kind,
-      type: entry.type,
-      status: this.toStatusDto(entry.status),
-      message: entry.message,
-      teamId: entry.teamId,
-      questionId: entry.questionId,
-      balloonDeliveryId: entry.balloonDeliveryId,
-      printTaskId: entry.printTaskId,
-      taskId,
-      actorUserId: entry.actorUserId,
-      actorName: entry.actorName,
-      createdAt: entry.createdAt.toISOString(),
     };
   }
 }
