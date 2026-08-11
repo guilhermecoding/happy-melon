@@ -1,5 +1,7 @@
 import { betterAuth } from 'better-auth';
 import { prismaAdapter } from '@better-auth/prisma-adapter';
+import { createAuthMiddleware } from 'better-auth/api';
+import { deleteSessionCookie } from 'better-auth/cookies';
 import { admin as adminPlugin } from 'better-auth/plugins/admin';
 import { prisma } from '@repo/database';
 import type {} from 'zod';
@@ -9,7 +11,16 @@ import {
   isIdUniqueViolation,
 } from '../common/short-id.js';
 import { ac, admin, staff } from './permissions.js';
+import { checkStaffSessionAccess } from './staff-session-access.js';
 import { staffSignIn } from './staff-sign-in.js';
+
+type SessionPayload = {
+  user?: { id?: string; role?: string | null } | null;
+  session?: {
+    id?: string;
+    activeContestId?: string | null;
+  } | null;
+} | null;
 
 function withIdCollisionRetry(client: typeof prisma) {
   return client.$extends({
@@ -80,6 +91,42 @@ export const auth = betterAuth({
     database: {
       generateId: () => generateShortId(),
     },
+  },
+  hooks: {
+    after: createAuthMiddleware(async (ctx) => {
+      if (ctx.path !== '/get-session') {
+        return;
+      }
+
+      const returned = ctx.context.returned;
+      if (!returned || returned instanceof Error) {
+        return;
+      }
+
+      const payload = returned as SessionPayload;
+      const user = payload?.user;
+      const session = payload?.session;
+
+      if (!user?.id || !session?.id || user.role !== 'staff') {
+        return;
+      }
+
+      const contestId = session.activeContestId;
+      if (!contestId) {
+        await prisma.session.deleteMany({ where: { id: session.id } });
+        deleteSessionCookie(ctx);
+        return ctx.json(null);
+      }
+
+      const access = await checkStaffSessionAccess(user.id, contestId);
+      if (access.valid) {
+        return;
+      }
+
+      await prisma.session.deleteMany({ where: { id: session.id } });
+      deleteSessionCookie(ctx);
+      return ctx.json(null);
+    }),
   },
   plugins: [
     adminPlugin({

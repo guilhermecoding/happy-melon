@@ -26,7 +26,7 @@ type BoxTeamsListProps = {
     onDeliveryChanged?: () => void;
 };
 
-const PAGE_SIZE = 21;
+const PAGE_SIZE = 20;
 
 function matchesSearch(team: Team, query: string) {
     if (!query) {

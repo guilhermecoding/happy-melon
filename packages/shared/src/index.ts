@@ -35,6 +35,14 @@ export {
 } from './collaborator.js';
 
 export {
+  CONTEST_ACCESS_EVENT_TYPE,
+  type ContestAccessEvent,
+  type ContestAccessEventType,
+  type ContestCollaboratorAccessRevokedEvent,
+  type ContestCollaboratorsAccessDisabledEvent,
+} from './contest-access.js';
+
+export {
   TASK_HISTORY_EVENT_TYPE,
   type TaskHistoryCreatedEvent,
   type TaskHistoryEntryDto,

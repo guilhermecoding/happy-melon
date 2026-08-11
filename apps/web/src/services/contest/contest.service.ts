@@ -9,6 +9,10 @@ import type {
   UpdateContestInput,
 } from './contest.type';
 
+import {
+  CONTEST_ACCESS_EVENT_TYPE,
+  type ContestAccessEvent,
+} from '@repo/shared';
 import { getApiBaseUrl } from '@/lib/api-url';
 
 const API_URL = getApiBaseUrl();
@@ -150,6 +154,25 @@ export const contestService = {
         error,
         'Não foi possível atualizar os ajustes.',
       );
+    }
+  },
+
+  getAccessEventsUrl(contestId: string): string {
+    return `${API_URL}/contests/${contestId}/access/events`;
+  },
+
+  parseAccessEventData(raw: string): ContestAccessEvent | null {
+    try {
+      const parsed = JSON.parse(raw) as ContestAccessEvent;
+      if (
+        parsed?.type === CONTEST_ACCESS_EVENT_TYPE.COLLABORATORS_DISABLED ||
+        parsed?.type === CONTEST_ACCESS_EVENT_TYPE.COLLABORATOR_REVOKED
+      ) {
+        return parsed;
+      }
+      return null;
+    } catch {
+      return null;
     }
   },
 };

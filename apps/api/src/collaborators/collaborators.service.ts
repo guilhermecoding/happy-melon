@@ -10,9 +10,11 @@ import {
 } from '@nestjs/common';
 import { APIError } from 'better-auth/api';
 import { fromNodeHeaders } from 'better-auth/node';
-import { COLLABORATOR_EVENT_TYPE } from '@repo/shared';
+import { COLLABORATOR_EVENT_TYPE, CONTEST_ACCESS_EVENT_TYPE } from '@repo/shared';
 import { prisma } from '@repo/database';
 import { auth } from '../auth/auth.js';
+import { revokeStaffSessionsForCollaborator } from '../auth/staff-session-access.js';
+import { ContestAccessEventsService } from '../contests/contest-access.events.js';
 import {
   generateShortId,
   ID_MAX_ATTEMPTS,
@@ -32,6 +34,7 @@ const PASSWORD_ALPHABET =
 export class CollaboratorsService {
   constructor(
     private readonly collaboratorsEvents: CollaboratorsEventsService,
+    private readonly contestAccessEvents: ContestAccessEventsService,
   ) {}
 
   async list(contestId: string) {
@@ -59,7 +62,13 @@ export class CollaboratorsService {
         return [];
       }
 
-      return [this.toCollaborator(user, lastAccessByUserId.get(user.id) ?? null)];
+      return [
+        this.toCollaborator(
+          user,
+          lastAccessByUserId.get(user.id) ?? null,
+          membership.hasAccess,
+        ),
+      ];
     });
   }
 
@@ -148,6 +157,7 @@ export class CollaboratorsService {
         email: userEmail,
       },
       lastAccessByUserId.get(userId) ?? null,
+      true,
     );
 
     this.collaboratorsEvents.emit(contestId, {
@@ -191,6 +201,11 @@ export class CollaboratorsService {
       const refreshed = await prisma.user.findUniqueOrThrow({
         where: { id: userId },
       });
+      const membership = await prisma.contestCollaborator.findUniqueOrThrow({
+        where: {
+          contestId_userId: { contestId, userId },
+        },
+      });
       const lastAccessByUserId = await this.getLastAccessByUserIds([userId]);
 
       return this.toCollaborator(
@@ -200,6 +215,7 @@ export class CollaboratorsService {
           email: updated.email,
         },
         lastAccessByUserId.get(userId) ?? null,
+        membership.hasAccess,
       );
     } catch (error) {
       this.rethrowApiError(error);
@@ -228,6 +244,13 @@ export class CollaboratorsService {
     try {
       const authHeaders = this.toAuthHeaders(headers);
 
+      await prisma.contestCollaborator.update({
+        where: {
+          contestId_userId: { contestId, userId },
+        },
+        data: { hasAccess },
+      });
+
       if (hasAccess) {
         await auth.api.unbanUser({
           headers: authHeaders,
@@ -241,6 +264,12 @@ export class CollaboratorsService {
             banReason: 'Acesso ao sistema desabilitado',
           },
         });
+        await revokeStaffSessionsForCollaborator(contestId, userId);
+        this.contestAccessEvents.emit(contestId, {
+          type: CONTEST_ACCESS_EVENT_TYPE.COLLABORATOR_REVOKED,
+          contestId,
+          userId,
+        });
       }
 
       const user = await prisma.user.findUniqueOrThrow({
@@ -251,6 +280,7 @@ export class CollaboratorsService {
       return this.toCollaborator(
         user,
         lastAccessByUserId.get(userId) ?? null,
+        hasAccess,
       );
     } catch (error) {
       this.rethrowApiError(error);
@@ -365,12 +395,13 @@ export class CollaboratorsService {
       createdAt: Date;
     },
     lastAccess: string | null,
+    membershipHasAccess: boolean,
   ) {
     return {
       id: user.id,
       name: user.name,
       email: user.email,
-      hasAccess: !user.banned,
+      hasAccess: membershipHasAccess && !user.banned,
       lastAccess,
       createdAt: user.createdAt.toISOString(),
     };

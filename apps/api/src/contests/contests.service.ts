@@ -5,11 +5,14 @@ import {
   NotFoundException,
 } from '@nestjs/common';
 import { ContestStatus, prisma, type Contest } from '@repo/database';
+import { CONTEST_ACCESS_EVENT_TYPE } from '@repo/shared';
+import { revokeStaffSessionsForContest } from '../auth/staff-session-access.js';
 import {
   generateShortId,
   ID_MAX_ATTEMPTS,
   isIdUniqueViolation,
 } from '../common/short-id.js';
+import { ContestAccessEventsService } from './contest-access.events.js';
 import type {
   ContestStatusDto,
   CreateContestDto,
@@ -19,6 +22,10 @@ import type {
 
 @Injectable()
 export class ContestsService {
+  constructor(
+    private readonly contestAccessEvents: ContestAccessEventsService,
+  ) {}
+
   async list() {
     const contests = await prisma.contest.findMany({
       orderBy: { startsAt: 'desc' },
@@ -90,6 +97,18 @@ export class ContestsService {
         venue: dto.venue,
       },
     });
+
+    // Collaborator access off → end sessions and notify open staff clients.
+    if (
+      existing.status === ContestStatus.ACTIVE &&
+      status === ContestStatus.INACTIVE
+    ) {
+      await revokeStaffSessionsForContest(id);
+      this.contestAccessEvents.emit(id, {
+        type: CONTEST_ACCESS_EVENT_TYPE.COLLABORATORS_DISABLED,
+        contestId: id,
+      });
+    }
 
     return this.toResponse(contest);
   }
