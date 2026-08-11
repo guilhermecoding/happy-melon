@@ -70,6 +70,16 @@ export async function proxy(request: NextRequest) {
   const role = getRole(session);
   const activeContestId = session?.session?.activeContestId ?? null;
 
+  if (pathname === '/') {
+    if (role === 'admin') {
+      return NextResponse.redirect(new URL('/admin', request.url));
+    }
+    if (role === 'staff') {
+      return NextResponse.redirect(new URL('/staff', request.url));
+    }
+    return NextResponse.redirect(new URL('/entrar', request.url));
+  }
+
   if (pathname.startsWith('/admin')) {
     if (role === 'staff' && activeContestId) {
       return NextResponse.redirect(
@@ -115,5 +125,5 @@ export async function proxy(request: NextRequest) {
 }
 
 export const config = {
-  matcher: ['/admin/:path*', '/staff/:path*', '/entrar'],
+  matcher: ['/', '/admin/:path*', '/staff/:path*', '/entrar'],
 };

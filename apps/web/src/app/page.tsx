@@ -1,3 +1,4 @@
+/** Root redirects are handled in `proxy.ts` by session role. */
 export default function Home() {
-  return <div>Hello World</div>;
+  return null;
 }
