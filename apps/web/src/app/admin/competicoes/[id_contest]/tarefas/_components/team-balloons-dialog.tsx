@@ -18,7 +18,7 @@ import {
 import type { Team } from '@/services/team/team.type';
 import { BalloonAchievement } from '@/components/balloon-achievement';
 import { BalloonDeliveryStatusIcon } from '@/components/balloon-delivery-status-icon';
-import { Button as ButtonPouf, IconButton } from '../pouf/Button';
+import { Button as ButtonPouf, IconButton } from '../../../../../../components/pouf/Button';
 import { Confirm, Dialog, Tooltip } from '@/components/pouf/controls';
 import { toBalloonColor } from '@/services/question/balloon-color';
 import { questionService } from '@/services/question/question.service';
@@ -33,7 +33,7 @@ import { toast } from '@/components/pouf/toaster';
 import PrintIcon from '@/components/print-icon';
 import { PrintTasksDialog } from './print-tasks-dialog';
 import Spinner from '@/components/spinner';
-import { RowCard } from '../pouf/surface';
+import { RowCard } from '../../../../../../components/pouf/surface';
 
 type TeamBalloonsDialogProps = {
   contestId: string;

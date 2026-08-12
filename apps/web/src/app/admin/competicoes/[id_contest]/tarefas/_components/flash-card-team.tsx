@@ -2,7 +2,7 @@
 
 import { ChevronDoubleCloseIcon } from '@hugeicons/core-free-icons';
 import { HugeiconsIcon } from '@hugeicons/react';
-import { Card } from '../pouf/surface';
+import { Card } from '../../../../../../components/pouf/surface';
 
 const RANK_GOLD = '#f8d559';
 const RANK_SILVER = '#f6f0ff';

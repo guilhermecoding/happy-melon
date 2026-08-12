@@ -18,8 +18,8 @@ import { TeamBalloonsDialog } from './team-balloons-dialog';
 import FlashCardTeam from './flash-card-team';
 import Spinner from '@/components/spinner';
 import EmptyIcon from '@/components/empty-icon';
-import { Input } from '../pouf/Input';
-import { Button } from '../pouf/Button';
+import { Input } from '../../../../../../components/pouf/Input';
+import { Button } from '../../../../../../components/pouf/Button';
 
 type BoxTeamsListProps = {
     contestId: string;

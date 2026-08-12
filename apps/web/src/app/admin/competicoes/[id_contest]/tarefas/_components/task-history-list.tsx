@@ -17,7 +17,7 @@ import type { TaskHistoryEntry } from '@/services/balloon/balloon.type';
 import Spinner from '@/components/spinner';
 import { Tooltip } from '@/components/pouf/controls';
 import { TaskTimelineDialog } from './task-timeline-dialog';
-import { Button as ButtonPouf } from '../pouf/Button';
+import { Button as ButtonPouf } from '../../../../../../components/pouf/Button';
 
 type TaskHistoryListProps = {
   contestId: string;
