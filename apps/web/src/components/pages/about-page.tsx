@@ -50,7 +50,7 @@ export default function AboutPage() {
                     </div>
                     <div className="flex flex-col">
                         <span className="text-sm text-muted-foreground">Data de lançamento:</span>
-                        <span className="text-base font-bold">--/--/2026</span>
+                        <span className="text-base font-bold">29/08/2026</span>
                     </div>
                     <div className="flex flex-col">
                         <span className="text-sm text-muted-foreground">Criador/Desenvolvedor:</span>
