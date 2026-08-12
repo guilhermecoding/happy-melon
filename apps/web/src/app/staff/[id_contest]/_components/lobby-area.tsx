@@ -16,9 +16,12 @@ import {
   toBalloonColor,
 } from '@/services/question/balloon-color';
 import {
-  ArrowUp01Icon, BadgeInfoIcon,
+  ArrowUp01Icon, AtSignIcon, BadgeInfoIcon,
   CheckmarkCircle02Icon,
   Clock01Icon,
+  ComputerIcon,
+  Door01Icon,
+  UserMultiple02Icon,
   WorkoutRunIcon
 } from '@hugeicons/core-free-icons';
 import { HugeiconsIcon } from '@hugeicons/react';
@@ -207,22 +210,38 @@ export default function LobbyArea({
         }}
       >
         {infoTask ? (
-          <dl className="grid grid-cols-[auto_1fr] gap-x-4 gap-y-2 text-sm">
-            <dt className="font-semibold text-muted-foreground">Time</dt>
-            <dd className="font-medium">{infoTask.teamName}</dd>
+          <dl className="flex flex-col gap-4 text-sm">
+            <div className="flex flex-col">
+              <div className="flex items-center gap-2">
+                <HugeiconsIcon icon={UserMultiple02Icon} className="size-5 text-muted-foreground" strokeWidth={2.5} />
+                <dt className="font-semibold text-xl text-muted-foreground">Time</dt>
+              </div>
+              <dd className="font-bold text-2xl">{infoTask.teamName}</dd>
+            </div>
 
-            <dt className="font-semibold text-muted-foreground">Usuário</dt>
-            <dd className="font-medium">{infoTask.teamUsername}</dd>
+            <div className="flex flex-col">
+              <div className="flex items-center gap-2">
+                <HugeiconsIcon icon={AtSignIcon} className="size-5 text-muted-foreground" strokeWidth={2.5} />
+                <dt className="font-semibold text-xl text-muted-foreground">Usuário</dt>
+              </div>
+              <dd className="font-bold text-2xl">{infoTask.teamUsername}</dd>
+            </div>
 
-            <dt className="font-semibold text-muted-foreground">Sala</dt>
-            <dd className="font-medium">
-              {displayOrDash(infoTask.teamRoom)}
-            </dd>
+            <div className="flex flex-col">
+              <div className="flex items-center gap-2">
+                <HugeiconsIcon icon={Door01Icon} className="size-5 text-muted-foreground" strokeWidth={2.5} />
+                <dt className="font-semibold text-xl text-muted-foreground">Sala</dt>
+              </div>
+              <dd className="font-bold text-2xl">{displayOrDash(infoTask.teamRoom)}</dd>
+            </div>
 
-            <dt className="font-semibold text-muted-foreground">Máquina</dt>
-            <dd className="font-medium">
-              {displayOrDash(infoTask.teamMachine)}
-            </dd>
+            <div className="flex flex-col">
+              <div className="flex items-center gap-2">
+                <HugeiconsIcon icon={ComputerIcon} className="size-5 text-muted-foreground" strokeWidth={2.5} />
+                <dt className="font-semibold text-xl text-muted-foreground">Máquina</dt>
+              </div>
+              <dd className="font-bold text-2xl">{displayOrDash(infoTask.teamMachine)}</dd>
+            </div>
           </dl>
         ) : null}
       </Dialog>
