@@ -100,8 +100,12 @@ export async function proxy(request: NextRequest) {
       return loginRedirect(request, pathname);
     }
 
-    // Allow bare /staff without forcing the contest route.
-    if (pathname === '/staff' || pathname === '/staff/') {
+    // Allow shared staff pages without forcing the contest route.
+    if (
+      pathname === '/staff' ||
+      pathname === '/staff/' ||
+      pathname === '/staff/sobre'
+    ) {
       return NextResponse.next();
     }
 

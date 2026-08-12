@@ -126,7 +126,7 @@ export function StaffShell({ children }: { children: React.ReactNode }) {
             <Logo className="size-28" />
           </Link>
           <div className="min-w-0 max-w-56">
-            <NavUser user={user} compact />
+            <NavUser user={user} compact aboutHref="/staff/sobre" />
           </div>
         </header>
         <main className="flex min-h-0 flex-1 flex-col overflow-auto">{children}</main>

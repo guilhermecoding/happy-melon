@@ -1,5 +1,6 @@
 "use client"
 
+import Link from "next/link"
 import { useRouter } from "next/navigation"
 import { useState } from "react"
 
@@ -23,7 +24,7 @@ import {
   SidebarMenuItem,
   useSidebar,
 } from "@/components/ui/sidebar"
-import { IconLogout, IconSelector } from "@tabler/icons-react"
+import { IconInfoCircle, IconLogout, IconSelector } from "@tabler/icons-react"
 import { authClient } from "@/lib/auth-client"
 import { cn } from "@/lib/utils"
 
@@ -39,6 +40,7 @@ function getInitials(name: string) {
 export function NavUser({
   user,
   compact = false,
+  aboutHref,
 }: {
   user: {
     name: string
@@ -46,6 +48,7 @@ export function NavUser({
     avatar?: string
   } | null;
   compact?: boolean;
+  aboutHref?: string;
 }) {
   const { isMobile } = useSidebar()
   const router = useRouter()
@@ -126,6 +129,15 @@ export function NavUser({
               </DropdownMenuLabel>
             </DropdownMenuGroup>
             <DropdownMenuSeparator />
+            {aboutHref ? (
+              <>
+                <DropdownMenuItem render={<Link href={aboutHref} />}>
+                  <IconInfoCircle />
+                  Sobre
+                </DropdownMenuItem>
+                <DropdownMenuSeparator />
+              </>
+            ) : null}
             <DropdownMenuItem
               disabled={isSigningOut || !user}
               onClick={handleSignOut}
