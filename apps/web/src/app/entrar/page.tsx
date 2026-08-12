@@ -28,7 +28,7 @@ export default function LoginPage({
       <BackgroundColors />
       <div
         aria-hidden
-        className="pointer-events-none absolute inset-0 z-[1] bg-[url('/tic-tac-toe.svg')] bg-repeat bg-size-[96px_96px] opacity-[0.06]"
+        className="pointer-events-none absolute inset-0 z-1 bg-[url('/tic-tac-toe.svg')] bg-repeat bg-size-[96px_96px] opacity-[0.06]"
       />
       <Section className="relative z-10 w-full max-w-sm md:max-w-4xl px-0 sm:px-0">
         <Suspense>

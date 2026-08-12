@@ -425,7 +425,7 @@ export function LoginForm({
           </form>
           <div className="relative hidden bg-muted md:block">
             <Image
-              src="/thumb_todos.jpg"
+              src="/thumb_todos.JPG"
               alt="Imagem de login"
               className="absolute inset-0 h-full w-full object-cover"
               width={1000}
