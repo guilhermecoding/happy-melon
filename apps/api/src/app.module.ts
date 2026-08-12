@@ -1,4 +1,5 @@
 import { Module } from '@nestjs/common';
+import { ScheduleModule } from '@nestjs/schedule';
 import { AuthModule } from '@thallesp/nestjs-better-auth';
 import { AppController } from './app.controller.js';
 import { AppService } from './app.service.js';
@@ -14,6 +15,7 @@ import { TeamsModule } from './teams/teams.module.js';
 
 @Module({
   imports: [
+    ScheduleModule.forRoot(),
     AuthModule.forRoot({ auth }),
     AdministratorsModule,
     BalloonsModule,

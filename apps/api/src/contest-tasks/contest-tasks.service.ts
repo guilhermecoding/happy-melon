@@ -16,7 +16,7 @@ export class ContestTasksService {
     contestId: string,
     userId: string,
   ): Promise<StaffTasksSnapshot> {
-    await this.ensureContestExists(contestId);
+    const contest = await this.ensureContestExists(contestId);
 
     const [balloonQueue, printQueue, balloonMine, printMine] =
       await Promise.all([
@@ -70,6 +70,7 @@ export class ContestTasksService {
           questionLabel: delivery.question.label,
           status: delivery.status,
           claimedByUserId: delivery.claimedByUserId,
+          claimedAt: delivery.claimedAt,
           createdAt: delivery.createdAt,
         }),
       ),
@@ -81,6 +82,7 @@ export class ContestTasksService {
           ...teamFieldsFrom(task.team),
           status: task.status,
           claimedByUserId: task.claimedByUserId,
+          claimedAt: task.claimedAt,
           createdAt: task.createdAt,
         }),
       ),
@@ -98,6 +100,7 @@ export class ContestTasksService {
           questionLabel: delivery.question.label,
           status: delivery.status,
           claimedByUserId: delivery.claimedByUserId,
+          claimedAt: delivery.claimedAt,
           createdAt: delivery.createdAt,
         }),
       ),
@@ -109,12 +112,20 @@ export class ContestTasksService {
           ...teamFieldsFrom(task.team),
           status: task.status,
           claimedByUserId: task.claimedByUserId,
+          claimedAt: task.claimedAt,
           createdAt: task.createdAt,
         }),
       ),
     ]);
 
-    return { queue, mine };
+    return {
+      queue,
+      mine,
+      deliveryTimeoutMinutes:
+        contest.deliveryTimeoutEnabled
+          ? contest.deliveryTimeoutMinutes
+          : null,
+    };
   }
 
   private sortByCreatedAt(tasks: StaffTask[]): StaffTask[] {
@@ -127,11 +138,17 @@ export class ContestTasksService {
   private async ensureContestExists(contestId: string) {
     const contest = await prisma.contest.findUnique({
       where: { id: contestId },
-      select: { id: true },
+      select: {
+        id: true,
+        deliveryTimeoutEnabled: true,
+        deliveryTimeoutMinutes: true,
+      },
     });
 
     if (!contest) {
       throw new NotFoundException('Competição não encontrada.');
     }
+
+    return contest;
   }
 }

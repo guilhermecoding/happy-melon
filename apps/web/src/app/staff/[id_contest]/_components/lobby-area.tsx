@@ -55,6 +55,25 @@ function getTaskSubtitle(task: StaffTask): string {
   return `Balão ${label} em rota de entrega`;
 }
 
+function getTimeoutRemainingPercent(
+  claimedAt: string,
+  timeoutMinutes: number,
+  nowMs: number,
+): number {
+  const totalMs = timeoutMinutes * 60_000;
+  if (totalMs <= 0) return 0;
+
+  const remainingMs = new Date(claimedAt).getTime() + totalMs - nowMs;
+  return Math.min(100, Math.max(0, (remainingMs / totalMs) * 100));
+}
+
+function getTimeoutBarClass(percent: number): string {
+  if (percent > 60) return 'bg-mint';
+  if (percent > 40) return 'bg-yellow';
+  if (percent > 20) return 'bg-orange';
+  return 'bg-red-500';
+}
+
 function displayOrDash(value: string | null | undefined): string {
   const trimmed = value?.trim();
   return trimmed ? trimmed : '—';
@@ -64,6 +83,7 @@ type LobbyTaskItemProps = {
   task: StaffTask;
   delivering: boolean;
   nowMs: number;
+  deliveryTimeoutMinutes: number | null;
   onDeliver: (task: StaffTask) => void;
   onOpenInfo: (task: StaffTask) => void;
 };
@@ -72,52 +92,76 @@ function LobbyTaskItem({
   task,
   delivering,
   nowMs,
+  deliveryTimeoutMinutes,
   onDeliver,
   onOpenInfo,
 }: LobbyTaskItemProps) {
   const isPrint = task.kind === TASK_KIND.PRINT_TASK;
   const balloonColor = toBalloonColor(task.balloonColor ?? '');
+  const claimedAt = task.claimedAt;
+  const showTimeoutBar =
+    deliveryTimeoutMinutes != null && claimedAt != null;
+  const remainingPercent =
+    showTimeoutBar && deliveryTimeoutMinutes != null && claimedAt
+      ? getTimeoutRemainingPercent(claimedAt, deliveryTimeoutMinutes, nowMs)
+      : 0;
 
   return (
     <Card variant="flush">
-      <div className="flex items-center gap-2 px-3 py-3">
-        {isPrint ? (
-          <PrintIcon className="size-8 shrink-0" strokeWidth={1.5} />
-        ) : (
-          <Balloon color={balloonColor} className="size-8 shrink-0" />
-        )}
-        <div className="flex min-w-0 flex-col">
-          <span className="truncate text-base font-bold">{task.teamName}</span>
-          <span className="truncate text-xs text-muted-foreground">
-            {getTaskSubtitle(task)}
-          </span>
-          <div className="mt-0.5 flex items-center gap-1">
-            <HugeiconsIcon icon={Clock01Icon} className="size-3" />
-            <span className="text-[11px] text-muted-foreground">
-              {formatRelativeTime(task.createdAt, nowMs)}
+      <div className="relative overflow-hidden rounded-card">
+        <div className="flex items-center gap-2 px-3 py-3">
+          {isPrint ? (
+            <PrintIcon className="size-8 shrink-0" strokeWidth={1.5} />
+          ) : (
+            <Balloon color={balloonColor} className="size-8 shrink-0" />
+          )}
+          <div className="flex min-w-0 flex-col">
+            <span className="truncate text-base font-bold">{task.teamName}</span>
+            <span className="truncate text-xs text-muted-foreground">
+              {getTaskSubtitle(task)}
             </span>
+            <div className="mt-0.5 flex items-center gap-1">
+              <HugeiconsIcon icon={Clock01Icon} className="size-3" />
+              <span className="text-[11px] text-muted-foreground">
+                {formatRelativeTime(task.createdAt, nowMs)}
+              </span>
+            </div>
+          </div>
+          <div className="ml-auto flex shrink-0 items-center gap-1.5">
+            <IconButton
+              tone="blue"
+              size="sm"
+              variant="solid"
+              icon={<HugeiconsIcon icon={BadgeInfoIcon} strokeWidth={2} />}
+              label="Detalhes do time"
+              onClick={() => onOpenInfo(task)}
+            />
+            <IconButton
+              tone="mint"
+              size="sm"
+              variant="solid"
+              icon={<HugeiconsIcon icon={CheckmarkCircle02Icon} strokeWidth={2} />}
+              label="Marcar como entregue"
+              disabled={delivering}
+              loading={delivering}
+              onClick={() => onDeliver(task)}
+            />
           </div>
         </div>
-        <div className="ml-auto flex shrink-0 items-center gap-1.5">
-          <IconButton
-            tone="blue"
-            size="sm"
-            variant="solid"
-            icon={<HugeiconsIcon icon={BadgeInfoIcon} strokeWidth={2} />}
-            label="Detalhes do time"
-            onClick={() => onOpenInfo(task)}
-          />
-          <IconButton
-            tone="mint"
-            size="sm"
-            variant="solid"
-            icon={<HugeiconsIcon icon={CheckmarkCircle02Icon} strokeWidth={2} />}
-            label="Marcar como entregue"
-            disabled={delivering}
-            loading={delivering}
-            onClick={() => onDeliver(task)}
-          />
-        </div>
+        {showTimeoutBar ? (
+          <div
+            className="pointer-events-none absolute inset-x-0 bottom-0 h-1.5 overflow-hidden"
+            aria-hidden
+          >
+            <div
+              className={cn(
+                'h-full transition-[width] duration-1000 ease-linear',
+                getTimeoutBarClass(remainingPercent),
+              )}
+              style={{ width: `${remainingPercent}%` }}
+            />
+          </div>
+        ) : null}
       </div>
     </Card>
   );
@@ -126,12 +170,14 @@ function LobbyTaskItem({
 type LobbyAreaProps = {
   tasks: StaffTask[];
   deliveringIds: Set<string>;
+  deliveryTimeoutMinutes: number | null;
   onDeliver: (task: StaffTask) => void;
 };
 
 export default function LobbyArea({
   tasks,
   deliveringIds,
+  deliveryTimeoutMinutes,
   onDeliver,
 }: LobbyAreaProps) {
   const [nowMs, setNowMs] = useState(() => Date.now());
@@ -139,9 +185,10 @@ export default function LobbyArea({
   const [expanded, setExpanded] = useState(false);
 
   useEffect(() => {
-    const id = window.setInterval(() => setNowMs(Date.now()), 30_000);
+    const intervalMs = deliveryTimeoutMinutes ? 1_000 : 30_000;
+    const id = window.setInterval(() => setNowMs(Date.now()), intervalMs);
     return () => window.clearInterval(id);
-  }, []);
+  }, [deliveryTimeoutMinutes]);
 
   return (
     <>
@@ -193,6 +240,7 @@ export default function LobbyArea({
                   task={task}
                   delivering={deliveringIds.has(task.id)}
                   nowMs={nowMs}
+                  deliveryTimeoutMinutes={deliveryTimeoutMinutes}
                   onDeliver={onDeliver}
                   onOpenInfo={setInfoTask}
                 />

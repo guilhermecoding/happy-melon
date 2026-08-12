@@ -48,6 +48,10 @@ export function teamFieldsFrom(team: {
   };
 }
 
+function toClaimedAtIso(claimedAt: Date | null | undefined): string | null {
+  return claimedAt ? claimedAt.toISOString() : null;
+}
+
 export function toBalloonStaffTask(params: {
   id: string;
   contestId: string;
@@ -57,6 +61,7 @@ export function toBalloonStaffTask(params: {
   questionLabel: string;
   status: PrismaBalloonDeliveryStatus;
   claimedByUserId: string | null;
+  claimedAt: Date | null;
   createdAt: Date;
 } & TeamFields): StaffTask {
   return {
@@ -70,6 +75,7 @@ export function toBalloonStaffTask(params: {
     teamMachine: params.teamMachine,
     status: toBalloonDeliveryStatusDto(params.status),
     claimedByUserId: params.claimedByUserId,
+    claimedAt: toClaimedAtIso(params.claimedAt),
     createdAt: params.createdAt.toISOString(),
     questionId: params.questionId,
     balloonColor: params.balloonColor,
@@ -83,6 +89,7 @@ export function toPrintStaffTask(params: {
   teamId: string;
   status: PrismaBalloonDeliveryStatus;
   claimedByUserId: string | null;
+  claimedAt: Date | null;
   createdAt: Date;
 } & TeamFields): StaffTask {
   return {
@@ -96,6 +103,7 @@ export function toPrintStaffTask(params: {
     teamMachine: params.teamMachine,
     status: toBalloonDeliveryStatusDto(params.status),
     claimedByUserId: params.claimedByUserId,
+    claimedAt: toClaimedAtIso(params.claimedAt),
     createdAt: params.createdAt.toISOString(),
   };
 }

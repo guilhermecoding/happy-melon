@@ -184,6 +184,7 @@ export class BalloonsService {
               data: {
                 status: prismaStatus,
                 claimedByUserId: null,
+                claimedAt: null,
               },
             })
             : await tx.balloonDelivery.create({
@@ -220,6 +221,7 @@ export class BalloonsService {
             questionLabel: question.label,
             status: delivery.status,
             claimedByUserId: delivery.claimedByUserId,
+            claimedAt: delivery.claimedAt,
             createdAt: delivery.createdAt,
           }),
         });
@@ -288,6 +290,7 @@ export class BalloonsService {
         data: {
           status: this.toPrismaStatus(targetStatus),
           claimedByUserId: null,
+          claimedAt: null,
         },
       });
 
@@ -314,6 +317,7 @@ export class BalloonsService {
         questionLabel: question.label,
         status: delivery.status,
         claimedByUserId: delivery.claimedByUserId,
+        claimedAt: delivery.claimedAt,
         createdAt: delivery.createdAt,
       }),
     });
@@ -346,6 +350,7 @@ export class BalloonsService {
         data: {
           status: processingStatus,
           claimedByUserId: actor.userId,
+          claimedAt: new Date(),
         },
       });
 
@@ -381,6 +386,7 @@ export class BalloonsService {
       questionLabel: delivery.question.label,
       status: delivery.status,
       claimedByUserId: delivery.claimedByUserId,
+      claimedAt: delivery.claimedAt,
       createdAt: delivery.createdAt,
     });
 
@@ -418,6 +424,7 @@ export class BalloonsService {
         },
         data: {
           status: deliveredStatus,
+          claimedAt: null,
         },
       });
 
@@ -453,6 +460,7 @@ export class BalloonsService {
       questionLabel: delivery.question.label,
       status: delivery.status,
       claimedByUserId: delivery.claimedByUserId,
+      claimedAt: delivery.claimedAt,
       createdAt: delivery.createdAt,
     });
 

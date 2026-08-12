@@ -113,6 +113,7 @@ export class PrintsService {
             ...teamFieldsFrom(team),
             status: task.status,
             claimedByUserId: task.claimedByUserId,
+            claimedAt: task.claimedAt,
             createdAt: task.createdAt,
           }),
         });
@@ -153,6 +154,7 @@ export class PrintsService {
         data: {
           status: this.toPrismaStatus(BALLOON_DELIVERY_STATUS.PENDING),
           claimedByUserId: null,
+          claimedAt: null,
         },
       });
 
@@ -175,6 +177,7 @@ export class PrintsService {
         ...teamFieldsFrom(team),
         status: saved.status,
         claimedByUserId: saved.claimedByUserId,
+        claimedAt: saved.claimedAt,
         createdAt: saved.createdAt,
       }),
     });
@@ -200,6 +203,7 @@ export class PrintsService {
         data: {
           status: this.toPrismaStatus(BALLOON_DELIVERY_STATUS.WITHHELD),
           claimedByUserId: null,
+          claimedAt: null,
         },
       });
 
@@ -222,6 +226,7 @@ export class PrintsService {
         ...teamFieldsFrom(team),
         status: saved.status,
         claimedByUserId: saved.claimedByUserId,
+        claimedAt: saved.claimedAt,
         createdAt: saved.createdAt,
       }),
     });
@@ -254,6 +259,7 @@ export class PrintsService {
         data: {
           status: processingStatus,
           claimedByUserId: actor.userId,
+          claimedAt: new Date(),
         },
       });
 
@@ -285,6 +291,7 @@ export class PrintsService {
       ...teamFieldsFrom(task.team),
       status: task.status,
       claimedByUserId: task.claimedByUserId,
+      claimedAt: task.claimedAt,
       createdAt: task.createdAt,
     });
 
@@ -322,6 +329,7 @@ export class PrintsService {
         },
         data: {
           status: deliveredStatus,
+          claimedAt: null,
         },
       });
 
@@ -353,6 +361,7 @@ export class PrintsService {
       ...teamFieldsFrom(task.team),
       status: task.status,
       claimedByUserId: task.claimedByUserId,
+      claimedAt: task.claimedAt,
       createdAt: task.createdAt,
     });
 

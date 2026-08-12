@@ -186,6 +186,7 @@ model BalloonDelivery {
   question        Question              @relation(fields: [questionId], references: [id], onDelete: Cascade)
   status          BalloonDeliveryStatus
   claimedByUserId String?
+  claimedAt       DateTime?
   createdAt       DateTime              @default(now())
   updatedAt       DateTime              @updatedAt
   taskHistories   TaskHistory[]
@@ -194,6 +195,7 @@ model BalloonDelivery {
   @@index([contestId])
   @@index([teamId])
   @@index([questionId])
+  @@index([status, claimedAt])
   @@map("balloon_delivery")
   @@schema("public")
 }
@@ -206,12 +208,14 @@ model PrintTask {
   team            Team                  @relation(fields: [teamId], references: [id], onDelete: Cascade)
   status          BalloonDeliveryStatus
   claimedByUserId String?
+  claimedAt       DateTime?
   createdAt       DateTime              @default(now())
   updatedAt       DateTime              @updatedAt
   taskHistories   TaskHistory[]
 
   @@index([contestId])
   @@index([teamId, createdAt])
+  @@index([status, claimedAt])
   @@map("print_task")
   @@schema("public")
 }

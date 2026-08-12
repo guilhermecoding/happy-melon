@@ -129,6 +129,7 @@ export type StaffTask = {
   teamMachine: string | null;
   status: BalloonDeliveryStatus;
   claimedByUserId: string | null;
+  claimedAt: string | null;
   createdAt: string;
   questionId?: string | null;
   balloonColor?: string | null;
@@ -152,4 +153,5 @@ export type StaffTaskEvent = {
 export type StaffTasksSnapshot = {
   queue: StaffTask[];
   mine: StaffTask[];
+  deliveryTimeoutMinutes: number | null;
 };

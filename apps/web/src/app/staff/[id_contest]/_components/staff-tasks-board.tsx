@@ -43,11 +43,16 @@ export default function StaffTasksBoard({ contestId }: StaffTasksBoardProps) {
 
   const [queue, setQueue] = useState<StaffTask[]>([]);
   const [lobby, setLobby] = useState<StaffTask[]>([]);
+  const [deliveryTimeoutMinutes, setDeliveryTimeoutMinutes] = useState<
+    number | null
+  >(null);
   const [claimingIds, setClaimingIds] = useState<Set<string>>(new Set());
   const [deliveringIds, setDeliveringIds] = useState<Set<string>>(new Set());
   const [, startTransition] = useTransition();
   const userIdRef = useRef(userId);
   userIdRef.current = userId;
+  const lobbyRef = useRef(lobby);
+  lobbyRef.current = lobby;
 
   useEffect(() => {
     let cancelled = false;
@@ -59,6 +64,7 @@ export default function StaffTasksBoard({ contestId }: StaffTasksBoardProps) {
         startTransition(() => {
           setQueue(sortByCreatedAtAsc(snapshot.queue));
           setLobby(sortByCreatedAtAsc(snapshot.mine));
+          setDeliveryTimeoutMinutes(snapshot.deliveryTimeoutMinutes);
         });
       } catch (error) {
         if (cancelled) return;
@@ -87,6 +93,9 @@ export default function StaffTasksBoard({ contestId }: StaffTasksBoardProps) {
 
     function applyEvent(event: StaffTaskEvent) {
       const me = userIdRef.current;
+      const expiredFromLobby =
+        event.type === STAFF_TASK_EVENT_TYPE.QUEUED &&
+        lobbyRef.current.some((item) => item.id === event.task.id);
 
       startTransition(() => {
         if (event.type === STAFF_TASK_EVENT_TYPE.QUEUED) {
@@ -111,6 +120,12 @@ export default function StaffTasksBoard({ contestId }: StaffTasksBoardProps) {
           setLobby((prev) => removeTask(prev, event.task.id));
         }
       });
+
+      if (expiredFromLobby) {
+        toast.warning(
+          'Uma tarefa expirou por exceder o tempo limite de entrega.',
+        );
+      }
     }
 
     void loadSnapshot();
@@ -128,6 +143,7 @@ export default function StaffTasksBoard({ contestId }: StaffTasksBoardProps) {
       ...task,
       status: BALLOON_DELIVERY_STATUS.PROCESSING,
       claimedByUserId: userId,
+      claimedAt: new Date().toISOString(),
     };
 
     setClaimingIds((prev) => new Set(prev).add(task.id));
@@ -187,6 +203,7 @@ export default function StaffTasksBoard({ contestId }: StaffTasksBoardProps) {
       <LobbyArea
         tasks={lobby}
         deliveringIds={deliveringIds}
+        deliveryTimeoutMinutes={deliveryTimeoutMinutes}
         onDeliver={handleDeliver}
       />
     </>
