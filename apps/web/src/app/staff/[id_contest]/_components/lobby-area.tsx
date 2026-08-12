@@ -52,7 +52,7 @@ function getTaskSubtitle(task: StaffTask): string {
 
   const color = toBalloonColor(task.balloonColor ?? '');
   const label = getBalloonColorLabel(color).toLowerCase();
-  return `Balão ${label} em entrega`;
+  return `Balão ${label} em rota de entrega`;
 }
 
 function displayOrDash(value: string | null | undefined): string {

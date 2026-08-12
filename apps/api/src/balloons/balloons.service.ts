@@ -55,7 +55,7 @@ const BALLOON_COLOR_LABELS: Record<string, string> = {
 
 const STATUS_ACTION_LABEL = {
   [BALLOON_DELIVERY_STATUS.PENDING]: 'confirmado',
-  [BALLOON_DELIVERY_STATUS.PROCESSING]: 'em entrega',
+  [BALLOON_DELIVERY_STATUS.PROCESSING]: 'em rota de entrega',
   [BALLOON_DELIVERY_STATUS.DELIVERED]: 'entregue',
   [BALLOON_DELIVERY_STATUS.WITHHELD]: 'retido',
 } as const;
@@ -70,7 +70,7 @@ export class BalloonsService {
   constructor(
     private readonly contestTasksEvents: ContestTasksEventsService,
     private readonly taskHistoryEvents: TaskHistoryEventsService,
-  ) {}
+  ) { }
 
   async listByContest(contestId: string, teamId?: string) {
     await this.ensureContestExists(contestId);
@@ -180,22 +180,22 @@ export class BalloonsService {
         const { delivery, history } = await prisma.$transaction(async (tx) => {
           const saved = existing
             ? await tx.balloonDelivery.update({
-                where: { id: existing.id },
-                data: {
-                  status: prismaStatus,
-                  claimedByUserId: null,
-                },
-              })
+              where: { id: existing.id },
+              data: {
+                status: prismaStatus,
+                claimedByUserId: null,
+              },
+            })
             : await tx.balloonDelivery.create({
-                data: {
-                  id: generateShortId(),
-                  contestId,
-                  teamId: team.id,
-                  questionId: question.id,
-                  status: prismaStatus,
-                  claimedByUserId: null,
-                },
-              });
+              data: {
+                id: generateShortId(),
+                contestId,
+                teamId: team.id,
+                questionId: question.id,
+                status: prismaStatus,
+                claimedByUserId: null,
+              },
+            });
 
           const history = await this.createHistoryEntry(tx, {
             contestId,

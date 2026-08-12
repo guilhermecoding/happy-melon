@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useMemo, useState } from 'react';
-import { TASK_KIND } from '@repo/shared';
+import { BALLOON_DELIVERY_STATUS, TASK_KIND } from '@repo/shared';
 import { HugeiconsIcon } from '@hugeicons/react';
 import {
   ArrowLeft01Icon,
@@ -43,6 +43,14 @@ function formatHistoryTime(isoDate: string): string {
 
 function getStatusChangedTaskId(entry: TaskHistoryEntry): string | null {
   return entry.taskId ?? entry.printTaskId ?? entry.balloonDeliveryId;
+}
+
+function formatHistoryMessage(entry: TaskHistoryEntry): string {
+  if (entry.status !== BALLOON_DELIVERY_STATUS.PROCESSING) {
+    return entry.message;
+  }
+
+  return entry.message.replace(/\bem entrega\b/g, 'em rota de entrega');
 }
 
 export default function TaskHistoryList({
@@ -200,7 +208,7 @@ export default function TaskHistoryList({
 
                   <div className="flex min-w-0 flex-1 flex-col gap-1">
                     <span className="text-sm font-semibold text-ink">
-                      {entry.message}.
+                      {formatHistoryMessage(entry)}.
                     </span>
                     {taskId ? (
                       <span className="text-xs text-muted-foreground">

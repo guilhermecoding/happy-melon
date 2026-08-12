@@ -38,7 +38,7 @@ import type { PrintTeamActionDto } from './dto/print.dto.js';
 
 const STATUS_ACTION_LABEL = {
   [BALLOON_DELIVERY_STATUS.PENDING]: 'confirmada',
-  [BALLOON_DELIVERY_STATUS.PROCESSING]: 'em entrega',
+  [BALLOON_DELIVERY_STATUS.PROCESSING]: 'em rota de entrega',
   [BALLOON_DELIVERY_STATUS.DELIVERED]: 'entregue',
   [BALLOON_DELIVERY_STATUS.WITHHELD]: 'retida',
 } as const;
@@ -53,7 +53,7 @@ export class PrintsService {
   constructor(
     private readonly contestTasksEvents: ContestTasksEventsService,
     private readonly taskHistoryEvents: TaskHistoryEventsService,
-  ) {}
+  ) { }
 
   async listByContest(contestId: string, teamId?: string) {
     await this.ensureContestExists(contestId);
