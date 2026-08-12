@@ -1,9 +1,13 @@
 "use client";
 
-import { useEffect, useMemo, useState } from 'react';
+import { useEffect, useMemo, useState, type ReactNode } from 'react';
 import { HugeiconsIcon } from '@hugeicons/react';
 import { ClockIcon, EyeClosedIcon } from '@hugeicons/core-free-icons';
-import { TASK_KIND, type TaskKind } from '@repo/shared';
+import {
+  BALLOON_DELIVERY_STATUS,
+  TASK_KIND,
+  type TaskKind,
+} from '@repo/shared';
 import {
   BalloonDeliveryStatusIcon,
   getBalloonDeliveryStatusLabel,
@@ -15,6 +19,7 @@ import Spinner from '@/components/spinner';
 import { balloonService } from '@/services/balloon/balloon.service';
 import { getBalloonErrorMessage } from '@/services/balloon/balloon.error';
 import type { TaskHistoryEntry } from '@/services/balloon/balloon.type';
+import { getFirstName } from '@/lib/greeting';
 import { cn } from '@/lib/utils';
 
 type TaskTimelineDialogProps = {
@@ -36,6 +41,46 @@ function formatTimelineTime(isoDate: string): string {
     hour: '2-digit',
     minute: '2-digit',
   }).format(date);
+}
+
+function formatTimelineActorMessage(
+  entry: TaskHistoryEntry,
+  kind: TaskKind,
+): ReactNode {
+  if (entry.status === BALLOON_DELIVERY_STATUS.PENDING) {
+    return entry.message;
+  }
+
+  const firstName = getFirstName(entry.actorName) || entry.actorName;
+  const item = kind === TASK_KIND.PRINT_TASK ? 'a impressão' : 'o balão';
+  const staff = (
+    <>
+      {firstName} ({entry.actorUserId})
+    </>
+  );
+
+  switch (entry.status) {
+    case BALLOON_DELIVERY_STATUS.PROCESSING:
+      return (
+        <>
+          {staff} está levando {item} para o time.
+        </>
+      );
+    case BALLOON_DELIVERY_STATUS.DELIVERED:
+      return (
+        <>
+          {staff} entregou {item} ao time.
+        </>
+      );
+    case BALLOON_DELIVERY_STATUS.WITHHELD:
+      return (
+        <>
+          {staff} pegou de volta {item} do time.
+        </>
+      );
+    default:
+      return entry.message;
+  }
 }
 
 export function TaskTimelineDialog({
@@ -166,7 +211,7 @@ export function TaskTimelineDialog({
                       {getBalloonDeliveryStatusLabel(entry.status, taskKind)}
                     </p>
                     <p className="text-sm text-muted-foreground">
-                      {entry.message}
+                      {formatTimelineActorMessage(entry, taskKind)}
                     </p>
                   </div>
                 </li>
