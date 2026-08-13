@@ -4,6 +4,7 @@ export type Collaborator = {
   email: string;
   hasAccess: boolean;
   lastAccess: string | null;
+  ipAddress: string | null;
   createdAt: string;
 };
 

@@ -11,6 +11,7 @@ export type CollaboratorListItem = {
   email: string;
   hasAccess: boolean;
   lastAccess: string | null;
+  ipAddress: string | null;
   createdAt: string;
 };
 

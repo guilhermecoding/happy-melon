@@ -43,6 +43,7 @@ function emitCollaboratorJoined(
     banned?: boolean | null;
     createdAt: Date | string;
   },
+  ipAddress?: string | null,
 ) {
   const createdAt =
     user.createdAt instanceof Date
@@ -57,6 +58,7 @@ function emitCollaboratorJoined(
       email: user.email,
       hasAccess: !user.banned,
       lastAccess: new Date().toISOString(),
+      ipAddress: ipAddress ?? null,
       createdAt,
     },
   });
@@ -223,7 +225,7 @@ export const staffSignIn = () =>
           });
 
           if (isNewMembership) {
-            emitCollaboratorJoined(contest.id, user);
+            emitCollaboratorJoined(contest.id, user, session.ipAddress);
           }
 
           return ctx.json({
@@ -325,7 +327,7 @@ export const staffSignIn = () =>
           const persistedUser = await prisma.user.findUniqueOrThrow({
             where: { id: createdUser.id },
           });
-          emitCollaboratorJoined(contest.id, persistedUser);
+          emitCollaboratorJoined(contest.id, persistedUser, session.ipAddress);
 
           return ctx.json({
             status: 'authenticated' as const,

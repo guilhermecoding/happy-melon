@@ -281,6 +281,12 @@ export default function BoxListCollaborators({
         formatDateTime(collaborator.lastAccess),
     },
     {
+      key: 'ipAddress',
+      header: 'IP',
+      mono: true,
+      render: (collaborator: Collaborator) => collaborator.ipAddress ?? '—',
+    },
+    {
       key: 'createdAt',
       header: 'Ingresso',
       render: (collaborator: Collaborator) =>

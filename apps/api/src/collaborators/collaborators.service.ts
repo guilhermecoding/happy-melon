@@ -54,7 +54,7 @@ export class CollaboratorsService {
       where: { id: { in: userIds } },
     });
     const usersById = new Map(users.map((user) => [user.id, user]));
-    const lastAccessByUserId = await this.getLastAccessByUserIds(userIds);
+    const lastSessionByUserId = await this.getLastSessionByUserIds(userIds);
 
     return memberships.flatMap((membership) => {
       const user = usersById.get(membership.userId);
@@ -62,10 +62,13 @@ export class CollaboratorsService {
         return [];
       }
 
+      const lastSession = lastSessionByUserId.get(user.id);
+
       return [
         this.toCollaborator(
           user,
-          lastAccessByUserId.get(user.id) ?? null,
+          lastSession?.lastAccess ?? null,
+          lastSession?.ipAddress ?? null,
           membership.hasAccess,
         ),
       ];
@@ -148,7 +151,8 @@ export class CollaboratorsService {
     }
 
     const user = await prisma.user.findUniqueOrThrow({ where: { id: userId } });
-    const lastAccessByUserId = await this.getLastAccessByUserIds([userId]);
+    const lastSessionByUserId = await this.getLastSessionByUserIds([userId]);
+    const lastSession = lastSessionByUserId.get(userId);
 
     const collaborator = this.toCollaborator(
       {
@@ -156,7 +160,8 @@ export class CollaboratorsService {
         name,
         email: userEmail,
       },
-      lastAccessByUserId.get(userId) ?? null,
+      lastSession?.lastAccess ?? null,
+      lastSession?.ipAddress ?? null,
       true,
     );
 
@@ -206,7 +211,8 @@ export class CollaboratorsService {
           contestId_userId: { contestId, userId },
         },
       });
-      const lastAccessByUserId = await this.getLastAccessByUserIds([userId]);
+      const lastSessionByUserId = await this.getLastSessionByUserIds([userId]);
+      const lastSession = lastSessionByUserId.get(userId);
 
       return this.toCollaborator(
         {
@@ -214,7 +220,8 @@ export class CollaboratorsService {
           name: updated.name,
           email: updated.email,
         },
-        lastAccessByUserId.get(userId) ?? null,
+        lastSession?.lastAccess ?? null,
+        lastSession?.ipAddress ?? null,
         membership.hasAccess,
       );
     } catch (error) {
@@ -275,11 +282,13 @@ export class CollaboratorsService {
       const user = await prisma.user.findUniqueOrThrow({
         where: { id: userId },
       });
-      const lastAccessByUserId = await this.getLastAccessByUserIds([userId]);
+      const lastSessionByUserId = await this.getLastSessionByUserIds([userId]);
+      const lastSession = lastSessionByUserId.get(userId);
 
       return this.toCollaborator(
         user,
-        lastAccessByUserId.get(userId) ?? null,
+        lastSession?.lastAccess ?? null,
+        lastSession?.ipAddress ?? null,
         hasAccess,
       );
     } catch (error) {
@@ -395,6 +404,7 @@ export class CollaboratorsService {
       createdAt: Date;
     },
     lastAccess: string | null,
+    ipAddress: string | null,
     membershipHasAccess: boolean,
   ) {
     return {
@@ -403,32 +413,45 @@ export class CollaboratorsService {
       email: user.email,
       hasAccess: membershipHasAccess && !user.banned,
       lastAccess,
+      ipAddress,
       createdAt: user.createdAt.toISOString(),
     };
   }
 
-  private async getLastAccessByUserIds(
+  private async getLastSessionByUserIds(
     userIds: string[],
-  ): Promise<Map<string, string>> {
+  ): Promise<Map<string, { lastAccess: string; ipAddress: string | null }>> {
     if (userIds.length === 0) {
       return new Map();
     }
 
-    const sessions = await prisma.session.groupBy({
-      by: ['userId'],
+    const sessions = await prisma.session.findMany({
       where: { userId: { in: userIds } },
-      _max: { updatedAt: true },
+      select: {
+        userId: true,
+        updatedAt: true,
+        ipAddress: true,
+      },
+      orderBy: { updatedAt: 'desc' },
     });
 
-    return new Map(
-      sessions.flatMap((session) => {
-        if (!session._max.updatedAt) {
-          return [];
-        }
+    const lastSessionByUserId = new Map<
+      string,
+      { lastAccess: string; ipAddress: string | null }
+    >();
 
-        return [[session.userId, session._max.updatedAt.toISOString()]];
-      }),
-    );
+    for (const session of sessions) {
+      if (lastSessionByUserId.has(session.userId)) {
+        continue;
+      }
+
+      lastSessionByUserId.set(session.userId, {
+        lastAccess: session.updatedAt.toISOString(),
+        ipAddress: session.ipAddress,
+      });
+    }
+
+    return lastSessionByUserId;
   }
 
   private toAuthHeaders(headers: IncomingHttpHeaders): Headers {
