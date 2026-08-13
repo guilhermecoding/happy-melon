@@ -401,24 +401,28 @@ export function LoginForm({
                     Voltar
                   </Button>
                 ) : (
-                  <Button
-                    variant="quiet"
-                    size="sm"
-                    block
-                    onClick={() => {
-                      setIsAdmin((prev) => !prev)
-                      setNeedsRegistration(false)
-                      setName('')
-                      setError(null)
-                    }}
-                  >
-                    <HugeiconsIcon
-                      icon={isAdmin ? BalloonIcon : Crown03Icon}
-                      className="size-5"
-                      strokeWidth={2.5}
-                    />
-                    {isAdmin ? 'Sou Colaborador' : 'Sou Administrador'}
-                  </Button>
+                  <div className="flex justify-end mt-4">
+                    <div className="w-full sm:w-fit">
+                      <Button
+                        variant="quiet"
+                        size="sm"
+                        block
+                        onClick={() => {
+                          setIsAdmin((prev) => !prev)
+                          setNeedsRegistration(false)
+                          setName('')
+                          setError(null)
+                        }}
+                      >
+                        <HugeiconsIcon
+                          icon={isAdmin ? BalloonIcon : Crown03Icon}
+                          className="size-5"
+                          strokeWidth={2.5}
+                        />
+                        {isAdmin ? 'Colaborador' : 'Administrador'}
+                      </Button>
+                    </div>
+                  </div>
                 )}
               </div>
             </div>

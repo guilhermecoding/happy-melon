@@ -150,10 +150,10 @@ export default function QueueTask({
               alt="Empty queue"
               width={100}
               height={100}
-              className="h-auto w-56 opacity-50"
+              className="h-auto w-56 opacity-50 pointer-events-none select-none"
               loading="eager"
             />
-            <p className="text-xl md:text-2xl text-muted-foreground px-1 text-center">
+            <p className="text-xl md:text-2xl text-muted-foreground px-1 text-center relative -top-18">
               Tudo tranquilo! Nenhuma tarefa disponível.
             </p>
           </div>
