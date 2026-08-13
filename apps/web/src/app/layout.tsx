@@ -52,7 +52,7 @@ export const metadata: Metadata = {
     locale: "pt-BR",
     type: "website",
   },
-  keywords: ["luna", "academy", "gestão", "academica", "escola", "educação", "educação superior", "educação profissional", "educação técnica", "educação infantil", "educação básica", "educação superior", "educação profissional", "educação técnica", "educação infantil", "educação básica", "educação superior", "educação profissional", "educação técnica", "educação infantil", "educação básica"],
+  keywords: ["happy-melon", "maratona-de-programacao", "staff", "baloes", "organizacao", "organizacao-de-staffs", "organizacao-de-baloes"],
 };
 
 export default function RootLayout({
