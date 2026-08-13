@@ -4,6 +4,7 @@ import Section from '@/components/ui/section'
 import Loading from '@/app/loading'
 import { Metadata } from 'next'
 import StaffTasksBoard from './_components/staff-tasks-board'
+import { contestService } from '@/services/contest/contest.service'
 
 export const metadata: Metadata = {
   title: 'Tarefas',
@@ -12,13 +13,14 @@ export const metadata: Metadata = {
 async function StaffContestPageContent({
   params,
 }: Omit<PageProps<'/staff/[id_contest]'>, 'searchParams'>) {
-  const { id_contest } = await params
+  const { id_contest } = await params;
+  const contest = await contestService.get(id_contest);
 
   return (
     <Page>
       <Section>
         <h1 className="text-xl sm:text-5xl font-black text-center">
-          Maratona Mineira de Programação
+          {contest.name}
         </h1>
       </Section>
 
