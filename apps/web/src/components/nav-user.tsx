@@ -41,6 +41,7 @@ export function NavUser({
   user,
   compact = false,
   aboutHref,
+  onBeforeSignOut,
 }: {
   user: {
     name: string
@@ -49,6 +50,7 @@ export function NavUser({
   } | null;
   compact?: boolean;
   aboutHref?: string;
+  onBeforeSignOut?: () => void;
 }) {
   const { isMobile } = useSidebar()
   const router = useRouter()
@@ -62,6 +64,7 @@ export function NavUser({
     if (isSigningOut) return
     setIsSigningOut(true)
     try {
+      onBeforeSignOut?.()
       await authClient.signOut()
       router.push("/entrar")
       router.refresh()
