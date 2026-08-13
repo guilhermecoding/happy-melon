@@ -24,7 +24,7 @@ export default function AboutPage() {
                         className="pointer-events-none w-76 sm:w-96 h-auto"
                     />
                     <span className="mt-2 text-sm text-muted-foreground">
-                        release version v{APP_VERSION}
+                        release version {APP_VERSION}
                     </span>
                 </div>
             </Section>
