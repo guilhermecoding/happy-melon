@@ -45,7 +45,7 @@ export default function AboutPage() {
                             className="text-base font-bold flex items-center gap-1 underline text-blue-400 w-max"
                             target="_blank"
                         >
-                            v{APP_VERSION} <IconExternalLink className="size-4" />
+                            {APP_VERSION} <IconExternalLink className="size-4" />
                         </Link>
                     </div>
                     <div className="flex flex-col">
