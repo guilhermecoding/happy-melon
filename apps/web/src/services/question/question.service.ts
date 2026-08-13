@@ -11,8 +11,6 @@ import type {
 
 import { getApiBaseUrl } from '@/lib/api-url';
 
-const API_URL = getApiBaseUrl();
-
 async function getServerCookieHeader(): Promise<string | undefined> {
   if (typeof window !== 'undefined') {
     return undefined;
@@ -32,7 +30,7 @@ export const questionService = {
     try {
       const cookie = await getServerCookieHeader();
       const response = await fetch(
-        `${API_URL}/contests/${contestId}/questions`,
+        `${getApiBaseUrl()}/contests/${contestId}/questions`,
         {
           credentials: 'include',
           headers: cookie ? { cookie } : undefined,
@@ -62,7 +60,7 @@ export const questionService = {
   ): Promise<Question> {
     try {
       const response = await fetch(
-        `${API_URL}/contests/${contestId}/questions`,
+        `${getApiBaseUrl()}/contests/${contestId}/questions`,
         {
           method: 'POST',
           credentials: 'include',
@@ -89,7 +87,7 @@ export const questionService = {
 
   async update(id: string, data: UpdateQuestionInput): Promise<Question> {
     try {
-      const response = await fetch(`${API_URL}/questions/${id}`, {
+      const response = await fetch(`${getApiBaseUrl()}/questions/${id}`, {
         method: 'PATCH',
         credentials: 'include',
         headers: { 'Content-Type': 'application/json' },
@@ -117,7 +115,7 @@ export const questionService = {
     data: DeleteQuestionInput,
   ): Promise<{ success: true }> {
     try {
-      const response = await fetch(`${API_URL}/questions/${id}/delete`, {
+      const response = await fetch(`${getApiBaseUrl()}/questions/${id}/delete`, {
         method: 'POST',
         credentials: 'include',
         headers: { 'Content-Type': 'application/json' },

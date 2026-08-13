@@ -12,8 +12,6 @@ import type {
 
 import { getApiBaseUrl } from '@/lib/api-url';
 
-const API_URL = getApiBaseUrl();
-
 async function getServerCookieHeader(): Promise<string | undefined> {
   if (typeof window !== 'undefined') {
     return undefined;
@@ -32,7 +30,7 @@ export const teamService = {
   async list(contestId: string): Promise<Team[]> {
     try {
       const cookie = await getServerCookieHeader();
-      const response = await fetch(`${API_URL}/contests/${contestId}/teams`, {
+      const response = await fetch(`${getApiBaseUrl()}/contests/${contestId}/teams`, {
         credentials: 'include',
         headers: cookie ? { cookie } : undefined,
         cache: 'no-store',
@@ -56,7 +54,7 @@ export const teamService = {
 
   async create(contestId: string, data: CreateTeamInput): Promise<Team> {
     try {
-      const response = await fetch(`${API_URL}/contests/${contestId}/teams`, {
+      const response = await fetch(`${getApiBaseUrl()}/contests/${contestId}/teams`, {
         method: 'POST',
         credentials: 'include',
         headers: { 'Content-Type': 'application/json' },
@@ -82,7 +80,7 @@ export const teamService = {
   ): Promise<Team[]> {
     try {
       const response = await fetch(
-        `${API_URL}/contests/${contestId}/teams/bulk`,
+        `${getApiBaseUrl()}/contests/${contestId}/teams/bulk`,
         {
           method: 'POST',
           credentials: 'include',
@@ -109,7 +107,7 @@ export const teamService = {
 
   async update(id: string, data: UpdateTeamInput): Promise<Team> {
     try {
-      const response = await fetch(`${API_URL}/teams/${id}`, {
+      const response = await fetch(`${getApiBaseUrl()}/teams/${id}`, {
         method: 'PATCH',
         credentials: 'include',
         headers: { 'Content-Type': 'application/json' },
@@ -137,7 +135,7 @@ export const teamService = {
     data: DeleteTeamInput,
   ): Promise<{ success: true }> {
     try {
-      const response = await fetch(`${API_URL}/teams/${id}/delete`, {
+      const response = await fetch(`${getApiBaseUrl()}/teams/${id}/delete`, {
         method: 'POST',
         credentials: 'include',
         headers: { 'Content-Type': 'application/json' },
@@ -170,7 +168,7 @@ export const teamService = {
   ): Promise<{ success: true; deletedCount: number }> {
     try {
       const response = await fetch(
-        `${API_URL}/contests/${contestId}/teams/delete`,
+        `${getApiBaseUrl()}/contests/${contestId}/teams/delete`,
         {
           method: 'POST',
           credentials: 'include',

@@ -1,5 +1,15 @@
 import process from "node:process";
 
+/** Prefixes of the Nest API, proxied same-origin via `app/backend/[...path]`. */
+const API_PREFIXES = [
+  "api",
+  "contests",
+  "administrators",
+  "teams",
+  "questions",
+  "me",
+];
+
 /** @type {import('next').NextConfig} */
 const nextConfig = {
   output: "standalone",
@@ -11,6 +21,12 @@ const nextConfig = {
       .filter(Boolean)
     : [],
   cacheComponents: true,
+  async rewrites() {
+    return API_PREFIXES.flatMap((prefix) => [
+      { source: `/${prefix}`, destination: `/backend/${prefix}` },
+      { source: `/${prefix}/:path*`, destination: `/backend/${prefix}/:path*` },
+    ]);
+  },
 };
 
 export default nextConfig;

@@ -14,8 +14,6 @@ import type {
 
 import { getApiBaseUrl } from '@/lib/api-url';
 
-const API_URL = getApiBaseUrl();
-
 async function getServerCookieHeader(): Promise<string | undefined> {
   if (typeof window !== 'undefined') {
     return undefined;
@@ -41,7 +39,7 @@ export const balloonService = {
         ? `?${new URLSearchParams({ teamId }).toString()}`
         : '';
       const response = await fetch(
-        `${API_URL}/contests/${contestId}/balloon-deliveries${search}`,
+        `${getApiBaseUrl()}/contests/${contestId}/balloon-deliveries${search}`,
         {
           credentials: 'include',
           headers: cookie ? { cookie } : undefined,
@@ -69,7 +67,7 @@ export const balloonService = {
     try {
       const cookie = await getServerCookieHeader();
       const response = await fetch(
-        `${API_URL}/contests/${contestId}/task-history`,
+        `${getApiBaseUrl()}/contests/${contestId}/task-history`,
         {
           credentials: 'include',
           headers: cookie ? { cookie } : undefined,
@@ -94,7 +92,7 @@ export const balloonService = {
   },
 
   getTaskHistoryEventsUrl(contestId: string): string {
-    return `${API_URL}/contests/${contestId}/task-history/events`;
+    return `${getApiBaseUrl()}/contests/${contestId}/task-history/events`;
   },
 
   parseTaskHistoryEventData(raw: string): TaskHistoryCreatedEvent | null {
@@ -126,7 +124,7 @@ export const balloonService = {
         ? `?${new URLSearchParams({ kind }).toString()}`
         : '';
       const response = await fetch(
-        `${API_URL}/contests/${contestId}/task-history/by-task/${relatedTaskId}${search}`,
+        `${getApiBaseUrl()}/contests/${contestId}/task-history/by-task/${relatedTaskId}${search}`,
         {
           credentials: 'include',
           headers: cookie ? { cookie } : undefined,
@@ -156,7 +154,7 @@ export const balloonService = {
   ): Promise<BalloonDelivery> {
     try {
       const response = await fetch(
-        `${API_URL}/contests/${contestId}/balloon-deliveries/confirm`,
+        `${getApiBaseUrl()}/contests/${contestId}/balloon-deliveries/confirm`,
         {
           method: 'POST',
           credentials: 'include',
@@ -187,7 +185,7 @@ export const balloonService = {
   ): Promise<BalloonDelivery> {
     try {
       const response = await fetch(
-        `${API_URL}/contests/${contestId}/balloon-deliveries/withhold`,
+        `${getApiBaseUrl()}/contests/${contestId}/balloon-deliveries/withhold`,
         {
           method: 'POST',
           credentials: 'include',

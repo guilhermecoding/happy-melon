@@ -15,8 +15,6 @@ import {
 } from '@repo/shared';
 import { getApiBaseUrl } from '@/lib/api-url';
 
-const API_URL = getApiBaseUrl();
-
 async function getServerCookieHeader(): Promise<string | undefined> {
   if (typeof window !== 'undefined') {
     return undefined;
@@ -34,7 +32,7 @@ async function getServerCookieHeader(): Promise<string | undefined> {
 export const contestService = {
   async list(): Promise<Contest[]> {
     try {
-      const response = await fetch(`${API_URL}/contests`, {
+      const response = await fetch(`${getApiBaseUrl()}/contests`, {
         credentials: 'include',
       });
 
@@ -57,7 +55,7 @@ export const contestService = {
   async get(id: string): Promise<Contest> {
     try {
       const cookie = await getServerCookieHeader();
-      const response = await fetch(`${API_URL}/contests/${id}`, {
+      const response = await fetch(`${getApiBaseUrl()}/contests/${id}`, {
         credentials: 'include',
         headers: cookie ? { cookie } : undefined,
         cache: 'no-store',
@@ -81,7 +79,7 @@ export const contestService = {
 
   async create(data: CreateContestInput): Promise<Contest> {
     try {
-      const response = await fetch(`${API_URL}/contests`, {
+      const response = await fetch(`${getApiBaseUrl()}/contests`, {
         method: 'POST',
         credentials: 'include',
         headers: { 'Content-Type': 'application/json' },
@@ -106,7 +104,7 @@ export const contestService = {
 
   async update(id: string, data: UpdateContestInput): Promise<Contest> {
     try {
-      const response = await fetch(`${API_URL}/contests/${id}`, {
+      const response = await fetch(`${getApiBaseUrl()}/contests/${id}`, {
         method: 'PATCH',
         credentials: 'include',
         headers: { 'Content-Type': 'application/json' },
@@ -134,7 +132,7 @@ export const contestService = {
     data: StaffSettingsInput,
   ): Promise<Contest> {
     try {
-      const response = await fetch(`${API_URL}/contests/${id}/staff-settings`, {
+      const response = await fetch(`${getApiBaseUrl()}/contests/${id}/staff-settings`, {
         method: 'PATCH',
         credentials: 'include',
         headers: { 'Content-Type': 'application/json' },
@@ -158,7 +156,7 @@ export const contestService = {
   },
 
   getAccessEventsUrl(contestId: string): string {
-    return `${API_URL}/contests/${contestId}/access/events`;
+    return `${getApiBaseUrl()}/contests/${contestId}/access/events`;
   },
 
   parseAccessEventData(raw: string): ContestAccessEvent | null {

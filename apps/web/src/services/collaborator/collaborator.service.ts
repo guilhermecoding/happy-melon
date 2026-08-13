@@ -14,13 +14,11 @@ import type {
 
 import { getApiBaseUrl } from '@/lib/api-url';
 
-const API_URL = getApiBaseUrl();
-
 export const collaboratorService = {
   async list(contestId: string): Promise<Collaborator[]> {
     try {
       const response = await fetch(
-        `${API_URL}/contests/${contestId}/collaborators`,
+        `${getApiBaseUrl()}/contests/${contestId}/collaborators`,
         {
           credentials: 'include',
         },
@@ -43,7 +41,7 @@ export const collaboratorService = {
   },
 
   getEventsUrl(contestId: string): string {
-    return `${API_URL}/contests/${contestId}/collaborators/events`;
+    return `${getApiBaseUrl()}/contests/${contestId}/collaborators/events`;
   },
 
   parseEventData(raw: string): CollaboratorJoinedEvent | null {
@@ -70,7 +68,7 @@ export const collaboratorService = {
   ): Promise<Collaborator> {
     try {
       const response = await fetch(
-        `${API_URL}/contests/${contestId}/collaborators`,
+        `${getApiBaseUrl()}/contests/${contestId}/collaborators`,
         {
           method: 'POST',
           credentials: 'include',
@@ -102,7 +100,7 @@ export const collaboratorService = {
   ): Promise<Collaborator> {
     try {
       const response = await fetch(
-        `${API_URL}/contests/${contestId}/collaborators/${userId}`,
+        `${getApiBaseUrl()}/contests/${contestId}/collaborators/${userId}`,
         {
           method: 'PATCH',
           credentials: 'include',
@@ -134,7 +132,7 @@ export const collaboratorService = {
   ): Promise<Collaborator> {
     try {
       const response = await fetch(
-        `${API_URL}/contests/${contestId}/collaborators/${userId}/access`,
+        `${getApiBaseUrl()}/contests/${contestId}/collaborators/${userId}/access`,
         {
           method: 'PATCH',
           credentials: 'include',
@@ -165,7 +163,7 @@ export const collaboratorService = {
   ): Promise<{ success: true }> {
     try {
       const response = await fetch(
-        `${API_URL}/contests/${contestId}/collaborators/${userId}/delete`,
+        `${getApiBaseUrl()}/contests/${contestId}/collaborators/${userId}/delete`,
         {
           method: 'POST',
           credentials: 'include',

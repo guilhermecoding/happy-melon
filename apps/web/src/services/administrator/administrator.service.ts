@@ -13,12 +13,10 @@ import type {
 
 import { getApiBaseUrl } from '@/lib/api-url';
 
-const API_URL = getApiBaseUrl();
-
 export const administratorService = {
   async list(): Promise<Administrator[]> {
     try {
-      const response = await fetch(`${API_URL}/administrators`, {
+      const response = await fetch(`${getApiBaseUrl()}/administrators`, {
         credentials: 'include',
       });
 
@@ -40,7 +38,7 @@ export const administratorService = {
 
   async create(data: CreateAdministratorInput): Promise<CreatedAdministrator> {
     try {
-      const response = await fetch(`${API_URL}/administrators`, {
+      const response = await fetch(`${getApiBaseUrl()}/administrators`, {
         method: 'POST',
         credentials: 'include',
         headers: { 'Content-Type': 'application/json' },
@@ -68,7 +66,7 @@ export const administratorService = {
     data: UpdateAdministratorInput,
   ): Promise<Administrator> {
     try {
-      const response = await fetch(`${API_URL}/administrators/${id}`, {
+      const response = await fetch(`${getApiBaseUrl()}/administrators/${id}`, {
         method: 'PATCH',
         credentials: 'include',
         headers: { 'Content-Type': 'application/json' },
@@ -93,7 +91,7 @@ export const administratorService = {
 
   async setAccess(id: string, hasAccess: boolean): Promise<Administrator> {
     try {
-      const response = await fetch(`${API_URL}/administrators/${id}/access`, {
+      const response = await fetch(`${getApiBaseUrl()}/administrators/${id}/access`, {
         method: 'PATCH',
         credentials: 'include',
         headers: { 'Content-Type': 'application/json' },
@@ -121,7 +119,7 @@ export const administratorService = {
     data: DeleteAdministratorInput,
   ): Promise<{ success: true }> {
     try {
-      const response = await fetch(`${API_URL}/administrators/${id}/delete`, {
+      const response = await fetch(`${getApiBaseUrl()}/administrators/${id}/delete`, {
         method: 'POST',
         credentials: 'include',
         headers: { 'Content-Type': 'application/json' },
@@ -154,7 +152,7 @@ export const administratorService = {
   ): Promise<{ success: true }> {
     try {
       const response = await fetch(
-        `${API_URL}/administrators/${id}/reset-password`,
+        `${getApiBaseUrl()}/administrators/${id}/reset-password`,
         {
           method: 'POST',
           credentials: 'include',

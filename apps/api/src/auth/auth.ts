@@ -56,6 +56,16 @@ function withIdCollisionRetry(client: typeof prisma) {
   });
 }
 
+const publicAppUrl = (
+  process.env.BETTER_AUTH_URL?.trim() ||
+  process.env.WEB_ORIGIN?.trim() ||
+  'http://localhost:3001'
+).replace(/\/$/, '');
+
+const webOrigin = (
+  process.env.WEB_ORIGIN?.trim() || publicAppUrl
+).replace(/\/$/, '');
+
 export const auth = betterAuth({
   database: prismaAdapter(withIdCollisionRetry(prisma), {
     provider: 'postgresql',
@@ -73,20 +83,19 @@ export const auth = betterAuth({
       },
     },
   },
-  trustedOrigins: [process.env.WEB_ORIGIN ?? 'http://localhost:3001'],
-  baseURL: process.env.BETTER_AUTH_URL ?? 'http://localhost:3000',
+  trustedOrigins: [...new Set([webOrigin, publicAppUrl])],
+  baseURL: publicAppUrl,
   secret: process.env.BETTER_AUTH_SECRET,
   // HTTP local/Docker: Secure cookies are rejected by the browser and login
   // appears to succeed (200) while the session never sticks. HTTPS → secure.
+  // baseURL is the public *site* URL (the browser talks to the web origin;
+  // Next proxies /api to this process).
   advanced: {
-    useSecureCookies: (
-      process.env.BETTER_AUTH_URL ?? 'http://localhost:3000'
-    ).startsWith('https://'),
+    trustedProxyHeaders: true,
+    useSecureCookies: publicAppUrl.startsWith('https://'),
     defaultCookieAttributes: {
       sameSite: 'lax',
-      secure: (
-        process.env.BETTER_AUTH_URL ?? 'http://localhost:3000'
-      ).startsWith('https://'),
+      secure: publicAppUrl.startsWith('https://'),
     },
     database: {
       generateId: () => generateShortId(),

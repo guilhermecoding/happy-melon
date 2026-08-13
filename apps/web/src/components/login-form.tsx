@@ -249,7 +249,7 @@ export function LoginForm({
         return
       }
 
-      // Full navigation so the session cookie is available to the proxy/middleware
+      // Full navigation so the session cookie is available to the proxy
       window.location.assign('/admin')
     } catch {
       setError('Não foi possível conectar ao servidor de autenticação.')

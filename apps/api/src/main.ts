@@ -9,14 +9,20 @@ import { AppModule } from './app.module.js';
 async function bootstrap() {
   const app = await NestFactory.create<NestFastifyApplication>(
     AppModule,
-    new FastifyAdapter(),
+    new FastifyAdapter({ trustProxy: true }),
     {
       bodyParser: false
     }
   );
 
+  const webOrigin = (
+    process.env.WEB_ORIGIN?.trim() ||
+    process.env.BETTER_AUTH_URL?.trim() ||
+    'http://localhost:3001'
+  ).replace(/\/$/, '');
+
   app.enableCors({
-    origin: process.env.WEB_ORIGIN ?? 'http://localhost:3001',
+    origin: webOrigin,
     credentials: true,
     methods: ['GET', 'HEAD', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'],
     allowedHeaders: ['Content-Type', 'Authorization', 'Cookie'],

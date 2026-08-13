@@ -17,8 +17,6 @@ import {
   parsePrintError,
 } from '@/services/print/print.error';
 
-const API_URL = getApiBaseUrl();
-
 export const CLAIM_RACE_ERROR_MESSAGE =
   'Ops! Alguém foi ligeiro e já pegou essa task. Tente outra!';
 
@@ -61,7 +59,7 @@ export const staffTasksService = {
     try {
       const cookie = await getServerCookieHeader();
       const response = await fetch(
-        `${API_URL}/contests/${contestId}/staff-tasks`,
+        `${getApiBaseUrl()}/contests/${contestId}/staff-tasks`,
         {
           credentials: 'include',
           headers: cookie ? { cookie } : undefined,
@@ -86,7 +84,7 @@ export const staffTasksService = {
   },
 
   getEventsUrl(contestId: string): string {
-    return `${API_URL}/contests/${contestId}/tasks/events`;
+    return `${getApiBaseUrl()}/contests/${contestId}/tasks/events`;
   },
 
   parseEventData(raw: string): StaffTaskEvent | null {
@@ -135,7 +133,7 @@ export const staffTasksService = {
     if (task.kind === TASK_KIND.PRINT_TASK) {
       try {
         const response = await fetch(
-          `${API_URL}/contests/${contestId}/print-tasks/${task.id}/claim`,
+          `${getApiBaseUrl()}/contests/${contestId}/print-tasks/${task.id}/claim`,
           {
             method: 'POST',
             credentials: 'include',
@@ -160,7 +158,7 @@ export const staffTasksService = {
 
     try {
       const response = await fetch(
-        `${API_URL}/contests/${contestId}/balloon-deliveries/${task.id}/claim`,
+        `${getApiBaseUrl()}/contests/${contestId}/balloon-deliveries/${task.id}/claim`,
         {
           method: 'POST',
           credentials: 'include',
@@ -187,7 +185,7 @@ export const staffTasksService = {
     if (task.kind === TASK_KIND.PRINT_TASK) {
       try {
         const response = await fetch(
-          `${API_URL}/contests/${contestId}/print-tasks/${task.id}/deliver`,
+          `${getApiBaseUrl()}/contests/${contestId}/print-tasks/${task.id}/deliver`,
           {
             method: 'POST',
             credentials: 'include',
@@ -212,7 +210,7 @@ export const staffTasksService = {
 
     try {
       const response = await fetch(
-        `${API_URL}/contests/${contestId}/balloon-deliveries/${task.id}/deliver`,
+        `${getApiBaseUrl()}/contests/${contestId}/balloon-deliveries/${task.id}/deliver`,
         {
           method: 'POST',
           credentials: 'include',

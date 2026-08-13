@@ -6,8 +6,6 @@ import type { EnqueuePrintTaskInput, PrintTask } from './print.type';
 
 import { getApiBaseUrl } from '@/lib/api-url';
 
-const API_URL = getApiBaseUrl();
-
 async function getServerCookieHeader(): Promise<string | undefined> {
   if (typeof window !== 'undefined') {
     return undefined;
@@ -33,7 +31,7 @@ export const printService = {
         ? `?${new URLSearchParams({ teamId }).toString()}`
         : '';
       const response = await fetch(
-        `${API_URL}/contests/${contestId}/print-tasks${search}`,
+        `${getApiBaseUrl()}/contests/${contestId}/print-tasks${search}`,
         {
           credentials: 'include',
           headers: cookie ? { cookie } : undefined,
@@ -63,7 +61,7 @@ export const printService = {
   ): Promise<PrintTask> {
     try {
       const response = await fetch(
-        `${API_URL}/contests/${contestId}/print-tasks/enqueue`,
+        `${getApiBaseUrl()}/contests/${contestId}/print-tasks/enqueue`,
         {
           method: 'POST',
           credentials: 'include',
@@ -91,7 +89,7 @@ export const printService = {
   async confirm(contestId: string, taskId: string): Promise<PrintTask> {
     try {
       const response = await fetch(
-        `${API_URL}/contests/${contestId}/print-tasks/${taskId}/confirm`,
+        `${getApiBaseUrl()}/contests/${contestId}/print-tasks/${taskId}/confirm`,
         {
           method: 'POST',
           credentials: 'include',
@@ -117,7 +115,7 @@ export const printService = {
   async withhold(contestId: string, taskId: string): Promise<PrintTask> {
     try {
       const response = await fetch(
-        `${API_URL}/contests/${contestId}/print-tasks/${taskId}/withhold`,
+        `${getApiBaseUrl()}/contests/${contestId}/print-tasks/${taskId}/withhold`,
         {
           method: 'POST',
           credentials: 'include',
