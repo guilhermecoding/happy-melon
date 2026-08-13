@@ -6,6 +6,7 @@ import {
   HttpException,
   HttpStatus,
   Injectable,
+  NotFoundException,
   UnauthorizedException,
 } from '@nestjs/common';
 import { APIError } from 'better-auth/api';
@@ -35,7 +36,7 @@ export class AdministratorsService {
       });
 
       const administrators = result.users.filter(
-        (user) => user.role === 'admin' || user.role === 'staff',
+        (user) => user.role === 'admin',
       );
       const lastAccessByUserId = await this.getLastAccessByUserIds(
         administrators.map((user) => user.id),
@@ -90,6 +91,8 @@ export class AdministratorsService {
     id: string,
     dto: UpdateAdministratorDto,
   ) {
+    await this.assertAdministrator(id);
+
     try {
       const user = await auth.api.adminUpdateUser({
         headers: this.toAuthHeaders(headers),
@@ -116,6 +119,8 @@ export class AdministratorsService {
         'Você não pode alterar o próprio acesso ao sistema',
       );
     }
+
+    await this.assertAdministrator(id);
 
     try {
       const authHeaders = this.toAuthHeaders(headers);
@@ -158,6 +163,8 @@ export class AdministratorsService {
       );
     }
 
+    await this.assertAdministrator(id);
+
     const authHeaders = this.toAuthHeaders(headers);
 
     try {
@@ -194,6 +201,8 @@ export class AdministratorsService {
     id: string,
     dto: ResetPasswordAdministratorDto,
   ) {
+    await this.assertAdministrator(id);
+
     const authHeaders = this.toAuthHeaders(headers);
 
     try {
@@ -223,6 +232,20 @@ export class AdministratorsService {
       return { success: true as const };
     } catch (error) {
       this.rethrowApiError(error);
+    }
+  }
+
+  private async assertAdministrator(id: string) {
+    const user = await prisma.user.findUnique({ where: { id } });
+
+    if (!user) {
+      throw new NotFoundException('Administrador não encontrado.');
+    }
+
+    if (user.role !== 'admin') {
+      throw new ForbiddenException(
+        'Não é possível gerenciar um colaborador por esta tela.',
+      );
     }
   }
 
