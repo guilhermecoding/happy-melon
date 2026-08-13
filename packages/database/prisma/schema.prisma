@@ -196,6 +196,7 @@ model BalloonDelivery {
   @@index([teamId])
   @@index([questionId])
   @@index([status, claimedAt])
+  @@index([contestId, claimedByUserId, status])
   @@map("balloon_delivery")
   @@schema("public")
 }
@@ -216,6 +217,7 @@ model PrintTask {
   @@index([contestId])
   @@index([teamId, createdAt])
   @@index([status, claimedAt])
+  @@index([contestId, claimedByUserId, status])
   @@map("print_task")
   @@schema("public")
 }

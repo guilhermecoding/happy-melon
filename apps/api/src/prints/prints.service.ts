@@ -28,6 +28,7 @@ import {
   isIdUniqueViolation,
 } from '../common/short-id.js';
 import { ContestTasksEventsService } from '../contest-tasks/contest-tasks.events.js';
+import { LobbyCapacityService } from '../contest-tasks/lobby-capacity.service.js';
 import {
   teamFieldsFrom,
   toPrintStaffTask,
@@ -53,6 +54,7 @@ export class PrintsService {
   constructor(
     private readonly contestTasksEvents: ContestTasksEventsService,
     private readonly taskHistoryEvents: TaskHistoryEventsService,
+    private readonly lobbyCapacity: LobbyCapacityService,
   ) { }
 
   async listByContest(contestId: string, teamId?: string) {
@@ -249,6 +251,8 @@ export class PrintsService {
     );
 
     const { task, history } = await prisma.$transaction(async (tx) => {
+      await this.lobbyCapacity.assertCanClaim(tx, contestId, actor.userId);
+
       const updated = await tx.printTask.updateMany({
         where: {
           id: taskId,

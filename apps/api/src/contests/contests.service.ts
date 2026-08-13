@@ -139,6 +139,7 @@ export class ContestsService {
       deliveryTimeoutMinutes: contest.deliveryTimeoutEnabled
         ? contest.deliveryTimeoutMinutes
         : null,
+      balloonLimit: contest.balloonLimitEnabled ? contest.balloonLimit : null,
     });
 
     return this.toResponse(contest);

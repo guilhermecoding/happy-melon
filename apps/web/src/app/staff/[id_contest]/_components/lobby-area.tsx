@@ -9,6 +9,7 @@ import { Balloon } from '@/components/balloon';
 import PrintIcon from '@/components/print-icon';
 import { IconButton } from '@/components/pouf/Button';
 import { Dialog } from '@/components/pouf/controls';
+import { Badge } from '@/components/pouf/media';
 import { Card } from '@/components/pouf/surface';
 import { cn } from '@/lib/utils';
 import {
@@ -172,6 +173,7 @@ type LobbyAreaProps = {
   tasks: StaffTask[];
   deliveringIds: Set<string>;
   deliveryTimeoutMinutes: number | null;
+  balloonLimit: number | null;
   onDeliver: (task: StaffTask) => void;
 };
 
@@ -179,6 +181,7 @@ export default function LobbyArea({
   tasks,
   deliveringIds,
   deliveryTimeoutMinutes,
+  balloonLimit,
   onDeliver,
 }: LobbyAreaProps) {
   const [nowMs, setNowMs] = useState(() => Date.now());
@@ -210,22 +213,31 @@ export default function LobbyArea({
             />
             <span className="font-bold text-xl">Lobby</span>
           </div>
-          <button
-            type="button"
-            aria-expanded={expanded}
-            aria-label={expanded ? 'Reduzir lobby' : 'Expandir lobby'}
-            className="mr-2 rounded-lg p-1 transition-colors hover:bg-white/10"
-            onClick={() => setExpanded((value) => !value)}
-          >
-            <HugeiconsIcon
-              icon={ArrowUp01Icon}
-              className={cn(
-                'size-8 text-white transition-transform duration-300 ease-out',
-                expanded && 'rotate-180',
-              )}
-              strokeWidth={2.5}
-            />
-          </button>
+          <div className="flex items-center gap-2">
+            {balloonLimit != null ? (
+              <Badge
+                tone={tasks.length <= balloonLimit ? 'mint' : 'orange'}
+              >
+                {tasks.length}/{balloonLimit}
+              </Badge>
+            ) : null}
+            <button
+              type="button"
+              aria-expanded={expanded}
+              aria-label={expanded ? 'Reduzir lobby' : 'Expandir lobby'}
+              className="mr-2 rounded-lg p-1 transition-colors hover:bg-white/10"
+              onClick={() => setExpanded((value) => !value)}
+            >
+              <HugeiconsIcon
+                icon={ArrowUp01Icon}
+                className={cn(
+                  'size-8 text-white transition-transform duration-300 ease-out',
+                  expanded && 'rotate-180',
+                )}
+                strokeWidth={2.5}
+              />
+            </button>
+          </div>
         </div>
 
         <div className="min-h-0 flex-1 overflow-y-auto rounded-2xl bg-white px-2 py-4">

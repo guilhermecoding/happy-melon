@@ -101,12 +101,18 @@ export const staffTasksService = {
       if (type === STAFF_TASK_EVENT_TYPE.SETTINGS_UPDATED) {
         const minutes = (parsed as { deliveryTimeoutMinutes?: unknown })
           .deliveryTimeoutMinutes;
+        const balloonLimit = (parsed as { balloonLimit?: unknown })
+          .balloonLimit;
         if (minutes !== null && typeof minutes !== 'number') {
+          return null;
+        }
+        if (balloonLimit !== null && typeof balloonLimit !== 'number') {
           return null;
         }
         return {
           type: STAFF_TASK_EVENT_TYPE.SETTINGS_UPDATED,
           deliveryTimeoutMinutes: minutes,
+          balloonLimit,
         };
       }
 
@@ -234,7 +240,9 @@ export const staffTasksService = {
       error instanceof PrintServiceError ||
       error instanceof BalloonServiceError
     ) {
-      return error.status === 400;
+      return (
+        error.status === 400 && error.message === CLAIM_RACE_ERROR_MESSAGE
+      );
     }
 
     return false;

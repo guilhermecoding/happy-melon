@@ -125,6 +125,7 @@ export class ContestTasksService {
         contest.deliveryTimeoutEnabled
           ? contest.deliveryTimeoutMinutes
           : null,
+      balloonLimit: contest.balloonLimitEnabled ? contest.balloonLimit : null,
     };
   }
 
@@ -140,6 +141,8 @@ export class ContestTasksService {
       where: { id: contestId },
       select: {
         id: true,
+        balloonLimitEnabled: true,
+        balloonLimit: true,
         deliveryTimeoutEnabled: true,
         deliveryTimeoutMinutes: true,
       },

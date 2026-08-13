@@ -157,6 +157,7 @@ export type StaffTaskLifecycleEvent = {
 export type StaffSettingsUpdatedEvent = {
   type: typeof STAFF_TASK_EVENT_TYPE.SETTINGS_UPDATED;
   deliveryTimeoutMinutes: number | null;
+  balloonLimit: number | null;
 };
 
 export type StaffTaskEvent = StaffTaskLifecycleEvent | StaffSettingsUpdatedEvent;
@@ -165,4 +166,5 @@ export type StaffTasksSnapshot = {
   queue: StaffTask[];
   mine: StaffTask[];
   deliveryTimeoutMinutes: number | null;
+  balloonLimit: number | null;
 };

@@ -46,6 +46,7 @@ export default function StaffTasksBoard({ contestId }: StaffTasksBoardProps) {
   const [deliveryTimeoutMinutes, setDeliveryTimeoutMinutes] = useState<
     number | null
   >(null);
+  const [balloonLimit, setBalloonLimit] = useState<number | null>(null);
   const [claimingIds, setClaimingIds] = useState<Set<string>>(new Set());
   const [deliveringIds, setDeliveringIds] = useState<Set<string>>(new Set());
   const [, startTransition] = useTransition();
@@ -65,6 +66,7 @@ export default function StaffTasksBoard({ contestId }: StaffTasksBoardProps) {
           setQueue(sortByCreatedAtAsc(snapshot.queue));
           setLobby(sortByCreatedAtAsc(snapshot.mine));
           setDeliveryTimeoutMinutes(snapshot.deliveryTimeoutMinutes);
+          setBalloonLimit(snapshot.balloonLimit);
         });
       } catch (error) {
         if (cancelled) return;
@@ -94,6 +96,7 @@ export default function StaffTasksBoard({ contestId }: StaffTasksBoardProps) {
     function applyEvent(event: StaffTaskEvent) {
       if (event.type === STAFF_TASK_EVENT_TYPE.SETTINGS_UPDATED) {
         setDeliveryTimeoutMinutes(event.deliveryTimeoutMinutes);
+        setBalloonLimit(event.balloonLimit);
         return;
       }
 
@@ -143,6 +146,7 @@ export default function StaffTasksBoard({ contestId }: StaffTasksBoardProps) {
 
   async function handleClaim(task: StaffTask) {
     if (!userId || claimingIds.has(task.id)) return;
+    if (balloonLimit != null && lobby.length >= balloonLimit) return;
 
     const optimistic: StaffTask = {
       ...task,
@@ -203,12 +207,15 @@ export default function StaffTasksBoard({ contestId }: StaffTasksBoardProps) {
       <QueueTask
         tasks={queue}
         claimingIds={claimingIds}
+        balloonLimit={balloonLimit}
+        lobbyCount={lobby.length}
         onClaim={handleClaim}
       />
       <LobbyArea
         tasks={lobby}
         deliveringIds={deliveringIds}
         deliveryTimeoutMinutes={deliveryTimeoutMinutes}
+        balloonLimit={balloonLimit}
         onDeliver={handleDeliver}
       />
     </>
