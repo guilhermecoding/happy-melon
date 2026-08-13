@@ -16,6 +16,7 @@ import {
   toBalloonColor,
 } from '@/services/question/balloon-color';
 import {
+  Alien02Icon,
   ArrowUp01Icon, AtSignIcon, BadgeInfoIcon,
   CheckmarkCircle02Icon,
   Clock01Icon,
@@ -229,9 +230,12 @@ export default function LobbyArea({
 
         <div className="min-h-0 flex-1 overflow-y-auto rounded-2xl bg-white px-2 py-4">
           {tasks.length === 0 ? (
-            <p className="px-1 py-2 text-xs text-muted-foreground">
-              Nenhuma tarefa em andamento.
-            </p>
+            <div className="flex flex-col items-center justify-center h-full mt-1">
+              <HugeiconsIcon icon={Alien02Icon} className="size-8 text-muted-foreground" strokeWidth={2} />
+              <p className="px-1 py-2 text-sm text-muted-foreground">
+                Buuh! Seu lobby está vazio.
+              </p>
+            </div>
           ) : (
             <div className="flex flex-col gap-2">
               {tasks.map((task) => (

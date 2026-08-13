@@ -16,6 +16,7 @@ import {
 } from '@/services/question/balloon-color';
 import { BalloonIcon, Clock01Icon, HandIcon } from '@hugeicons/core-free-icons';
 import { HugeiconsIcon } from '@hugeicons/react';
+import Image from 'next/image';
 
 function formatRelativeTime(isoDate: string, nowMs: number): string {
   const diffSeconds = Math.round(
@@ -128,10 +129,13 @@ export default function QueueTask({
       </Card>
 
       <div className="flex flex-col gap-3">
-        {tasks.length === 0 ? (
-          <p className="text-sm text-muted-foreground px-1">
-            Nenhuma tarefa na fila.
-          </p>
+        {tasks.length !== 0 ? (
+          <div className="flex flex-col items-center justify-center h-full">
+            <Image src="/sleep-cat.svg" alt="Empty queue" width={100} height={100} className="h-auto w-56 opacity-50" />
+            <p className="text-xl md:text-2xl text-muted-foreground px-1 text-center">
+              Tudo tranquilo! Nenhuma tarefa disponível.
+            </p>
+          </div>
         ) : (
           tasks.map((task) => (
             <TaskItem
