@@ -27,6 +27,7 @@ import {
   WorkoutRunIcon
 } from '@hugeicons/core-free-icons';
 import { HugeiconsIcon } from '@hugeicons/react';
+import confetti from 'canvas-confetti';
 
 function formatRelativeTime(isoDate: string, nowMs: number): string {
   const diffSeconds = Math.round(
@@ -146,7 +147,17 @@ function LobbyTaskItem({
               label="Marcar como entregue"
               disabled={delivering}
               loading={delivering}
-              onClick={() => onDeliver(task)}
+              onClick={(event) => {
+                const rect = event.currentTarget.getBoundingClientRect();
+                void confetti({
+                  zIndex: 9999,
+                  origin: {
+                    x: (rect.left + rect.width / 2) / window.innerWidth,
+                    y: (rect.top + rect.height / 2) / window.innerHeight,
+                  },
+                });
+                onDeliver(task);
+              }}
             />
           </div>
         </div>
