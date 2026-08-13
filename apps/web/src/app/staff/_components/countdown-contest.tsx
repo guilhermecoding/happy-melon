@@ -61,7 +61,7 @@ export default function CountdownContest({
                     {name}
                 </h1>
                 <FlipClock
-                    variant="muted"
+                    variant="default"
                     className="relative text-3xl md:text-5xl lg:text-7xl mt-4"
                     countdown
                     targetDate={targetDate}
