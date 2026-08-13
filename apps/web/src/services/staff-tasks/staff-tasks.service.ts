@@ -1,4 +1,5 @@
 import {
+  STAFF_TASK_EVENT_TYPE,
   TASK_KIND,
   type StaffTask,
   type StaffTaskEvent,
@@ -91,14 +92,33 @@ export const staffTasksService = {
   parseEventData(raw: string): StaffTaskEvent | null {
     try {
       const parsed: unknown = JSON.parse(raw);
+      if (!parsed || typeof parsed !== 'object' || !('type' in parsed)) {
+        return null;
+      }
+
+      const type = (parsed as { type: unknown }).type;
+
+      if (type === STAFF_TASK_EVENT_TYPE.SETTINGS_UPDATED) {
+        const minutes = (parsed as { deliveryTimeoutMinutes?: unknown })
+          .deliveryTimeoutMinutes;
+        if (minutes !== null && typeof minutes !== 'number') {
+          return null;
+        }
+        return {
+          type: STAFF_TASK_EVENT_TYPE.SETTINGS_UPDATED,
+          deliveryTimeoutMinutes: minutes,
+        };
+      }
+
       if (
-        parsed &&
-        typeof parsed === 'object' &&
-        'type' in parsed &&
+        (type === STAFF_TASK_EVENT_TYPE.QUEUED ||
+          type === STAFF_TASK_EVENT_TYPE.CLAIMED ||
+          type === STAFF_TASK_EVENT_TYPE.REMOVED) &&
         'task' in parsed
       ) {
         return parsed as StaffTaskEvent;
       }
+
       return null;
     } catch {
       return null;

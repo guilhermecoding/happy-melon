@@ -92,6 +92,11 @@ export default function StaffTasksBoard({ contestId }: StaffTasksBoardProps) {
     };
 
     function applyEvent(event: StaffTaskEvent) {
+      if (event.type === STAFF_TASK_EVENT_TYPE.SETTINGS_UPDATED) {
+        setDeliveryTimeoutMinutes(event.deliveryTimeoutMinutes);
+        return;
+      }
+
       const me = userIdRef.current;
       const expiredFromLobby =
         event.type === STAFF_TASK_EVENT_TYPE.QUEUED &&

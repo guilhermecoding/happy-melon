@@ -5,13 +5,14 @@ import {
   NotFoundException,
 } from '@nestjs/common';
 import { ContestStatus, prisma, type Contest } from '@repo/database';
-import { CONTEST_ACCESS_EVENT_TYPE } from '@repo/shared';
+import { CONTEST_ACCESS_EVENT_TYPE, STAFF_TASK_EVENT_TYPE } from '@repo/shared';
 import { revokeStaffSessionsForContest } from '../auth/staff-session-access.js';
 import {
   generateShortId,
   ID_MAX_ATTEMPTS,
   isIdUniqueViolation,
 } from '../common/short-id.js';
+import { ContestTasksEventsService } from '../contest-tasks/contest-tasks.events.js';
 import { ContestAccessEventsService } from './contest-access.events.js';
 import type {
   ContestStatusDto,
@@ -24,6 +25,7 @@ import type {
 export class ContestsService {
   constructor(
     private readonly contestAccessEvents: ContestAccessEventsService,
+    private readonly contestTasksEvents: ContestTasksEventsService,
   ) {}
 
   async list() {
@@ -130,6 +132,13 @@ export class ContestsService {
           ? dto.deliveryTimeoutMinutes
           : null,
       },
+    });
+
+    this.contestTasksEvents.emit(id, {
+      type: STAFF_TASK_EVENT_TYPE.SETTINGS_UPDATED,
+      deliveryTimeoutMinutes: contest.deliveryTimeoutEnabled
+        ? contest.deliveryTimeoutMinutes
+        : null,
     });
 
     return this.toResponse(contest);

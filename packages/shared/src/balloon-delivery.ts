@@ -140,15 +140,26 @@ export const STAFF_TASK_EVENT_TYPE = {
   QUEUED: 'task.queued',
   CLAIMED: 'task.claimed',
   REMOVED: 'task.removed',
+  SETTINGS_UPDATED: 'task.settings.updated',
 } as const;
 
 export type StaffTaskEventType =
   (typeof STAFF_TASK_EVENT_TYPE)[keyof typeof STAFF_TASK_EVENT_TYPE];
 
-export type StaffTaskEvent = {
-  type: StaffTaskEventType;
+export type StaffTaskLifecycleEvent = {
+  type:
+    | typeof STAFF_TASK_EVENT_TYPE.QUEUED
+    | typeof STAFF_TASK_EVENT_TYPE.CLAIMED
+    | typeof STAFF_TASK_EVENT_TYPE.REMOVED;
   task: StaffTask;
 };
+
+export type StaffSettingsUpdatedEvent = {
+  type: typeof STAFF_TASK_EVENT_TYPE.SETTINGS_UPDATED;
+  deliveryTimeoutMinutes: number | null;
+};
+
+export type StaffTaskEvent = StaffTaskLifecycleEvent | StaffSettingsUpdatedEvent;
 
 export type StaffTasksSnapshot = {
   queue: StaffTask[];
