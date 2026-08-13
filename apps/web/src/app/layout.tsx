@@ -25,12 +25,34 @@ const nunito = Nunito({
   display: 'swap',
 });
 
+const APP_NAME = 'Happy Melon';
+
 export const metadata: Metadata = {
   title: {
-    default: 'Happy Melon - Otimize a organização dos staffs na entrega de balões!',
-    template: '%s | Happy Melon',
+    default: `${APP_NAME} - Otimize a organização dos staffs na entrega de balões!`,
+    template: '%s | ${APP_NAME}',
   },
-  description: 'Otimize a organização dos staffs na entrega de balões!',
+  description: 'Otimize a organização dos staffs na entrega de balões durante Maratonas de Programação!',
+  applicationName: APP_NAME,
+  metadataBase: new URL(process.env.NEXT_PUBLIC_APP_URL || "http://localhost:3001"),
+  authors: [{
+    name: "Joao Guilherme",
+    url: "https://www.linkedin.com/in/jo%C3%A3o-guilherme-ara%C3%BAjo-viana",
+  }],
+  openGraph: {
+    title: `${APP_NAME} - Otimize a organização dos staffs na entrega de balões!`,
+    description: "Otimize a organização dos staffs na entrega de balões durante Maratonas de Programação!",
+    url: process.env.NEXT_PUBLIC_APP_URL,
+    siteName: APP_NAME,
+    images: [
+      {
+        url: "og-img.jpg",
+      },
+    ],
+    locale: "pt-BR",
+    type: "website",
+  },
+  keywords: ["luna", "academy", "gestão", "academica", "escola", "educação", "educação superior", "educação profissional", "educação técnica", "educação infantil", "educação básica", "educação superior", "educação profissional", "educação técnica", "educação infantil", "educação básica", "educação superior", "educação profissional", "educação técnica", "educação infantil", "educação básica"],
 };
 
 export default function RootLayout({
