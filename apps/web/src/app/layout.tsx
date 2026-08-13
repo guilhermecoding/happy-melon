@@ -30,7 +30,7 @@ const APP_NAME = 'Happy Melon';
 export const metadata: Metadata = {
   title: {
     default: `${APP_NAME} - Otimize a organização dos staffs na entrega de balões!`,
-    template: '%s | ${APP_NAME}',
+    template: `${`%s | ${APP_NAME}`}`,
   },
   description: 'Otimize a organização dos staffs na entrega de balões durante Maratonas de Programação!',
   applicationName: APP_NAME,
