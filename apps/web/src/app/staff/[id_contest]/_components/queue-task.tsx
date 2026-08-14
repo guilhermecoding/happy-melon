@@ -17,7 +17,7 @@ import {
 import { BalloonIcon, Clock01Icon, ClockFadingIcon, HandIcon } from '@hugeicons/core-free-icons';
 import { HugeiconsIcon } from '@hugeicons/react';
 import Image from 'next/image';
-import { motion, useReducedMotion } from 'motion/react';
+import { AnimatePresence, motion, useReducedMotion } from 'motion/react';
 import { useContestSchedule } from '@/app/staff/_components/countdown-contest';
 
 function getTaskKey(task: StaffTask): string {
@@ -125,6 +125,9 @@ function TaskItem({
   const isPrint = task.kind === TASK_KIND.PRINT_TASK;
   const balloonColor = toBalloonColor(task.balloonColor ?? '');
   const shouldAnimate = animateEnter && !reduceMotion;
+  const transition = reduceMotion
+    ? { duration: 0.01 }
+    : { type: 'spring' as const, stiffness: 420, damping: 30, mass: 0.8 };
 
   return (
     <motion.div
@@ -132,7 +135,12 @@ function TaskItem({
         shouldAnimate ? { opacity: 0, y: 16, scale: 0.97 } : false
       }
       animate={{ opacity: 1, y: 0, scale: 1 }}
-      transition={{ type: 'spring', stiffness: 420, damping: 30, mass: 0.8 }}
+      exit={
+        reduceMotion
+          ? { opacity: 0 }
+          : { opacity: 0, y: -12, scale: 0.97, transition: { duration: 0.18, ease: 'easeIn' } }
+      }
+      transition={transition}
     >
       <Card variant="flush">
         <div className="flex items-center gap-2 px-5 py-6">
@@ -246,8 +254,9 @@ export default function QueueTask({
               Tudo tranquilo! Nenhuma tarefa disponível.
             </p>
           </div>
-        ) : (
-          tasks.map((task) => {
+        ) : null}
+        <AnimatePresence initial={false}>
+          {tasks.map((task) => {
             const key = getTaskKey(task);
             return (
               <TaskItem
@@ -260,8 +269,8 @@ export default function QueueTask({
                 animateEnter={enteringKeys.has(key)}
               />
             );
-          })
-        )}
+          })}
+        </AnimatePresence>
       </div>
     </div>
   );
