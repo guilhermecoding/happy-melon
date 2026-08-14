@@ -1,4 +1,4 @@
-# 🎈 Happy Melon
+# 🎈 Happy Melon 🍉
 
 Aumente a eficiência na organização e entrega de tarefas durante as competições de programação!
 
