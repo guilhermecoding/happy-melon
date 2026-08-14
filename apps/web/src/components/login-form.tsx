@@ -29,6 +29,7 @@ import {
   SquareLock01Icon,
   UserIcon,
 } from '@hugeicons/core-free-icons';
+import { APP_VERSION } from '@/lib/app-version';
 
 const ADMIN_ROLES = new Set(['admin']);
 
@@ -254,7 +255,7 @@ export function LoginForm({
       return;
     }
 
-        if (data.status === 'needsRegistration') {
+    if (data.status === 'needsRegistration') {
       form.setFieldValue('mode', 'register');
       return;
     }
@@ -514,6 +515,14 @@ export function LoginForm({
                   )}
                 </form.Subscribe>
               </div>
+            </div>
+            <div className="flex justify-center flex-col items-center gap-2 mt-4">
+              <span className="text-xs text-muted-foreground text-center">
+                © Todos os direitos reservados - {new Date().getFullYear()}
+              </span>
+              <span className="text-xs text-muted-foreground text-center">
+                {APP_VERSION}
+              </span>
             </div>
           </form>
           <div className="relative hidden bg-muted md:block">
