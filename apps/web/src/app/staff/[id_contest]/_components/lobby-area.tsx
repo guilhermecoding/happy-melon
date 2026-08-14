@@ -226,11 +226,13 @@ export default function LobbyArea({
           </div>
           <div className="flex items-center gap-2">
             {balloonLimit != null ? (
-              <Badge
-                tone={tasks.length <= balloonLimit ? 'mint' : 'orange'}
-              >
-                {tasks.length}/{balloonLimit}
-              </Badge>
+              <div className="mt-1">
+                <Badge
+                  tone={tasks.length <= balloonLimit ? 'mint' : 'orange'}
+                >
+                  {tasks.length}/{balloonLimit}
+                </Badge>
+              </div>
             ) : null}
             <button
               type="button"

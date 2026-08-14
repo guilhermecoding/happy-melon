@@ -1,6 +1,7 @@
 export const CONTEST_ACCESS_EVENT_TYPE = {
   COLLABORATORS_DISABLED: 'contest.collaboratorsAccess.disabled',
   COLLABORATOR_REVOKED: 'contest.collaboratorAccess.revoked',
+  SCHEDULE_UPDATED: 'contest.schedule.updated',
 } as const;
 
 export type ContestAccessEventType =
@@ -17,6 +18,15 @@ export type ContestCollaboratorAccessRevokedEvent = {
   userId: string;
 };
 
+export type ContestScheduleUpdatedEvent = {
+  type: typeof CONTEST_ACCESS_EVENT_TYPE.SCHEDULE_UPDATED;
+  contestId: string;
+  name: string;
+  startsAt: string;
+  endsAt: string;
+};
+
 export type ContestAccessEvent =
   | ContestCollaboratorsAccessDisabledEvent
-  | ContestCollaboratorAccessRevokedEvent;
+  | ContestCollaboratorAccessRevokedEvent
+  | ContestScheduleUpdatedEvent;

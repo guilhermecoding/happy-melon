@@ -28,6 +28,7 @@ import {
   isIdUniqueViolation,
 } from '../common/short-id.js';
 import { ContestTasksEventsService } from '../contest-tasks/contest-tasks.events.js';
+import { assertContestInProgress } from '../contests/contest-window.js';
 import { LobbyCapacityService } from '../contest-tasks/lobby-capacity.service.js';
 import {
   teamFieldsFrom,
@@ -244,6 +245,7 @@ export class PrintsService {
     actor: Actor,
   ): Promise<StaffTask> {
     await this.ensureContestExists(contestId);
+    await assertContestInProgress(contestId);
 
     const pendingStatus = this.toPrismaStatus(BALLOON_DELIVERY_STATUS.PENDING);
     const processingStatus = this.toPrismaStatus(
@@ -315,6 +317,7 @@ export class PrintsService {
     actor: Actor,
   ): Promise<StaffTask> {
     await this.ensureContestExists(contestId);
+    await assertContestInProgress(contestId);
 
     const processingStatus = this.toPrismaStatus(
       BALLOON_DELIVERY_STATUS.PROCESSING,

@@ -40,6 +40,7 @@ export {
   type ContestAccessEventType,
   type ContestCollaboratorAccessRevokedEvent,
   type ContestCollaboratorsAccessDisabledEvent,
+  type ContestScheduleUpdatedEvent,
 } from './contest-access.js';
 
 export {

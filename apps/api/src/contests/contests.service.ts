@@ -112,6 +112,20 @@ export class ContestsService {
       });
     }
 
+    const scheduleChanged =
+      existing.startsAt.getTime() !== startsAt.getTime() ||
+      existing.endsAt.getTime() !== endsAt.getTime();
+
+    if (scheduleChanged) {
+      this.contestAccessEvents.emit(id, {
+        type: CONTEST_ACCESS_EVENT_TYPE.SCHEDULE_UPDATED,
+        contestId: id,
+        name: contest.name,
+        startsAt: contest.startsAt.toISOString(),
+        endsAt: contest.endsAt.toISOString(),
+      });
+    }
+
     return this.toResponse(contest);
   }
 

@@ -97,6 +97,7 @@ export default function StaffTasksBoard({ contestId }: StaffTasksBoardProps) {
       if (event.type === STAFF_TASK_EVENT_TYPE.SETTINGS_UPDATED) {
         setDeliveryTimeoutMinutes(event.deliveryTimeoutMinutes);
         setBalloonLimit(event.balloonLimit);
+        toast.info('Os ajustes da competição foram atualizados.');
         return;
       }
 

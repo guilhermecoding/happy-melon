@@ -44,7 +44,7 @@ export function getContestCondition(
     return 'not_started';
   }
 
-  if (now > end) {
+  if (now >= end) {
     return 'finished';
   }
 

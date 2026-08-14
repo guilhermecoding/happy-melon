@@ -8,15 +8,27 @@ import {
 import { Balloon } from '@/components/balloon';
 import PrintIcon from '@/components/print-icon';
 import { IconButton } from '@/components/pouf/Button';
-import { Blob } from '@/components/pouf/media';
+import { Badge, Blob } from '@/components/pouf/media';
 import { Card } from '@/components/pouf/surface';
 import {
   getBalloonColorLabel,
   toBalloonColor,
 } from '@/services/question/balloon-color';
-import { BalloonIcon, Clock01Icon, HandIcon } from '@hugeicons/core-free-icons';
+import { BalloonIcon, Clock01Icon, ClockFadingIcon, HandIcon } from '@hugeicons/core-free-icons';
 import { HugeiconsIcon } from '@hugeicons/react';
 import Image from 'next/image';
+import { useContestSchedule } from '@/app/staff/_components/countdown-contest';
+
+function formatCountdown(msRemaining: number): string {
+  const total = Math.max(0, Math.floor(msRemaining / 1000));
+  const hours = Math.floor(total / 3600);
+  const minutes = Math.floor((total % 3600) / 60);
+  const seconds = total % 60;
+
+  return [hours, minutes, seconds]
+    .map((value) => String(value).padStart(2, '0'))
+    .join(':');
+}
 
 function formatRelativeTime(isoDate: string, nowMs: number): string {
   const diffSeconds = Math.round(
@@ -117,10 +129,17 @@ export default function QueueTask({
   lobbyCount,
   onClaim,
 }: QueueTaskProps) {
+  const { endsAt } = useContestSchedule();
   const [nowMs, setNowMs] = useState(() => Date.now());
+  const [countdownNowMs, setCountdownNowMs] = useState(() => Date.now());
 
   useEffect(() => {
     const id = window.setInterval(() => setNowMs(Date.now()), 30_000);
+    return () => window.clearInterval(id);
+  }, []);
+
+  useEffect(() => {
+    const id = window.setInterval(() => setCountdownNowMs(Date.now()), 1_000);
     return () => window.clearInterval(id);
   }, []);
 
@@ -130,15 +149,27 @@ export default function QueueTask({
   return (
     <div className="flex w-full flex-col gap-4">
       <Card variant="tight">
-        <div className="flex items-center gap-3">
-          <Blob
-            icon={
-              <HugeiconsIcon icon={BalloonIcon} strokeWidth={2.5} />
-            }
-            size="sm"
-            tone="blue"
-          />
-          <span className="text-xl font-bold">Tarefas</span>
+        <div className="flex items-center justify-between">
+          <div className="flex items-center gap-3">
+            <Blob
+              icon={
+                <HugeiconsIcon icon={BalloonIcon} strokeWidth={2.5} />
+              }
+              size="sm"
+              tone="blue"
+            />
+            <span className="text-xl font-bold">Tarefas</span>
+          </div>
+          <div>
+            <Badge tone="orange">
+              <div className="flex items-center gap-1">
+                <HugeiconsIcon icon={ClockFadingIcon} className="size-4" strokeWidth={3} />
+                <span className="text-sm tabular-nums">
+                  {formatCountdown(new Date(endsAt).getTime() - countdownNowMs)}
+                </span>
+              </div>
+            </Badge>
+          </div>
         </div>
       </Card>
 

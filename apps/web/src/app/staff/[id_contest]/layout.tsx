@@ -22,7 +22,12 @@ async function StaffContestLayoutContent({
   }
 
   return (
-    <CountdownContest name={contest.name} startsAt={contest.startsAt}>
+    <CountdownContest
+      contestId={contest.id}
+      name={contest.name}
+      startsAt={contest.startsAt}
+      endsAt={contest.endsAt}
+    >
       {children}
     </CountdownContest>
   )
