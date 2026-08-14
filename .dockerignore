@@ -1,0 +1,28 @@
+# Dependencies and build outputs
+node_modules
+**/node_modules
+**/.next
+**/dist
+**/.turbo
+**/coverage
+out
+**/out
+
+# Git and IDE
+.git
+.gitignore
+.vscode
+.idea
+
+# Env and secrets (Compose injects via env_file)
+.env
+.env.*
+!.env.example
+**/.env
+**/.env.*
+!**/.env.example
+
+# Docs and misc
+*.md
+LICENSE
+.DS_Store
