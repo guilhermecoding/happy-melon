@@ -1,0 +1,253 @@
+generator client {
+  provider     = "prisma-client"
+  output       = "../src/generated/prisma"
+  moduleFormat = "esm"
+}
+
+datasource db {
+  provider = "postgresql"
+  schemas  = ["public", "system-auth"]
+}
+
+model User {
+  id            String    @id
+  name          String
+  email         String
+  emailVerified Boolean   @default(false)
+  image         String?
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+  role          String?
+  banned        Boolean?  @default(false)
+  banReason     String?
+  banExpires    DateTime?
+  sessions      Session[]
+  accounts      Account[]
+
+  @@unique([email])
+  @@map("user")
+  @@schema("system-auth")
+}
+
+model Session {
+  id              String   @id
+  expiresAt       DateTime
+  token           String
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+  ipAddress       String?
+  userAgent       String?
+  userId          String
+  impersonatedBy  String?
+  activeContestId String?
+  user            User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([token])
+  @@index([userId])
+  @@map("session")
+  @@schema("system-auth")
+}
+
+model Account {
+  id                    String    @id
+  accountId             String
+  providerId            String
+  userId                String
+  user                  User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  accessToken           String?
+  refreshToken          String?
+  idToken               String?
+  accessTokenExpiresAt  DateTime?
+  refreshTokenExpiresAt DateTime?
+  scope                 String?
+  password              String?
+  createdAt             DateTime  @default(now())
+  updatedAt             DateTime  @updatedAt
+
+  @@index([userId])
+  @@map("account")
+  @@schema("system-auth")
+}
+
+model Verification {
+  id         String   @id
+  identifier String
+  value      String
+  expiresAt  DateTime
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+
+  @@index([identifier])
+  @@map("verification")
+  @@schema("system-auth")
+}
+
+enum ContestStatus {
+  ACTIVE
+  INACTIVE
+
+  @@schema("public")
+}
+
+enum BalloonDeliveryStatus {
+  PENDING
+  PROCESSING
+  DELIVERED
+  WITHHELD
+
+  @@schema("public")
+}
+
+model Contest {
+  id                       String                @id
+  name                     String
+  status                   ContestStatus         @default(ACTIVE)
+  startsAt                 DateTime
+  endsAt                   DateTime
+  venue                    String
+  balloonLimitEnabled      Boolean               @default(false)
+  balloonLimit             Int?
+  deliveryTimeoutEnabled   Boolean               @default(false)
+  deliveryTimeoutMinutes   Int?
+  createdAt                DateTime              @default(now())
+  updatedAt                DateTime              @updatedAt
+  questions                Question[]
+  teams                    Team[]
+  balloonDeliveries        BalloonDelivery[]
+  printTasks               PrintTask[]
+  taskHistories            TaskHistory[]
+  collaborators            ContestCollaborator[]
+
+  @@map("contest")
+  @@schema("public")
+}
+
+model ContestCollaborator {
+  id        String   @id
+  contestId String
+  contest   Contest  @relation(fields: [contestId], references: [id], onDelete: Cascade)
+  userId    String
+  hasAccess Boolean  @default(true)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@unique([contestId, userId])
+  @@index([contestId])
+  @@index([userId])
+  @@map("contest_collaborator")
+  @@schema("public")
+}
+
+model Question {
+  id                String            @id
+  contestId         String
+  contest           Contest           @relation(fields: [contestId], references: [id], onDelete: Cascade)
+  label             String
+  title             String
+  balloonColor      String
+  createdAt         DateTime          @default(now())
+  updatedAt         DateTime          @updatedAt
+  balloonDeliveries BalloonDelivery[]
+  taskHistories     TaskHistory[]
+
+  @@unique([contestId, label])
+  @@index([contestId])
+  @@map("question")
+  @@schema("public")
+}
+
+model Team {
+  id                String            @id
+  contestId         String
+  contest           Contest           @relation(fields: [contestId], references: [id], onDelete: Cascade)
+  name              String
+  usernameTeam      String
+  room              String?
+  machine           String?
+  createdAt         DateTime          @default(now())
+  updatedAt         DateTime          @updatedAt
+  balloonDeliveries BalloonDelivery[]
+  printTasks        PrintTask[]
+  taskHistories     TaskHistory[]
+
+  @@unique([contestId, usernameTeam])
+  @@index([contestId])
+  @@map("team")
+  @@schema("public")
+}
+
+model BalloonDelivery {
+  id              String                @id
+  contestId       String
+  contest         Contest               @relation(fields: [contestId], references: [id], onDelete: Cascade)
+  teamId          String
+  team            Team                  @relation(fields: [teamId], references: [id], onDelete: Cascade)
+  questionId      String
+  question        Question              @relation(fields: [questionId], references: [id], onDelete: Cascade)
+  status          BalloonDeliveryStatus
+  claimedByUserId String?
+  claimedAt       DateTime?
+  createdAt       DateTime              @default(now())
+  updatedAt       DateTime              @updatedAt
+  taskHistories   TaskHistory[]
+
+  @@unique([teamId, questionId])
+  @@index([contestId])
+  @@index([teamId])
+  @@index([questionId])
+  @@index([status, claimedAt])
+  @@index([contestId, claimedByUserId, status])
+  @@map("balloon_delivery")
+  @@schema("public")
+}
+
+model PrintTask {
+  id              String                @id
+  contestId       String
+  contest         Contest               @relation(fields: [contestId], references: [id], onDelete: Cascade)
+  teamId          String
+  team            Team                  @relation(fields: [teamId], references: [id], onDelete: Cascade)
+  status          BalloonDeliveryStatus
+  claimedByUserId String?
+  claimedAt       DateTime?
+  createdAt       DateTime              @default(now())
+  updatedAt       DateTime              @updatedAt
+  taskHistories   TaskHistory[]
+
+  @@index([contestId])
+  @@index([teamId, createdAt])
+  @@index([status, claimedAt])
+  @@index([contestId, claimedByUserId, status])
+  @@map("print_task")
+  @@schema("public")
+}
+
+model TaskHistory {
+  id                String                @id
+  contestId         String
+  contest           Contest               @relation(fields: [contestId], references: [id], onDelete: Cascade)
+  kind              String                @default("balloon_task")
+  type              String
+  status            BalloonDeliveryStatus
+  message           String
+  teamId            String?
+  team              Team?                 @relation(fields: [teamId], references: [id], onDelete: SetNull)
+  questionId        String?
+  question          Question?             @relation(fields: [questionId], references: [id], onDelete: SetNull)
+  balloonDeliveryId String?
+  balloonDelivery   BalloonDelivery?      @relation(fields: [balloonDeliveryId], references: [id], onDelete: SetNull)
+  printTaskId       String?
+  printTask         PrintTask?            @relation(fields: [printTaskId], references: [id], onDelete: SetNull)
+  /// Denormalized balloonDeliveryId/printTaskId for O(log n) timeline lookups.
+  relatedTaskId     String?
+  actorUserId       String
+  actorName         String
+  createdAt         DateTime              @default(now())
+
+  @@index([contestId, createdAt])
+  @@index([contestId, relatedTaskId, createdAt])
+  @@index([balloonDeliveryId, createdAt])
+  @@index([printTaskId, createdAt])
+  @@map("task_history")
+  @@schema("public")
+}
