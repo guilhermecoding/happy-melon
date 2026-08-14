@@ -2,7 +2,64 @@
 
 Aumente a eficiência na organização e entrega de tarefas durante as competições de programação!
 
+O Happy Melon apoia a operação de maratonas no estilo ICPC: administradores confirmam balões e encaminham impressões; colaboradores no salão pegam as tarefas e entregam aos times, em tempo real.
+
 O browser fala **só com o site**. A API pode rodar à parte; a web encaminha `/api`, `/contests`, etc. para o backend. O cookie de sessão fica no mesmo host da página.
+
+## Principais funcionalidades
+
+### Administradores
+
+- **Competições** — cadastro com nome, sede, período de prova (`início` / `término`) e status (Habilitada / Desabilitada). Competições finalizadas aparecem separadas na lista.
+- **Prova** — questões com identificador, título e cor do balão.
+- **Times** — cadastro individual ou importação em massa (CSV padrão ou arquivo BOCA), com sala e máquina.
+- **Colaboradores** — convite por e-mail, QR e código da competição, acesso individual ou geral, limite de balões no lobby e timeout de entrega.
+- **Tarefas** — confirmar ou reter balões conquistados, encaminhar impressões e acompanhar o histórico.
+- **Administradores do sistema** — contas de quem gerencia o Happy Melon.
+
+### Colaboradores
+
+- Login com **e-mail** e **código da competição** (primeiro acesso pede o nome).
+- Countdown até o início; após o término, a tela **A competição finalizou**.
+- Fila **Tarefas**: pegar balão ou impressão.
+- **Lobby**: levar até o time, ver sala/máquina e marcar como entregue.
+- Ajustes e horários alterados pelo admin chegam na hora (com aviso).
+
+## Como realizar uma maratona
+
+Ordem recomendada, do cadastro ao encerramento. Os nomes abaixo são os da interface.
+
+### 1. Antes da prova
+
+1. Entre em **Sou Administrador** e abra **Competições** → **Nova Competição**. Preencha nome, sede, data/hora de início e término. Deixe o status **Habilitada**.
+2. Abra a competição (**Visão geral**).
+3. Em **Prova**, cadastre cada questão (identificador, título e cor do balão). Sem questão, não há balão para confirmar.
+4. Em **Times**, cadastre os times ou use **Importar em massa** (CSV: `Nome,Usuario,Sala,Numero da Maquina`, ou arquivo BOCA). Sala e máquina aparecem nos detalhes do colaborador.
+5. Em **Colaboradores**:
+   - opcionalmente **Adicionar** quem já conhece o e-mail;
+   - em **Controle e acesso**, compartilhe o QR ou o código (é o ID da competição);
+   - ligue **Acesso dos colaboradores**;
+   - em **Ajustes**, defina se quiser **Limite de balões** no lobby e **Timeout de entrega**.
+6. Os colaboradores entram em **Sou Colaborador** com e-mail + código. No primeiro acesso, informam o nome. Antes do horário de início, veem o cronômetro.
+
+### 2. Durante a prova
+
+1. No horário de início, a fila **Tarefas** e o **Lobby** dos colaboradores são liberados.
+2. No admin, **Tarefas** → escolha o time:
+   - **Balões conquistados** → **Confirmar** quando o time deve receber o balão (a tarefa entra na fila dos colaboradores); **Reter** se não for entregar.
+   - **Impressão** → **Encaminhar** para a fila de impressão.
+3. O colaborador, na fila **Tarefas**, usa **Levantar balão** ou **Pegar impressão**. A tarefa vai para o **Lobby**.
+4. No **Lobby**, o colaborador vai até o time (sala/máquina em **Detalhes do time**) e toca **Marcar como entregue**.
+5. Acompanhe o **Histórico de tarefas**. Se precisar, altere horários ou ajustes: os colaboradores são avisados na hora.
+6. Para tirar alguém da operação, desligue o **Acesso** daquela pessoa. Para pausar todo o salão, desligue **Acesso dos colaboradores** (status **Desabilitada**).
+
+### 3. Depois da prova
+
+1. No horário de término, os colaboradores veem **A competição finalizou** e não conseguem mais pegar nem entregar tarefas.
+2. No admin, revise **Histórico de tarefas** e as **Conquistas** de cada time.
+3. Opcional: desabilite o acesso dos colaboradores e deixe a competição na seção **Finalizadas**.
+
+Fluxo de um balão: **Confirmar** (admin) → fila **Tarefas** → **Levantar balão** → **Lobby** → **Marcar como entregue**.
 
 ## Pré-requisitos
 
