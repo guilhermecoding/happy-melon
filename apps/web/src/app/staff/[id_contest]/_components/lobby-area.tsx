@@ -29,6 +29,22 @@ import {
 import { HugeiconsIcon } from '@hugeicons/react';
 import confetti from 'canvas-confetti';
 
+const TASK_DONE_SOUND_URL = '/sounds/task-done.mp3';
+
+let taskDoneAudio: HTMLAudioElement | undefined;
+
+function playTaskDoneSound() {
+  if (!taskDoneAudio) {
+    taskDoneAudio = new Audio(TASK_DONE_SOUND_URL);
+    taskDoneAudio.preload = 'auto';
+  }
+
+  const playback = taskDoneAudio.cloneNode(true) as HTMLAudioElement;
+  void playback.play().catch(() => {
+    // Deliver must not fail if the browser blocks audio.
+  });
+}
+
 function formatRelativeTime(isoDate: string, nowMs: number): string {
   const diffSeconds = Math.round(
     (new Date(isoDate).getTime() - nowMs) / 1000,
@@ -149,6 +165,7 @@ function LobbyTaskItem({
               loading={delivering}
               onClick={(event) => {
                 const rect = event.currentTarget.getBoundingClientRect();
+                playTaskDoneSound();
                 void confetti({
                   zIndex: 9999,
                   origin: {
