@@ -28,33 +28,36 @@ export default function ContestCard({
   endsAt,
 }: ContestCardProps) {
   const condition = getContestCondition(startsAt, endsAt);
+  const finished = condition === 'finished';
 
   return (
-    <Card variant="tight" motion="lift">
-      <Link
-        href={`/admin/competicoes/${id}`}
-        className="flex h-full w-full flex-col gap-1 outline-none"
-      >
-        <h2 className="text-xl font-bold text-ink">{name}</h2>
-        <span className="mb-2 text-sm text-muted-foreground">ID: {id}</span>
-        <div className="flex items-start gap-2 text-muted-foreground sm:items-center">
-          <HugeiconsIcon icon={ViewIcon} className="size-4" strokeWidth={2} />
-          <span className="text-sm font-medium">
-            {status === 'active' ? 'Habilitada' : 'Desabilitada'}
-          </span>
-        </div>
-        <div className="flex items-start gap-2 text-muted-foreground sm:items-center">
-          <HugeiconsIcon icon={Flag02Icon} className="size-4" strokeWidth={2} />
-          <span className="text-sm font-medium">{CONDITION_LABELS[condition]}</span>
-        </div>
-        <div className="flex items-start gap-2 text-muted-foreground sm:items-center">
-          <HugeiconsIcon icon={DateTimeIcon} className="size-4" strokeWidth={2} />
-          <span className="text-sm font-medium">
-            {formatDateTime(new Date(startsAt))} &bull;{' '}
-            {formatDateTime(new Date(endsAt))}
-          </span>
-        </div>
-      </Link>
-    </Card>
+    <div className={finished ? 'opacity-55 grayscale' : undefined}>
+      <Card variant="tight" motion="lift">
+        <Link
+          href={`/admin/competicoes/${id}`}
+          className="flex h-full w-full flex-col gap-1 outline-none"
+        >
+          <h2 className="text-xl font-bold text-ink">{name}</h2>
+          <span className="mb-2 text-sm text-muted-foreground">ID: {id}</span>
+          <div className="flex items-start gap-2 text-muted-foreground sm:items-center">
+            <HugeiconsIcon icon={ViewIcon} className="size-4" strokeWidth={2} />
+            <span className="text-sm font-medium">
+              {status === 'active' ? 'Habilitada' : 'Desabilitada'}
+            </span>
+          </div>
+          <div className="flex items-start gap-2 text-muted-foreground sm:items-center">
+            <HugeiconsIcon icon={Flag02Icon} className="size-4" strokeWidth={2} />
+            <span className="text-sm font-medium">{CONDITION_LABELS[condition]}</span>
+          </div>
+          <div className="flex items-start gap-2 text-muted-foreground sm:items-center">
+            <HugeiconsIcon icon={DateTimeIcon} className="size-4" strokeWidth={2} />
+            <span className="text-sm font-medium">
+              {formatDateTime(new Date(startsAt))} &bull;{' '}
+              {formatDateTime(new Date(endsAt))}
+            </span>
+          </div>
+        </Link>
+      </Card>
+    </div>
   );
 }
