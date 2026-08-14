@@ -1,6 +1,6 @@
 {
   "name": "web",
-  "version": "v1.0.0",
+  "version": "v1.0.2",
   "type": "module",
   "private": true,
   "scripts": {
@@ -36,6 +36,7 @@
     "class-variance-authority": "^0.7.1",
     "clsx": "^2.1.1",
     "framer-motion": "^13.0.0",
+    "motion": "^13.1.0",
     "next": "16.2.10",
     "postcss": "^8.5.19",
     "qrcode.react": "^4.2.0",
