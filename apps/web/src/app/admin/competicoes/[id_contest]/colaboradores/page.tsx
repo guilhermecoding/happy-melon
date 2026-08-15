@@ -28,7 +28,7 @@ async function AdminCompetitionColaboratorsPageContent({
                 <TitlePage title="Colaboradores" icon={ThumbsUpIcon} />
             </Section>
 
-            <Section>
+            <Section className="mt-6">
                 <CollaboratorsPageTabs
                     geral={<CollaboratorsGeralPanel contest={contest} />}
                     score={null}

@@ -16,6 +16,7 @@ export function CollaboratorsPageTabs({
     <Tabs
       value={tab}
       onChange={setTab}
+      tone="purple"
       tabs={[
         { value: 'geral', label: 'Geral', content: geral },
         { value: 'score', label: 'Score', content: score },
