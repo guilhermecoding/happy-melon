@@ -57,7 +57,7 @@ export function Tabs({ tabs, value, onChange, tone = 'blue' }: TabsProps) {
                 asChild
               >
                 <motion.div
-                  initial={reduceMotion ? { opacity: 0 } : { opacity: 0, y: 6 }}
+                  initial={false}
                   animate={{ opacity: 1, y: 0 }}
                   exit={reduceMotion ? { opacity: 0 } : { opacity: 0, y: -6 }}
                   transition={{

@@ -8,6 +8,7 @@ import {
 } from './collaborator.error';
 import type {
   Collaborator,
+  CollaboratorScore,
   CreateCollaboratorInput,
   UpdateCollaboratorInput,
 } from './collaborator.type';
@@ -36,6 +37,31 @@ export const collaboratorService = {
       throw normalizeCollaboratorError(
         error,
         'Não foi possível carregar os colaboradores.',
+      );
+    }
+  },
+
+  async listScore(contestId: string): Promise<CollaboratorScore[]> {
+    try {
+      const response = await fetch(
+        `${getApiBaseUrl()}/contests/${contestId}/collaborators/score`,
+        {
+          credentials: 'include',
+        },
+      );
+
+      if (!response.ok) {
+        throw await parseCollaboratorError(
+          response,
+          'Não foi possível carregar o ranking dos colaboradores.',
+        );
+      }
+
+      return response.json();
+    } catch (error) {
+      throw normalizeCollaboratorError(
+        error,
+        'Não foi possível carregar o ranking dos colaboradores.',
       );
     }
   },

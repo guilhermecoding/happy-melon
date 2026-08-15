@@ -8,6 +8,15 @@ export type Collaborator = {
   createdAt: string;
 };
 
+export type CollaboratorScore = {
+  id: string;
+  name: string;
+  email: string;
+  deliveredCount: number;
+  totalDurationMs: number;
+  lastDeliveredAt: string | null;
+};
+
 export type CreateCollaboratorInput = {
   name: string;
   email: string;

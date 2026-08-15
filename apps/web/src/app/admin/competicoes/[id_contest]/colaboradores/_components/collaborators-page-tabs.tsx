@@ -3,6 +3,8 @@
 import { useState, type ReactNode } from 'react';
 import { Tabs } from '@/components/pouf/disclosure';
 
+const DEFAULT_TAB = 'geral';
+
 export function CollaboratorsPageTabs({
   geral,
   score,
@@ -10,7 +12,7 @@ export function CollaboratorsPageTabs({
   geral: ReactNode;
   score: ReactNode;
 }) {
-  const [tab, setTab] = useState('geral');
+  const [tab, setTab] = useState(DEFAULT_TAB);
 
   return (
     <Tabs

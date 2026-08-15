@@ -43,6 +43,11 @@ export class CollaboratorsController {
     return this.collaboratorsService.list(contestId);
   }
 
+  @Get('contests/:contestId/collaborators/score')
+  listScore(@Param('contestId') contestId: string) {
+    return this.collaboratorsService.listScore(contestId);
+  }
+
   @Sse('contests/:contestId/collaborators/events')
   streamEvents(
     @Param('contestId') contestId: string,
