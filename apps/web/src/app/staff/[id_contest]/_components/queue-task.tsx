@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useEffect, useLayoutEffect, useRef, useState } from 'react';
 import {
   TASK_KIND,
   type StaffTask,
@@ -17,7 +17,52 @@ import {
 import { BalloonIcon, Clock01Icon, ClockFadingIcon, HandIcon } from '@hugeicons/core-free-icons';
 import { HugeiconsIcon } from '@hugeicons/react';
 import Image from 'next/image';
+import { AnimatePresence, motion, useReducedMotion } from 'motion/react';
 import { useContestSchedule } from '@/app/staff/_components/countdown-contest';
+
+function getTaskKey(task: StaffTask): string {
+  return `${task.kind}-${task.id}`;
+}
+
+function useEnteringTaskKeys(tasks: StaffTask[]): Set<string> {
+  const mountedAtRef = useRef<number | null>(null);
+  if (mountedAtRef.current === null) {
+    mountedAtRef.current = Date.now();
+  }
+
+  const seenKeysRef = useRef(new Set<string>());
+  const ingestedInitialRef = useRef(false);
+
+  const entering = new Set<string>();
+  for (const task of tasks) {
+    const key = getTaskKey(task);
+    if (seenKeysRef.current.has(key)) continue;
+
+    if (ingestedInitialRef.current) {
+      entering.add(key);
+      continue;
+    }
+
+    if (new Date(task.createdAt).getTime() >= mountedAtRef.current) {
+      entering.add(key);
+    }
+  }
+
+  useLayoutEffect(() => {
+    const current = new Set(tasks.map(getTaskKey));
+    for (const key of seenKeysRef.current) {
+      if (!current.has(key)) seenKeysRef.current.delete(key);
+    }
+    for (const key of current) {
+      seenKeysRef.current.add(key);
+    }
+    if (tasks.length > 0) {
+      ingestedInitialRef.current = true;
+    }
+  }, [tasks]);
+
+  return entering;
+}
 
 function formatCountdown(msRemaining: number): string {
   const total = Math.max(0, Math.floor(msRemaining / 1000));
@@ -65,6 +110,7 @@ type TaskItemProps = {
   claimDisabled: boolean;
   onClaim: (task: StaffTask) => void;
   nowMs: number;
+  animateEnter: boolean;
 };
 
 function TaskItem({
@@ -73,44 +119,63 @@ function TaskItem({
   claimDisabled,
   onClaim,
   nowMs,
+  animateEnter,
 }: TaskItemProps) {
+  const reduceMotion = useReducedMotion();
   const isPrint = task.kind === TASK_KIND.PRINT_TASK;
   const balloonColor = toBalloonColor(task.balloonColor ?? '');
+  const shouldAnimate = animateEnter && !reduceMotion;
+  const transition = reduceMotion
+    ? { duration: 0.01 }
+    : { type: 'spring' as const, stiffness: 420, damping: 30, mass: 0.8 };
 
   return (
-    <Card variant="flush">
-      <div className="flex items-center gap-2 px-5 py-6">
-        {isPrint ? (
-          <PrintIcon className="size-10" strokeWidth={1.5} />
-        ) : (
-          <Balloon color={balloonColor} className="size-10" />
-        )}
-        <div className="flex flex-col min-w-0">
-          <span className="text-xl font-bold truncate">{task.teamName}</span>
-          <span className="text-sm text-muted-foreground">
-            {getTaskSubtitle(task)}
-          </span>
-          <div className="flex items-center gap-1 mt-1">
-            <HugeiconsIcon icon={Clock01Icon} className="size-3" />
-            <span className="text-xs text-muted-foreground">
-              {formatRelativeTime(task.createdAt, nowMs)}
+    <motion.div
+      initial={
+        shouldAnimate ? { opacity: 0, y: 16, scale: 0.97 } : false
+      }
+      animate={{ opacity: 1, y: 0, scale: 1 }}
+      exit={
+        reduceMotion
+          ? { opacity: 0 }
+          : { opacity: 0, y: -12, scale: 0.97, transition: { duration: 0.18, ease: 'easeIn' } }
+      }
+      transition={transition}
+    >
+      <Card variant="flush">
+        <div className="flex items-center gap-2 px-5 py-6">
+          {isPrint ? (
+            <PrintIcon className="size-10" strokeWidth={1.5} />
+          ) : (
+            <Balloon color={balloonColor} className="size-10" />
+          )}
+          <div className="flex flex-col min-w-0">
+            <span className="text-xl font-bold truncate">{task.teamName}</span>
+            <span className="text-sm text-muted-foreground">
+              {getTaskSubtitle(task)}
             </span>
+            <div className="flex items-center gap-1 mt-1">
+              <HugeiconsIcon icon={Clock01Icon} className="size-3" />
+              <span className="text-xs text-muted-foreground">
+                {formatRelativeTime(task.createdAt, nowMs)}
+              </span>
+            </div>
+          </div>
+          <div className="ml-auto shrink-0">
+            <IconButton
+              tone="mint"
+              size="md"
+              variant="solid"
+              icon={<HugeiconsIcon icon={HandIcon} strokeWidth={2} />}
+              label={isPrint ? 'Pegar impressão' : 'Levantar balão'}
+              disabled={claiming || claimDisabled}
+              loading={claiming}
+              onClick={() => onClaim(task)}
+            />
           </div>
         </div>
-        <div className="ml-auto shrink-0">
-          <IconButton
-            tone="mint"
-            size="md"
-            variant="solid"
-            icon={<HugeiconsIcon icon={HandIcon} strokeWidth={2} />}
-            label={isPrint ? 'Pegar impressão' : 'Levantar balão'}
-            disabled={claiming || claimDisabled}
-            loading={claiming}
-            onClick={() => onClaim(task)}
-          />
-        </div>
-      </div>
-    </Card>
+      </Card>
+    </motion.div>
   );
 }
 
@@ -143,6 +208,7 @@ export default function QueueTask({
     return () => window.clearInterval(id);
   }, []);
 
+  const enteringKeys = useEnteringTaskKeys(tasks);
   const claimDisabled =
     balloonLimit != null && lobbyCount >= balloonLimit;
 
@@ -188,18 +254,23 @@ export default function QueueTask({
               Tudo tranquilo! Nenhuma tarefa disponível.
             </p>
           </div>
-        ) : (
-          tasks.map((task) => (
-            <TaskItem
-              key={`${task.kind}-${task.id}`}
-              task={task}
-              claiming={claimingIds.has(task.id)}
-              claimDisabled={claimDisabled}
-              onClaim={onClaim}
-              nowMs={nowMs}
-            />
-          ))
-        )}
+        ) : null}
+        <AnimatePresence initial={false}>
+          {tasks.map((task) => {
+            const key = getTaskKey(task);
+            return (
+              <TaskItem
+                key={key}
+                task={task}
+                claiming={claimingIds.has(task.id)}
+                claimDisabled={claimDisabled}
+                onClaim={onClaim}
+                nowMs={nowMs}
+                animateEnter={enteringKeys.has(key)}
+              />
+            );
+          })}
+        </AnimatePresence>
       </div>
     </div>
   );

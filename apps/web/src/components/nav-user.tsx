@@ -1,6 +1,5 @@
 "use client"
 
-import Link from "next/link"
 import { useRouter } from "next/navigation"
 import { useState } from "react"
 
@@ -10,21 +9,13 @@ import {
   AvatarImage,
 } from "@/components/ui/avatar"
 import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuGroup,
-  DropdownMenuItem,
-  DropdownMenuLabel,
-  DropdownMenuSeparator,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu"
-import {
   SidebarMenu,
   SidebarMenuButton,
   SidebarMenuItem,
   useSidebar,
 } from "@/components/ui/sidebar"
-import { IconInfoCircle, IconLogout, IconSelector } from "@tabler/icons-react"
+import { DropdownMenu, type MenuEntry } from "@/components/pouf/menu"
+import { IconLogout, IconSelector } from "@tabler/icons-react"
 import { authClient } from "@/lib/auth-client"
 import { cn } from "@/lib/utils"
 
@@ -73,20 +64,39 @@ export function NavUser({
     }
   }
 
+  const items: (MenuEntry | "separator")[] = []
+  if (aboutHref) {
+    items.push(
+      {
+        label: "Sobre",
+        icon: "info",
+        onClick: () => router.push(aboutHref),
+      },
+      "separator",
+    )
+  }
+  items.push({
+    label: "Sair",
+    icon: <IconLogout className="size-4" />,
+    onClick: () => void handleSignOut(),
+    disabled: isSigningOut || !user,
+  })
+
   return (
     <SidebarMenu>
       <SidebarMenuItem>
-        <DropdownMenu>
-          <DropdownMenuTrigger
-            render={
-              <SidebarMenuButton
-                size="lg"
-                className={
-                  compact
-                    ? "aria-expanded:bg-muted justify-between gap-2 overflow-hidden"
-                    : "aria-expanded:bg-muted justify-end"
-                }
-              />
+        <DropdownMenu
+          label="Menu do usuário"
+          align="end"
+          side={isMobile ? "bottom" : "right"}
+          items={items}
+        >
+          <SidebarMenuButton
+            size="lg"
+            className={
+              compact
+                ? "aria-expanded:bg-muted justify-between gap-2 overflow-hidden"
+                : "aria-expanded:bg-muted justify-end"
             }
           >
             <Avatar className="shrink-0">
@@ -106,49 +116,7 @@ export function NavUser({
             </div>
 
             <IconSelector className="size-4 shrink-0" />
-          </DropdownMenuTrigger>
-          <DropdownMenuContent
-            className="min-w-56 rounded-lg"
-            side={isMobile ? "bottom" : "right"}
-            align="end"
-            sideOffset={4}
-          >
-            <DropdownMenuGroup>
-              <DropdownMenuLabel className="p-0 font-normal">
-                <div className="flex items-center gap-2 px-1 py-1.5 text-left text-sm">
-                  <Avatar>
-                    {user?.avatar ? (
-                      <AvatarImage src={user.avatar} alt={displayName} />
-                    ) : null}
-                    <AvatarFallback>{initials}</AvatarFallback>
-                  </Avatar>
-                  <div className="grid min-w-0 flex-1 text-left text-sm leading-tight">
-                    <span className="truncate font-medium">{displayName}</span>
-                    <span className="truncate text-xs text-muted-foreground">
-                      {displayEmail}
-                    </span>
-                  </div>
-                </div>
-              </DropdownMenuLabel>
-            </DropdownMenuGroup>
-            <DropdownMenuSeparator />
-            {aboutHref ? (
-              <>
-                <DropdownMenuItem render={<Link href={aboutHref} />}>
-                  <IconInfoCircle />
-                  Sobre
-                </DropdownMenuItem>
-                <DropdownMenuSeparator />
-              </>
-            ) : null}
-            <DropdownMenuItem
-              disabled={isSigningOut || !user}
-              onClick={handleSignOut}
-            >
-              <IconLogout />
-              Sair
-            </DropdownMenuItem>
-          </DropdownMenuContent>
+          </SidebarMenuButton>
         </DropdownMenu>
       </SidebarMenuItem>
     </SidebarMenu>
