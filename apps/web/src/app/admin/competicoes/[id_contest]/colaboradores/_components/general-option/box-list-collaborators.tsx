@@ -247,6 +247,13 @@ export default function BoxListCollaborators({
 
   const columns = [
     {
+      key: 'index',
+      header: '#',
+      mono: true,
+      render: (_collaborator: Collaborator, index: number) =>
+        (currentPage - 1) * PAGE_SIZE + index + 1,
+    },
+    {
       key: 'id',
       header: 'ID',
       mono: true,

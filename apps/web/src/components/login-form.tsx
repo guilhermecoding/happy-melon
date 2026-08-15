@@ -28,6 +28,7 @@ import {
   MailIcon,
   SquareLock01Icon,
   UserIcon,
+  LoginCircle01Icon,
 } from '@hugeicons/core-free-icons';
 import { APP_VERSION } from '@/lib/app-version';
 
@@ -476,6 +477,7 @@ export function LoginForm({
                   {([mode, isSubmitting]) => (
                     <>
                       <Button type="submit" block loading={isSubmitting}>
+                        <HugeiconsIcon icon={LoginCircle01Icon} className="size-5" strokeWidth={2.5} />
                         {MODE_COPY[mode].submit}
                       </Button>
                       {mode === 'register' ? (

@@ -29,7 +29,7 @@ type CreateQuestionSheetProps = {
 const DEFAULT_FORM_VALUES: QuestionFormValues = {
   label: '',
   title: '',
-  balloonColor: COLOR.RED,
+  balloonColor: COLOR.YELLOW,
 };
 
 export function CreateQuestionSheet({
