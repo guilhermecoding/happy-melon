@@ -80,7 +80,7 @@ function ScoreItem({
     score.deliveredCount === 1 ? 'tarefa entregue' : 'tarefas entregues';
 
   return (
-    <Card variant="tight" shadow="inset">
+    <Card variant="tight" shadow="inset" motion="lift">
       <div className="flex items-center gap-4 pr-6">
         <div className="shrink-0">
           <span
