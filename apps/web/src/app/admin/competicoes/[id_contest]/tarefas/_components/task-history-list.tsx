@@ -1,6 +1,14 @@
 "use client";
 
-import { useEffect, useMemo, useState } from 'react';
+import {
+  memo,
+  useCallback,
+  useEffect,
+  useLayoutEffect,
+  useMemo,
+  useRef,
+  useState,
+} from 'react';
 import { BALLOON_DELIVERY_STATUS, TASK_KIND } from '@repo/shared';
 import { HugeiconsIcon } from '@hugeicons/react';
 import {
@@ -8,8 +16,10 @@ import {
   ArrowRight01Icon,
   Attachment01Icon,
   BalloonIcon,
-  DocumentAttachmentIcon, ViewIcon
+  DocumentAttachmentIcon,
+  ViewIcon,
 } from '@hugeicons/core-free-icons';
+import { AnimatePresence, motion, useReducedMotion } from 'motion/react';
 import { BalloonDeliveryStatusIcon } from '@/components/balloon-delivery-status-icon';
 import { balloonService } from '@/services/balloon/balloon.service';
 import { getBalloonErrorMessage } from '@/services/balloon/balloon.error';
@@ -53,6 +63,146 @@ function formatHistoryMessage(entry: TaskHistoryEntry): string {
   return entry.message.replace(/\bem entrega\b/g, 'em rota de entrega');
 }
 
+/** Marks only ids that appear after the initial history load (e.g. SSE). */
+function useEnteringHistoryIds(
+  entries: TaskHistoryEntry[],
+  resetKey: string,
+): Set<string> {
+  const mountedAtRef = useRef<number | null>(null);
+  const seenIdsRef = useRef(new Set<string>());
+  const ingestedInitialRef = useRef(false);
+  const prevResetKeyRef = useRef(resetKey);
+
+  if (prevResetKeyRef.current !== resetKey) {
+    prevResetKeyRef.current = resetKey;
+    mountedAtRef.current = Date.now();
+    seenIdsRef.current = new Set();
+    ingestedInitialRef.current = false;
+  }
+
+  if (mountedAtRef.current === null) {
+    mountedAtRef.current = Date.now();
+  }
+
+  const entering = new Set<string>();
+  for (const entry of entries) {
+    if (seenIdsRef.current.has(entry.id)) continue;
+
+    if (ingestedInitialRef.current) {
+      entering.add(entry.id);
+      continue;
+    }
+
+    if (new Date(entry.createdAt).getTime() >= mountedAtRef.current) {
+      entering.add(entry.id);
+    }
+  }
+
+  useLayoutEffect(() => {
+    const current = new Set(entries.map((entry) => entry.id));
+    for (const id of seenIdsRef.current) {
+      if (!current.has(id)) seenIdsRef.current.delete(id);
+    }
+    for (const id of current) {
+      seenIdsRef.current.add(id);
+    }
+    if (entries.length > 0) {
+      ingestedInitialRef.current = true;
+    }
+  }, [entries]);
+
+  return entering;
+}
+
+type HistoryRowProps = {
+  entry: TaskHistoryEntry;
+  animateEnter: boolean;
+  onOpenTimeline: (taskId: string, kind: string) => void;
+};
+
+const HistoryRow = memo(function HistoryRow({
+  entry,
+  animateEnter,
+  onOpenTimeline,
+}: HistoryRowProps) {
+  const reduceMotion = useReducedMotion();
+  const shouldAnimate = animateEnter && !reduceMotion;
+  const taskId = getStatusChangedTaskId(entry);
+
+  return (
+    <motion.div
+      className="px-2 py-3"
+      style={{ transformOrigin: 'center center' }}
+      initial={
+        shouldAnimate
+          ? { opacity: 0, scale: 0.72 }
+          : false
+      }
+      animate={{ opacity: 1, scale: 1 }}
+      transition={
+        reduceMotion
+          ? { duration: 0.01 }
+          : { type: 'spring', stiffness: 420, damping: 28, mass: 0.7 }
+      }
+    >
+      <div className="flex items-center gap-3">
+        {entry.kind === TASK_KIND.PRINT_TASK ? (
+          <HugeiconsIcon
+            icon={Attachment01Icon}
+            className="size-5 shrink-0 text-muted-foreground"
+            strokeWidth={2}
+          />
+        ) : (
+          <HugeiconsIcon
+            icon={BalloonIcon}
+            className="size-5 shrink-0 text-muted-foreground"
+            strokeWidth={2}
+            fill="currentColor"
+          />
+        )}
+
+        <span className="w-16 shrink-0 text-sm font-semibold tabular-nums text-muted-foreground">
+          {formatHistoryTime(entry.createdAt)}
+        </span>
+
+        <BalloonDeliveryStatusIcon
+          status={entry.status}
+          kind={
+            entry.kind === TASK_KIND.PRINT_TASK
+              ? TASK_KIND.PRINT_TASK
+              : TASK_KIND.BALLOON_TASK
+          }
+          className="shrink-0"
+        />
+
+        <div className="flex min-w-0 flex-1 flex-col gap-1">
+          <span className="text-sm font-semibold text-ink">
+            {formatHistoryMessage(entry)}.
+          </span>
+          {taskId ? (
+            <span className="text-xs text-muted-foreground">#{taskId}</span>
+          ) : null}
+        </div>
+
+        <Tooltip tip="Ver tarefa completa">
+          <button
+            type="button"
+            title=""
+            disabled={!taskId}
+            onClick={() => {
+              if (!taskId) return;
+              onOpenTimeline(taskId, entry.kind);
+            }}
+            className="flex shrink-0 cursor-pointer items-center justify-center rounded-full p-2 transition-colors hover:bg-ink/10"
+          >
+            <HugeiconsIcon icon={ViewIcon} className="size-4" strokeWidth={2} />
+          </button>
+        </Tooltip>
+      </div>
+    </motion.div>
+  );
+});
+
 export default function TaskHistoryList({
   contestId,
   refreshKey = 0,
@@ -66,6 +216,9 @@ export default function TaskHistoryList({
     kind: string;
   } | null>(null);
 
+  const resetKey = `${contestId}:${refreshKey}`;
+  const enteringIds = useEnteringHistoryIds(entries, resetKey);
+
   const totalPages = Math.max(1, Math.ceil(entries.length / PAGE_SIZE));
   const currentPage = Math.min(page, totalPages);
 
@@ -77,6 +230,10 @@ export default function TaskHistoryList({
   const rangeStart =
     entries.length === 0 ? 0 : (currentPage - 1) * PAGE_SIZE + 1;
   const rangeEnd = Math.min(currentPage * PAGE_SIZE, entries.length);
+
+  const handleOpenTimeline = useCallback((taskId: string, kind: string) => {
+    setTimelineTask({ taskId, kind });
+  }, []);
 
   useEffect(() => {
     setPage(1);
@@ -141,9 +298,7 @@ export default function TaskHistoryList({
   }, [contestId, refreshKey]);
 
   if (loading) {
-    return (
-      <Spinner />
-    );
+    return <Spinner />;
   }
 
   if (error) {
@@ -157,8 +312,12 @@ export default function TaskHistoryList({
   if (entries.length === 0) {
     return (
       <div className="flex h-100 flex-col items-center justify-center gap-2">
-        <HugeiconsIcon icon={DocumentAttachmentIcon} className="size-14 text-muted-foreground opacity-50" strokeWidth={2} />
-        <p className="text-center font-medium text-muted-foreground/80 mt-2">
+        <HugeiconsIcon
+          icon={DocumentAttachmentIcon}
+          className="size-14 text-muted-foreground opacity-50"
+          strokeWidth={2}
+        />
+        <p className="mt-2 text-center font-medium text-muted-foreground/80">
           Tudo quieto por aqui...
         </p>
       </div>
@@ -168,80 +327,17 @@ export default function TaskHistoryList({
   return (
     <>
       <div className="flex h-full min-h-100 flex-col gap-4 px-2 pt-2 pb-2">
-        {/* A log, not a data grid: plain rows split by a hairline, no cushions
-            and no <table> chrome. */}
         <div className="min-h-0 flex-1 divide-y divide-ink/10 overflow-auto">
-          {paginatedEntries.map((entry) => {
-            const taskId = getStatusChangedTaskId(entry);
-
-            return (
-              <div key={entry.id} className="px-2 py-3">
-                <div className="flex items-center gap-3">
-                  {entry.kind === TASK_KIND.PRINT_TASK ? (
-                    <HugeiconsIcon
-                      icon={Attachment01Icon}
-                      className="size-5 shrink-0 text-muted-foreground"
-                      strokeWidth={2}
-                    />
-                  ) : (
-                    <HugeiconsIcon
-                      icon={BalloonIcon}
-                      className="size-5 shrink-0 text-muted-foreground"
-                      strokeWidth={2}
-                      fill="currentColor"
-                    />
-                  )}
-
-                  <span className="w-16 shrink-0 text-sm font-semibold tabular-nums text-muted-foreground">
-                    {formatHistoryTime(entry.createdAt)}
-                  </span>
-
-                  <BalloonDeliveryStatusIcon
-                    status={entry.status}
-                    kind={
-                      entry.kind === TASK_KIND.PRINT_TASK
-                        ? TASK_KIND.PRINT_TASK
-                        : TASK_KIND.BALLOON_TASK
-                    }
-                    className="shrink-0"
-                  />
-
-                  <div className="flex min-w-0 flex-1 flex-col gap-1">
-                    <span className="text-sm font-semibold text-ink">
-                      {formatHistoryMessage(entry)}.
-                    </span>
-                    {taskId ? (
-                      <span className="text-xs text-muted-foreground">
-                        #{taskId}
-                      </span>
-                    ) : null}
-                  </div>
-
-                  <Tooltip tip="Ver tarefa completa">
-                    <button
-                      type="button"
-                      title=""
-                      disabled={!taskId}
-                      onClick={() => {
-                        if (!taskId) return;
-                        setTimelineTask({
-                          taskId,
-                          kind: entry.kind,
-                        });
-                      }}
-                      className="flex items-center justify-center hover:bg-ink/10 rounded-full p-2 shrink-0 cursor-pointer transition-colors"
-                    >
-                      <HugeiconsIcon
-                        icon={ViewIcon}
-                        className="size-4"
-                        strokeWidth={2}
-                      />
-                    </button>
-                  </Tooltip>
-                </div>
-              </div>
-            );
-          })}
+          <AnimatePresence initial={false}>
+            {paginatedEntries.map((entry) => (
+              <HistoryRow
+                key={entry.id}
+                entry={entry}
+                animateEnter={enteringIds.has(entry.id)}
+                onOpenTimeline={handleOpenTimeline}
+              />
+            ))}
+          </AnimatePresence>
         </div>
 
         <div className="mt-auto flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">

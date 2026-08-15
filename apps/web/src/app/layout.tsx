@@ -5,6 +5,7 @@ import './globals.css';
 import '@/components/pouf/pouf.css';
 import { cn } from '@/lib/utils';
 import Providers from '@/lib/providers';
+import NextTopLoader from 'nextjs-toploader';
 
 const cause = localFont({
   src: '../fonts/cause-latin-wght-normal.woff2',
@@ -37,7 +38,7 @@ export const metadata: Metadata = {
   metadataBase: new URL(process.env.NEXT_PUBLIC_APP_URL || "http://localhost:3001"),
   authors: [{
     name: "Joao Guilherme",
-    url: "https://www.linkedin.com/in/jo%C3%A3o-guilherme-ara%C3%BAjo-viana",
+    url: "https://github.com/guilhermecoding",
   }],
   openGraph: {
     title: `${APP_NAME} - Otimize a organização dos staffs na entrega de balões!`,
@@ -64,6 +65,11 @@ export default function RootLayout({
     <html lang="pt-BR" className={cn('font-sans', cause.variable, spaceGrotesk.variable, nunito.variable)}>
       <body>
         <Providers>
+          <NextTopLoader
+            color="#e73235"
+            height={4}
+            showSpinner={false}
+          />
           {children}
         </Providers>
       </body>

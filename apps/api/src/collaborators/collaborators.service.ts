@@ -11,7 +11,10 @@ import {
 import { APIError } from 'better-auth/api';
 import { fromNodeHeaders } from 'better-auth/node';
 import { COLLABORATOR_EVENT_TYPE, CONTEST_ACCESS_EVENT_TYPE } from '@repo/shared';
-import { prisma } from '@repo/database';
+import {
+  BalloonDeliveryStatus as PrismaBalloonDeliveryStatus,
+  prisma,
+} from '@repo/database';
 import { auth } from '../auth/auth.js';
 import { revokeStaffSessionsForCollaborator } from '../auth/staff-session-access.js';
 import { ContestAccessEventsService } from '../contests/contest-access.events.js';
@@ -29,6 +32,52 @@ import { CollaboratorsEventsService } from './collaborators.events.js';
 
 const PASSWORD_ALPHABET =
   'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
+
+type CollaboratorScore = {
+  id: string;
+  name: string;
+  email: string;
+  deliveredCount: number;
+  totalDurationMs: number;
+  lastDeliveredAt: string | null;
+};
+
+type DeliveryStats = {
+  deliveredCount: number;
+  totalDurationMs: number;
+  lastDeliveredAt: Date | null;
+};
+
+type TaskHistoryEvents = {
+  processingByActor: Map<string, Date[]>;
+  deliveredAt: Date | null;
+};
+
+function compareCollaboratorScores(
+  a: CollaboratorScore,
+  b: CollaboratorScore,
+) {
+  if (b.deliveredCount !== a.deliveredCount) {
+    return b.deliveredCount - a.deliveredCount;
+  }
+
+  if (a.totalDurationMs !== b.totalDurationMs) {
+    return a.totalDurationMs - b.totalDurationMs;
+  }
+
+  const aLast = a.lastDeliveredAt
+    ? Date.parse(a.lastDeliveredAt)
+    : Number.POSITIVE_INFINITY;
+  const bLast = b.lastDeliveredAt
+    ? Date.parse(b.lastDeliveredAt)
+    : Number.POSITIVE_INFINITY;
+
+  if (aLast !== bLast) {
+    return aLast - bLast;
+  }
+
+  return a.name.localeCompare(b.name, 'pt-BR', { sensitivity: 'base' });
+}
 
 @Injectable()
 export class CollaboratorsService {
@@ -73,6 +122,52 @@ export class CollaboratorsService {
         ),
       ];
     });
+  }
+
+  async listScore(contestId: string) {
+    await this.ensureContestExists(contestId);
+
+    const memberships = await prisma.contestCollaborator.findMany({
+      where: { contestId },
+      orderBy: { createdAt: 'asc' },
+    });
+
+    if (memberships.length === 0) {
+      return [];
+    }
+
+    const userIds = memberships.map((membership) => membership.userId);
+    const users = await prisma.user.findMany({
+      where: { id: { in: userIds } },
+      select: { id: true, name: true, email: true, role: true },
+    });
+    const usersById = new Map(users.map((user) => [user.id, user]));
+
+    const collaborators = memberships.flatMap((membership) => {
+      const user = usersById.get(membership.userId);
+      if (!user || user.role === 'admin') {
+        return [];
+      }
+
+      return [user];
+    });
+
+    const statsByUserId = await this.getDeliveryStatsByUserId(contestId);
+
+    return collaborators
+      .map((user) => {
+        const stats = statsByUserId.get(user.id);
+
+        return {
+          id: user.id,
+          name: user.name,
+          email: user.email,
+          deliveredCount: stats?.deliveredCount ?? 0,
+          totalDurationMs: stats?.totalDurationMs ?? 0,
+          lastDeliveredAt: stats?.lastDeliveredAt?.toISOString() ?? null,
+        };
+      })
+      .sort(compareCollaboratorScores);
   }
 
   async create(
@@ -336,6 +431,126 @@ export class CollaboratorsService {
     }
 
     return { success: true as const };
+  }
+
+  private async getDeliveryStatsByUserId(
+    contestId: string,
+  ): Promise<Map<string, DeliveryStats>> {
+    const deliveredStatus = PrismaBalloonDeliveryStatus.DELIVERED;
+    const processingStatus = PrismaBalloonDeliveryStatus.PROCESSING;
+
+    const [balloons, prints] = await Promise.all([
+      prisma.balloonDelivery.findMany({
+        where: {
+          contestId,
+          status: deliveredStatus,
+          claimedByUserId: { not: null },
+        },
+        select: { id: true, claimedByUserId: true },
+      }),
+      prisma.printTask.findMany({
+        where: {
+          contestId,
+          status: deliveredStatus,
+          claimedByUserId: { not: null },
+        },
+        select: { id: true, claimedByUserId: true },
+      }),
+    ]);
+
+    const deliveredTasks = [...balloons, ...prints];
+    const statsByUserId = new Map<string, DeliveryStats>();
+
+    if (deliveredTasks.length === 0) {
+      return statsByUserId;
+    }
+
+    const history = await prisma.taskHistory.findMany({
+      where: {
+        contestId,
+        relatedTaskId: { in: deliveredTasks.map((task) => task.id) },
+        status: { in: [processingStatus, deliveredStatus] },
+      },
+      select: {
+        relatedTaskId: true,
+        actorUserId: true,
+        status: true,
+        createdAt: true,
+      },
+      orderBy: { createdAt: 'asc' },
+    });
+
+    const eventsByTask = new Map<string, TaskHistoryEvents>();
+
+    for (const entry of history) {
+      const taskId = entry.relatedTaskId;
+      if (!taskId) {
+        continue;
+      }
+
+      let events = eventsByTask.get(taskId);
+      if (!events) {
+        events = { processingByActor: new Map(), deliveredAt: null };
+        eventsByTask.set(taskId, events);
+      }
+
+      if (entry.status === processingStatus) {
+        const times = events.processingByActor.get(entry.actorUserId) ?? [];
+        times.push(entry.createdAt);
+        events.processingByActor.set(entry.actorUserId, times);
+        continue;
+      }
+
+      events.deliveredAt = entry.createdAt;
+    }
+
+    for (const task of deliveredTasks) {
+      const userId = task.claimedByUserId;
+      if (!userId) {
+        continue;
+      }
+
+      let stats = statsByUserId.get(userId);
+      if (!stats) {
+        stats = {
+          deliveredCount: 0,
+          totalDurationMs: 0,
+          lastDeliveredAt: null,
+        };
+        statsByUserId.set(userId, stats);
+      }
+
+      stats.deliveredCount += 1;
+
+      const events = eventsByTask.get(task.id);
+      const deliveredAt = events?.deliveredAt;
+      if (!deliveredAt) {
+        continue;
+      }
+
+      if (!stats.lastDeliveredAt || deliveredAt > stats.lastDeliveredAt) {
+        stats.lastDeliveredAt = deliveredAt;
+      }
+
+      const processingTimes = events?.processingByActor.get(userId) ?? [];
+      let lastProcessing: Date | undefined;
+      for (let index = processingTimes.length - 1; index >= 0; index -= 1) {
+        const time = processingTimes[index];
+        if (time && time.getTime() <= deliveredAt.getTime()) {
+          lastProcessing = time;
+          break;
+        }
+      }
+
+      if (lastProcessing) {
+        stats.totalDurationMs += Math.max(
+          0,
+          deliveredAt.getTime() - lastProcessing.getTime(),
+        );
+      }
+    }
+
+    return statsByUserId;
   }
 
   private async ensureContestExists(contestId: string) {

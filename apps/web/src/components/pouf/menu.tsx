@@ -30,9 +30,19 @@ interface DropdownMenuProps {
   children: ReactElement
   items: (MenuItem | 'separator')[]
   label?: string
+  align?: 'start' | 'center' | 'end'
+  side?: 'top' | 'right' | 'bottom' | 'left'
+  sideOffset?: number
 }
 
-export function DropdownMenu({ children, items, label }: DropdownMenuProps) {
+export function DropdownMenu({
+  children,
+  items,
+  label,
+  align = 'start',
+  side,
+  sideOffset = 8,
+}: DropdownMenuProps) {
   const reduceMotion = useReducedMotion()
   return (
     <RMenu.Root>
@@ -42,7 +52,7 @@ export function DropdownMenu({ children, items, label }: DropdownMenuProps) {
         {children}
       </RMenu.Trigger>
       <RMenu.Portal>
-        <RMenu.Content asChild sideOffset={8} align="start">
+        <RMenu.Content asChild side={side} sideOffset={sideOffset} align={align}>
           <motion.div
             className="pouf-menu"
             initial={reduceMotion ? { opacity: 0 } : { opacity: 0, scale: 0.95, y: -4 }}

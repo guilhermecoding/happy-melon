@@ -28,6 +28,7 @@ import {
 } from '@hugeicons/core-free-icons';
 import { HugeiconsIcon } from '@hugeicons/react';
 import confetti from 'canvas-confetti';
+import { AnimatePresence, motion, useReducedMotion } from 'motion/react';
 
 const TASK_DONE_SOUND_URL = '/sounds/task-done.mp3';
 
@@ -215,6 +216,7 @@ export default function LobbyArea({
   const [nowMs, setNowMs] = useState(() => Date.now());
   const [infoTask, setInfoTask] = useState<StaffTask | null>(null);
   const [expanded, setExpanded] = useState(false);
+  const reduceMotion = useReducedMotion();
 
   useEffect(() => {
     const intervalMs = deliveryTimeoutMinutes ? 1_000 : 30_000;
@@ -270,29 +272,48 @@ export default function LobbyArea({
           </div>
         </div>
 
-        <div className="min-h-0 flex-1 overflow-y-auto rounded-2xl bg-white px-2 py-4">
+        <div className="relative min-h-0 flex-1 overflow-y-auto rounded-2xl bg-white px-2 py-4">
           {tasks.length === 0 ? (
-            <div className="flex flex-col items-center justify-center h-full mt-1">
+            <div className="pointer-events-none absolute inset-0 mt-1 flex flex-col items-center justify-center">
               <HugeiconsIcon icon={Alien02Icon} className="size-8 text-muted-foreground" strokeWidth={2} />
               <p className="px-1 py-2 text-sm text-muted-foreground">
                 Buuh! Seu lobby está vazio.
               </p>
             </div>
-          ) : (
-            <div className="flex flex-col gap-2">
+          ) : null}
+          <div className="flex flex-col gap-2">
+            <AnimatePresence initial={false}>
               {tasks.map((task) => (
-                <LobbyTaskItem
+                <motion.div
                   key={`${task.kind}-${task.id}`}
-                  task={task}
-                  delivering={deliveringIds.has(task.id)}
-                  nowMs={nowMs}
-                  deliveryTimeoutMinutes={deliveryTimeoutMinutes}
-                  onDeliver={onDeliver}
-                  onOpenInfo={setInfoTask}
-                />
+                  exit={
+                    reduceMotion
+                      ? { opacity: 0 }
+                      : {
+                          opacity: 0,
+                          y: -8,
+                          scale: 0.97,
+                          transition: { duration: 0.18, ease: 'easeIn' },
+                        }
+                  }
+                  transition={
+                    reduceMotion
+                      ? { duration: 0.01 }
+                      : { type: 'spring', stiffness: 420, damping: 30, mass: 0.8 }
+                  }
+                >
+                  <LobbyTaskItem
+                    task={task}
+                    delivering={deliveringIds.has(task.id)}
+                    nowMs={nowMs}
+                    deliveryTimeoutMinutes={deliveryTimeoutMinutes}
+                    onDeliver={onDeliver}
+                    onOpenInfo={setInfoTask}
+                  />
+                </motion.div>
               ))}
-            </div>
-          )}
+            </AnimatePresence>
+          </div>
         </div>
       </div>
 
