@@ -6,8 +6,9 @@ import Loading from '@/app/loading';
 import { contestService } from '@/services/contest/contest.service';
 import { ThumbsUpIcon } from '@hugeicons/core-free-icons';
 import { Metadata } from 'next';
-import { CollaboratorsGeralPanel } from './_components/collaborators-geral-panel';
+import { CollaboratorsGeralPanel } from './_components/general-option/collaborators-geral-panel';
 import { CollaboratorsPageTabs } from './_components/collaborators-page-tabs';
+import { CollaboratorsScorePanel } from './_components/score-option/collaborators-score-panel';
 
 export const metadata: Metadata = {
     title: 'Colaboradores',
@@ -31,7 +32,7 @@ async function AdminCompetitionColaboratorsPageContent({
             <Section className="mt-6">
                 <CollaboratorsPageTabs
                     geral={<CollaboratorsGeralPanel contest={contest} />}
-                    score={null}
+                    score={<CollaboratorsScorePanel />}
                 />
             </Section>
         </Page>
