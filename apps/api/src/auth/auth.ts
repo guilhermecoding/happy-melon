@@ -75,6 +75,8 @@ export const auth = betterAuth({
     disableSignUp: true,
   },
   session: {
+    expiresIn: 60 * 60 * 24, // 1 day
+    updateAge: 60 * 60 * 24,
     additionalFields: {
       activeContestId: {
         type: 'string',
