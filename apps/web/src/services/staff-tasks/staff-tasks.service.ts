@@ -20,10 +20,43 @@ import {
 export const CLAIM_RACE_ERROR_MESSAGE =
   'Ops! Alguém foi ligeiro e já pegou essa task. Tente outra!';
 
-export const CLAIM_SUCCESS_MESSAGE =
-  'Agora é com você! Tarefa adicionada ao seu lobby.';
+export const CLAIM_SUCCESS_MESSAGES = [
+  'Agora é com você! Tarefa adicionada ao seu lobby.',
+  'Pegou! Essa tarefa já está no seu lobby.',
+  'Boa! Mais uma missão acabou de cair no lobby.',
+  'É sua! Leva essa pro lobby e mostra serviço.',
+  'Capturada! A tarefa já está esperando no lobby.',
+  'Fechou! Seu lobby acabou de ganhar companhia.',
+  'Missão aceita! Tarefa adicionada ao lobby.',
+  'Olha só! Essa já é sua e está no lobby.',
+  'Mandou bem! Tarefa conquistada e no lobby.',
+  'Chegou! Essa tarefa agora mora no seu lobby.',
+] as const;
 
-export const DELIVER_SUCCESS_MESSAGE = 'Que massa! Você arrasou nessa tarefa do início ao fim!';
+export const DELIVER_SUCCESS_MESSAGES = [
+  'Que massa! Você arrasou nessa tarefa do início ao fim!',
+  'Entregue! Você voou nessa do começo ao fim.',
+  'Pronto! Missão cumprida com chave de ouro.',
+  'Uhu! Tarefa entregue. Continua nesse ritmo!',
+  'Arrasou de novo! Essa entrega saiu redondinha.',
+  'Feito! Mais uma tarefa resolvida com maestria.',
+  'Isso aí! Tarefa entregue e lobby mais leve.',
+  'Mandou muito! Você fechou essa com estilo.',
+  'Show! Entrega confirmada, pode comemorar.',
+  'Brilhou! Essa tarefa foi sua do início ao fim.',
+] as const;
+
+function pickMessage(messages: readonly string[]): string {
+  return messages[Math.floor(Math.random() * messages.length)]!;
+}
+
+export function getClaimSuccessMessage(): string {
+  return pickMessage(CLAIM_SUCCESS_MESSAGES);
+}
+
+export function getDeliverSuccessMessage(): string {
+  return pickMessage(DELIVER_SUCCESS_MESSAGES);
+}
 
 async function getServerCookieHeader(): Promise<string | undefined> {
   if (typeof window !== 'undefined') {

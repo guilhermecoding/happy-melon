@@ -24,7 +24,7 @@ import {
 } from '@hugeicons/core-free-icons';
 import Spinner from '@/components/spinner';
 
-const PAGE_SIZE = 5;
+const PAGE_SIZE = 6;
 
 function formatDateTime(value: string | null) {
   if (!value) {

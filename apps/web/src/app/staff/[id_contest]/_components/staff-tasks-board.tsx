@@ -10,8 +10,8 @@ import {
 import { toast } from '@/components/pouf/toaster';
 import { authClient } from '@/lib/auth-client';
 import {
-  CLAIM_SUCCESS_MESSAGE,
-  DELIVER_SUCCESS_MESSAGE,
+  getClaimSuccessMessage,
+  getDeliverSuccessMessage,
   staffTasksService,
 } from '@/services/staff-tasks/staff-tasks.service';
 import LobbyArea from './lobby-area';
@@ -163,7 +163,7 @@ export default function StaffTasksBoard({ contestId }: StaffTasksBoardProps) {
     try {
       const claimed = await staffTasksService.claim(contestId, task);
       setLobby((prev) => upsertTask(prev, claimed));
-      toast.success(CLAIM_SUCCESS_MESSAGE);
+      toast.success(getClaimSuccessMessage());
     } catch (error) {
       setLobby((prev) => removeTask(prev, task.id));
       if (staffTasksService.isClaimRaceError(error)) {
@@ -190,7 +190,7 @@ export default function StaffTasksBoard({ contestId }: StaffTasksBoardProps) {
 
     try {
       await staffTasksService.deliver(contestId, task);
-      toast.success(DELIVER_SUCCESS_MESSAGE);
+      toast.success(getDeliverSuccessMessage());
     } catch (error) {
       setLobby((prev) => upsertTask(prev, task));
       toast.error(staffTasksService.getDeliverErrorMessage(error));
