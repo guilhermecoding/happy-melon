@@ -8,7 +8,7 @@ import { Text } from './text'
 interface TableColumn<T> {
   key: string
   header: string
-  render: (row: T) => ReactNode
+  render: (row: T, index: number) => ReactNode
   align?: 'left' | 'right'
   mono?: boolean
   truncate?: boolean
@@ -106,7 +106,7 @@ export function Table<T>({ columns, rows, getKey, onRowClick, getRowLabel }: Tab
               </td>
             </tr>
           ) : (
-            sorted.map((row) => (
+            sorted.map((row, rowIndex) => (
               <tr
                 key={getKey(row)}
                 className={onRowClick ? 'pouf-table__row pouf-table__row--click' : 'pouf-table__row'}
@@ -121,7 +121,7 @@ export function Table<T>({ columns, rows, getKey, onRowClick, getRowLabel }: Tab
                     : undefined
                 }
               >
-                {columns.map((col, index) => {
+                {columns.map((col, colIndex) => {
                   const cell = (
                     <Text
                       size="sm"
@@ -129,7 +129,7 @@ export function Table<T>({ columns, rows, getKey, onRowClick, getRowLabel }: Tab
                       num={col.align === 'right'}
                       truncate={col.truncate}
                     >
-                      {col.render(row)}
+                      {col.render(row, rowIndex)}
                     </Text>
                   )
                   return (
@@ -137,7 +137,7 @@ export function Table<T>({ columns, rows, getKey, onRowClick, getRowLabel }: Tab
                       key={col.key}
                       className={col.align === 'right' ? 'pouf-table__cell--right' : ''}
                     >
-                      {index === 0 && onRowClick ? (
+                      {colIndex === 0 && onRowClick ? (
                         <button
                           type="button"
                           className="pouf-table__rowaction"

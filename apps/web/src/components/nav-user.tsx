@@ -15,9 +15,11 @@ import {
   useSidebar,
 } from "@/components/ui/sidebar"
 import { DropdownMenu, type MenuEntry } from "@/components/pouf/menu"
-import { IconLogout, IconSelector } from "@tabler/icons-react"
+import { IconSelector } from "@tabler/icons-react"
 import { authClient } from "@/lib/auth-client"
 import { cn } from "@/lib/utils"
+import { HugeiconsIcon } from "@hugeicons/react"
+import { LogoutCircle01Icon } from "@hugeicons/core-free-icons"
 
 function getInitials(name: string) {
   const parts = name.trim().split(/\s+/).filter(Boolean)
@@ -77,7 +79,7 @@ export function NavUser({
   }
   items.push({
     label: "Sair",
-    icon: <IconLogout className="size-4" />,
+    icon: <HugeiconsIcon icon={LogoutCircle01Icon} className="size-4" strokeWidth={2.5} />,
     onClick: () => void handleSignOut(),
     disabled: isSigningOut || !user,
   })

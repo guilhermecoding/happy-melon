@@ -24,7 +24,7 @@ import {
 } from '@hugeicons/core-free-icons';
 import Spinner from '@/components/spinner';
 
-const PAGE_SIZE = 5;
+const PAGE_SIZE = 6;
 
 function formatDateTime(value: string | null) {
   if (!value) {
@@ -246,6 +246,13 @@ export default function BoxListCollaborators({
   }
 
   const columns = [
+    {
+      key: 'index',
+      header: '#',
+      mono: true,
+      render: (_collaborator: Collaborator, index: number) =>
+        (currentPage - 1) * PAGE_SIZE + index + 1,
+    },
     {
       key: 'id',
       header: 'ID',
