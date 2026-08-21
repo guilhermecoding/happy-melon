@@ -5,6 +5,18 @@ Todas as mudanças notáveis deste projeto serão documentadas neste arquivo.
 O formato segue [Keep a Changelog](https://keepachangelog.com/pt-BR/1.1.0/),
 e este projeto adere ao [Semantic Versioning](https://semver.org/lang/pt-BR/).
 
+## [1.2.0] - 2026-08-21
+
+### Added
+
+- Componente QRCode reutilizável, com logo, estilo de pontos e cantos configuráveis.
+
+### Changed
+
+- QR Code de acesso dos colaboradores passou a usar o novo componente estilizado e se ajusta à largura da tela.
+- Versão do aplicativo (`APP_VERSION`) passou a ser lida de forma centralizada em `@repo/shared`, a partir do `package.json` da raiz.
+- Toast ao pegar uma tarefa no lobby do colaborador passou a ser informativo, em vez de sucesso.
+
 ## [1.1.0] - 2026-08-15
 
 ### Added
@@ -58,6 +70,7 @@ e este projeto adere ao [Semantic Versioning](https://semver.org/lang/pt-BR/).
 
 - Lançamento inicial do Happy Melon: operação de maratonas no estilo ICPC, com painel de administradores, fila e lobby de colaboradores, gestão de competições, prova, times, balões e impressões.
 
+[1.2.0]: https://github.com/guilhermecoding/happy-melon/compare/v1.1.0...v1.2.0
 [1.1.0]: https://github.com/guilhermecoding/happy-melon/compare/v1.0.2...v1.1.0
 [1.0.2]: https://github.com/guilhermecoding/happy-melon/compare/v1.0.1...v1.0.2
 [1.0.1]: https://github.com/guilhermecoding/happy-melon/compare/v1.0.0...v1.0.1
