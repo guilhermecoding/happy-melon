@@ -1,12 +1,12 @@
 'use client'
 
 import { useEffect, useState } from 'react'
-import { QRCodeSVG } from 'qrcode.react'
 import { contestService } from '@/services/contest/contest.service'
 import { getContestErrorMessage } from '@/services/contest/contest.error'
 import type { Contest, ContestStatus } from '@/services/contest/contest.type'
 import { Switch } from '@/components/pouf/controls'
 import { toast } from '@/components/pouf/toaster'
+import QRCode from '@/components/ui/qrcode'
 
 type BoxAccessControllCollabProps = {
     contest: Contest
@@ -64,25 +64,23 @@ export default function BoxAccessControllCollab({
         <div className="px-4 py-6">
             <div className="flex-1 flex items-center justify-center">
                 {loginUrl ? (
-                    <div className="flex flex-col gap-4 items-center justify-center">
-                        <span className="text-muted-foreground">
+                    <div className="flex w-full min-w-0 flex-col items-center justify-center gap-4">
+                        <span className="text-center text-muted-foreground">
                             Compartilhe o código ou o QR Code com os colaboradores
                             para que eles possam acessar a competição.
                         </span>
-                        <div className="flex items-center justify-center bg-white p-4 rounded-xl">
-                            <QRCodeSVG
+                        <div className="flex w-full min-w-0 max-w-60 items-center justify-center rounded-xl bg-white p-3 sm:max-w-64 sm:p-4 md:max-w-78">
+                            <QRCode
                                 value={loginUrl}
-                                fgColor="#32345c"
-                                imageSettings={{
-                                    src: '/logo-icon.svg',
-                                    x: undefined,
-                                    y: undefined,
-                                    height: 22,
-                                    width: 13,
-                                    opacity: 1,
-                                    excavate: true,
-                                }}
-                                className='size-52 md:size-64'
+                                className="block w-full max-w-full [&_div]:w-full [&_svg]:h-auto [&_svg]:w-full"
+                                size={256}
+                                logoImage='/logo-icon.svg'
+                                logoSize={0.25}
+                                dotStyle='rounded'
+                                cornerSquareStyle='dot'
+                                cornerDotStyle='dot'
+                                fgColor='#32345c'
+                                level='H'
                             />
                         </div>
                         <span className="text-4xl md:text-5xl font-semibold text-primary/70">

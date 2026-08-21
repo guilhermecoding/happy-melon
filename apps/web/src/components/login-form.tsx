@@ -20,6 +20,7 @@ import {
   type LoginFormValues,
   type LoginMode,
 } from './login-schema';
+import { APP_VERSION } from '@repo/shared/app-version';
 
 import { HugeiconsIcon } from '@hugeicons/react';
 import {
@@ -30,7 +31,6 @@ import {
   UserIcon,
   LoginCircle01Icon,
 } from '@hugeicons/core-free-icons';
-import { APP_VERSION } from '@/lib/app-version';
 
 const ADMIN_ROLES = new Set(['admin']);
 

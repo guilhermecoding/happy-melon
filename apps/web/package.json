@@ -1,6 +1,5 @@
 {
   "name": "web",
-  "version": "v1.1.0",
   "type": "module",
   "private": true,
   "scripts": {
@@ -43,6 +42,7 @@
     "next": "16.2.10",
     "nextjs-toploader": "^3.9.17",
     "postcss": "^8.5.19",
+    "qr-code-styling": "^1.9.2",
     "qrcode.react": "^4.2.0",
     "react": "^19.2.7",
     "react-dom": "^19.2.7",
