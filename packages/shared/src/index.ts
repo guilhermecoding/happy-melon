@@ -1,3 +1,5 @@
+export { APP_VERSION } from './app-version.js';
+
 export {
   BALLOON_DELIVERY_STATUS,
   BALLOON_DELIVERY_STATUS_VALUES,

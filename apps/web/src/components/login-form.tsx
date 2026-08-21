@@ -20,6 +20,7 @@ import {
   type LoginFormValues,
   type LoginMode,
 } from './login-schema';
+import { APP_VERSION } from '@repo/shared/app-version';
 
 import { HugeiconsIcon } from '@hugeicons/react';
 import {
