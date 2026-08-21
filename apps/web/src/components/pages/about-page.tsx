@@ -5,7 +5,7 @@ import { Separator } from "../ui/separator";
 import { IconBrandGithubFilled, IconBrandLinkedinFilled, IconExternalLink, IconMailFilled } from "@tabler/icons-react";
 import Link from "next/link";
 import Page from "../ui/page";
-import { APP_VERSION } from "@/lib/app-version";
+import { APP_VERSION } from "@repo/shared/app-version";
 
 export default function AboutPage() {
     return (

@@ -163,7 +163,7 @@ export default function StaffTasksBoard({ contestId }: StaffTasksBoardProps) {
     try {
       const claimed = await staffTasksService.claim(contestId, task);
       setLobby((prev) => upsertTask(prev, claimed));
-      toast.success(getClaimSuccessMessage());
+      toast.info(getClaimSuccessMessage());
     } catch (error) {
       setLobby((prev) => removeTask(prev, task.id));
       if (staffTasksService.isClaimRaceError(error)) {
