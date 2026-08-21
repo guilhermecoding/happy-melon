@@ -30,7 +30,6 @@ import {
   UserIcon,
   LoginCircle01Icon,
 } from '@hugeicons/core-free-icons';
-import { APP_VERSION } from '@/lib/app-version';
 
 const ADMIN_ROLES = new Set(['admin']);
 
