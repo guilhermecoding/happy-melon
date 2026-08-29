@@ -17,8 +17,7 @@ import { contestService } from '@/services/contest/contest.service'
 
 export function StaffShell({ children }: { children: React.ReactNode }) {
   const router = useRouter()
-  const { data: session, isPending } = authClient.useSession()
-  const hadSessionRef = useRef(false)
+  const { data: session } = authClient.useSession()
   const signingOutRef = useRef(false)
   const userId = session?.user?.id ?? null
   const contestId = session?.session?.activeContestId
@@ -33,29 +32,6 @@ export function StaffShell({ children }: { children: React.ReactNode }) {
     : null
 
   useEffect(() => {
-    if (session) {
-      hadSessionRef.current = true
-    }
-  }, [session])
-
-  useEffect(() => {
-    if (isPending) {
-      return
-    }
-
-    if (!session && hadSessionRef.current) {
-      hadSessionRef.current = false
-      if (!signingOutRef.current) {
-        toast.error(
-          'O acesso dos colaboradores foi desabilitado. Você foi desconectado.',
-        )
-        router.replace('/entrar')
-        router.refresh()
-      }
-    }
-  }, [session, isPending, router])
-
-  useEffect(() => {
     if (!contestId || !userId) {
       return
     }
@@ -67,7 +43,6 @@ export function StaffShell({ children }: { children: React.ReactNode }) {
         return
       }
       signingOutRef.current = true
-      hadSessionRef.current = false
       toast.error(message)
       try {
         await authClient.signOut()
@@ -132,7 +107,6 @@ export function StaffShell({ children }: { children: React.ReactNode }) {
               aboutHref="/staff/sobre"
               onBeforeSignOut={() => {
                 signingOutRef.current = true
-                hadSessionRef.current = false
               }}
             />
           </div>

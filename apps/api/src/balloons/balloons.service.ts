@@ -46,6 +46,7 @@ const BALLOON_COLOR_LABELS: Record<string, string> = {
   '#FFFFFF': 'Branco',
   '#800000': 'Grená',
   '#FF8000': 'Laranja',
+  '#A3794D': 'Marrom',
   '#C0C0C0': 'Prata',
   '#FF00FF': 'Rosa',
   '#800080': 'Roxo',
@@ -399,6 +400,7 @@ export class BalloonsService {
     this.contestTasksEvents.emit(contestId, {
       type: STAFF_TASK_EVENT_TYPE.CLAIMED,
       task: staffTask,
+      claimedByName: actor.name,
     });
 
     this.emitHistoryCreated(contestId, history);

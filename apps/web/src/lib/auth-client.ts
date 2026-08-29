@@ -18,6 +18,10 @@ export const authClient = createAuthClient({
   fetchOptions: {
     credentials: 'include',
   },
+  sessionOptions: {
+    refetchOnWindowFocus: true,
+    refetchWhenOffline: false,
+  },
   plugins: [
     adminClient({
       ac,

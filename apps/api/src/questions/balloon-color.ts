@@ -5,6 +5,7 @@ export const COLOR = {
   NAVY: '#000080',
   WHITE: '#FFFFFF',
   MAROON: '#800000',
+  BROWN: '#A3794D',
   ORANGE: '#FF8000',
   SILVER: '#C0C0C0',
   PINK: '#FF00FF',

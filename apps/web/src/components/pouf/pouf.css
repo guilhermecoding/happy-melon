@@ -443,6 +443,9 @@
  * thumb is, and where the platform convention already points. The top corners
  * stay round so it still reads as a surface sliding over the page rather than a
  * navigation to a new one. */
+.pouf-dialog__handle {
+  display: none;
+}
 @media (max-width: 900px) {
   .pouf-dialog,
   .pouf-dialog--lg,
@@ -467,6 +470,32 @@
   }
   .pouf-dialog[data-state='closed'] {
     animation: pouf-slide-down 200ms ease forwards;
+  }
+  .pouf-dialog[data-dragging] {
+    animation: none;
+  }
+  .pouf-dialog__handle {
+    display: flex;
+    flex-shrink: 0;
+    align-items: center;
+    justify-content: center;
+    margin: calc(var(--s2) * -1) 0 0;
+    padding: var(--s2) 0 var(--s1);
+    touch-action: none;
+    cursor: grab;
+  }
+  .pouf-dialog__handle:active {
+    cursor: grabbing;
+  }
+  .pouf-dialog__handle-bar {
+    width: 2.75rem;
+    height: 0.25rem;
+    border-radius: 999px;
+    background: currentColor;
+    opacity: 0.22;
+  }
+  .pouf-dialog__head {
+    touch-action: none;
   }
 }
 /* The body scrolls, not the page behind it. A 37-row list has to live
