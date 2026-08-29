@@ -1,44 +1,18 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { getApiBaseUrl } from '@/lib/api-url';
+import {
+  lookupSession,
+  type SessionLookup,
+  type SessionPayload,
+} from '@/lib/auth/lookup-session';
 
-type SessionResponse = {
-  user?: {
-    role?: string | null;
-  };
-  session?: {
-    activeContestId?: string | null;
-  } | null;
-} | null;
-
-async function getSession(request: NextRequest): Promise<SessionResponse> {
-  const apiUrl = getApiBaseUrl();
-  const cookie = request.headers.get('cookie') ?? '';
-
-  if (!cookie) {
-    return null;
+function applySetCookies(response: NextResponse, setCookies: string[]) {
+  for (const cookie of setCookies) {
+    response.headers.append('Set-Cookie', cookie);
   }
-
-  try {
-    const response = await fetch(`${apiUrl}/api/auth/get-session`, {
-      method: 'GET',
-      headers: {
-        cookie,
-      },
-      cache: 'no-store',
-    });
-
-    if (!response.ok) {
-      return null;
-    }
-
-    const data = (await response.json()) as SessionResponse;
-    return data?.session ? data : null;
-  } catch {
-    return null;
-  }
+  return response;
 }
 
-function getRole(session: SessionResponse): string | null {
+function getRole(session: SessionPayload): string | null {
   const role = session?.user?.role;
   return typeof role === 'string' ? role : null;
 }
@@ -49,7 +23,7 @@ function loginRedirect(request: NextRequest, pathname: string) {
   return NextResponse.redirect(loginUrl);
 }
 
-function getPostLoginRedirect(session: SessionResponse, request: NextRequest) {
+function getPostLoginRedirect(session: SessionPayload, request: NextRequest) {
   const role = getRole(session);
   const activeContestId = session?.session?.activeContestId;
 
@@ -66,38 +40,54 @@ function getPostLoginRedirect(session: SessionResponse, request: NextRequest) {
 
 export async function proxy(request: NextRequest) {
   const { pathname } = request.nextUrl;
-  const session = await getSession(request);
+  const lookup: SessionLookup = await lookupSession(
+    request.headers.get('cookie') ?? '',
+  );
+  const session = lookup.session;
   const role = getRole(session);
   const activeContestId = session?.session?.activeContestId ?? null;
+  const sessionUncertain = lookup.status === 'unknown';
+
+  const respond = (response: NextResponse) =>
+    applySetCookies(response, lookup.setCookies);
 
   if (pathname === '/') {
     if (role === 'admin') {
-      return NextResponse.redirect(new URL('/admin', request.url));
+      return respond(NextResponse.redirect(new URL('/admin', request.url)));
     }
     if (role === 'staff') {
-      return NextResponse.redirect(new URL('/staff', request.url));
+      return respond(NextResponse.redirect(new URL('/staff', request.url)));
     }
-    return NextResponse.redirect(new URL('/entrar', request.url));
+    if (sessionUncertain) {
+      return respond(NextResponse.next());
+    }
+    return respond(NextResponse.redirect(new URL('/entrar', request.url)));
   }
 
   if (pathname.startsWith('/admin')) {
     if (role === 'staff' && activeContestId) {
-      return NextResponse.redirect(
-        new URL(`/staff/${activeContestId}`, request.url),
+      return respond(
+        NextResponse.redirect(new URL(`/staff/${activeContestId}`, request.url)),
       );
     }
-    if (role !== 'admin') {
-      return loginRedirect(request, pathname);
+    if (sessionUncertain) {
+      return respond(NextResponse.next());
     }
-    return NextResponse.next();
+    if (role !== 'admin') {
+      return respond(loginRedirect(request, pathname));
+    }
+    return respond(NextResponse.next());
   }
 
   if (pathname.startsWith('/staff')) {
     if (role === 'admin') {
-      return NextResponse.redirect(new URL('/admin', request.url));
+      return respond(NextResponse.redirect(new URL('/admin', request.url)));
+    }
+    if (sessionUncertain) {
+      return respond(NextResponse.next());
     }
     if (role !== 'staff' || !activeContestId) {
-      return loginRedirect(request, pathname);
+      return respond(loginRedirect(request, pathname));
     }
 
     // Allow shared staff pages without forcing the contest route.
@@ -106,26 +96,28 @@ export async function proxy(request: NextRequest) {
       pathname === '/staff/' ||
       pathname === '/staff/sobre'
     ) {
-      return NextResponse.next();
+      return respond(NextResponse.next());
     }
 
     const staffHome = `/staff/${activeContestId}`;
     const onOwnContest =
       pathname === staffHome || pathname.startsWith(`${staffHome}/`);
     if (!onOwnContest) {
-      return NextResponse.redirect(new URL(staffHome, request.url));
+      return respond(NextResponse.redirect(new URL(staffHome, request.url)));
     }
 
-    return NextResponse.next();
+    return respond(NextResponse.next());
   }
 
   if (pathname === '/entrar') {
     if (role === 'admin' || (role === 'staff' && activeContestId)) {
-      return NextResponse.redirect(getPostLoginRedirect(session, request));
+      return respond(
+        NextResponse.redirect(getPostLoginRedirect(session, request)),
+      );
     }
   }
 
-  return NextResponse.next();
+  return respond(NextResponse.next());
 }
 
 export const config = {

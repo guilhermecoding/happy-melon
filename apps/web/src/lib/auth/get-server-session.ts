@@ -1,47 +1,33 @@
 import { cookies } from 'next/headers';
-import { getApiBaseUrl } from '@/lib/api-url';
+import {
+  lookupSession,
+  type SessionPayload,
+} from '@/lib/auth/lookup-session';
 
-export type ServerSession = {
-  user?: {
-    id?: string;
-    name?: string;
-    email?: string;
-    image?: string | null;
-    role?: string | null;
-  };
-  session?: {
-    activeContestId?: string | null;
-  } | null;
-} | null;
+export type ServerSession = SessionPayload;
 
-export async function getServerSession(): Promise<ServerSession> {
-  const apiUrl = getApiBaseUrl();
+export type ServerSessionLookup = {
+  status: 'authenticated' | 'unauthenticated' | 'unknown';
+  session: ServerSession;
+};
+
+export async function lookupServerSession(): Promise<ServerSessionLookup> {
   const cookieStore = await cookies();
   const cookie = cookieStore
     .getAll()
     .map(({ name, value }) => `${name}=${value}`)
     .join('; ');
 
-  if (!cookie) {
-    return null;
-  }
+  const result = await lookupSession(cookie);
+  return {
+    status: result.status,
+    session: result.session,
+  };
+}
 
-  try {
-    const response = await fetch(`${apiUrl}/api/auth/get-session`, {
-      method: 'GET',
-      headers: { cookie },
-      cache: 'no-store',
-    });
-
-    if (!response.ok) {
-      return null;
-    }
-
-    const data = (await response.json()) as ServerSession;
-    return data?.session ? data : null;
-  } catch {
-    return null;
-  }
+export async function getServerSession(): Promise<ServerSession> {
+  const result = await lookupServerSession();
+  return result.session;
 }
 
 export function isValidStaffSession(session: ServerSession): boolean {

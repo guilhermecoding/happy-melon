@@ -6,14 +6,48 @@ import * as RTooltip from '@radix-ui/react-tooltip'
 import * as RAlert from '@radix-ui/react-alert-dialog'
 import * as RDialog from '@radix-ui/react-dialog'
 import * as RPopover from '@radix-ui/react-popover'
-import { useId, useMemo, useState, type KeyboardEvent, type ReactNode } from 'react'
+import {
+  useEffect,
+  useId,
+  useMemo,
+  useRef,
+  useState,
+  type KeyboardEvent,
+  type PointerEvent as ReactPointerEvent,
+  type ReactNode,
+} from 'react'
 import clsx from 'clsx'
+import {
+  animate,
+  motion,
+  useDragControls,
+  useMotionValue,
+  type PanInfo,
+} from 'motion/react'
 import { Button } from './Button'
 import { Icon } from './Icon'
 import { inputClasses } from './Input'
 import { Row, Stack } from './layout'
 import { Heading, Text } from './text'
 import type { Tone } from './tone'
+
+const POUF_SHEET_MEDIA = '(max-width: 900px)'
+const DIALOG_DISMISS_OFFSET_PX = 120
+const DIALOG_DISMISS_VELOCITY_Y = 700
+
+function usePoufSheetLayout() {
+  const [isSheet, setIsSheet] = useState(false)
+
+  useEffect(() => {
+    const media = window.matchMedia(POUF_SHEET_MEDIA)
+    const sync = () => setIsSheet(media.matches)
+    sync()
+    media.addEventListener('change', sync)
+    return () => media.removeEventListener('change', sync)
+  }, [])
+
+  return isSheet
+}
 
 /* Radix supplies the behaviour (focus traps, typeahead, escape handling,
  * aria wiring); pouf.css supplies the skin. We never restyle Radix inline —
@@ -170,6 +204,110 @@ interface DialogProps {
  * easily. Using AlertDialog to show a plain list would train the user to
  * dismiss the same chrome that later asks them to confirm something destructive.
  */
+function DialogPanel({
+  title,
+  description,
+  children,
+  size,
+  className,
+}: {
+  title: string
+  description?: ReactNode
+  children: ReactNode
+  size: 'md' | 'lg' | 'xl'
+  className?: string
+}) {
+  const isSheet = usePoufSheetLayout()
+  const dragControls = useDragControls()
+  const y = useMotionValue(0)
+  const closeRef = useRef<HTMLButtonElement>(null)
+  const [dragging, setDragging] = useState(false)
+
+  function startSheetDrag(event: ReactPointerEvent<HTMLElement>) {
+    if (!isSheet) return
+    if ((event.target as HTMLElement).closest('button')) return
+    setDragging(true)
+    dragControls.start(event)
+  }
+
+  async function handleDragEnd(_: MouseEvent | TouchEvent | PointerEvent, info: PanInfo) {
+    const shouldClose =
+      info.offset.y > DIALOG_DISMISS_OFFSET_PX ||
+      info.velocity.y > DIALOG_DISMISS_VELOCITY_Y
+
+    if (shouldClose) {
+      await animate(y, window.innerHeight, {
+        duration: 0.2,
+        ease: [0.32, 0.72, 0, 1],
+      })
+      closeRef.current?.click()
+      return
+    }
+
+    await animate(y, 0, { type: 'spring', stiffness: 500, damping: 40 })
+    setDragging(false)
+  }
+
+  return (
+    <RDialog.Content asChild>
+      <motion.div
+        className={clsx(
+          size === 'xl'
+            ? 'pouf-dialog pouf-dialog--xl'
+            : size === 'lg'
+              ? 'pouf-dialog pouf-dialog--lg'
+              : 'pouf-dialog',
+          className,
+        )}
+        style={isSheet && dragging ? { y } : undefined}
+        data-dragging={dragging || undefined}
+        drag={isSheet ? 'y' : false}
+        dragListener={false}
+        dragControls={dragControls}
+        dragConstraints={{ top: 0, bottom: 0 }}
+        dragElastic={{ top: 0, bottom: 0.7 }}
+        dragMomentum={false}
+        onDragStart={() => setDragging(true)}
+        onDragEnd={handleDragEnd}
+      >
+        <div
+          className="pouf-dialog__handle"
+          onPointerDown={startSheetDrag}
+        >
+          <span className="pouf-dialog__handle-bar" aria-hidden />
+          <span className="sr-only">Arraste para baixo para fechar</span>
+        </div>
+        <Stack gap={4}>
+          <div className="pouf-dialog__head" onPointerDown={startSheetDrag}>
+            <Stack gap={1}>
+              <RDialog.Title asChild>
+                <div>
+                  <Heading level={3}>{title}</Heading>
+                </div>
+              </RDialog.Title>
+              {description != null && description !== '' && (
+                <RDialog.Description asChild>
+                  <div>
+                    <Text size="md" muted>
+                      {description}
+                    </Text>
+                  </div>
+                </RDialog.Description>
+              )}
+            </Stack>
+            <RDialog.Close asChild>
+              <Button ref={closeRef} variant="quiet" size="sm" label="Close">
+                <Icon name="close" size="sm" />
+              </Button>
+            </RDialog.Close>
+          </div>
+          <div className="pouf-dialog__body">{children}</div>
+        </Stack>
+      </motion.div>
+    </RDialog.Content>
+  )
+}
+
 export function Dialog({
   trigger,
   title,
@@ -194,43 +332,14 @@ export function Dialog({
             unmounts at once and the exit never plays. Nested modals dim each
             other through portal order at a shared z-index instead. */}
         <RDialog.Overlay className="pouf-overlay" />
-        <RDialog.Content
-          className={clsx(
-            size === 'xl'
-              ? 'pouf-dialog pouf-dialog--xl'
-              : size === 'lg'
-                ? 'pouf-dialog pouf-dialog--lg'
-                : 'pouf-dialog',
-            className,
-          )}
+        <DialogPanel
+          title={title}
+          description={description}
+          size={size}
+          className={className}
         >
-          <Stack gap={4}>
-            <div className="pouf-dialog__head">
-              <Stack gap={1}>
-                <RDialog.Title asChild>
-                  <div>
-                    <Heading level={3}>{title}</Heading>
-                  </div>
-                </RDialog.Title>
-                {description != null && description !== '' && (
-                  <RDialog.Description asChild>
-                    <div>
-                      <Text size="md" muted>
-                        {description}
-                      </Text>
-                    </div>
-                  </RDialog.Description>
-                )}
-              </Stack>
-              <RDialog.Close asChild>
-                <Button variant="quiet" size="sm" label="Close">
-                  <Icon name="close" size="sm" />
-                </Button>
-              </RDialog.Close>
-            </div>
-            <div className="pouf-dialog__body">{children}</div>
-          </Stack>
-        </RDialog.Content>
+          {children}
+        </DialogPanel>
       </RDialog.Portal>
     </RDialog.Root>
   )

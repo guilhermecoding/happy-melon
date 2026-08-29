@@ -75,8 +75,8 @@ export const auth = betterAuth({
     disableSignUp: true,
   },
   session: {
-    expiresIn: 60 * 60 * 24, // 1 day
-    updateAge: 60 * 60 * 24,
+    expiresIn: 60 * 60 * 24 * 7,
+    updateAge: 60 * 60,
     additionalFields: {
       activeContestId: {
         type: 'string',
@@ -122,11 +122,17 @@ export const auth = betterAuth({
         return;
       }
 
-      const contestId = session.activeContestId;
+      let contestId = session.activeContestId;
       if (!contestId) {
-        await prisma.session.deleteMany({ where: { id: session.id } });
-        deleteSessionCookie(ctx);
-        return ctx.json(null);
+        const stored = await prisma.session.findUnique({
+          where: { id: session.id },
+          select: { activeContestId: true },
+        });
+        contestId = stored?.activeContestId ?? undefined;
+      }
+
+      if (!contestId) {
+        return;
       }
 
       const access = await checkStaffSessionAccess(user.id, contestId);

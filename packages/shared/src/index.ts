@@ -22,6 +22,7 @@ export {
   type BalloonDeliveryStatus,
   type BalloonEffectiveStatus,
   type StaffTask,
+  type StaffTaskClaimedEvent,
   type StaffTaskEvent,
   type StaffTaskEventType,
   type StaffTasksSnapshot,
