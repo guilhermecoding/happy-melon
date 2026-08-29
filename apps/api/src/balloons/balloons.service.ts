@@ -400,6 +400,7 @@ export class BalloonsService {
     this.contestTasksEvents.emit(contestId, {
       type: STAFF_TASK_EVENT_TYPE.CLAIMED,
       task: staffTask,
+      claimedByName: actor.name,
     });
 
     this.emitHistoryCreated(contestId, history);

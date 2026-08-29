@@ -17,6 +17,11 @@ import {
 import LobbyArea from './lobby-area';
 import QueueTask from './queue-task';
 
+function firstName(fullName: string) {
+  const part = fullName.trim().split(/\s+/)[0];
+  return part || fullName.trim();
+}
+
 function sortByCreatedAtAsc(tasks: StaffTask[]): StaffTask[] {
   return [...tasks].sort(
     (a, b) =>
@@ -134,6 +139,14 @@ export default function StaffTasksBoard({ contestId }: StaffTasksBoardProps) {
         toast.warning(
           'Uma tarefa expirou por exceder o tempo limite de entrega.',
         );
+      }
+
+      if (
+        event.type === STAFF_TASK_EVENT_TYPE.CLAIMED &&
+        me != null &&
+        event.task.claimedByUserId !== me
+      ) {
+        toast.info(`${firstName(event.claimedByName)} pegou uma tarefa.`);
       }
     }
 

@@ -149,10 +149,18 @@ export const staffTasksService = {
 
       if (
         (type === STAFF_TASK_EVENT_TYPE.QUEUED ||
-          type === STAFF_TASK_EVENT_TYPE.CLAIMED ||
           type === STAFF_TASK_EVENT_TYPE.REMOVED) &&
         'task' in parsed
       ) {
+        return parsed as StaffTaskEvent;
+      }
+
+      if (type === STAFF_TASK_EVENT_TYPE.CLAIMED && 'task' in parsed) {
+        const claimedByName = (parsed as { claimedByName?: unknown })
+          .claimedByName;
+        if (typeof claimedByName !== 'string' || claimedByName.trim() === '') {
+          return null;
+        }
         return parsed as StaffTaskEvent;
       }
 
