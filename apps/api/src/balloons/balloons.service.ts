@@ -46,6 +46,7 @@ const BALLOON_COLOR_LABELS: Record<string, string> = {
   '#FFFFFF': 'Branco',
   '#800000': 'Grená',
   '#FF8000': 'Laranja',
+  '#A3794D': 'Marrom',
   '#C0C0C0': 'Prata',
   '#FF00FF': 'Rosa',
   '#800080': 'Roxo',
