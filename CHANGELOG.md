@@ -5,6 +5,22 @@ Todas as mudanças notáveis deste projeto serão documentadas neste arquivo.
 O formato segue [Keep a Changelog](https://keepachangelog.com/pt-BR/1.1.0/),
 e este projeto adere ao [Semantic Versioning](https://semver.org/lang/pt-BR/).
 
+## [1.3.0] - 2026-08-29
+
+### Added
+
+- Cor de balão Marrom (`#A3794D`) na paleta da API e do web, inclusive no select de criar e editar questão.
+- Arrastar para baixo para fechar o Dialog no mobile (alça no topo do sheet).
+- Toast informativo em tempo real quando outro colaborador pega uma tarefa, com o primeiro nome de quem reivindicou.
+
+### Changed
+
+- Duração da sessão passou de 1 dia para 7 dias, com renovação a cada 1 hora de uso.
+
+### Fixed
+
+- Logout intermitente ao voltar para o app ou trocar de tela: falha transitória de `get-session` deixa de ser tratada como sessão encerrada.
+
 ## [1.2.0] - 2026-08-21
 
 ### Added
@@ -70,6 +86,7 @@ e este projeto adere ao [Semantic Versioning](https://semver.org/lang/pt-BR/).
 
 - Lançamento inicial do Happy Melon: operação de maratonas no estilo ICPC, com painel de administradores, fila e lobby de colaboradores, gestão de competições, prova, times, balões e impressões.
 
+[1.3.0]: https://github.com/guilhermecoding/happy-melon/compare/v1.2.0...v1.3.0
 [1.2.0]: https://github.com/guilhermecoding/happy-melon/compare/v1.1.0...v1.2.0
 [1.1.0]: https://github.com/guilhermecoding/happy-melon/compare/v1.0.2...v1.1.0
 [1.0.2]: https://github.com/guilhermecoding/happy-melon/compare/v1.0.1...v1.0.2
