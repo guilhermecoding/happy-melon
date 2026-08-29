@@ -1,9 +1,14 @@
 import { redirect } from 'next/navigation'
-import { getServerSession } from '@/lib/auth/get-server-session'
+import { lookupServerSession } from '@/lib/auth/get-server-session'
 
 export default async function StaffPage() {
-  const session = await getServerSession()
-  const contestId = session?.session?.activeContestId
+  const result = await lookupServerSession()
+
+  if (result.status === 'unknown') {
+    return null
+  }
+
+  const contestId = result.session?.session?.activeContestId
 
   if (typeof contestId === 'string' && contestId.length > 0) {
     redirect(`/staff/${contestId}`)
