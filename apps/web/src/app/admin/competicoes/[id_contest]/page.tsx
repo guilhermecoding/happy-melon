@@ -2,13 +2,14 @@ import BoxFeatures from '@/components/box-features';
 import Page from '@/components/ui/page';
 import Section from '@/components/ui/section';
 import { BadgeInfoIcon } from '@hugeicons/core-free-icons';
-import BoxContentContest from './_components/box-content-contest';
-import TitleContestPageManager from './_components/title-contest-page-manager';
+import BoxContentContest from '@/components/contest/box-content-contest';
+import TitleContestPageManager from '@/components/contest/title-contest-page-manager';
 import { Suspense } from 'react';
 import { CustomizeIcon } from '@hugeicons/core-free-icons';
-import BoxContentOptions from './_components/box-content-options';
+import BoxContentOptions from '@/components/contest/box-content-options';
 import Loading from '@/app/loading';
 import { Metadata } from 'next';
+import { getContestNavItems } from '@/lib/nav/admin-nav';
 
 export const metadata: Metadata = {
     title: 'Gerenciar Competição'
@@ -38,7 +39,7 @@ async function AdminContestManagementPageContent({
                         blobSize="sm"
                         blobTone="yellow"
                     >
-                        <BoxContentOptions idContest={id_contest} />
+                        <BoxContentOptions items={getContestNavItems(id_contest)} />
                     </BoxFeatures>
                 </div>
             </Section>

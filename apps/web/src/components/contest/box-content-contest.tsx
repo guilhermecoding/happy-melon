@@ -20,12 +20,14 @@ function BoxContentContesSkeleton() {
 
 async function BoxContentContestFetch({
   idContest,
+  editable,
 }: {
   idContest: string;
+  editable: boolean;
 }) {
   try {
     const contest = await contestService.get(idContest);
-    return <BoxContentContestView contest={contest} />;
+    return <BoxContentContestView contest={contest} editable={editable} />;
   } catch (error) {
     return (
       <div className="p-4">
@@ -42,12 +44,14 @@ async function BoxContentContestFetch({
 
 export default function BoxContentContest({
   idContest,
+  editable = true,
 }: {
   idContest: string;
+  editable?: boolean;
 }) {
   return (
     <Suspense fallback={<BoxContentContesSkeleton />}>
-      <BoxContentContestFetch idContest={idContest} />
+      <BoxContentContestFetch idContest={idContest} editable={editable} />
     </Suspense>
   );
 }

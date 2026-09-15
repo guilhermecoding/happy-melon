@@ -159,7 +159,7 @@ export const staffSignIn = () =>
             });
           }
 
-          if (user.role === 'admin') {
+          if (user.role === 'admin' || user.role === 'chef') {
             throw APIError.from('FORBIDDEN', {
               message: 'Use o login de administrador para esta conta.',
               code: 'ADMIN_USE_PASSWORD_LOGIN',

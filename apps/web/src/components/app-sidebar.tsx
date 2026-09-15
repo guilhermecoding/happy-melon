@@ -24,6 +24,10 @@ import {
   type AdminNavIcon,
 } from "@/lib/nav/admin-nav"
 import {
+  chefSecondaryNavItems,
+  getChefPrimaryNavItems,
+} from "@/lib/nav/chef-nav"
+import {
   BadgeInfoIcon,
   BalloonIcon,
   ClipboardCheckIcon,
@@ -40,6 +44,7 @@ const navIcons: Record<AdminNavIcon, IconSvgElement> = {
   home: Home05Icon,
   competicoes: BalloonIcon,
   administradores: Crown03Icon,
+  chefes: Crown03Icon,
   overview: MenuCircleIcon,
   colaboradores: ThumbsUpIcon,
   prova: GoogleDocIcon,
@@ -48,11 +53,22 @@ const navIcons: Record<AdminNavIcon, IconSvgElement> = {
   sobre: BadgeInfoIcon,
 }
 
-export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
+export function AppSidebar({
+  area = "admin",
+  ...props
+}: React.ComponentProps<typeof Sidebar> & {
+  area?: "admin" | "chef"
+}) {
   const pathname = usePathname()
   const { data: session } = authClient.useSession()
 
-  const primaryItems = getPrimaryNavItems(pathname)
+  const homeHref = area === "chef" ? "/chef" : "/admin"
+  const primaryItems =
+    area === "chef"
+      ? getChefPrimaryNavItems(pathname)
+      : getPrimaryNavItems(pathname)
+  const secondaryItems =
+    area === "chef" ? chefSecondaryNavItems : secondaryNavItems
   const user = session?.user
     ? {
       name: session.user.name,
@@ -68,7 +84,7 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
           <SidebarMenuItem>
             <SidebarMenuButton
               size="lg"
-              render={<Link href="/admin" />}
+              render={<Link href={homeHref} />}
               className="flex justify-center my-4"
             >
               <Logo className="size-36" />
@@ -79,7 +95,7 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
       <SidebarContent>
         <NavPrimary items={primaryItems} icons={navIcons} />
         <NavSecondary
-          items={secondaryNavItems}
+          items={secondaryItems}
           icons={navIcons}
           className="mt-auto"
         />

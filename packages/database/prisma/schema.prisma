@@ -112,6 +112,7 @@ model Competition {
   rounds                 Contest[]
   teams                  Team[]
   collaborators          ContestCollaborator[]
+  chefs                  ContestChef[]
 
   @@map("competition")
   @@schema("public")
@@ -150,6 +151,22 @@ model ContestCollaborator {
   @@index([competitionId])
   @@index([userId])
   @@map("contest_collaborator")
+  @@schema("public")
+}
+
+model ContestChef {
+  id            String      @id
+  competitionId String
+  competition   Competition @relation(fields: [competitionId], references: [id], onDelete: Cascade)
+  userId        String
+  hasAccess     Boolean     @default(true)
+  createdAt     DateTime    @default(now())
+  updatedAt     DateTime    @updatedAt
+
+  @@unique([competitionId, userId])
+  @@index([competitionId])
+  @@index([userId])
+  @@map("contest_chef")
   @@schema("public")
 }
 

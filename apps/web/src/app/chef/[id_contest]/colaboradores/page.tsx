@@ -1,0 +1,48 @@
+import { Suspense } from 'react';
+import TitlePage from '@/components/title-page';
+import Page from '@/components/ui/page';
+import Section from '@/components/ui/section';
+import Loading from '@/app/loading';
+import { contestService } from '@/services/contest/contest.service';
+import { ThumbsUpIcon } from '@hugeicons/core-free-icons';
+import { Metadata } from 'next';
+import { CollaboratorsGeralPanel } from '@/components/collaborators/collaborators-geral-panel';
+import { CollaboratorsPageTabs } from '@/components/collaborators/collaborators-page-tabs';
+import { CollaboratorsScorePanel } from '@/components/collaborators/collaborators-score-panel';
+
+export const metadata: Metadata = {
+  title: 'Colaboradores',
+};
+
+async function ChefCollaboratorsPageContent({
+  params,
+}: Omit<PageProps<'/chef/[id_contest]/colaboradores'>, 'searchParams'>) {
+  const { id_contest } = await params;
+  const contest = await contestService.get(id_contest);
+
+  return (
+    <Page>
+      <Section>
+        <TitlePage title="Colaboradores" icon={ThumbsUpIcon} />
+      </Section>
+
+      <Section className="mt-6">
+        <CollaboratorsPageTabs
+          key={contest.id}
+          geral={<CollaboratorsGeralPanel contest={contest} />}
+          score={<CollaboratorsScorePanel contestId={contest.id} />}
+        />
+      </Section>
+    </Page>
+  );
+}
+
+export default function ChefCollaboratorsPage({
+  params,
+}: PageProps<'/chef/[id_contest]/colaboradores'>) {
+  return (
+    <Suspense fallback={<Loading />}>
+      <ChefCollaboratorsPageContent params={params} />
+    </Suspense>
+  );
+}

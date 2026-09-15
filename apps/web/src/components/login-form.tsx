@@ -32,7 +32,7 @@ import {
   LoginCircle01Icon,
 } from '@hugeicons/core-free-icons';
 
-const ADMIN_ROLES = new Set(['admin']);
+const PASSWORD_ROLES = new Set(['admin', 'chef']);
 
 const MODE_COPY: Record<
   LoginMode,
@@ -171,14 +171,14 @@ export function LoginForm({
         }
 
         const role = data?.user?.role;
-        if (!role || !ADMIN_ROLES.has(role)) {
+        if (!role || !PASSWORD_ROLES.has(role)) {
           await authClient.signOut();
           setRequestError('Acesso restrito a administradores.');
           return;
         }
 
         // Full navigation so the session cookie is available to the proxy
-        window.location.assign('/admin');
+        window.location.assign(role === 'chef' ? '/chef' : '/admin');
       } catch {
         setRequestError('Não foi possível conectar ao servidor de autenticação.');
       }

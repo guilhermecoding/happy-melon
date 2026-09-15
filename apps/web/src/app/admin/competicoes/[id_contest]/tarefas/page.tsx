@@ -5,10 +5,10 @@ import Section from '@/components/ui/section';
 import Loading from '@/app/loading';
 import { ClipboardCheckIcon } from '@hugeicons/core-free-icons';
 import { Metadata } from 'next';
-import TasksBoard from '@/app/admin/competicoes/[id_contest]/tarefas/_components/tasks-board';
+import TasksBoard from '@/components/tasks/tasks-board';
 import { contestService } from '@/services/contest/contest.service';
 import { pickRoundId } from '@/services/contest/contest.type';
-import RoundSwitcher from '../_components/round-switcher';
+import RoundSwitcher from '@/components/contest/round-switcher';
 
 export const metadata: Metadata = {
   title: 'Tarefas',

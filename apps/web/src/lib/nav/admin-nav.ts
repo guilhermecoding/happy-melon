@@ -7,6 +7,7 @@ export type AdminNavIcon =
   | 'prova'
   | 'tarefas'
   | 'times'
+  | 'chefes'
   | 'sobre';
 
 export type AdminNavItem = {
@@ -30,6 +31,11 @@ export function getContestNavItems(contestId: string): AdminNavItem[] {
       title: 'Colaboradores',
       url: `${base}/colaboradores`,
       icon: 'colaboradores',
+    },
+    {
+      title: 'Chefes',
+      url: `${base}/chefes`,
+      icon: 'chefes',
     },
     {
       title: 'Prova',
@@ -83,7 +89,8 @@ export function isNavItemActive(pathname: string, url: string): boolean {
   // Contest hub and competition list: exact only (nested routes use other items)
   if (
     url === '/admin/competicoes' ||
-    /^\/admin\/competicoes\/[^/]+$/.test(url)
+    /^\/admin\/competicoes\/[^/]+$/.test(url) ||
+    /^\/chef\/[^/]+$/.test(url)
   ) {
     return false;
   }

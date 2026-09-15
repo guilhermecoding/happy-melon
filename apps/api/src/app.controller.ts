@@ -19,7 +19,7 @@ export class AppController {
   }
 
   @Get('me')
-  @Roles(['admin', 'staff'])
+  @Roles(['admin', 'staff', 'chef'])
   getMe(@Session() session: UserSession<typeof auth>) {
     return {
       user: session.user,

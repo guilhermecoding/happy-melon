@@ -9,7 +9,6 @@ import {
   NotFoundException,
 } from '@nestjs/common';
 import { APIError } from 'better-auth/api';
-import { fromNodeHeaders } from 'better-auth/node';
 import { COLLABORATOR_EVENT_TYPE, CONTEST_ACCESS_EVENT_TYPE } from '@repo/shared';
 import {
   BalloonDeliveryStatus as PrismaBalloonDeliveryStatus,
@@ -107,7 +106,7 @@ export class CollaboratorsService {
 
     return memberships.flatMap((membership) => {
       const user = usersById.get(membership.userId);
-      if (!user || user.role === 'admin') {
+      if (!user || user.role !== 'staff') {
         return [];
       }
 
@@ -145,7 +144,7 @@ export class CollaboratorsService {
 
     const collaborators = memberships.flatMap((membership) => {
       const user = usersById.get(membership.userId);
-      if (!user || user.role === 'admin') {
+      if (!user || user.role !== 'staff') {
         return [];
       }
 
@@ -186,6 +185,12 @@ export class CollaboratorsService {
       );
     }
 
+    if (existingUser?.role === 'chef') {
+      throw new ConflictException(
+        'Este e-mail pertence a um chefe de competição.',
+      );
+    }
+
     let userId: string;
     let name = dto.name.trim();
     let userEmail = email;
@@ -214,7 +219,6 @@ export class CollaboratorsService {
 
       try {
         const { user } = await auth.api.createUser({
-          headers: this.toAuthHeaders(headers),
           body: {
             name: dto.name.trim(),
             email,
@@ -281,25 +285,16 @@ export class CollaboratorsService {
       throw new NotFoundException('Colaborador não encontrado.');
     }
 
-    if (user.role === 'admin') {
+    if (user.role !== 'staff') {
       throw new ForbiddenException(
-        'Não é possível editar um administrador por esta tela.',
+        'Não é possível editar este usuário por esta tela.',
       );
     }
 
     try {
-      const updated = await auth.api.adminUpdateUser({
-        headers: this.toAuthHeaders(headers),
-        body: {
-          userId,
-          data: {
-            name: dto.name.trim(),
-          },
-        },
-      });
-
-      const refreshed = await prisma.user.findUniqueOrThrow({
+      const refreshed = await prisma.user.update({
         where: { id: userId },
+        data: { name: dto.name.trim() },
       });
       const membership = await prisma.contestCollaborator.findUniqueOrThrow({
         where: {
@@ -312,8 +307,8 @@ export class CollaboratorsService {
       return this.toCollaborator(
         {
           ...refreshed,
-          name: updated.name,
-          email: updated.email,
+          name: refreshed.name,
+          email: refreshed.email,
         },
         lastSession?.lastAccess ?? null,
         lastSession?.ipAddress ?? null,
@@ -337,9 +332,9 @@ export class CollaboratorsService {
       throw new NotFoundException('Colaborador não encontrado.');
     }
 
-    if (existing.role === 'admin') {
+    if (existing.role !== 'staff') {
       throw new ForbiddenException(
-        'Não é possível alterar o acesso de um administrador por esta tela.',
+        'Não é possível alterar o acesso deste usuário por esta tela.',
       );
     }
 
@@ -389,9 +384,9 @@ export class CollaboratorsService {
       throw new NotFoundException('Colaborador não encontrado.');
     }
 
-    if (user.role === 'admin') {
+    if (user.role !== 'staff') {
       throw new ForbiddenException(
-        'Não é possível remover um administrador por esta tela.',
+        'Não é possível remover este usuário por esta tela.',
       );
     }
 
@@ -406,14 +401,7 @@ export class CollaboratorsService {
     });
 
     if (remainingMemberships === 0 && user.role === 'staff') {
-      try {
-        await auth.api.removeUser({
-          headers: this.toAuthHeaders(headers),
-          body: { userId },
-        });
-      } catch (error) {
-        this.rethrowApiError(error);
-      }
+      await prisma.user.delete({ where: { id: userId } });
     }
 
     return { success: true as const };
@@ -654,26 +642,6 @@ export class CollaboratorsService {
     }
 
     return lastSessionByUserId;
-  }
-
-  private toAuthHeaders(headers: IncomingHttpHeaders): Headers {
-    if (typeof fromNodeHeaders === 'function') {
-      return fromNodeHeaders(headers);
-    }
-
-    const authHeaders = new Headers();
-
-    for (const [name, value] of Object.entries(headers)) {
-      if (Array.isArray(value)) {
-        for (const item of value) {
-          authHeaders.append(name, item);
-        }
-      } else if (value !== undefined) {
-        authHeaders.set(name, value);
-      }
-    }
-
-    return authHeaders;
   }
 
   private generateTemporaryPassword(): string {

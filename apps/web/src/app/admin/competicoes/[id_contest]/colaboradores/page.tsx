@@ -6,9 +6,9 @@ import Loading from '@/app/loading';
 import { contestService } from '@/services/contest/contest.service';
 import { ThumbsUpIcon } from '@hugeicons/core-free-icons';
 import { Metadata } from 'next';
-import { CollaboratorsGeralPanel } from './_components/general-option/collaborators-geral-panel';
-import { CollaboratorsPageTabs } from './_components/collaborators-page-tabs';
-import { CollaboratorsScorePanel } from './_components/score-option/collaborators-score-panel';
+import { CollaboratorsGeralPanel } from '@/components/collaborators/collaborators-geral-panel';
+import { CollaboratorsPageTabs } from '@/components/collaborators/collaborators-page-tabs';
+import { CollaboratorsScorePanel } from '@/components/collaborators/collaborators-score-panel';
 
 export const metadata: Metadata = {
     title: 'Colaboradores',

@@ -1,6 +1,7 @@
 import type { IncomingHttpHeaders } from 'node:http';
 import {
   BadRequestException,
+  ForbiddenException,
   Injectable,
   InternalServerErrorException,
   NotFoundException,
@@ -123,8 +124,21 @@ export class CompetitionsService {
     );
   }
 
-  async update(id: string, dto: UpdateCompetitionDto) {
+  async update(
+    id: string,
+    dto: UpdateCompetitionDto,
+    actorRole?: string | null,
+  ) {
     const existing = await getCompetitionOrThrow(id);
+
+    if (actorRole === 'chef') {
+      if (dto.name !== existing.name || dto.venue !== existing.venue) {
+        throw new ForbiddenException(
+          'Chefe não pode alterar os dados da competição.',
+        );
+      }
+    }
+
     const status = this.toStatus(dto.status);
 
     const competition = await prisma.competition.update({
