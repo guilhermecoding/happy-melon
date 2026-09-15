@@ -7,10 +7,11 @@ import BoxTeamsList from './box-teams-list';
 import TaskHistoryList from './task-history-list';
 
 type TasksBoardProps = {
-  contestId: string;
+  competitionId: string;
+  roundId: string;
 };
 
-export default function TasksBoard({ contestId }: TasksBoardProps) {
+export default function TasksBoard({ competitionId, roundId }: TasksBoardProps) {
   const [historyKey, setHistoryKey] = useState(0);
 
   return (
@@ -23,7 +24,8 @@ export default function TasksBoard({ contestId }: TasksBoardProps) {
           blobTone="blue"
         >
           <BoxTeamsList
-            contestId={contestId}
+            competitionId={competitionId}
+            roundId={roundId}
             onDeliveryChanged={() => setHistoryKey((current) => current + 1)}
           />
         </BoxFeatures>
@@ -36,7 +38,7 @@ export default function TasksBoard({ contestId }: TasksBoardProps) {
           blobSize="sm"
           blobTone="down"
         >
-          <TaskHistoryList contestId={contestId} refreshKey={historyKey} />
+          <TaskHistoryList contestId={roundId} refreshKey={historyKey} />
         </BoxFeatures>
       </div>
     </>

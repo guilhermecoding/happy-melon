@@ -22,7 +22,8 @@ import { Input } from '../../../../../../components/pouf/Input';
 import { Button } from '../../../../../../components/pouf/Button';
 
 type BoxTeamsListProps = {
-    contestId: string;
+    competitionId: string;
+    roundId: string;
     onDeliveryChanged?: () => void;
 };
 
@@ -52,7 +53,8 @@ function countConqueredBalloons(deliveries: BalloonDelivery[]) {
 }
 
 export default function BoxTeamsList({
-    contestId,
+    competitionId,
+    roundId,
     onDeliveryChanged,
 }: BoxTeamsListProps) {
     const [teams, setTeams] = useState<Team[]>([]);
@@ -137,9 +139,9 @@ export default function BoxTeamsList({
             try {
                 const [teamsData, questionsData, deliveriesData] =
                     await Promise.all([
-                        teamService.list(contestId),
-                        questionService.list(contestId),
-                        balloonService.listDeliveries(contestId),
+                        teamService.list(competitionId),
+                        questionService.list(roundId),
+                        balloonService.listDeliveries(roundId),
                     ]);
 
                 if (!active) return;
@@ -166,7 +168,7 @@ export default function BoxTeamsList({
         return () => {
             active = false;
         };
-    }, [contestId]);
+    }, [competitionId, roundId]);
 
     function openAchievements(team: Team) {
         setSelectedTeam(team);
@@ -297,7 +299,7 @@ export default function BoxTeamsList({
             </div>
 
             <TeamBalloonsDialog
-                contestId={contestId}
+                contestId={roundId}
                 team={selectedTeam}
                 open={achievementsOpen}
                 onDeliveryChanged={applyDelivery}

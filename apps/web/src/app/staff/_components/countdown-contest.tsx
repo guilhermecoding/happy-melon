@@ -10,16 +10,19 @@ import {
 } from 'react'
 import {
     CONTEST_ACCESS_EVENT_TYPE,
+    getCompetitionSchedule,
 } from '@repo/shared'
 import FlipClock from '@/components/8starlabs-ui/flip-clock'
 import { toast } from '@/components/pouf/toaster'
 import { contestService } from '@/services/contest/contest.service'
-import { getContestCondition } from '@/services/contest/contest.type'
+import type { Contest } from '@/services/contest/contest.type'
 import Image from 'next/image'
 
 type ContestScheduleValue = {
     startsAt: string
     endsAt: string
+    currentRoundId: string | null
+    currentRoundName: string | null
 }
 
 const ContestScheduleContext = createContext<ContestScheduleValue | null>(null)
@@ -33,31 +36,21 @@ export function useContestSchedule(): ContestScheduleValue {
 }
 
 type CountdownContestProps = {
-    contestId: string
-    name: string
-    startsAt: string
-    endsAt: string
+    contest: Contest
     children: ReactNode
 }
 
 export default function CountdownContest({
-    contestId,
-    name: initialName,
-    startsAt: initialStartsAt,
-    endsAt: initialEndsAt,
+    contest: initialContest,
     children,
 }: CountdownContestProps) {
-    const [name, setName] = useState(initialName)
-    const [startsAt, setStartsAt] = useState(initialStartsAt)
-    const [endsAt, setEndsAt] = useState(initialEndsAt)
+    const [contest, setContest] = useState(initialContest)
     const [nowMs, setNowMs] = useState(() => Date.now())
     const [ready, setReady] = useState(false)
 
     useEffect(() => {
-        setName(initialName)
-        setStartsAt(initialStartsAt)
-        setEndsAt(initialEndsAt)
-    }, [initialName, initialStartsAt, initialEndsAt])
+        setContest(initialContest)
+    }, [initialContest])
 
     useEffect(() => {
         setReady(true)
@@ -67,20 +60,23 @@ export default function CountdownContest({
 
     useEffect(() => {
         const source = new EventSource(
-            contestService.getAccessEventsUrl(contestId),
+            contestService.getAccessEventsUrl(contest.id),
             { withCredentials: true },
         )
 
         source.onmessage = (message) => {
             const event = contestService.parseAccessEventData(message.data)
-            if (event?.type !== CONTEST_ACCESS_EVENT_TYPE.SCHEDULE_UPDATED) {
+            if (
+                event?.type !== CONTEST_ACCESS_EVENT_TYPE.SCHEDULE_UPDATED &&
+                event?.type !== CONTEST_ACCESS_EVENT_TYPE.ROUND_CHANGED
+            ) {
                 return
             }
 
-            setName(event.name)
-            setStartsAt(event.startsAt)
-            setEndsAt(event.endsAt)
-            toast.info('Os horários da competição foram atualizados.')
+            void contestService.get(contest.id).then((next) => {
+                setContest(next)
+                toast.info('Os horários da competição foram atualizados.')
+            })
         }
 
         source.onerror = () => {
@@ -90,55 +86,109 @@ export default function CountdownContest({
         return () => {
             source.close()
         }
-    }, [contestId])
+    }, [contest.id])
 
-    const startDate = useMemo(() => new Date(startsAt), [startsAt])
-    const condition = getContestCondition(startsAt, endsAt, new Date(nowMs))
-    const schedule = useMemo(
-        () => ({ startsAt, endsAt }),
-        [startsAt, endsAt],
+    const schedule = getCompetitionSchedule(contest.rounds, new Date(nowMs))
+    const activeRound = schedule.currentRound ?? schedule.nextRound
+    const previousRound = useMemo(() => {
+        const now = nowMs
+        return [...contest.rounds]
+            .filter((round) => new Date(round.endsAt).getTime() <= now)
+            .sort(
+                (a, b) =>
+                    new Date(a.endsAt).getTime() - new Date(b.endsAt).getTime(),
+            )
+            .at(-1)
+    }, [contest.rounds, nowMs])
+
+    const scheduleValue = useMemo(
+        () =>
+            activeRound
+                ? {
+                    startsAt: activeRound.startsAt,
+                    endsAt: activeRound.endsAt,
+                    currentRoundId: schedule.currentRound?.id ?? null,
+                    currentRoundName: schedule.currentRound?.name ?? null,
+                }
+                : {
+                    startsAt: contest.rounds[0]?.startsAt ?? new Date().toISOString(),
+                    endsAt: contest.rounds[0]?.endsAt ?? new Date().toISOString(),
+                    currentRoundId: null,
+                    currentRoundName: null,
+                },
+        [activeRound, contest.rounds, schedule.currentRound],
     )
 
     if (!ready) {
         return null
     }
 
-    if (condition === 'in_progress') {
-        return (
-            <ContestScheduleContext.Provider value={schedule}>
-                <div className="flex min-h-0 flex-1 flex-col">{children}</div>
-            </ContestScheduleContext.Provider>
-        )
-    }
+    const waiting =
+        schedule.condition === 'not_started' ||
+        schedule.condition === 'intermission'
+    const waitingTarget = schedule.nextRound
+        ? new Date(schedule.nextRound.startsAt)
+        : null
 
     return (
-        <div className="flex h-screen w-full items-center justify-center">
-            <div className="flex flex-col items-center justify-center gap-4 md:gap-6">
-                <h1 className="text-center text-xl font-bold text-muted-foreground md:text-3xl lg:text-4xl">
-                    {name}
-                </h1>
-                {condition === 'not_started' ? (
-                    <FlipClock
-                        variant="default"
-                        className="relative text-3xl md:text-5xl lg:text-7xl mt-4"
-                        countdown
-                        targetDate={startDate}
-                    />
-                ) : (
-                    <p className="text-center text-2xl font-bold md:text-4xl lg:text-5xl">
-                        A competição finalizou.
-                    </p>
-                )}
-                <div className="flex justify-center mt-8">
-                    <Image
-                        src="/logo-texto.svg"
-                        alt="Logo"
-                        width={100}
-                        height={100}
-                        className="w-60 object-contain grayscale-100 opacity-40 pointer-events-none select-none"
-                    />
+        <ContestScheduleContext.Provider value={scheduleValue}>
+            {waiting ? (
+                <div className="flex min-h-0 flex-1 flex-col">
+                    <div className="flex w-full items-center justify-center px-4 py-8">
+                        <div className="flex flex-col items-center justify-center gap-4 md:gap-6">
+                            <h1 className="text-center text-xl font-bold text-muted-foreground md:text-3xl lg:text-4xl">
+                                {contest.name}
+                            </h1>
+                            {schedule.condition === 'intermission' ? (
+                                <p className="text-center text-lg font-semibold md:text-2xl">
+                                    {previousRound?.name ?? 'Aquecimento'} encerrado.
+                                    {schedule.nextRound
+                                        ? ` ${schedule.nextRound.name} começa às ${new Date(schedule.nextRound.startsAt).toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' })}.`
+                                        : null}
+                                </p>
+                            ) : null}
+                            {waitingTarget ? (
+                                <FlipClock
+                                    variant="default"
+                                    className="relative text-3xl md:text-5xl lg:text-7xl mt-4"
+                                    countdown
+                                    targetDate={waitingTarget}
+                                />
+                            ) : null}
+                            {schedule.condition === 'not_started' ? (
+                                <div className="flex justify-center mt-8">
+                                    <Image
+                                        src="/logo-texto.svg"
+                                        alt="Logo"
+                                        width={100}
+                                        height={100}
+                                        className="w-60 object-contain grayscale-100 opacity-40 pointer-events-none select-none"
+                                    />
+                                </div>
+                            ) : null}
+                        </div>
+                    </div>
+                    {schedule.condition === 'intermission' ? (
+                        <div className="flex min-h-0 flex-1 flex-col">{children}</div>
+                    ) : null}
                 </div>
-            </div>
-        </div>
+            ) : schedule.condition === 'finished' ? (
+                <div className="flex min-h-0 flex-1 flex-col">
+                    <div className="flex w-full items-center justify-center px-4 py-8">
+                        <div className="flex flex-col items-center justify-center gap-4">
+                            <h1 className="text-center text-xl font-bold text-muted-foreground md:text-3xl lg:text-4xl">
+                                {contest.name}
+                            </h1>
+                            <p className="text-center text-2xl font-bold md:text-4xl lg:text-5xl">
+                                A competição finalizou.
+                            </p>
+                        </div>
+                    </div>
+                    <div className="flex min-h-0 flex-1 flex-col">{children}</div>
+                </div>
+            ) : (
+                <div className="flex min-h-0 flex-1 flex-col">{children}</div>
+            )}
+        </ContestScheduleContext.Provider>
     )
 }

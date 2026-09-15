@@ -3,6 +3,7 @@ import Page from '@/components/ui/page'
 import Section from '@/components/ui/section'
 import Loading from '@/app/loading'
 import { Metadata } from 'next'
+import StaffContestHeading from './_components/staff-contest-heading'
 import StaffTasksBoard from './_components/staff-tasks-board'
 import { contestService } from '@/services/contest/contest.service'
 
@@ -19,9 +20,7 @@ async function StaffContestPageContent({
   return (
     <Page>
       <Section>
-        <h1 className="text-xl sm:text-5xl font-black text-center">
-          {contest.name}
-        </h1>
+        <StaffContestHeading name={contest.name} />
       </Section>
 
       <Section className="mt-4 pb-40 lg:pb-8">

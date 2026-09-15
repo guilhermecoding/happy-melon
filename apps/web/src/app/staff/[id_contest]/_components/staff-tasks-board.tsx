@@ -16,6 +16,7 @@ import {
 } from '@/services/staff-tasks/staff-tasks.service';
 import LobbyArea from './lobby-area';
 import QueueTask from './queue-task';
+import { useContestSchedule } from '@/app/staff/_components/countdown-contest';
 
 function firstName(fullName: string) {
   const part = fullName.trim().split(/\s+/)[0];
@@ -45,6 +46,9 @@ type StaffTasksBoardProps = {
 export default function StaffTasksBoard({ contestId }: StaffTasksBoardProps) {
   const { data: session } = authClient.useSession();
   const userId = session?.user?.id ?? null;
+  const { currentRoundId } = useContestSchedule();
+  const currentRoundIdRef = useRef(currentRoundId);
+  currentRoundIdRef.current = currentRoundId;
 
   const [queue, setQueue] = useState<StaffTask[]>([]);
   const [lobby, setLobby] = useState<StaffTask[]>([]);
@@ -113,6 +117,12 @@ export default function StaffTasksBoard({ contestId }: StaffTasksBoardProps) {
 
       startTransition(() => {
         if (event.type === STAFF_TASK_EVENT_TYPE.QUEUED) {
+          const roundId = currentRoundIdRef.current;
+          if (!roundId || event.task.contestId !== roundId) {
+            setQueue((prev) => removeTask(prev, event.task.id));
+            setLobby((prev) => removeTask(prev, event.task.id));
+            return;
+          }
           setQueue((prev) => upsertTask(prev, event.task));
           setLobby((prev) => removeTask(prev, event.task.id));
           return;
@@ -156,7 +166,7 @@ export default function StaffTasksBoard({ contestId }: StaffTasksBoardProps) {
       cancelled = true;
       source.close();
     };
-  }, [contestId]);
+  }, [contestId, currentRoundId]);
 
   async function handleClaim(task: StaffTask) {
     if (!userId || claimingIds.has(task.id)) return;

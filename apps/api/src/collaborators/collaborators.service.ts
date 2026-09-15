@@ -86,11 +86,11 @@ export class CollaboratorsService {
     private readonly contestAccessEvents: ContestAccessEventsService,
   ) {}
 
-  async list(contestId: string) {
-    await this.ensureContestExists(contestId);
+  async list(competitionId: string) {
+    await this.ensureCompetitionExists(competitionId);
 
     const memberships = await prisma.contestCollaborator.findMany({
-      where: { contestId },
+      where: { competitionId },
       orderBy: { createdAt: 'asc' },
     });
 
@@ -124,11 +124,11 @@ export class CollaboratorsService {
     });
   }
 
-  async listScore(contestId: string) {
-    await this.ensureContestExists(contestId);
+  async listScore(competitionId: string) {
+    await this.ensureCompetitionExists(competitionId);
 
     const memberships = await prisma.contestCollaborator.findMany({
-      where: { contestId },
+      where: { competitionId },
       orderBy: { createdAt: 'asc' },
     });
 
@@ -152,7 +152,7 @@ export class CollaboratorsService {
       return [user];
     });
 
-    const statsByUserId = await this.getDeliveryStatsByUserId(contestId);
+    const statsByUserId = await this.getDeliveryStatsByUserId(competitionId);
 
     return collaborators
       .map((user) => {
@@ -172,10 +172,10 @@ export class CollaboratorsService {
 
   async create(
     headers: IncomingHttpHeaders,
-    contestId: string,
+    competitionId: string,
     dto: CreateCollaboratorDto,
   ) {
-    await this.ensureContestExists(contestId);
+    await this.ensureCompetitionExists(competitionId);
 
     const email = dto.email.toLowerCase().trim();
     const existingUser = await prisma.user.findUnique({ where: { email } });
@@ -193,8 +193,8 @@ export class CollaboratorsService {
     if (existingUser) {
       const alreadyMember = await prisma.contestCollaborator.findUnique({
         where: {
-          contestId_userId: {
-            contestId,
+          competitionId_userId: {
+            competitionId,
             userId: existingUser.id,
           },
         },
@@ -235,7 +235,7 @@ export class CollaboratorsService {
     }
 
     try {
-      await this.createMembership(contestId, userId);
+      await this.createMembership(competitionId, userId);
     } catch (error) {
       if (isPrismaUniqueViolation(error)) {
         throw new ConflictException(
@@ -260,7 +260,7 @@ export class CollaboratorsService {
       true,
     );
 
-    this.collaboratorsEvents.emit(contestId, {
+    this.collaboratorsEvents.emit(competitionId, {
       type: COLLABORATOR_EVENT_TYPE.JOINED,
       collaborator,
     });
@@ -270,11 +270,11 @@ export class CollaboratorsService {
 
   async update(
     headers: IncomingHttpHeaders,
-    contestId: string,
+    competitionId: string,
     userId: string,
     dto: UpdateCollaboratorDto,
   ) {
-    await this.ensureMembership(contestId, userId);
+    await this.ensureMembership(competitionId, userId);
 
     const user = await prisma.user.findUnique({ where: { id: userId } });
     if (!user) {
@@ -303,7 +303,7 @@ export class CollaboratorsService {
       });
       const membership = await prisma.contestCollaborator.findUniqueOrThrow({
         where: {
-          contestId_userId: { contestId, userId },
+          competitionId_userId: { competitionId, userId },
         },
       });
       const lastSessionByUserId = await this.getLastSessionByUserIds([userId]);
@@ -326,11 +326,11 @@ export class CollaboratorsService {
 
   async setAccess(
     headers: IncomingHttpHeaders,
-    contestId: string,
+    competitionId: string,
     userId: string,
     hasAccess: boolean,
   ) {
-    await this.ensureMembership(contestId, userId);
+    await this.ensureMembership(competitionId, userId);
 
     const existing = await prisma.user.findUnique({ where: { id: userId } });
     if (!existing) {
@@ -344,32 +344,18 @@ export class CollaboratorsService {
     }
 
     try {
-      const authHeaders = this.toAuthHeaders(headers);
-
       await prisma.contestCollaborator.update({
         where: {
-          contestId_userId: { contestId, userId },
+          competitionId_userId: { competitionId, userId },
         },
         data: { hasAccess },
       });
 
-      if (hasAccess) {
-        await auth.api.unbanUser({
-          headers: authHeaders,
-          body: { userId },
-        });
-      } else {
-        await auth.api.banUser({
-          headers: authHeaders,
-          body: {
-            userId,
-            banReason: 'Acesso ao sistema desabilitado',
-          },
-        });
-        await revokeStaffSessionsForCollaborator(contestId, userId);
-        this.contestAccessEvents.emit(contestId, {
+      if (!hasAccess) {
+        await revokeStaffSessionsForCollaborator(competitionId, userId);
+        this.contestAccessEvents.emit(competitionId, {
           type: CONTEST_ACCESS_EVENT_TYPE.COLLABORATOR_REVOKED,
-          contestId,
+          contestId: competitionId,
           userId,
         });
       }
@@ -393,10 +379,10 @@ export class CollaboratorsService {
 
   async remove(
     headers: IncomingHttpHeaders,
-    contestId: string,
+    competitionId: string,
     userId: string,
   ) {
-    await this.ensureMembership(contestId, userId);
+    await this.ensureMembership(competitionId, userId);
 
     const user = await prisma.user.findUnique({ where: { id: userId } });
     if (!user) {
@@ -411,7 +397,7 @@ export class CollaboratorsService {
 
     await prisma.contestCollaborator.delete({
       where: {
-        contestId_userId: { contestId, userId },
+        competitionId_userId: { competitionId, userId },
       },
     });
 
@@ -434,7 +420,7 @@ export class CollaboratorsService {
   }
 
   private async getDeliveryStatsByUserId(
-    contestId: string,
+    competitionId: string,
   ): Promise<Map<string, DeliveryStats>> {
     const deliveredStatus = PrismaBalloonDeliveryStatus.DELIVERED;
     const processingStatus = PrismaBalloonDeliveryStatus.PROCESSING;
@@ -442,7 +428,7 @@ export class CollaboratorsService {
     const [balloons, prints] = await Promise.all([
       prisma.balloonDelivery.findMany({
         where: {
-          contestId,
+          contest: { competitionId },
           status: deliveredStatus,
           claimedByUserId: { not: null },
         },
@@ -450,7 +436,7 @@ export class CollaboratorsService {
       }),
       prisma.printTask.findMany({
         where: {
-          contestId,
+          contest: { competitionId },
           status: deliveredStatus,
           claimedByUserId: { not: null },
         },
@@ -467,7 +453,7 @@ export class CollaboratorsService {
 
     const history = await prisma.taskHistory.findMany({
       where: {
-        contestId,
+        contest: { competitionId },
         relatedTaskId: { in: deliveredTasks.map((task) => task.id) },
         status: { in: [processingStatus, deliveredStatus] },
       },
@@ -553,24 +539,25 @@ export class CollaboratorsService {
     return statsByUserId;
   }
 
-  private async ensureContestExists(contestId: string) {
-    const contest = await prisma.contest.findUnique({
-      where: { id: contestId },
+  private async ensureCompetitionExists(competitionId: string) {
+    const competition = await prisma.competition.findUnique({
+      where: { id: competitionId },
+      select: { id: true },
     });
 
-    if (!contest) {
+    if (!competition) {
       throw new NotFoundException('Competição não encontrada.');
     }
 
-    return contest;
+    return competition;
   }
 
-  private async ensureMembership(contestId: string, userId: string) {
-    await this.ensureContestExists(contestId);
+  private async ensureMembership(competitionId: string, userId: string) {
+    await this.ensureCompetitionExists(competitionId);
 
     const membership = await prisma.contestCollaborator.findUnique({
       where: {
-        contestId_userId: { contestId, userId },
+        competitionId_userId: { competitionId, userId },
       },
     });
 
@@ -581,13 +568,13 @@ export class CollaboratorsService {
     return membership;
   }
 
-  private async createMembership(contestId: string, userId: string) {
+  private async createMembership(competitionId: string, userId: string) {
     for (let attempt = 0; attempt < ID_MAX_ATTEMPTS; attempt++) {
       try {
         return await prisma.contestCollaborator.create({
           data: {
             id: generateShortId(),
-            contestId,
+            competitionId,
             userId,
             hasAccess: true,
           },

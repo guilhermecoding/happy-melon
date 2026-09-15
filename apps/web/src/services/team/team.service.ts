@@ -30,7 +30,7 @@ export const teamService = {
   async list(contestId: string): Promise<Team[]> {
     try {
       const cookie = await getServerCookieHeader();
-      const response = await fetch(`${getApiBaseUrl()}/contests/${contestId}/teams`, {
+      const response = await fetch(`${getApiBaseUrl()}/competitions/${contestId}/teams`, {
         credentials: 'include',
         headers: cookie ? { cookie } : undefined,
         cache: 'no-store',
@@ -54,7 +54,7 @@ export const teamService = {
 
   async create(contestId: string, data: CreateTeamInput): Promise<Team> {
     try {
-      const response = await fetch(`${getApiBaseUrl()}/contests/${contestId}/teams`, {
+      const response = await fetch(`${getApiBaseUrl()}/competitions/${contestId}/teams`, {
         method: 'POST',
         credentials: 'include',
         headers: { 'Content-Type': 'application/json' },
@@ -80,7 +80,7 @@ export const teamService = {
   ): Promise<Team[]> {
     try {
       const response = await fetch(
-        `${getApiBaseUrl()}/contests/${contestId}/teams/bulk`,
+        `${getApiBaseUrl()}/competitions/${contestId}/teams/bulk`,
         {
           method: 'POST',
           credentials: 'include',
@@ -168,7 +168,7 @@ export const teamService = {
   ): Promise<{ success: true; deletedCount: number }> {
     try {
       const response = await fetch(
-        `${getApiBaseUrl()}/contests/${contestId}/teams/delete`,
+        `${getApiBaseUrl()}/competitions/${contestId}/teams/delete`,
         {
           method: 'POST',
           credentials: 'include',

@@ -29,11 +29,11 @@ import { toTaskHistoryEntryDto } from './task-history.mapper.js';
 const SWEEP_INTERVAL_MS = 15_000;
 
 type BalloonWithRelations = Prisma.BalloonDeliveryGetPayload<{
-  include: { team: true; question: true };
+  include: { team: true; question: true; contest: { select: { competitionId: true } } };
 }>;
 
 type PrintWithRelations = Prisma.PrintTaskGetPayload<{
-  include: { team: true };
+  include: { team: true; contest: { select: { competitionId: true } } };
 }>;
 
 @Injectable()
@@ -67,7 +67,7 @@ export class DeliveryTimeoutService {
   }
 
   private async expire() {
-    const contests = await prisma.contest.findMany({
+    const competitions = await prisma.competition.findMany({
       where: {
         deliveryTimeoutEnabled: true,
         deliveryTimeoutMinutes: { not: null },
@@ -75,21 +75,22 @@ export class DeliveryTimeoutService {
       select: {
         id: true,
         deliveryTimeoutMinutes: true,
+        rounds: { select: { id: true } },
       },
     });
 
-    if (contests.length === 0) {
+    if (competitions.length === 0) {
       return;
     }
 
     const contestIdsByMinutes = new Map<number, string[]>();
 
-    for (const contest of contests) {
-      const minutes = contest.deliveryTimeoutMinutes;
+    for (const competition of competitions) {
+      const minutes = competition.deliveryTimeoutMinutes;
       if (minutes == null) continue;
 
       const ids = contestIdsByMinutes.get(minutes) ?? [];
-      ids.push(contest.id);
+      ids.push(...competition.rounds.map((round) => round.id));
       contestIdsByMinutes.set(minutes, ids);
     }
 
@@ -107,7 +108,7 @@ export class DeliveryTimeoutService {
             status: processing,
             claimedAt: { lte: cutoff },
           },
-          include: { team: true, question: true },
+          include: { team: true, question: true, contest: { select: { competitionId: true } } },
         }),
         prisma.printTask.findMany({
           where: {
@@ -115,7 +116,7 @@ export class DeliveryTimeoutService {
             status: processing,
             claimedAt: { lte: cutoff },
           },
-          include: { team: true },
+          include: { team: true, contest: { select: { competitionId: true } } },
         }),
       ]);
 
@@ -193,7 +194,10 @@ export class DeliveryTimeoutService {
       return;
     }
 
-    this.contestTasksEvents.emit(result.saved.contestId, {
+    this.contestTasksEvents.emitForRound(
+      result.saved.contestId,
+      delivery.contest.competitionId,
+      {
       type: STAFF_TASK_EVENT_TYPE.QUEUED,
       task: toBalloonStaffTask({
         id: result.saved.id,
@@ -208,7 +212,8 @@ export class DeliveryTimeoutService {
         claimedAt: result.saved.claimedAt,
         createdAt: result.saved.createdAt,
       }),
-    });
+    },
+    );
 
     this.taskHistoryEvents.emit(result.saved.contestId, {
       type: TASK_HISTORY_EVENT_TYPE.CREATED,
@@ -271,7 +276,10 @@ export class DeliveryTimeoutService {
       return;
     }
 
-    this.contestTasksEvents.emit(result.saved.contestId, {
+    this.contestTasksEvents.emitForRound(
+      result.saved.contestId,
+      task.contest.competitionId,
+      {
       type: STAFF_TASK_EVENT_TYPE.QUEUED,
       task: toPrintStaffTask({
         id: result.saved.id,
@@ -283,7 +291,8 @@ export class DeliveryTimeoutService {
         claimedAt: result.saved.claimedAt,
         createdAt: result.saved.createdAt,
       }),
-    });
+    },
+    );
 
     this.taskHistoryEvents.emit(result.saved.contestId, {
       type: TASK_HISTORY_EVENT_TYPE.CREATED,

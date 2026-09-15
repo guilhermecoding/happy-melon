@@ -92,7 +92,7 @@ export const staffTasksService = {
     try {
       const cookie = await getServerCookieHeader();
       const response = await fetch(
-        `${getApiBaseUrl()}/contests/${contestId}/staff-tasks`,
+        `${getApiBaseUrl()}/competitions/${contestId}/staff-tasks`,
         {
           credentials: 'include',
           headers: cookie ? { cookie } : undefined,
@@ -117,7 +117,7 @@ export const staffTasksService = {
   },
 
   getEventsUrl(contestId: string): string {
-    return `${getApiBaseUrl()}/contests/${contestId}/tasks/events`;
+    return `${getApiBaseUrl()}/competitions/${contestId}/tasks/events`;
   },
 
   parseEventData(raw: string): StaffTaskEvent | null {
@@ -170,7 +170,8 @@ export const staffTasksService = {
     }
   },
 
-  async claim(contestId: string, task: StaffTask): Promise<StaffTask> {
+  async claim(_competitionId: string, task: StaffTask): Promise<StaffTask> {
+    const contestId = task.contestId;
     if (task.kind === TASK_KIND.PRINT_TASK) {
       try {
         const response = await fetch(
@@ -222,7 +223,8 @@ export const staffTasksService = {
     }
   },
 
-  async deliver(contestId: string, task: StaffTask): Promise<StaffTask> {
+  async deliver(_competitionId: string, task: StaffTask): Promise<StaffTask> {
+    const contestId = task.contestId;
     if (task.kind === TASK_KIND.PRINT_TASK) {
       try {
         const response = await fetch(

@@ -16,11 +16,21 @@ import {
   contestFormSchema,
   type ContestFormValues,
 } from './contest-schema';
-import { CheckmarkCircle01Icon, EyeClosedIcon } from '@hugeicons/core-free-icons';
+import {
+  Add01Icon,
+  CheckmarkCircle01Icon,
+  Delete02Icon,
+  EyeClosedIcon,
+} from '@hugeicons/core-free-icons';
 
 const STATUS_OPTIONS = [
   { value: 'active', label: 'Habilitada' },
   { value: 'inactive', label: 'Desabilitada' },
+];
+
+const DEFAULT_ROUNDS: ContestFormValues['rounds'] = [
+  { name: 'Aquecimento', startsAt: '', endsAt: '' },
+  { name: 'Prova', startsAt: '', endsAt: '' },
 ];
 
 type CreateContestSheetProps = {
@@ -40,9 +50,8 @@ export function CreateContestSheet({
     defaultValues: {
       name: '',
       status: 'active' as ContestFormValues['status'],
-      startsAt: '',
-      endsAt: '',
       venue: '',
+      rounds: DEFAULT_ROUNDS,
     } satisfies ContestFormValues,
     validators: {
       onSubmit: contestFormSchema,
@@ -53,9 +62,12 @@ export function CreateContestSheet({
         const contest = await contestService.create({
           name: value.name,
           status: value.status,
-          startsAt: new Date(value.startsAt).toISOString(),
-          endsAt: new Date(value.endsAt).toISOString(),
           venue: value.venue,
+          rounds: value.rounds.map((round) => ({
+            name: round.name,
+            startsAt: new Date(round.startsAt).toISOString(),
+            endsAt: new Date(round.endsAt).toISOString(),
+          })),
         });
         onCreated(contest);
         toast.success('Competição cadastrada com sucesso.');
@@ -84,7 +96,7 @@ export function CreateContestSheet({
       open={open}
       onOpenChange={handleOpenChange}
       title="Nova competição"
-      description="Cadastre uma nova competição do sistema."
+      description="Cadastre o evento e as rodadas (aquecimento e prova)."
     >
       <form
         onSubmit={(event) => {
@@ -133,50 +145,6 @@ export function CreateContestSheet({
             )}
           </form.Field>
 
-          <form.Field name="startsAt">
-            {(field) => (
-              <Field
-                label="Data e hora de início"
-                error={fieldError(field.state.meta)}
-              >
-                {(id, describedBy) => (
-                  <Input
-                    id={id}
-                    name={field.name}
-                    describedBy={describedBy}
-                    type="datetime-local"
-                    value={field.state.value}
-                    onBlur={field.handleBlur}
-                    onChange={field.handleChange}
-                    invalid={!field.state.meta.isValid}
-                  />
-                )}
-              </Field>
-            )}
-          </form.Field>
-
-          <form.Field name="endsAt">
-            {(field) => (
-              <Field
-                label="Data e hora de término"
-                error={fieldError(field.state.meta)}
-              >
-                {(id, describedBy) => (
-                  <Input
-                    id={id}
-                    name={field.name}
-                    describedBy={describedBy}
-                    type="datetime-local"
-                    value={field.state.value}
-                    onBlur={field.handleBlur}
-                    onChange={field.handleChange}
-                    invalid={!field.state.meta.isValid}
-                  />
-                )}
-              </Field>
-            )}
-          </form.Field>
-
           <form.Field name="venue">
             {(field) => (
               <Field label="Local da sede" error={fieldError(field.state.meta)}>
@@ -193,6 +161,113 @@ export function CreateContestSheet({
                   />
                 )}
               </Field>
+            )}
+          </form.Field>
+
+          <form.Field name="rounds" mode="array">
+            {(roundsField) => (
+              <div className="flex flex-col gap-4">
+                <div className="flex items-center justify-between">
+                  <p className="text-sm font-medium">Rodadas</p>
+                  <Button
+                    type="button"
+                    size="sm"
+                    variant="quiet"
+                    onClick={() =>
+                      roundsField.pushValue({
+                        name: `Rodada ${roundsField.state.value.length + 1}`,
+                        startsAt: '',
+                        endsAt: '',
+                      })
+                    }
+                  >
+                    <HugeiconsIcon icon={Add01Icon} className="size-4" />
+                    Adicionar
+                  </Button>
+                </div>
+                {roundsField.state.value.map((_, index) => (
+                  <div
+                    key={index}
+                    className="flex flex-col gap-3 rounded-xl border p-3"
+                  >
+                    <div className="flex items-center justify-between">
+                      <span className="text-sm font-medium">
+                        Rodada {index + 1}
+                      </span>
+                      {roundsField.state.value.length > 1 ? (
+                        <Button
+                          type="button"
+                          size="sm"
+                          variant="quiet"
+                          onClick={() => roundsField.removeValue(index)}
+                        >
+                          <HugeiconsIcon icon={Delete02Icon} className="size-4" />
+                          Remover
+                        </Button>
+                      ) : null}
+                    </div>
+                    <form.Field name={`rounds[${index}].name`}>
+                      {(field) => (
+                        <Field label="Nome" error={fieldError(field.state.meta)}>
+                          {(id, describedBy) => (
+                            <Input
+                              id={id}
+                              name={field.name}
+                              describedBy={describedBy}
+                              value={field.state.value}
+                              onBlur={field.handleBlur}
+                              onChange={field.handleChange}
+                              invalid={!field.state.meta.isValid}
+                            />
+                          )}
+                        </Field>
+                      )}
+                    </form.Field>
+                    <form.Field name={`rounds[${index}].startsAt`}>
+                      {(field) => (
+                        <Field
+                          label="Início"
+                          error={fieldError(field.state.meta)}
+                        >
+                          {(id, describedBy) => (
+                            <Input
+                              id={id}
+                              name={field.name}
+                              describedBy={describedBy}
+                              type="datetime-local"
+                              value={field.state.value}
+                              onBlur={field.handleBlur}
+                              onChange={field.handleChange}
+                              invalid={!field.state.meta.isValid}
+                            />
+                          )}
+                        </Field>
+                      )}
+                    </form.Field>
+                    <form.Field name={`rounds[${index}].endsAt`}>
+                      {(field) => (
+                        <Field
+                          label="Término"
+                          error={fieldError(field.state.meta)}
+                        >
+                          {(id, describedBy) => (
+                            <Input
+                              id={id}
+                              name={field.name}
+                              describedBy={describedBy}
+                              type="datetime-local"
+                              value={field.state.value}
+                              onBlur={field.handleBlur}
+                              onChange={field.handleChange}
+                              invalid={!field.state.meta.isValid}
+                            />
+                          )}
+                        </Field>
+                      )}
+                    </form.Field>
+                  </div>
+                ))}
+              </div>
             )}
           </form.Field>
 

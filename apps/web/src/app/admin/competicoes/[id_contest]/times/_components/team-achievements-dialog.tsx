@@ -20,6 +20,8 @@ import { getQuestionErrorMessage } from '@/services/question/question.error';
 import type { Question } from '@/services/question/question.type';
 import { balloonService } from '@/services/balloon/balloon.service';
 import { getBalloonErrorMessage } from '@/services/balloon/balloon.error';
+import { contestService } from '@/services/contest/contest.service';
+import type { ContestRound } from '@/services/contest/contest.type';
 
 type TeamAchievementsDialogProps = {
   contestId: string;
@@ -28,13 +30,18 @@ type TeamAchievementsDialogProps = {
   onOpenChange: (open: boolean) => void;
 };
 
+type RoundAchievements = {
+  round: ContestRound;
+  questions: Question[];
+};
+
 export function TeamAchievementsDialog({
   contestId,
   team,
   open,
   onOpenChange,
 }: TeamAchievementsDialogProps) {
-  const [questions, setQuestions] = useState<Question[]>([]);
+  const [rounds, setRounds] = useState<RoundAchievements[]>([]);
   const [deliveriesByQuestionId, setDeliveriesByQuestionId] = useState(
     () => new Map<string, BalloonDeliveryStatus>(),
   );
@@ -53,14 +60,25 @@ export function TeamAchievementsDialog({
       setError(undefined);
 
       try {
-        const [questionsData, deliveriesData] = await Promise.all([
-          questionService.list(contestId),
-          balloonService.listDeliveries(contestId, team!.id),
-        ]);
+        const contest = await contestService.get(contestId);
+        const results = await Promise.all(
+          contest.rounds.map((round) =>
+            Promise.all([
+              questionService.list(round.id),
+              balloonService.listDeliveries(round.id, team!.id),
+            ]),
+          ),
+        );
+        const deliveriesData = results.flatMap(([, deliveries]) => deliveries);
 
         if (!active) return;
 
-        setQuestions(questionsData);
+        setRounds(
+          contest.rounds.map((round, index) => ({
+            round,
+            questions: results[index]?.[0] ?? [],
+          })),
+        );
         setDeliveriesByQuestionId(
           new Map(
             deliveriesData.map((delivery) => [
@@ -71,7 +89,7 @@ export function TeamAchievementsDialog({
         );
       } catch (loadError) {
         if (active) {
-          setQuestions([]);
+          setRounds([]);
           setDeliveriesByQuestionId(new Map());
           setError(
             getQuestionErrorMessage(
@@ -119,7 +137,7 @@ export function TeamAchievementsDialog({
           <p role="alert" className="text-center text-sm text-destructive">
             {error}
           </p>
-        ) : questions.length === 0 ? (
+        ) : rounds.every((item) => item.questions.length === 0) ? (
           <div className="flex flex-col items-center justify-center gap-3 text-center">
             <span className="flex size-14 items-center justify-center rounded-full bg-muted">
               <HugeiconsIcon
@@ -136,26 +154,39 @@ export function TeamAchievementsDialog({
             </p>
           </div>
         ) : (
-          <div className="grid grid-cols-1 gap-3 text-center sm:grid-cols-2 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-6">
-            {questions.map((question) => {
-              const status = toBalloonEffectiveStatus(
-                deliveriesByQuestionId.get(question.id),
-              );
-              const resolved = isResolvedBalloonStatus(status);
+          <div className="flex flex-col gap-6">
+            {rounds.map(({ round, questions }) =>
+              questions.length === 0 ? null : (
+                <div key={round.id} className="flex flex-col gap-3">
+                  {rounds.length > 1 ? (
+                    <p className="text-sm font-semibold text-muted-foreground">
+                      {round.name}
+                    </p>
+                  ) : null}
+                  <div className="grid grid-cols-1 gap-3 text-center sm:grid-cols-2 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-6">
+                    {questions.map((question) => {
+                      const status = toBalloonEffectiveStatus(
+                        deliveriesByQuestionId.get(question.id),
+                      );
+                      const resolved = isResolvedBalloonStatus(status);
 
-              return (
-                <div
-                  key={question.id}
-                  className="relative min-w-0 rounded-2xl border border-border bg-background p-2"
-                >
-                  <BalloonAchievement
-                    questionId={question.label}
-                    color={toBalloonColor(question.balloonColor)}
-                    resolved={resolved}
-                  />
+                      return (
+                        <div
+                          key={question.id}
+                          className="relative min-w-0 rounded-2xl border border-border bg-background p-2"
+                        >
+                          <BalloonAchievement
+                            questionId={question.label}
+                            color={toBalloonColor(question.balloonColor)}
+                            resolved={resolved}
+                          />
+                        </div>
+                      );
+                    })}
+                  </div>
                 </div>
-              );
-            })}
+              ),
+            )}
           </div>
         )}
       </RowCard>

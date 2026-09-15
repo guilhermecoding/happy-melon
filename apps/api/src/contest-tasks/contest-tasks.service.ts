@@ -1,9 +1,14 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import { Injectable } from '@nestjs/common';
 import {
   BalloonDeliveryStatus as PrismaBalloonDeliveryStatus,
   prisma,
 } from '@repo/database';
-import type { StaffTask, StaffTasksSnapshot } from '@repo/shared';
+import {
+  getCompetitionSchedule,
+  type StaffTask,
+  type StaffTasksSnapshot,
+} from '@repo/shared';
+import { getCompetitionOrThrow } from '../competitions/round-access.js';
 import {
   teamFieldsFrom,
   toBalloonStaffTask,
@@ -12,46 +17,78 @@ import {
 
 @Injectable()
 export class ContestTasksService {
-  async getStaffTasksSnapshot(
-    contestId: string,
+  async getCompetitionStaffTasksSnapshot(
+    competitionId: string,
     userId: string,
   ): Promise<StaffTasksSnapshot> {
-    const contest = await this.ensureContestExists(contestId);
+    const competition = await getCompetitionOrThrow(competitionId);
+    const rounds = await prisma.contest.findMany({
+      where: { competitionId },
+      orderBy: { startsAt: 'asc' },
+    });
+    const schedule = getCompetitionSchedule(rounds);
+
+    return this.buildSnapshot({
+      queueContestId: schedule.currentRound?.id ?? null,
+      mineCompetitionId: competitionId,
+      userId,
+      balloonLimitEnabled: competition.balloonLimitEnabled,
+      balloonLimit: competition.balloonLimit,
+      deliveryTimeoutEnabled: competition.deliveryTimeoutEnabled,
+      deliveryTimeoutMinutes: competition.deliveryTimeoutMinutes,
+    });
+  }
+
+  private async buildSnapshot(params: {
+    queueContestId: string | null;
+    mineCompetitionId: string;
+    userId: string;
+    balloonLimitEnabled: boolean;
+    balloonLimit: number | null;
+    deliveryTimeoutEnabled: boolean;
+    deliveryTimeoutMinutes: number | null;
+  }): Promise<StaffTasksSnapshot> {
+    const processing = PrismaBalloonDeliveryStatus.PROCESSING;
+    const pending = PrismaBalloonDeliveryStatus.PENDING;
 
     const [balloonQueue, printQueue, balloonMine, printMine] =
       await Promise.all([
+        params.queueContestId
+          ? prisma.balloonDelivery.findMany({
+              where: {
+                contestId: params.queueContestId,
+                status: pending,
+                claimedByUserId: null,
+              },
+              include: { team: true, question: true },
+              orderBy: { createdAt: 'asc' },
+            })
+          : Promise.resolve([]),
+        params.queueContestId
+          ? prisma.printTask.findMany({
+              where: {
+                contestId: params.queueContestId,
+                status: pending,
+                claimedByUserId: null,
+              },
+              include: { team: true },
+              orderBy: { createdAt: 'asc' },
+            })
+          : Promise.resolve([]),
         prisma.balloonDelivery.findMany({
           where: {
-            contestId,
-            status: PrismaBalloonDeliveryStatus.PENDING,
-            claimedByUserId: null,
+            contest: { competitionId: params.mineCompetitionId },
+            status: processing,
+            claimedByUserId: params.userId,
           },
           include: { team: true, question: true },
           orderBy: { createdAt: 'asc' },
         }),
         prisma.printTask.findMany({
           where: {
-            contestId,
-            status: PrismaBalloonDeliveryStatus.PENDING,
-            claimedByUserId: null,
-          },
-          include: { team: true },
-          orderBy: { createdAt: 'asc' },
-        }),
-        prisma.balloonDelivery.findMany({
-          where: {
-            contestId,
-            status: PrismaBalloonDeliveryStatus.PROCESSING,
-            claimedByUserId: userId,
-          },
-          include: { team: true, question: true },
-          orderBy: { createdAt: 'asc' },
-        }),
-        prisma.printTask.findMany({
-          where: {
-            contestId,
-            status: PrismaBalloonDeliveryStatus.PROCESSING,
-            claimedByUserId: userId,
+            contest: { competitionId: params.mineCompetitionId },
+            status: processing,
+            claimedByUserId: params.userId,
           },
           include: { team: true },
           orderBy: { createdAt: 'asc' },
@@ -121,11 +158,11 @@ export class ContestTasksService {
     return {
       queue,
       mine,
-      deliveryTimeoutMinutes:
-        contest.deliveryTimeoutEnabled
-          ? contest.deliveryTimeoutMinutes
-          : null,
-      balloonLimit: contest.balloonLimitEnabled ? contest.balloonLimit : null,
+      deliveryTimeoutMinutes: params.deliveryTimeoutEnabled
+        ? params.deliveryTimeoutMinutes
+        : null,
+      balloonLimit: params.balloonLimitEnabled ? params.balloonLimit : null,
+      currentRoundId: params.queueContestId,
     };
   }
 
@@ -134,24 +171,5 @@ export class ContestTasksService {
       (a, b) =>
         new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime(),
     );
-  }
-
-  private async ensureContestExists(contestId: string) {
-    const contest = await prisma.contest.findUnique({
-      where: { id: contestId },
-      select: {
-        id: true,
-        balloonLimitEnabled: true,
-        balloonLimit: true,
-        deliveryTimeoutEnabled: true,
-        deliveryTimeoutMinutes: true,
-      },
-    });
-
-    if (!contest) {
-      throw new NotFoundException('Competição não encontrada.');
-    }
-
-    return contest;
   }
 }

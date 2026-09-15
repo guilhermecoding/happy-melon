@@ -1,29 +1,59 @@
+import type { CompetitionCondition } from '@repo/shared';
+
+export type { CompetitionCondition } from '@repo/shared';
+export { getCompetitionSchedule } from '@repo/shared';
+
 export type ContestStatus = 'active' | 'inactive';
 
 export type ContestCondition = 'not_started' | 'in_progress' | 'finished';
+
+export type ContestRound = {
+  id: string;
+  competitionId: string;
+  name: string;
+  startsAt: string;
+  endsAt: string;
+  createdAt: string;
+  updatedAt: string;
+};
 
 export type Contest = {
   id: string;
   name: string;
   status: ContestStatus;
-  startsAt: string;
-  endsAt: string;
   venue: string;
   balloonLimitEnabled: boolean;
   balloonLimit: number | null;
   deliveryTimeoutEnabled: boolean;
   deliveryTimeoutMinutes: number | null;
+  rounds: ContestRound[];
+  currentRound: ContestRound | null;
+  nextRound: ContestRound | null;
+  condition: CompetitionCondition;
+  createdAt: string;
+  updatedAt: string;
 };
+
+export type CreateRoundInput = {
+  name: string;
+  startsAt: string;
+  endsAt: string;
+};
+
+export type UpdateRoundInput = CreateRoundInput;
 
 export type CreateContestInput = {
   name: string;
   status: ContestStatus;
-  startsAt: string;
-  endsAt: string;
   venue: string;
+  rounds: CreateRoundInput[];
 };
 
-export type UpdateContestInput = CreateContestInput;
+export type UpdateContestInput = {
+  name: string;
+  status: ContestStatus;
+  venue: string;
+};
 
 export type StaffSettingsInput = {
   balloonLimitEnabled: boolean;
@@ -49,4 +79,23 @@ export function getContestCondition(
   }
 
   return 'in_progress';
+}
+
+export function pickRoundId(
+  contest: Contest,
+  preferredRoundId?: string | null,
+): string | null {
+  if (
+    preferredRoundId &&
+    contest.rounds.some((round) => round.id === preferredRoundId)
+  ) {
+    return preferredRoundId;
+  }
+
+  return (
+    contest.currentRound?.id ??
+    contest.nextRound?.id ??
+    contest.rounds[0]?.id ??
+    null
+  );
 }

@@ -19,7 +19,7 @@ export const collaboratorService = {
   async list(contestId: string): Promise<Collaborator[]> {
     try {
       const response = await fetch(
-        `${getApiBaseUrl()}/contests/${contestId}/collaborators`,
+        `${getApiBaseUrl()}/competitions/${contestId}/collaborators`,
         {
           credentials: 'include',
         },
@@ -44,7 +44,7 @@ export const collaboratorService = {
   async listScore(contestId: string): Promise<CollaboratorScore[]> {
     try {
       const response = await fetch(
-        `${getApiBaseUrl()}/contests/${contestId}/collaborators/score`,
+        `${getApiBaseUrl()}/competitions/${contestId}/collaborators/score`,
         {
           credentials: 'include',
         },
@@ -67,7 +67,7 @@ export const collaboratorService = {
   },
 
   getEventsUrl(contestId: string): string {
-    return `${getApiBaseUrl()}/contests/${contestId}/collaborators/events`;
+    return `${getApiBaseUrl()}/competitions/${contestId}/collaborators/events`;
   },
 
   parseEventData(raw: string): CollaboratorJoinedEvent | null {
@@ -94,7 +94,7 @@ export const collaboratorService = {
   ): Promise<Collaborator> {
     try {
       const response = await fetch(
-        `${getApiBaseUrl()}/contests/${contestId}/collaborators`,
+        `${getApiBaseUrl()}/competitions/${contestId}/collaborators`,
         {
           method: 'POST',
           credentials: 'include',
@@ -126,7 +126,7 @@ export const collaboratorService = {
   ): Promise<Collaborator> {
     try {
       const response = await fetch(
-        `${getApiBaseUrl()}/contests/${contestId}/collaborators/${userId}`,
+        `${getApiBaseUrl()}/competitions/${contestId}/collaborators/${userId}`,
         {
           method: 'PATCH',
           credentials: 'include',
@@ -158,7 +158,7 @@ export const collaboratorService = {
   ): Promise<Collaborator> {
     try {
       const response = await fetch(
-        `${getApiBaseUrl()}/contests/${contestId}/collaborators/${userId}/access`,
+        `${getApiBaseUrl()}/competitions/${contestId}/collaborators/${userId}/access`,
         {
           method: 'PATCH',
           credentials: 'include',
@@ -189,7 +189,7 @@ export const collaboratorService = {
   ): Promise<{ success: true }> {
     try {
       const response = await fetch(
-        `${getApiBaseUrl()}/contests/${contestId}/collaborators/${userId}/delete`,
+        `${getApiBaseUrl()}/competitions/${contestId}/collaborators/${userId}/delete`,
         {
           method: 'POST',
           credentials: 'include',

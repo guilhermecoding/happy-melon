@@ -40,8 +40,6 @@ export default function BoxAccessControllCollab({
             const updatedContest = await contestService.update(contest.id, {
                 name: contest.name,
                 status: nextStatus,
-                startsAt: contest.startsAt,
-                endsAt: contest.endsAt,
                 venue: contest.venue,
             })
             setContest(updatedContest)

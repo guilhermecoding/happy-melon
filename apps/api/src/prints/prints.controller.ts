@@ -5,6 +5,7 @@ import {
   Param,
   Post,
   Query,
+  UseGuards,
 } from '@nestjs/common';
 import {
   Roles,
@@ -12,6 +13,7 @@ import {
   type UserSession,
 } from '@thallesp/nestjs-better-auth';
 import type { auth } from '../auth/auth.js';
+import { StaffCompetitionGuard } from '../auth/staff-competition.guard.js';
 import { ZodValidationPipe } from '../common/pipes/zod-validation.pipe.js';
 import { PrintsService } from './prints.service.js';
 import {
@@ -23,6 +25,7 @@ const printTeamActionPipe = new ZodValidationPipe(printTeamActionSchema);
 
 @Controller()
 @Roles(['admin', 'staff'])
+@UseGuards(StaffCompetitionGuard)
 export class PrintsController {
   constructor(private readonly printsService: PrintsService) {}
 

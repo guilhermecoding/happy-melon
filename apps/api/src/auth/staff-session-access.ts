@@ -1,26 +1,26 @@
 import { ContestStatus, prisma } from '@repo/database';
 
 /**
- * Ends all staff sessions bound to a contest (e.g. when collaborator access
- * is disabled for the whole competition).
+ * Ends all staff sessions bound to a competition (e.g. when collaborator access
+ * is disabled for the whole event).
  */
-export async function revokeStaffSessionsForContest(contestId: string) {
+export async function revokeStaffSessionsForContest(competitionId: string) {
   await prisma.session.deleteMany({
-    where: { activeContestId: contestId },
+    where: { activeContestId: competitionId },
   });
 }
 
 /**
- * Ends sessions of one collaborator on a specific contest.
+ * Ends sessions of one collaborator on a specific competition.
  */
 export async function revokeStaffSessionsForCollaborator(
-  contestId: string,
+  competitionId: string,
   userId: string,
 ) {
   await prisma.session.deleteMany({
     where: {
       userId,
-      activeContestId: contestId,
+      activeContestId: competitionId,
     },
   });
 }
@@ -33,24 +33,24 @@ export type StaffSessionAccessCheck = {
 };
 
 /**
- * Whether a staff session may keep using the given contest.
+ * Whether a staff session may keep using the given competition.
  */
 export async function checkStaffSessionAccess(
   userId: string,
-  contestId: string,
+  competitionId: string,
 ): Promise<StaffSessionAccessCheck> {
-  const [user, contest, membership] = await Promise.all([
+  const [user, competition, membership] = await Promise.all([
     prisma.user.findUnique({
       where: { id: userId },
       select: { banned: true, role: true },
     }),
-    prisma.contest.findUnique({
-      where: { id: contestId },
+    prisma.competition.findUnique({
+      where: { id: competitionId },
       select: { status: true },
     }),
     prisma.contestCollaborator.findUnique({
       where: {
-        contestId_userId: { contestId, userId },
+        competitionId_userId: { competitionId, userId },
       },
       select: { hasAccess: true },
     }),
@@ -64,7 +64,7 @@ export async function checkStaffSessionAccess(
     return { valid: false, reason: 'banned' };
   }
 
-  if (!contest || contest.status !== ContestStatus.ACTIVE) {
+  if (!competition || competition.status !== ContestStatus.ACTIVE) {
     return { valid: false, reason: 'contest_inactive' };
   }
 

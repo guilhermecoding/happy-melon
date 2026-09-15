@@ -65,7 +65,7 @@ function emitCollaboratorJoined(
 }
 
 async function createCollaboratorMembership(
-  contestId: string,
+  competitionId: string,
   userId: string,
 ) {
   for (let attempt = 0; attempt < ID_MAX_ATTEMPTS; attempt++) {
@@ -73,7 +73,7 @@ async function createCollaboratorMembership(
       return await prisma.contestCollaborator.create({
         data: {
           id: generateShortId(),
-          contestId,
+          competitionId,
           userId,
           hasAccess: true,
         },
@@ -82,7 +82,7 @@ async function createCollaboratorMembership(
       if (isPrismaUniqueViolation(error)) {
         const existing = await prisma.contestCollaborator.findUnique({
           where: {
-            contestId_userId: { contestId, userId },
+            competitionId_userId: { competitionId, userId },
           },
         });
         if (existing) {
@@ -103,26 +103,26 @@ async function createCollaboratorMembership(
   );
 }
 
-async function findActiveContest(contestCode: string) {
-  const contest = await prisma.contest.findUnique({
+async function findActiveCompetition(contestCode: string) {
+  const competition = await prisma.competition.findUnique({
     where: { id: contestCode },
   });
 
-  if (!contest) {
+  if (!competition) {
     throw APIError.from('NOT_FOUND', {
       message: 'Competição não encontrada.',
       code: 'CONTEST_NOT_FOUND',
     });
   }
 
-  if (contest.status !== ContestStatus.ACTIVE) {
+  if (competition.status !== ContestStatus.ACTIVE) {
     throw APIError.from('FORBIDDEN', {
       message: 'O acesso dos colaboradores está desabilitado para esta competição.',
       code: 'CONTEST_INACTIVE',
     });
   }
 
-  return contest;
+  return competition;
 }
 
 export const staffSignIn = () =>
@@ -138,7 +138,7 @@ export const staffSignIn = () =>
         async (ctx) => {
           const email = ctx.body.email.toLowerCase().trim();
           const contestCode = ctx.body.contestCode.trim();
-          const contest = await findActiveContest(contestCode);
+          const contest = await findActiveCompetition(contestCode);
 
           const found = await ctx.context.internalAdapter.findUserByEmail(email);
           if (!found?.user) {
@@ -182,8 +182,8 @@ export const staffSignIn = () =>
 
           let membership = await prisma.contestCollaborator.findUnique({
             where: {
-              contestId_userId: {
-                contestId: contest.id,
+              competitionId_userId: {
+                competitionId: contest.id,
                 userId: user.id,
               },
             },
@@ -250,7 +250,7 @@ export const staffSignIn = () =>
           const email = ctx.body.email.toLowerCase().trim();
           const contestCode = ctx.body.contestCode.trim();
           const name = ctx.body.name.trim();
-          const contest = await findActiveContest(contestCode);
+          const contest = await findActiveCompetition(contestCode);
 
           const existing = await ctx.context.internalAdapter.findUserByEmail(
             email,

@@ -7,6 +7,7 @@ import {
   Post,
   Query,
   Sse,
+  UseGuards,
 } from '@nestjs/common';
 import {
   Roles,
@@ -15,6 +16,7 @@ import {
 } from '@thallesp/nestjs-better-auth';
 import { map, type Observable } from 'rxjs';
 import type { auth } from '../auth/auth.js';
+import { StaffCompetitionGuard } from '../auth/staff-competition.guard.js';
 import { TaskHistoryEventsService } from '../contest-tasks/task-history.events.js';
 import { ZodValidationPipe } from '../common/pipes/zod-validation.pipe.js';
 import { BalloonsService } from './balloons.service.js';
@@ -27,6 +29,7 @@ const teamQuestionActionPipe = new ZodValidationPipe(teamQuestionActionSchema);
 
 @Controller()
 @Roles(['admin', 'staff'])
+@UseGuards(StaffCompetitionGuard)
 export class BalloonsController {
   constructor(
     private readonly balloonsService: BalloonsService,
