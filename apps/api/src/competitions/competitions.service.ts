@@ -185,7 +185,7 @@ export class CompetitionsService {
         return this.createRoundInTx(tx, competitionId, dto);
       });
 
-      this.emitRoundSchedule(competitionId, round);
+      this.emitRoundChanged(competitionId, round);
       return toRoundResponse(round);
     } catch (error) {
       if (isExclusionViolation(error)) {
@@ -227,7 +227,7 @@ export class CompetitionsService {
         existing.name !== dto.name;
 
       if (scheduleChanged) {
-        this.emitRoundSchedule(competitionId, round);
+        this.emitScheduleUpdated(competitionId, round);
       }
 
       return toRoundResponse(round);
@@ -257,14 +257,7 @@ export class CompetitionsService {
 
     await prisma.contest.delete({ where: { id: roundId } });
 
-    this.contestAccessEvents.emit(competitionId, {
-      type: CONTEST_ACCESS_EVENT_TYPE.ROUND_CHANGED,
-      contestId: competitionId,
-      roundId: null,
-      roundName: null,
-      startsAt: null,
-      endsAt: null,
-    });
+    this.emitRoundChanged(competitionId, null);
 
     return { success: true as const };
   }
@@ -332,7 +325,7 @@ export class CompetitionsService {
     }
   }
 
-  private emitRoundSchedule(competitionId: string, round: Contest) {
+  private emitScheduleUpdated(competitionId: string, round: Contest) {
     this.contestAccessEvents.emit(competitionId, {
       type: CONTEST_ACCESS_EVENT_TYPE.SCHEDULE_UPDATED,
       contestId: competitionId,
@@ -342,13 +335,16 @@ export class CompetitionsService {
       roundId: round.id,
       roundName: round.name,
     });
+  }
+
+  private emitRoundChanged(competitionId: string, round: Contest | null) {
     this.contestAccessEvents.emit(competitionId, {
       type: CONTEST_ACCESS_EVENT_TYPE.ROUND_CHANGED,
       contestId: competitionId,
-      roundId: round.id,
-      roundName: round.name,
-      startsAt: round.startsAt.toISOString(),
-      endsAt: round.endsAt.toISOString(),
+      roundId: round?.id ?? null,
+      roundName: round?.name ?? null,
+      startsAt: round?.startsAt?.toISOString() ?? null,
+      endsAt: round?.endsAt?.toISOString() ?? null,
     });
   }
 
