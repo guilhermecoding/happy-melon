@@ -9,6 +9,7 @@ import {
   DateTimeIcon,
   Delete02Icon,
   EditIcon,
+  IterationCwIcon,
   ViewIcon,
 } from '@hugeicons/core-free-icons';
 import { formatDateTime, toDateTimeLocalValue } from '@/lib/format-data';
@@ -169,11 +170,14 @@ export default function BoxContentContestView({
 
         <div className="mt-2 flex flex-col gap-2">
           <div className="flex items-center justify-between">
-            <span className="text-sm font-medium text-muted-foreground">
-              Rodadas
-            </span>
-            <Button size="sm" variant="quiet" onClick={openCreateRound}>
-              <HugeiconsIcon icon={Add01Icon} className="size-4" />
+            <div className="flex items-center gap-1">
+              <HugeiconsIcon icon={IterationCwIcon} className="size-3.5 shrink-0 text-muted-foreground" strokeWidth={2} />
+              <span className="text-sm font-medium text-muted-foreground">
+                Rodadas
+              </span>
+            </div>
+            <Button size="sm" tone="mint" onClick={openCreateRound}>
+              <HugeiconsIcon icon={Add01Icon} className="size-4 shrink-0" strokeWidth={2} />
               Nova
             </Button>
           </div>
@@ -190,19 +194,19 @@ export default function BoxContentContestView({
                     variant="quiet"
                     onClick={() => openEditRound(round)}
                   >
-                    <HugeiconsIcon icon={EditIcon} className="size-4" />
+                    <HugeiconsIcon icon={EditIcon} className="size-4 shrink-0" strokeWidth={2} />
                   </Button>
                   <Button
                     size="sm"
                     variant="quiet"
                     onClick={() => void handleDeleteRound(round)}
                   >
-                    <HugeiconsIcon icon={Delete02Icon} className="size-4" />
+                    <HugeiconsIcon icon={Delete02Icon} className="size-4 shrink-0" strokeWidth={2} />
                   </Button>
                 </div>
               </div>
               <div className="flex items-center gap-1 text-sm text-muted-foreground">
-                <HugeiconsIcon icon={DateTimeIcon} className="size-4" />
+                <HugeiconsIcon icon={DateTimeIcon} className="size-4 shrink-0" strokeWidth={2} />
                 {formatDateTime(new Date(round.startsAt))} &bull;{' '}
                 {formatDateTime(new Date(round.endsAt))}
               </div>
