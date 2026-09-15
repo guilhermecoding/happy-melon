@@ -1,16 +1,17 @@
 import {
   Body,
   Controller,
-  Delete,
   Get,
   MessageEvent,
   Param,
   Patch,
   Post,
+  Req,
   Sse,
   UseGuards,
 } from '@nestjs/common';
 import { Roles } from '@thallesp/nestjs-better-auth';
+import type { IncomingHttpHeaders } from 'node:http';
 import { map, type Observable } from 'rxjs';
 import { StaffCompetitionGuard } from '../auth/staff-competition.guard.js';
 import { ZodValidationPipe } from '../common/pipes/zod-validation.pipe.js';
@@ -19,20 +20,25 @@ import { CompetitionsService } from './competitions.service.js';
 import {
   createCompetitionSchema,
   createRoundSchema,
+  deleteRoundSchema,
   staffSettingsSchema,
   updateCompetitionSchema,
   updateRoundSchema,
   type CreateCompetitionDto,
   type CreateRoundDto,
+  type DeleteRoundDto,
   type StaffSettingsDto,
   type UpdateCompetitionDto,
   type UpdateRoundDto,
 } from './dto/competition.dto.js';
 
+type RequestWithHeaders = { headers: IncomingHttpHeaders };
+
 const createCompetitionPipe = new ZodValidationPipe(createCompetitionSchema);
 const updateCompetitionPipe = new ZodValidationPipe(updateCompetitionSchema);
 const createRoundPipe = new ZodValidationPipe(createRoundSchema);
 const updateRoundPipe = new ZodValidationPipe(updateRoundSchema);
+const deleteRoundPipe = new ZodValidationPipe(deleteRoundSchema);
 const staffSettingsPipe = new ZodValidationPipe(staffSettingsSchema);
 
 @Controller('competitions')
@@ -106,11 +112,18 @@ export class CompetitionsController {
     return this.competitionsService.updateRound(competitionId, roundId, dto);
   }
 
-  @Delete(':id/rounds/:roundId')
+  @Post(':id/rounds/:roundId/delete')
   deleteRound(
+    @Req() request: RequestWithHeaders,
     @Param('id') competitionId: string,
     @Param('roundId') roundId: string,
+    @Body(deleteRoundPipe) dto: DeleteRoundDto,
   ) {
-    return this.competitionsService.deleteRound(competitionId, roundId);
+    return this.competitionsService.deleteRound(
+      request.headers,
+      competitionId,
+      roundId,
+      dto,
+    );
   }
 }

@@ -13,6 +13,7 @@ import {
   ViewIcon,
 } from '@hugeicons/core-free-icons';
 import { formatDateTime, toDateTimeLocalValue } from '@/lib/format-data';
+import { AdminPasswordConfirmDialog } from '@/components/admin-password-confirm-dialog';
 import { Button } from '@/components/pouf/Button';
 import { Badge } from '@/components/pouf/media';
 import { Field, Input } from '@/components/pouf/Input';
@@ -47,6 +48,9 @@ export default function BoxContentContestView({
   const [roundDraft, setRoundDraft] = useState<RoundDraft>(EMPTY_ROUND);
   const [roundError, setRoundError] = useState<string>();
   const [savingRound, setSavingRound] = useState(false);
+  const [roundToDelete, setRoundToDelete] = useState<ContestRound | null>(null);
+  const [deletingRound, setDeletingRound] = useState(false);
+  const [deleteRoundError, setDeleteRoundError] = useState<string>();
 
   useEffect(() => {
     setContest(initialContest);
@@ -113,21 +117,39 @@ export default function BoxContentContestView({
     }
   }
 
-  async function handleDeleteRound(round: ContestRound) {
+  function openDeleteRound(round: ContestRound) {
     if (contest.rounds.length <= 1) {
       toast.error('A competição precisa ter pelo menos uma rodada.');
       return;
     }
 
+    setDeleteRoundError(undefined);
+    setRoundToDelete(round);
+  }
+
+  async function handleConfirmDeleteRound(password: string) {
+    if (!roundToDelete) return;
+
+    setDeletingRound(true);
+    setDeleteRoundError(undefined);
+
     try {
-      await contestService.deleteRound(contest.id, round.id);
+      await contestService.deleteRound(contest.id, roundToDelete.id, {
+        password,
+      });
       toast.success('Rodada excluída.');
       const refreshed = await contestService.get(contest.id);
       handleUpdated(refreshed);
+      setRoundToDelete(null);
     } catch (error) {
-      toast.error(
-        getContestErrorMessage(error, 'Não foi possível excluir a rodada.'),
+      const message = getContestErrorMessage(
+        error,
+        'Não foi possível excluir a rodada.',
       );
+      setDeleteRoundError(message);
+      toast.error(message);
+    } finally {
+      setDeletingRound(false);
     }
   }
 
@@ -199,7 +221,7 @@ export default function BoxContentContestView({
                   <Button
                     size="sm"
                     variant="quiet"
-                    onClick={() => void handleDeleteRound(round)}
+                    onClick={() => openDeleteRound(round)}
                   >
                     <HugeiconsIcon icon={Delete02Icon} className="size-4 shrink-0" strokeWidth={2} />
                   </Button>
@@ -286,6 +308,30 @@ export default function BoxContentContestView({
           </div>
         </div>
       </Sheet>
+
+      <AdminPasswordConfirmDialog
+        open={Boolean(roundToDelete)}
+        onOpenChange={(nextOpen) => {
+          if (!nextOpen) {
+            setRoundToDelete(null);
+            setDeleteRoundError(undefined);
+          }
+        }}
+        title="Confirmar exclusão da rodada"
+        description={
+          <>
+            Digite a senha do administrador logado para excluir a rodada{' '}
+            <strong>{roundToDelete?.name}</strong>. Questões da prova, balões,
+            impressões e o histórico desta rodada serão apagados. Esta ação não
+            pode ser desfeita.
+          </>
+        }
+        confirmLabel="Apagar rodada"
+        confirmTone="pink"
+        isLoading={deletingRound}
+        error={deleteRoundError}
+        onConfirm={handleConfirmDeleteRound}
+      />
     </>
   );
 }

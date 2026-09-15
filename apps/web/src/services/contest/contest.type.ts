@@ -42,6 +42,10 @@ export type CreateRoundInput = {
 
 export type UpdateRoundInput = CreateRoundInput;
 
+export type DeleteRoundInput = {
+  password: string;
+};
+
 export type CreateContestInput = {
   name: string;
   status: ContestStatus;

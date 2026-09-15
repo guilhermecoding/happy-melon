@@ -51,6 +51,10 @@ export const updateCompetitionSchema = z.object({
 export const createRoundSchema = roundInputSchema;
 export const updateRoundSchema = roundInputSchema;
 
+export const deleteRoundSchema = z.object({
+  password: z.string().min(1),
+});
+
 export const staffSettingsSchema = z
   .object({
     balloonLimitEnabled: z.boolean(),
@@ -99,5 +103,6 @@ export type CreateCompetitionDto = z.infer<typeof createCompetitionSchema>;
 export type UpdateCompetitionDto = z.infer<typeof updateCompetitionSchema>;
 export type CreateRoundDto = z.infer<typeof createRoundSchema>;
 export type UpdateRoundDto = z.infer<typeof updateRoundSchema>;
+export type DeleteRoundDto = z.infer<typeof deleteRoundSchema>;
 export type StaffSettingsDto = z.infer<typeof staffSettingsSchema>;
 export type ContestStatusDto = z.infer<typeof contestStatusSchema>;

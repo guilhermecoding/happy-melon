@@ -12,6 +12,7 @@ import type {
   ContestRound,
   CreateContestInput,
   CreateRoundInput,
+  DeleteRoundInput,
   StaffSettingsInput,
   UpdateContestInput,
   UpdateRoundInput,
@@ -223,13 +224,16 @@ export const contestService = {
   async deleteRound(
     competitionId: string,
     roundId: string,
+    data: DeleteRoundInput,
   ): Promise<{ success: true }> {
     try {
       const response = await fetch(
-        `${getApiBaseUrl()}/competitions/${competitionId}/rounds/${roundId}`,
+        `${getApiBaseUrl()}/competitions/${competitionId}/rounds/${roundId}/delete`,
         {
-          method: 'DELETE',
+          method: 'POST',
           credentials: 'include',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(data),
         },
       );
 

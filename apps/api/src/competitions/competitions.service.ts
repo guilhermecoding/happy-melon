@@ -1,9 +1,13 @@
+import type { IncomingHttpHeaders } from 'node:http';
 import {
   BadRequestException,
   Injectable,
   InternalServerErrorException,
   NotFoundException,
+  UnauthorizedException,
 } from '@nestjs/common';
+import { APIError } from 'better-auth/api';
+import { fromNodeHeaders } from 'better-auth/node';
 import {
   ContestStatus,
   prisma,
@@ -17,6 +21,7 @@ import {
   getCompetitionSchedule,
   roundsOverlap,
 } from '@repo/shared';
+import { auth } from '../auth/auth.js';
 import { revokeStaffSessionsForContest } from '../auth/staff-session-access.js';
 import {
   generateShortId,
@@ -30,6 +35,7 @@ import type {
   ContestStatusDto,
   CreateCompetitionDto,
   CreateRoundDto,
+  DeleteRoundDto,
   StaffSettingsDto,
   UpdateCompetitionDto,
   UpdateRoundDto,
@@ -242,7 +248,13 @@ export class CompetitionsService {
     }
   }
 
-  async deleteRound(competitionId: string, roundId: string) {
+  async deleteRound(
+    headers: IncomingHttpHeaders,
+    competitionId: string,
+    roundId: string,
+    dto: DeleteRoundDto,
+  ) {
+    await this.verifyAdminPassword(headers, dto.password);
     await this.getRoundInCompetition(competitionId, roundId);
 
     const roundCount = await prisma.contest.count({
@@ -335,6 +347,44 @@ export class CompetitionsService {
       roundId: round.id,
       roundName: round.name,
     });
+  }
+
+  private async verifyAdminPassword(
+    headers: IncomingHttpHeaders,
+    password: string,
+  ) {
+    try {
+      await auth.api.verifyPassword({
+        headers: this.toAuthHeaders(headers),
+        body: { password },
+      });
+    } catch (error) {
+      if (error instanceof APIError) {
+        throw new UnauthorizedException('Senha de administrador incorreta.');
+      }
+
+      throw error;
+    }
+  }
+
+  private toAuthHeaders(headers: IncomingHttpHeaders): Headers {
+    if (typeof fromNodeHeaders === 'function') {
+      return fromNodeHeaders(headers);
+    }
+
+    const authHeaders = new Headers();
+
+    for (const [name, value] of Object.entries(headers)) {
+      if (Array.isArray(value)) {
+        for (const item of value) {
+          authHeaders.append(name, item);
+        }
+      } else if (value !== undefined) {
+        authHeaders.set(name, value);
+      }
+    }
+
+    return authHeaders;
   }
 
   private emitRoundChanged(competitionId: string, round: Contest | null) {
