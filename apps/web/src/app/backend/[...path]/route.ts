@@ -15,6 +15,7 @@ const HOP_BY_HOP = new Set([
 
 const ALLOWED_PREFIXES = [
   'api',
+  'competitions',
   'contests',
   'administrators',
   'teams',

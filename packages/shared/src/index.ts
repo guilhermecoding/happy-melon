@@ -43,8 +43,18 @@ export {
   type ContestAccessEventType,
   type ContestCollaboratorAccessRevokedEvent,
   type ContestCollaboratorsAccessDisabledEvent,
+  type ContestRoundChangedEvent,
   type ContestScheduleUpdatedEvent,
 } from './contest-access.js';
+
+export {
+  getCompetitionSchedule,
+  roundsOverlap,
+  sortRoundsByStart,
+  type CompetitionCondition,
+  type CompetitionSchedule,
+  type RoundWindow,
+} from './competition-schedule.js';
 
 export {
   TASK_HISTORY_EVENT_TYPE,

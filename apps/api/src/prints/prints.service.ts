@@ -27,8 +27,12 @@ import {
   ID_MAX_ATTEMPTS,
   isIdUniqueViolation,
 } from '../common/short-id.js';
+import { getRoundOrThrow } from '../competitions/round-access.js';
 import { ContestTasksEventsService } from '../contest-tasks/contest-tasks.events.js';
-import { assertContestInProgress } from '../contests/contest-window.js';
+import {
+  assertCompetitionActiveForRound,
+  assertRoundInProgress,
+} from '../contests/contest-window.js';
 import { LobbyCapacityService } from '../contest-tasks/lobby-capacity.service.js';
 import {
   teamFieldsFrom,
@@ -81,7 +85,10 @@ export class PrintsService {
     dto: PrintTeamActionDto,
     actor: Actor,
   ) {
-    const team = await this.ensureTeamInContest(contestId, dto.teamId);
+    const { team, competitionId } = await this.ensureTeamInContest(
+      contestId,
+      dto.teamId,
+    );
     const prismaStatus = this.toPrismaStatus(BALLOON_DELIVERY_STATUS.PENDING);
 
     for (let attempt = 0; attempt < ID_MAX_ATTEMPTS; attempt++) {
@@ -107,7 +114,7 @@ export class PrintsService {
           return { task: saved, history };
         });
 
-        this.contestTasksEvents.emit(contestId, {
+        this.contestTasksEvents.emitForRound(contestId, competitionId, {
           type: STAFF_TASK_EVENT_TYPE.QUEUED,
           task: toPrintStaffTask({
             id: task.id,
@@ -142,7 +149,7 @@ export class PrintsService {
   }
 
   async confirm(contestId: string, taskId: string, actor: Actor) {
-    const { task, team } = await this.resolveTask(contestId, taskId);
+    const { task, team, competitionId } = await this.resolveTask(contestId, taskId);
     const effective = toBalloonEffectiveStatus(this.toStatusDto(task.status));
 
     if (!isConfirmableStatus(effective)) {
@@ -171,7 +178,7 @@ export class PrintsService {
       return { saved: updated, history };
     });
 
-    this.contestTasksEvents.emit(contestId, {
+    this.contestTasksEvents.emitForRound(contestId, competitionId, {
       type: STAFF_TASK_EVENT_TYPE.QUEUED,
       task: toPrintStaffTask({
         id: saved.id,
@@ -191,7 +198,7 @@ export class PrintsService {
   }
 
   async withhold(contestId: string, taskId: string, actor: Actor) {
-    const { task, team } = await this.resolveTask(contestId, taskId);
+    const { task, team, competitionId } = await this.resolveTask(contestId, taskId);
     const effective = toBalloonEffectiveStatus(this.toStatusDto(task.status));
 
     if (!isWithholdableStatus(effective)) {
@@ -220,7 +227,7 @@ export class PrintsService {
       return { saved: updated, history };
     });
 
-    this.contestTasksEvents.emit(contestId, {
+    this.contestTasksEvents.emitForRound(contestId, competitionId, {
       type: STAFF_TASK_EVENT_TYPE.REMOVED,
       task: toPrintStaffTask({
         id: saved.id,
@@ -244,8 +251,9 @@ export class PrintsService {
     taskId: string,
     actor: Actor,
   ): Promise<StaffTask> {
-    await this.ensureContestExists(contestId);
-    await assertContestInProgress(contestId);
+    const round = await this.ensureContestExists(contestId);
+    await assertRoundInProgress(contestId);
+    const competitionId = round.competitionId;
 
     const pendingStatus = this.toPrismaStatus(BALLOON_DELIVERY_STATUS.PENDING);
     const processingStatus = this.toPrismaStatus(
@@ -301,7 +309,7 @@ export class PrintsService {
       createdAt: task.createdAt,
     });
 
-    this.contestTasksEvents.emit(contestId, {
+    this.contestTasksEvents.emitForRound(contestId, competitionId, {
       type: STAFF_TASK_EVENT_TYPE.CLAIMED,
       task: staffTask,
       claimedByName: actor.name,
@@ -317,8 +325,9 @@ export class PrintsService {
     taskId: string,
     actor: Actor,
   ): Promise<StaffTask> {
-    await this.ensureContestExists(contestId);
-    await assertContestInProgress(contestId);
+    const round = await this.ensureContestExists(contestId);
+    await assertCompetitionActiveForRound(contestId);
+    const competitionId = round.competitionId;
 
     const processingStatus = this.toPrismaStatus(
       BALLOON_DELIVERY_STATUS.PROCESSING,
@@ -373,7 +382,7 @@ export class PrintsService {
       createdAt: task.createdAt,
     });
 
-    this.contestTasksEvents.emit(contestId, {
+    this.contestTasksEvents.emitForRound(contestId, competitionId, {
       type: STAFF_TASK_EVENT_TYPE.REMOVED,
       task: staffTask,
     });
@@ -442,7 +451,7 @@ export class PrintsService {
   }
 
   private async resolveTask(contestId: string, taskId: string) {
-    await this.ensureContestExists(contestId);
+    const round = await this.ensureContestExists(contestId);
 
     const task = await prisma.printTask.findFirst({
       where: { id: taskId, contestId },
@@ -453,32 +462,25 @@ export class PrintsService {
       throw new NotFoundException('Tarefa de impressão não encontrada.');
     }
 
-    return { task, team: task.team };
+    return { task, team: task.team, competitionId: round.competitionId };
   }
 
   private async ensureContestExists(contestId: string) {
-    const contest = await prisma.contest.findUnique({
-      where: { id: contestId },
-      select: { id: true },
-    });
-
-    if (!contest) {
-      throw new NotFoundException('Competição não encontrada.');
-    }
+    return getRoundOrThrow(contestId);
   }
 
   private async ensureTeamInContest(contestId: string, teamId: string) {
-    await this.ensureContestExists(contestId);
+    const round = await this.ensureContestExists(contestId);
 
     const team = await prisma.team.findFirst({
-      where: { id: teamId, contestId },
+      where: { id: teamId, competitionId: round.competitionId },
     });
 
     if (!team) {
       throw new NotFoundException('Time não encontrado nesta competição.');
     }
 
-    return team;
+    return { team, competitionId: round.competitionId };
   }
 
   private toPrismaStatus(

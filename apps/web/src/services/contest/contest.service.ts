@@ -1,19 +1,22 @@
 import {
+  CONTEST_ACCESS_EVENT_TYPE,
+  type ContestAccessEvent,
+} from '@repo/shared';
+import { getApiBaseUrl } from '@/lib/api-url';
+import {
   normalizeContestError,
   parseContestError,
 } from './contest.error';
 import type {
   Contest,
+  ContestRound,
   CreateContestInput,
+  CreateRoundInput,
+  DeleteRoundInput,
   StaffSettingsInput,
   UpdateContestInput,
+  UpdateRoundInput,
 } from './contest.type';
-
-import {
-  CONTEST_ACCESS_EVENT_TYPE,
-  type ContestAccessEvent,
-} from '@repo/shared';
-import { getApiBaseUrl } from '@/lib/api-url';
 
 async function getServerCookieHeader(): Promise<string | undefined> {
   if (typeof window !== 'undefined') {
@@ -32,7 +35,7 @@ async function getServerCookieHeader(): Promise<string | undefined> {
 export const contestService = {
   async list(): Promise<Contest[]> {
     try {
-      const response = await fetch(`${getApiBaseUrl()}/contests`, {
+      const response = await fetch(`${getApiBaseUrl()}/competitions`, {
         credentials: 'include',
       });
 
@@ -55,7 +58,7 @@ export const contestService = {
   async get(id: string): Promise<Contest> {
     try {
       const cookie = await getServerCookieHeader();
-      const response = await fetch(`${getApiBaseUrl()}/contests/${id}`, {
+      const response = await fetch(`${getApiBaseUrl()}/competitions/${id}`, {
         credentials: 'include',
         headers: cookie ? { cookie } : undefined,
         cache: 'no-store',
@@ -79,7 +82,7 @@ export const contestService = {
 
   async create(data: CreateContestInput): Promise<Contest> {
     try {
-      const response = await fetch(`${getApiBaseUrl()}/contests`, {
+      const response = await fetch(`${getApiBaseUrl()}/competitions`, {
         method: 'POST',
         credentials: 'include',
         headers: { 'Content-Type': 'application/json' },
@@ -104,7 +107,7 @@ export const contestService = {
 
   async update(id: string, data: UpdateContestInput): Promise<Contest> {
     try {
-      const response = await fetch(`${getApiBaseUrl()}/contests/${id}`, {
+      const response = await fetch(`${getApiBaseUrl()}/competitions/${id}`, {
         method: 'PATCH',
         credentials: 'include',
         headers: { 'Content-Type': 'application/json' },
@@ -132,12 +135,15 @@ export const contestService = {
     data: StaffSettingsInput,
   ): Promise<Contest> {
     try {
-      const response = await fetch(`${getApiBaseUrl()}/contests/${id}/staff-settings`, {
-        method: 'PATCH',
-        credentials: 'include',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(data),
-      });
+      const response = await fetch(
+        `${getApiBaseUrl()}/competitions/${id}/staff-settings`,
+        {
+          method: 'PATCH',
+          credentials: 'include',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(data),
+        },
+      );
 
       if (!response.ok) {
         throw await parseContestError(
@@ -155,8 +161,97 @@ export const contestService = {
     }
   },
 
+  async createRound(
+    competitionId: string,
+    data: CreateRoundInput,
+  ): Promise<ContestRound> {
+    try {
+      const response = await fetch(
+        `${getApiBaseUrl()}/competitions/${competitionId}/rounds`,
+        {
+          method: 'POST',
+          credentials: 'include',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(data),
+        },
+      );
+
+      if (!response.ok) {
+        throw await parseContestError(
+          response,
+          'Não foi possível criar a rodada.',
+        );
+      }
+
+      return response.json();
+    } catch (error) {
+      throw normalizeContestError(error, 'Não foi possível criar a rodada.');
+    }
+  },
+
+  async updateRound(
+    competitionId: string,
+    roundId: string,
+    data: UpdateRoundInput,
+  ): Promise<ContestRound> {
+    try {
+      const response = await fetch(
+        `${getApiBaseUrl()}/competitions/${competitionId}/rounds/${roundId}`,
+        {
+          method: 'PATCH',
+          credentials: 'include',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(data),
+        },
+      );
+
+      if (!response.ok) {
+        throw await parseContestError(
+          response,
+          'Não foi possível atualizar a rodada.',
+        );
+      }
+
+      return response.json();
+    } catch (error) {
+      throw normalizeContestError(
+        error,
+        'Não foi possível atualizar a rodada.',
+      );
+    }
+  },
+
+  async deleteRound(
+    competitionId: string,
+    roundId: string,
+    data: DeleteRoundInput,
+  ): Promise<{ success: true }> {
+    try {
+      const response = await fetch(
+        `${getApiBaseUrl()}/competitions/${competitionId}/rounds/${roundId}/delete`,
+        {
+          method: 'POST',
+          credentials: 'include',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(data),
+        },
+      );
+
+      if (!response.ok) {
+        throw await parseContestError(
+          response,
+          'Não foi possível excluir a rodada.',
+        );
+      }
+
+      return response.json();
+    } catch (error) {
+      throw normalizeContestError(error, 'Não foi possível excluir a rodada.');
+    }
+  },
+
   getAccessEventsUrl(contestId: string): string {
-    return `${getApiBaseUrl()}/contests/${contestId}/access/events`;
+    return `${getApiBaseUrl()}/competitions/${contestId}/access/events`;
   },
 
   parseAccessEventData(raw: string): ContestAccessEvent | null {
@@ -165,7 +260,8 @@ export const contestService = {
       if (
         parsed?.type === CONTEST_ACCESS_EVENT_TYPE.COLLABORATORS_DISABLED ||
         parsed?.type === CONTEST_ACCESS_EVENT_TYPE.COLLABORATOR_REVOKED ||
-        parsed?.type === CONTEST_ACCESS_EVENT_TYPE.SCHEDULE_UPDATED
+        parsed?.type === CONTEST_ACCESS_EVENT_TYPE.SCHEDULE_UPDATED ||
+        parsed?.type === CONTEST_ACCESS_EVENT_TYPE.ROUND_CHANGED
       ) {
         return parsed;
       }

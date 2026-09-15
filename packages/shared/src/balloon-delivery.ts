@@ -176,4 +176,5 @@ export type StaffTasksSnapshot = {
   mine: StaffTask[];
   deliveryTimeoutMinutes: number | null;
   balloonLimit: number | null;
+  currentRoundId: string | null;
 };

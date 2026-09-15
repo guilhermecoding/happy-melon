@@ -1,6 +1,7 @@
-import { Body, Controller, Get, Param, Patch, Post, Req } from '@nestjs/common';
+import { Body, Controller, Get, Param, Patch, Post, Req, UseGuards } from '@nestjs/common';
 import { Roles } from '@thallesp/nestjs-better-auth';
 import type { IncomingHttpHeaders } from 'node:http';
+import { StaffCompetitionGuard } from '../auth/staff-competition.guard.js';
 import { ZodValidationPipe } from '../common/pipes/zod-validation.pipe.js';
 import { TeamsService } from './teams.service.js';
 import {
@@ -26,37 +27,38 @@ const deleteTeamPipe = new ZodValidationPipe(deleteTeamSchema);
 export class TeamsController {
   constructor(private readonly teamsService: TeamsService) {}
 
-  @Get('contests/:contestId/teams')
+  @Get('competitions/:competitionId/teams')
   @Roles(['admin', 'staff'])
-  listByContest(@Param('contestId') contestId: string) {
-    return this.teamsService.listByContest(contestId);
+  @UseGuards(StaffCompetitionGuard)
+  listByContest(@Param('competitionId') competitionId: string) {
+    return this.teamsService.listByCompetition(competitionId);
   }
 
-  @Post('contests/:contestId/teams')
+  @Post('competitions/:competitionId/teams')
   create(
-    @Param('contestId') contestId: string,
+    @Param('competitionId') competitionId: string,
     @Body(createTeamPipe) dto: CreateTeamDto,
   ) {
-    return this.teamsService.create(contestId, dto);
+    return this.teamsService.create(competitionId, dto);
   }
 
-  @Post('contests/:contestId/teams/bulk')
+  @Post('competitions/:competitionId/teams/bulk')
   bulkUpsert(
-    @Param('contestId') contestId: string,
+    @Param('competitionId') competitionId: string,
     @Body(bulkUpsertTeamsPipe) dto: BulkUpsertTeamsDto,
   ) {
-    return this.teamsService.bulkUpsert(contestId, dto);
+    return this.teamsService.bulkUpsert(competitionId, dto);
   }
 
-  @Post('contests/:contestId/teams/delete')
+  @Post('competitions/:competitionId/teams/delete')
   removeAllByContest(
     @Req() request: RequestWithHeaders,
-    @Param('contestId') contestId: string,
+    @Param('competitionId') competitionId: string,
     @Body(deleteTeamPipe) dto: DeleteTeamDto,
   ) {
-    return this.teamsService.removeAllByContest(
+    return this.teamsService.removeAllByCompetition(
       request.headers,
-      contestId,
+      competitionId,
       dto,
     );
   }

@@ -38,75 +38,75 @@ export class CollaboratorsController {
     private readonly collaboratorsEvents: CollaboratorsEventsService,
   ) {}
 
-  @Get('contests/:contestId/collaborators')
-  list(@Param('contestId') contestId: string) {
-    return this.collaboratorsService.list(contestId);
+  @Get('competitions/:competitionId/collaborators')
+  list(@Param('competitionId') competitionId: string) {
+    return this.collaboratorsService.list(competitionId);
   }
 
-  @Get('contests/:contestId/collaborators/score')
-  listScore(@Param('contestId') contestId: string) {
-    return this.collaboratorsService.listScore(contestId);
+  @Get('competitions/:competitionId/collaborators/score')
+  listScore(@Param('competitionId') competitionId: string) {
+    return this.collaboratorsService.listScore(competitionId);
   }
 
-  @Sse('contests/:contestId/collaborators/events')
+  @Sse('competitions/:competitionId/collaborators/events')
   streamEvents(
-    @Param('contestId') contestId: string,
+    @Param('competitionId') competitionId: string,
   ): Observable<MessageEvent> {
-    return this.collaboratorsEvents.subscribe(contestId).pipe(
+    return this.collaboratorsEvents.subscribe(competitionId).pipe(
       map((event) => ({
         data: event,
       })),
     );
   }
 
-  @Post('contests/:contestId/collaborators')
+  @Post('competitions/:competitionId/collaborators')
   create(
-    @Param('contestId') contestId: string,
+    @Param('competitionId') competitionId: string,
     @Req() request: RequestWithHeaders,
     @Body(createCollaboratorPipe) dto: CreateCollaboratorDto,
   ) {
-    return this.collaboratorsService.create(request.headers, contestId, dto);
+    return this.collaboratorsService.create(request.headers, competitionId, dto);
   }
 
-  @Patch('contests/:contestId/collaborators/:userId')
+  @Patch('competitions/:competitionId/collaborators/:userId')
   update(
-    @Param('contestId') contestId: string,
+    @Param('competitionId') competitionId: string,
     @Param('userId') userId: string,
     @Req() request: RequestWithHeaders,
     @Body(updateCollaboratorPipe) dto: UpdateCollaboratorDto,
   ) {
     return this.collaboratorsService.update(
       request.headers,
-      contestId,
+      competitionId,
       userId,
       dto,
     );
   }
 
-  @Patch('contests/:contestId/collaborators/:userId/access')
+  @Patch('competitions/:competitionId/collaborators/:userId/access')
   setAccess(
-    @Param('contestId') contestId: string,
+    @Param('competitionId') competitionId: string,
     @Param('userId') userId: string,
     @Req() request: RequestWithHeaders,
     @Body(setAccessPipe) dto: SetCollaboratorAccessDto,
   ) {
     return this.collaboratorsService.setAccess(
       request.headers,
-      contestId,
+      competitionId,
       userId,
       dto.hasAccess,
     );
   }
 
-  @Post('contests/:contestId/collaborators/:userId/delete')
+  @Post('competitions/:competitionId/collaborators/:userId/delete')
   remove(
-    @Param('contestId') contestId: string,
+    @Param('competitionId') competitionId: string,
     @Param('userId') userId: string,
     @Req() request: RequestWithHeaders,
   ) {
     return this.collaboratorsService.remove(
       request.headers,
-      contestId,
+      competitionId,
       userId,
     );
   }

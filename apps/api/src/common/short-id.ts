@@ -24,6 +24,31 @@ export function isPrismaUniqueViolation(error: unknown): boolean {
   return getPrismaErrorCode(error) === 'P2002';
 }
 
+export function isExclusionViolation(error: unknown): boolean {
+  return getPrismaErrorCode(error) === '23P01' || hasPgCode(error, '23P01');
+}
+
+function hasPgCode(error: unknown, code: string): boolean {
+  if (!error || typeof error !== 'object') {
+    return false;
+  }
+
+  const candidate = error as {
+    code?: string;
+    cause?: { code?: string; cause?: { code?: string } };
+  };
+
+  if (candidate.code === code) {
+    return true;
+  }
+
+  if (candidate.cause?.code === code) {
+    return true;
+  }
+
+  return candidate.cause?.cause?.code === code;
+}
+
 export function isUniqueViolationOn(
   error: unknown,
   field: string,

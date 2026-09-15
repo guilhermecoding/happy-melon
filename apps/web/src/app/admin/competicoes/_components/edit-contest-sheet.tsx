@@ -24,23 +24,9 @@ type EditContestSheetProps = {
   onUpdated: (contest: Contest) => void;
 };
 
-function toDateTimeLocalValue(iso: string): string {
-  const date = new Date(iso);
-
-  if (Number.isNaN(date.getTime())) {
-    return '';
-  }
-
-  const pad = (value: number) => String(value).padStart(2, '0');
-
-  return `${date.getFullYear()}-${pad(date.getMonth() + 1)}-${pad(date.getDate())}T${pad(date.getHours())}:${pad(date.getMinutes())}`;
-}
-
 function toFormValues(contest: Contest): EditContestFormValues {
   return {
     name: contest.name,
-    startsAt: toDateTimeLocalValue(contest.startsAt),
-    endsAt: toDateTimeLocalValue(contest.endsAt),
     venue: contest.venue,
   };
 }
@@ -56,8 +42,6 @@ export function EditContestSheet({
   const form = useForm({
     defaultValues: {
       name: '',
-      startsAt: '',
-      endsAt: '',
       venue: '',
     } satisfies EditContestFormValues,
     validators: {
@@ -71,8 +55,6 @@ export function EditContestSheet({
         const updatedContest = await contestService.update(contest.id, {
           name: value.name,
           status: contest.status,
-          startsAt: new Date(value.startsAt).toISOString(),
-          endsAt: new Date(value.endsAt).toISOString(),
           venue: value.venue,
         });
         onUpdated(updatedContest);
@@ -132,50 +114,6 @@ export function EditContestSheet({
                     name={field.name}
                     describedBy={describedBy}
                     placeholder="Nome da competição"
-                    value={field.state.value}
-                    onBlur={field.handleBlur}
-                    onChange={field.handleChange}
-                    invalid={!field.state.meta.isValid}
-                  />
-                )}
-              </Field>
-            )}
-          </form.Field>
-
-          <form.Field name="startsAt">
-            {(field) => (
-              <Field
-                label="Data e hora de início"
-                error={fieldError(field.state.meta)}
-              >
-                {(id, describedBy) => (
-                  <Input
-                    id={id}
-                    name={field.name}
-                    describedBy={describedBy}
-                    type="datetime-local"
-                    value={field.state.value}
-                    onBlur={field.handleBlur}
-                    onChange={field.handleChange}
-                    invalid={!field.state.meta.isValid}
-                  />
-                )}
-              </Field>
-            )}
-          </form.Field>
-
-          <form.Field name="endsAt">
-            {(field) => (
-              <Field
-                label="Data e hora de término"
-                error={fieldError(field.state.meta)}
-              >
-                {(id, describedBy) => (
-                  <Input
-                    id={id}
-                    name={field.name}
-                    describedBy={describedBy}
-                    type="datetime-local"
                     value={field.state.value}
                     onBlur={field.handleBlur}
                     onChange={field.handleChange}
