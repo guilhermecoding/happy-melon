@@ -199,7 +199,7 @@ export function ChefsPanel({ contestId }: { contestId: string }) {
   return (
     <>
       <BoxFeatures
-        title="Chefes da competição"
+        title="Chefes desta competição"
         icon={Crown03Icon}
         blobSize="sm"
         blobTone="blue"

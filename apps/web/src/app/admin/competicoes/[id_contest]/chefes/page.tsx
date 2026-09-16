@@ -8,7 +8,7 @@ import TitlePage from '@/components/title-page';
 import Loading from '@/app/loading';
 
 export const metadata: Metadata = {
-  title: 'Chefes',
+  title: 'Chefes de Sala',
 };
 
 async function AdminChefsPageContent({
@@ -19,7 +19,7 @@ async function AdminChefsPageContent({
   return (
     <Page>
       <Section>
-        <TitlePage title="Chefes da competição" icon={Crown03Icon} />
+        <TitlePage title="Chefes de Sala" icon={Crown03Icon} />
       </Section>
       <Section className="mt-6 flex flex-col gap-4">
         <ChefsPanel contestId={id_contest} />

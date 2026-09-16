@@ -43,7 +43,7 @@ const MODE_COPY: Record<
     submit: 'Entrar',
   },
   admin: {
-    description: 'Entre com suas credenciais de administrador ou chefe de competição',
+    description: 'Entre com suas credenciais de administrador ou chefe de sala',
     submit: 'Entrar',
   },
   register: {
@@ -508,7 +508,7 @@ export function LoginForm({
                                 className="size-5"
                                 strokeWidth={2.5}
                               />
-                              {mode === 'admin' ? 'Colaborador' : 'Administrador ou Chefe de Competição'}
+                              {mode === 'admin' ? 'Colaborador' : 'Administrador ou Chefe de Sala'}
                             </Button>
                           </div>
                         </div>

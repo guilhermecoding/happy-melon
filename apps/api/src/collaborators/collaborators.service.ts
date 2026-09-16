@@ -83,7 +83,7 @@ export class CollaboratorsService {
   constructor(
     private readonly collaboratorsEvents: CollaboratorsEventsService,
     private readonly contestAccessEvents: ContestAccessEventsService,
-  ) {}
+  ) { }
 
   async list(competitionId: string) {
     await this.ensureCompetitionExists(competitionId);
@@ -187,7 +187,7 @@ export class CollaboratorsService {
 
     if (existingUser?.role === 'chef') {
       throw new ConflictException(
-        'Este e-mail pertence a um chefe de competição.',
+        'Este e-mail pertence a um chefe de sala.',
       );
     }
 
