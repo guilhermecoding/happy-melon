@@ -43,7 +43,7 @@ const MODE_COPY: Record<
     submit: 'Entrar',
   },
   admin: {
-    description: 'Entre com suas credenciais de administrador',
+    description: 'Entre com suas credenciais de administrador ou chefe de competição',
     submit: 'Entrar',
   },
   register: {
@@ -489,7 +489,7 @@ export function LoginForm({
                           Voltar
                         </Button>
                       ) : (
-                        <div className="flex justify-end mt-4">
+                        <div className="flex justify-center mt-4">
                           <div className="w-full sm:w-fit">
                             <Button
                               variant="quiet"
@@ -508,7 +508,7 @@ export function LoginForm({
                                 className="size-5"
                                 strokeWidth={2.5}
                               />
-                              {mode === 'admin' ? 'Colaborador' : 'Administrador'}
+                              {mode === 'admin' ? 'Colaborador' : 'Administrador ou Chefe de Competição'}
                             </Button>
                           </div>
                         </div>
