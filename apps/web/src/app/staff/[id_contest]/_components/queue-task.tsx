@@ -14,9 +14,8 @@ import {
   getBalloonColorLabel,
   toBalloonColor,
 } from '@/services/question/balloon-color';
-import { BalloonIcon, Clock01Icon, ClockFadingIcon, HandIcon } from '@hugeicons/core-free-icons';
+import { BalloonIcon, Clock01Icon, ClockFadingIcon, HandIcon, ThumbsUpIcon } from '@hugeicons/core-free-icons';
 import { HugeiconsIcon } from '@hugeicons/react';
-import Image from 'next/image';
 import { AnimatePresence, motion, useReducedMotion } from 'motion/react';
 import { useContestSchedule } from '@/app/staff/_components/countdown-contest';
 
@@ -239,19 +238,15 @@ export default function QueueTask({
         </div>
       </Card>
 
-      <div className="flex flex-col gap-3">
+      <div className="flex flex-col gap-3 mt-8">
         {tasks.length === 0 ? (
           <div className="flex flex-col items-center justify-center h-full">
-            <Image
-              src="/sleep-cat.svg"
-              alt="Empty queue"
-              width={100}
-              height={100}
-              className="h-auto w-56 opacity-50 pointer-events-none select-none"
-              loading="eager"
-            />
-            <p className="text-xl md:text-2xl text-muted-foreground px-1 text-center relative -top-18">
-              Tudo tranquilo! Nenhuma tarefa disponível.
+            <HugeiconsIcon icon={ThumbsUpIcon} className="size-18 text-muted-foreground" strokeWidth={2} />
+            <p className="text-2xl md:text-3xl text-muted-foreground px-1 font-bold text-center mt-4">
+              Tudo tranquilo!
+            </p>
+            <p className="text-xl md:text-2xl text-muted-foreground px-1 text-center">
+              Nenhuma tarefa por enquanto.
             </p>
           </div>
         ) : null}
