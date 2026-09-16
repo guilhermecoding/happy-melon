@@ -39,6 +39,7 @@ type TeamBalloonsDialogProps = {
   contestId: string;
   team: Team | null;
   open: boolean;
+  canSend?: boolean;
   onOpenChange: (open: boolean) => void;
   onDeliveryChanged?: (delivery?: BalloonDelivery) => void;
 };
@@ -47,18 +48,22 @@ function PrintRequestCard({
   contestId,
   team,
   disabled,
+  canSend = true,
   onEnqueued,
   onOpenQueue,
 }: {
   contestId: string;
   team: Team;
   disabled?: boolean;
+  canSend?: boolean;
   onEnqueued?: () => void;
   onOpenQueue?: () => void;
 }) {
   const [isEnqueueing, setIsEnqueueing] = useState(false);
 
   async function handleEnqueue() {
+    if (!canSend) return;
+
     setIsEnqueueing(true);
 
     try {
@@ -102,7 +107,7 @@ function PrintRequestCard({
           variant="solid"
           tone="blue"
           block={true}
-          disabled={disabled || isEnqueueing}
+          disabled={disabled || isEnqueueing || !canSend}
           loading={isEnqueueing}
           onClick={() => void handleEnqueue()}
         >
@@ -117,6 +122,7 @@ export function TeamBalloonsDialog({
   contestId,
   team,
   open,
+  canSend = true,
   onOpenChange,
   onDeliveryChanged,
 }: TeamBalloonsDialogProps) {
@@ -213,7 +219,7 @@ export function TeamBalloonsDialog({
   }
 
   async function handleConfirm(question: Question) {
-    if (!team) return;
+    if (!team || !canSend) return;
 
     setPendingQuestionId(question.id);
 
@@ -341,7 +347,8 @@ export function TeamBalloonsDialog({
                       disabled={
                         isPending ||
                         Boolean(pendingQuestionId) ||
-                        Boolean(withholdQuestion)
+                        Boolean(withholdQuestion) ||
+                        (canConfirm && !canSend)
                       }
                       loading={isPending && canConfirm}
                       onClick={() =>
@@ -366,6 +373,7 @@ export function TeamBalloonsDialog({
                 <PrintRequestCard
                   contestId={contestId}
                   team={team}
+                  canSend={canSend}
                   disabled={
                     Boolean(pendingQuestionId) || Boolean(withholdQuestion)
                   }
@@ -409,6 +417,7 @@ export function TeamBalloonsDialog({
           contestId={contestId}
           team={team}
           open={printQueueOpen}
+          canSend={canSend}
           onOpenChange={setPrintQueueOpen}
           refreshKey={printQueueRefreshKey}
           onTaskChanged={() => {

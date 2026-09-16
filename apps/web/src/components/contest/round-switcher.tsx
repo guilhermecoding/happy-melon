@@ -7,17 +7,23 @@ import type { Contest } from '@/services/contest/contest.type';
 type RoundSwitcherProps = {
   contest: Contest;
   selectedRoundId: string;
+  alwaysShow?: boolean;
 };
 
 export default function RoundSwitcher({
   contest,
   selectedRoundId,
+  alwaysShow = false,
 }: RoundSwitcherProps) {
   const router = useRouter();
   const pathname = usePathname();
   const searchParams = useSearchParams();
 
-  if (contest.rounds.length <= 1) {
+  if (contest.rounds.length === 0) {
+    return null;
+  }
+
+  if (!alwaysShow && contest.rounds.length <= 1) {
     return null;
   }
 

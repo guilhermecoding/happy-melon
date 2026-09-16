@@ -23,6 +23,7 @@ type PrintTasksDialogProps = {
   contestId: string;
   team: Team;
   open: boolean;
+  canSend?: boolean;
   onOpenChange: (open: boolean) => void;
   refreshKey?: number;
   onTaskChanged?: () => void;
@@ -32,6 +33,7 @@ export function PrintTasksDialog({
   contestId,
   team,
   open,
+  canSend = true,
   onOpenChange,
   refreshKey = 0,
   onTaskChanged,
@@ -101,6 +103,8 @@ export function PrintTasksDialog({
   }
 
   async function handleConfirm(task: PrintTask) {
+    if (!canSend) return;
+
     setPendingTaskId(task.id);
 
     try {
@@ -216,7 +220,8 @@ export function PrintTasksDialog({
                       disabled={
                         isPending ||
                         Boolean(pendingTaskId) ||
-                        Boolean(withholdTask)
+                        Boolean(withholdTask) ||
+                        (canConfirm && !canSend)
                       }
                       loading={isPending && canConfirm}
                       onClick={() =>

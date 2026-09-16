@@ -23,6 +23,7 @@ async function AdminTasksPageContent({
   const contest = await contestService.get(id_contest);
   const roundParam = typeof query.round === 'string' ? query.round : null;
   const roundId = pickRoundId(contest, roundParam);
+  const selectedRound = contest.rounds.find((round) => round.id === roundId);
 
   return (
     <Page>
@@ -31,11 +32,18 @@ async function AdminTasksPageContent({
       </Section>
 
       <Section className="mt-6 flex flex-col gap-4">
-        <RoundSwitcher contest={contest} selectedRoundId={roundId ?? ''} />
-        {roundId ? (
-          <div className="flex flex-col gap-4 @5xl:flex-row">
-            <TasksBoard competitionId={id_contest} roundId={roundId} />
-          </div>
+        <RoundSwitcher
+          alwaysShow
+          contest={contest}
+          selectedRoundId={roundId ?? ''}
+        />
+        {roundId && selectedRound ? (
+          <TasksBoard
+            competitionId={id_contest}
+            roundId={roundId}
+            startsAt={selectedRound.startsAt}
+            endsAt={selectedRound.endsAt}
+          />
         ) : (
           <p className="text-sm text-muted-foreground">
             Cadastre uma rodada para gerenciar as tarefas.

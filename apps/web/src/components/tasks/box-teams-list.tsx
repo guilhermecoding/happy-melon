@@ -24,6 +24,7 @@ import { Button } from '@/components/pouf/Button';
 type BoxTeamsListProps = {
     competitionId: string;
     roundId: string;
+    canSend?: boolean;
     onDeliveryChanged?: () => void;
 };
 
@@ -55,6 +56,7 @@ function countConqueredBalloons(deliveries: BalloonDelivery[]) {
 export default function BoxTeamsList({
     competitionId,
     roundId,
+    canSend = true,
     onDeliveryChanged,
 }: BoxTeamsListProps) {
     const [teams, setTeams] = useState<Team[]>([]);
@@ -302,6 +304,7 @@ export default function BoxTeamsList({
                 contestId={roundId}
                 team={selectedTeam}
                 open={achievementsOpen}
+                canSend={canSend}
                 onDeliveryChanged={applyDelivery}
                 onOpenChange={(nextOpen) => {
                     setAchievementsOpen(nextOpen);

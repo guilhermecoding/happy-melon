@@ -85,6 +85,8 @@ export class PrintsService {
     dto: PrintTeamActionDto,
     actor: Actor,
   ) {
+    await assertRoundInProgress(contestId);
+
     const { team, competitionId } = await this.ensureTeamInContest(
       contestId,
       dto.teamId,
@@ -149,6 +151,8 @@ export class PrintsService {
   }
 
   async confirm(contestId: string, taskId: string, actor: Actor) {
+    await assertRoundInProgress(contestId);
+
     const { task, team, competitionId } = await this.resolveTask(contestId, taskId);
     const effective = toBalloonEffectiveStatus(this.toStatusDto(task.status));
 
