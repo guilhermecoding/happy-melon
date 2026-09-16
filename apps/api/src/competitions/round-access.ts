@@ -68,6 +68,7 @@ export function toRoundResponse(round: Contest) {
     name: round.name,
     startsAt: round.startsAt.toISOString(),
     endsAt: round.endsAt.toISOString(),
+    scoreFreezeMinutes: round.scoreFreezeMinutes,
     createdAt: round.createdAt.toISOString(),
     updatedAt: round.updatedAt.toISOString(),
   };

@@ -21,8 +21,24 @@ export const roundFormSchema = z
     name: z.string().min(1, 'Informe o nome da rodada'),
     startsAt: z.string().min(1, 'Informe a data e hora de início'),
     endsAt: z.string().min(1, 'Informe a data e hora de término'),
+    scoreFreezeMinutes: z
+      .string()
+      .trim()
+      .refine(
+        (value) => value === '' || (/^\d+$/.test(value) && Number(value) >= 1),
+        'Informe um número inteiro de minutos.',
+      ),
   })
   .refine(contestDatesRefine, contestDatesRefineConfig);
+
+export function parseScoreFreezeMinutes(value: string): number | null {
+  const trimmed = value.trim();
+  if (!trimmed) {
+    return null;
+  }
+
+  return Number.parseInt(trimmed, 10);
+}
 
 export const contestFormSchema = z
   .object({

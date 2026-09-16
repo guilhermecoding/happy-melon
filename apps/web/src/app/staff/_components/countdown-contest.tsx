@@ -21,6 +21,7 @@ import Image from 'next/image'
 type ContestScheduleValue = {
     startsAt: string
     endsAt: string
+    scoreFreezeMinutes: number | null
     currentRoundId: string | null
     currentRoundName: string | null
 }
@@ -111,12 +112,14 @@ export default function CountdownContest({
                 ? {
                     startsAt: activeRound.startsAt,
                     endsAt: activeRound.endsAt,
+                    scoreFreezeMinutes: activeRound.scoreFreezeMinutes,
                     currentRoundId: schedule.currentRound?.id ?? null,
                     currentRoundName: schedule.currentRound?.name ?? null,
                 }
                 : {
                     startsAt: contest.rounds[0]?.startsAt ?? new Date().toISOString(),
                     endsAt: contest.rounds[0]?.endsAt ?? new Date().toISOString(),
+                    scoreFreezeMinutes: contest.rounds[0]?.scoreFreezeMinutes ?? null,
                     currentRoundId: null,
                     currentRoundName: null,
                 },

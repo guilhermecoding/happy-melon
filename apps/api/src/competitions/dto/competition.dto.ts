@@ -32,6 +32,7 @@ export const roundInputSchema = z
     name: z.string().min(1),
     startsAt: z.iso.datetime(),
     endsAt: z.iso.datetime(),
+    scoreFreezeMinutes: z.number().int().min(1).nullable().optional(),
   })
   .superRefine(roundDatesRefine);
 

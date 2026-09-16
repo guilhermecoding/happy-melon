@@ -2,6 +2,7 @@
 
 import { useEffect, useLayoutEffect, useRef, useState } from 'react';
 import {
+  isScoreFreezeActive,
   TASK_KIND,
   type StaffTask,
 } from '@repo/shared';
@@ -14,7 +15,7 @@ import {
   getBalloonColorLabel,
   toBalloonColor,
 } from '@/services/question/balloon-color';
-import { BalloonIcon, Clock01Icon, ClockFadingIcon, HandIcon, ThumbsUpIcon } from '@hugeicons/core-free-icons';
+import { BalloonIcon, Clock01Icon, ClockFadingIcon, HandIcon, SnowIcon, ThumbsUpIcon } from '@hugeicons/core-free-icons';
 import { HugeiconsIcon } from '@hugeicons/react';
 import { AnimatePresence, motion, useReducedMotion } from 'motion/react';
 import { useContestSchedule } from '@/app/staff/_components/countdown-contest';
@@ -193,7 +194,7 @@ export default function QueueTask({
   lobbyCount,
   onClaim,
 }: QueueTaskProps) {
-  const { endsAt } = useContestSchedule();
+  const { startsAt, endsAt, scoreFreezeMinutes } = useContestSchedule();
   const [nowMs, setNowMs] = useState(() => Date.now());
   const [countdownNowMs, setCountdownNowMs] = useState(() => Date.now());
 
@@ -210,6 +211,10 @@ export default function QueueTask({
   const enteringKeys = useEnteringTaskKeys(tasks);
   const claimDisabled =
     balloonLimit != null && lobbyCount >= balloonLimit;
+  const scoreFrozen = isScoreFreezeActive(
+    { startsAt, endsAt, scoreFreezeMinutes },
+    new Date(countdownNowMs),
+  );
 
   return (
     <div className="flex w-full flex-col gap-4">
@@ -226,9 +231,12 @@ export default function QueueTask({
             <span className="text-xl font-bold">Tarefas</span>
           </div>
           <div>
-            <Badge tone="orange">
+            <Badge tone={scoreFrozen ? 'blue' : 'orange'}>
               <div className="flex items-center gap-1">
                 <HugeiconsIcon icon={ClockFadingIcon} className="size-4" strokeWidth={3} />
+                {scoreFrozen ? (
+                  <HugeiconsIcon icon={SnowIcon} className="size-4" strokeWidth={3} />
+                ) : null}
                 <span className="text-sm tabular-nums">
                   {formatCountdown(new Date(endsAt).getTime() - countdownNowMs)}
                 </span>

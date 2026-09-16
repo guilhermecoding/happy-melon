@@ -49,11 +49,13 @@ export {
 
 export {
   getCompetitionSchedule,
+  isScoreFreezeActive,
   roundsOverlap,
   sortRoundsByStart,
   type CompetitionCondition,
   type CompetitionSchedule,
   type RoundWindow,
+  type ScoreFreezeWindow,
 } from './competition-schedule.js';
 
 export {

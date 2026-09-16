@@ -237,6 +237,7 @@ export class CompetitionsService {
             name: dto.name,
             startsAt,
             endsAt,
+            scoreFreezeMinutes: dto.scoreFreezeMinutes ?? null,
           },
         });
       });
@@ -244,7 +245,9 @@ export class CompetitionsService {
       const scheduleChanged =
         existing.startsAt.getTime() !== startsAt.getTime() ||
         existing.endsAt.getTime() !== endsAt.getTime() ||
-        existing.name !== dto.name;
+        existing.name !== dto.name ||
+        (existing.scoreFreezeMinutes ?? null) !==
+          (dto.scoreFreezeMinutes ?? null);
 
       if (scheduleChanged) {
         this.emitScheduleUpdated(competitionId, round);
@@ -302,6 +305,7 @@ export class CompetitionsService {
             name: dto.name,
             startsAt: new Date(dto.startsAt),
             endsAt: new Date(dto.endsAt),
+            scoreFreezeMinutes: dto.scoreFreezeMinutes ?? null,
           },
         });
       } catch (error) {

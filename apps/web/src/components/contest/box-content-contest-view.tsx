@@ -23,7 +23,7 @@ import { contestService } from '@/services/contest/contest.service';
 import { getContestErrorMessage } from '@/services/contest/contest.error';
 import type { Contest, ContestRound } from '@/services/contest/contest.type';
 import { EditContestSheet } from '@/app/admin/competicoes/_components/edit-contest-sheet';
-import { roundFormSchema } from '@/app/admin/competicoes/_components/contest-schema';
+import { parseScoreFreezeMinutes, roundFormSchema } from '@/app/admin/competicoes/_components/contest-schema';
 
 type BoxContentContestViewProps = {
   contest: Contest;
@@ -34,9 +34,15 @@ type RoundDraft = {
   name: string;
   startsAt: string;
   endsAt: string;
+  scoreFreezeMinutes: string;
 };
 
-const EMPTY_ROUND: RoundDraft = { name: '', startsAt: '', endsAt: '' };
+const EMPTY_ROUND: RoundDraft = {
+  name: '',
+  startsAt: '',
+  endsAt: '',
+  scoreFreezeMinutes: '',
+};
 
 export default function BoxContentContestView({
   contest: initialContest,
@@ -76,6 +82,8 @@ export default function BoxContentContestView({
       name: round.name,
       startsAt: toDateTimeLocalValue(round.startsAt),
       endsAt: toDateTimeLocalValue(round.endsAt),
+      scoreFreezeMinutes:
+        round.scoreFreezeMinutes != null ? String(round.scoreFreezeMinutes) : '',
     });
     setRoundError(undefined);
     setRoundSheetOpen(true);
@@ -94,6 +102,7 @@ export default function BoxContentContestView({
       name: parsed.data.name,
       startsAt: new Date(parsed.data.startsAt).toISOString(),
       endsAt: new Date(parsed.data.endsAt).toISOString(),
+      scoreFreezeMinutes: parseScoreFreezeMinutes(parsed.data.scoreFreezeMinutes),
     };
 
     try {
@@ -257,91 +266,114 @@ export default function BoxContentContestView({
 
       {editable ? (
         <>
-      <EditContestSheet
-        contest={contest}
-        open={editOpen}
-        onOpenChange={setEditOpen}
-        onUpdated={handleUpdated}
-      />
+          <EditContestSheet
+            contest={contest}
+            open={editOpen}
+            onOpenChange={setEditOpen}
+            onUpdated={handleUpdated}
+          />
 
-      <Sheet
-        open={roundSheetOpen}
-        onOpenChange={setRoundSheetOpen}
-        title={editingRound ? 'Editar rodada' : 'Nova rodada'}
-        description="Defina o nome e o horário desta fatia da competição."
-      >
-        <div className="flex flex-col gap-4">
-          <Field label="Nome">
-            {(id) => (
-              <Input
-                id={id}
-                value={roundDraft.name}
-                onChange={(value) =>
-                  setRoundDraft((current) => ({ ...current, name: value }))
-                }
-              />
-            )}
-          </Field>
-          <Field label="Início">
-            {(id) => (
-              <Input
-                id={id}
-                type="datetime-local"
-                value={roundDraft.startsAt}
-                onChange={(value) =>
-                  setRoundDraft((current) => ({ ...current, startsAt: value }))
-                }
-              />
-            )}
-          </Field>
-          <Field label="Término">
-            {(id) => (
-              <Input
-                id={id}
-                type="datetime-local"
-                value={roundDraft.endsAt}
-                onChange={(value) =>
-                  setRoundDraft((current) => ({ ...current, endsAt: value }))
-                }
-              />
-            )}
-          </Field>
-          {roundError ? (
-            <p role="alert" className="text-sm text-destructive">
-              {roundError}
-            </p>
-          ) : null}
-          <div className="flex justify-end">
-            <Button tone="mint" loading={savingRound} onClick={() => void handleSaveRound()}>
-              Salvar
-            </Button>
-          </div>
-        </div>
-      </Sheet>
+          <Sheet
+            open={roundSheetOpen}
+            onOpenChange={setRoundSheetOpen}
+            title={editingRound ? 'Editar rodada' : 'Nova rodada'}
+            description="Defina o nome e o horário desta fatia da competição."
+          >
+            <div className="flex flex-col gap-4">
+              <Field label="Nome">
+                {(id) => (
+                  <Input
+                    id={id}
+                    value={roundDraft.name}
+                    onChange={(value) =>
+                      setRoundDraft((current) => ({ ...current, name: value }))
+                    }
+                  />
+                )}
+              </Field>
+              <Field label="Início">
+                {(id) => (
+                  <Input
+                    id={id}
+                    type="datetime-local"
+                    value={roundDraft.startsAt}
+                    onChange={(value) =>
+                      setRoundDraft((current) => ({ ...current, startsAt: value }))
+                    }
+                  />
+                )}
+              </Field>
+              <Field label="Término">
+                {(id) => (
+                  <Input
+                    id={id}
+                    type="datetime-local"
+                    value={roundDraft.endsAt}
+                    onChange={(value) =>
+                      setRoundDraft((current) => ({ ...current, endsAt: value }))
+                    }
+                  />
+                )}
+              </Field>
+              <Field
+                label="Congelamento"
+                description="Define quando o placar será congelado nos minutos restantes."
+              >
+                {(id, describedBy) => (
+                  <Input
+                    id={id}
+                    describedBy={describedBy}
+                    type="number"
+                    inputMode="numeric"
+                    placeholder="Ex: 20"
+                    min={1}
+                    step={1}
+                    value={roundDraft.scoreFreezeMinutes}
+                    onChange={(value) =>
+                      setRoundDraft((current) => ({
+                        ...current,
+                        scoreFreezeMinutes: value,
+                      }))
+                    }
+                  />
+                )}
+              </Field>
+              {roundError ? (
+                <p role="alert" className="text-sm text-destructive">
+                  {roundError}
+                </p>
+              ) : null}
+              <div className="flex justify-end">
+                <Button tone="mint" loading={savingRound} onClick={() => void handleSaveRound()}>
+                  Salvar
+                </Button>
+              </div>
+            </div>
+          </Sheet>
 
-      <AdminPasswordConfirmDialog
-        open={Boolean(roundToDelete)}
-        onOpenChange={(nextOpen) => {
-          if (!nextOpen) {
-            setRoundToDelete(null);
-            setDeleteRoundError(undefined);
-          }
-        }}
-        title="Confirmar exclusão da rodada"
-        description={
-          <>
-            Digite a senha do administrador logado para excluir a rodada{' '}
-            <strong>{roundToDelete?.name}</strong>. Questões da prova, balões,
-            impressões e o histórico desta rodada serão apagados. Esta ação não
-            pode ser desfeita.
-          </>
-        }
-        confirmLabel="Apagar rodada"
-        confirmTone="pink"
-        isLoading={deletingRound}
-        error={deleteRoundError}
-        onConfirm={handleConfirmDeleteRound}
-      />
+          <AdminPasswordConfirmDialog
+            open={Boolean(roundToDelete)}
+            onOpenChange={(nextOpen) => {
+              if (!nextOpen) {
+                setRoundToDelete(null);
+                setDeleteRoundError(undefined);
+              }
+            }}
+            title="Confirmar exclusão da rodada"
+            description={
+              <>
+                Digite a senha do administrador logado para excluir a rodada{' '}
+                <strong>{roundToDelete?.name}</strong>. Questões da prova, balões,
+                impressões e o histórico desta rodada serão apagados. Esta ação não
+                pode ser desfeita.
+              </>
+            }
+            confirmLabel="Apagar rodada"
+            confirmTone="pink"
+            isLoading={deletingRound}
+            error={deleteRoundError}
+            onConfirm={handleConfirmDeleteRound}
+          />
         </>
       ) : null}
     </>

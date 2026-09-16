@@ -98,3 +98,29 @@ export function getCompetitionSchedule<T extends RoundWindow>(
     lastRound,
   };
 }
+
+export type ScoreFreezeWindow = {
+  startsAt: string | Date;
+  endsAt: string | Date;
+  scoreFreezeMinutes: number | null | undefined;
+};
+
+export function isScoreFreezeActive(
+  round: ScoreFreezeWindow,
+  now: Date = new Date(),
+): boolean {
+  const minutes = round.scoreFreezeMinutes;
+  if (minutes == null || minutes < 1) {
+    return false;
+  }
+
+  const nowMs = now.getTime();
+  const start = toTime(round.startsAt);
+  const end = toTime(round.endsAt);
+
+  if (nowMs < start || nowMs >= end) {
+    return false;
+  }
+
+  return nowMs >= end - minutes * 60_000;
+}
