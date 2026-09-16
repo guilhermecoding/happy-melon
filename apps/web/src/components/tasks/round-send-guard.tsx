@@ -37,7 +37,7 @@ export default function RoundSendGuard({
       {!canSend ? (
         <div
           role="status"
-          className="flex items-center gap-3 rounded-2xl border border-border bg-muted/40 px-4 py-3"
+          className="flex items-center gap-3 rounded-2xl bg-white border border-border px-4 py-3"
         >
           <HugeiconsIcon
             icon={Alert02Icon}
@@ -45,7 +45,7 @@ export default function RoundSendGuard({
             strokeWidth={2}
           />
           <p className="text-sm font-medium text-foreground">
-            Não é possível enviar tasks fora do horário da rodada.
+            Não é possível enviar tarefas fora do horário da rodada.
           </p>
         </div>
       ) : null}
