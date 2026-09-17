@@ -15,10 +15,16 @@ import {
 
 const SEGMENT_LABELS: Record<string, string> = {
   admin: "Admin",
+  chef: "Chefe",
   home: "Início",
   competicoes: "Competições",
   administradores: "Administradores",
+  chefes: "Chefes",
+  colaboradores: "Colaboradores",
+  tarefas: "Tarefas",
+  times: "Times",
   prova: "Prova",
+  sobre: "Sobre",
   teste: "Teste",
 }
 

@@ -155,6 +155,8 @@ export class BalloonsService {
     dto: TeamQuestionActionDto,
     actor: Actor,
   ) {
+    await assertRoundInProgress(contestId);
+
     const { team, question, competitionId } = await this.resolveTeamAndQuestion(
       contestId,
       dto.teamId,

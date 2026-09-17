@@ -28,7 +28,7 @@ export class TeamsController {
   constructor(private readonly teamsService: TeamsService) {}
 
   @Get('competitions/:competitionId/teams')
-  @Roles(['admin', 'staff'])
+  @Roles(['admin', 'staff', 'chef'])
   @UseGuards(StaffCompetitionGuard)
   listByContest(@Param('competitionId') competitionId: string) {
     return this.teamsService.listByCompetition(competitionId);

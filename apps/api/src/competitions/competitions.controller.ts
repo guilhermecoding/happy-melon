@@ -10,9 +10,10 @@ import {
   Sse,
   UseGuards,
 } from '@nestjs/common';
-import { Roles } from '@thallesp/nestjs-better-auth';
+import { Roles, Session, type UserSession } from '@thallesp/nestjs-better-auth';
 import type { IncomingHttpHeaders } from 'node:http';
 import { map, type Observable } from 'rxjs';
+import type { auth } from '../auth/auth.js';
 import { StaffCompetitionGuard } from '../auth/staff-competition.guard.js';
 import { ZodValidationPipe } from '../common/pipes/zod-validation.pipe.js';
 import { ContestAccessEventsService } from '../contests/contest-access.events.js';
@@ -55,14 +56,14 @@ export class CompetitionsController {
   }
 
   @Get(':id')
-  @Roles(['admin', 'staff'])
+  @Roles(['admin', 'staff', 'chef'])
   @UseGuards(StaffCompetitionGuard)
   findById(@Param('id') id: string) {
     return this.competitionsService.findById(id);
   }
 
   @Sse(':id/access/events')
-  @Roles(['admin', 'staff'])
+  @Roles(['admin', 'staff', 'chef'])
   @UseGuards(StaffCompetitionGuard)
   streamAccessEvents(
     @Param('id') competitionId: string,
@@ -80,6 +81,8 @@ export class CompetitionsController {
   }
 
   @Patch(':id/staff-settings')
+  @Roles(['admin', 'chef'])
+  @UseGuards(StaffCompetitionGuard)
   updateStaffSettings(
     @Param('id') id: string,
     @Body(staffSettingsPipe) dto: StaffSettingsDto,
@@ -88,11 +91,14 @@ export class CompetitionsController {
   }
 
   @Patch(':id')
+  @Roles(['admin', 'chef'])
+  @UseGuards(StaffCompetitionGuard)
   update(
     @Param('id') id: string,
     @Body(updateCompetitionPipe) dto: UpdateCompetitionDto,
+    @Session() session: UserSession<typeof auth>,
   ) {
-    return this.competitionsService.update(id, dto);
+    return this.competitionsService.update(id, dto, session.user.role);
   }
 
   @Post(':id/rounds')

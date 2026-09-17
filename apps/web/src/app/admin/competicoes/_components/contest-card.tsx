@@ -1,6 +1,6 @@
 import React from 'react';
 import { HugeiconsIcon } from '@hugeicons/react';
-import { DateTimeIcon, Flag02Icon, ViewIcon } from '@hugeicons/core-free-icons';
+import { DateTimeIcon, Flag02Icon } from '@hugeicons/core-free-icons';
 import { formatDateTime } from '@/lib/format-data';
 import type { Contest } from '@/services/contest/contest.type';
 import Link from 'next/link';
@@ -8,7 +8,7 @@ import { Card } from '@/components/pouf/surface';
 
 type ContestCardProps = Pick<
   Contest,
-  'id' | 'name' | 'status' | 'condition' | 'rounds'
+  'id' | 'name' | 'condition' | 'rounds'
 >;
 
 const CONDITION_LABELS = {
@@ -21,7 +21,6 @@ const CONDITION_LABELS = {
 export default function ContestCard({
   name,
   id,
-  status,
   condition,
   rounds,
 }: ContestCardProps) {
@@ -36,12 +35,6 @@ export default function ContestCard({
         >
           <h2 className="text-xl font-bold text-ink">{name}</h2>
           <span className="mb-2 text-sm text-muted-foreground">ID: {id}</span>
-          <div className="flex items-start gap-2 text-muted-foreground sm:items-center">
-            <HugeiconsIcon icon={ViewIcon} className="size-4" strokeWidth={2} />
-            <span className="text-sm font-medium">
-              {status === 'active' ? 'Habilitada' : 'Desabilitada'}
-            </span>
-          </div>
           <div className="flex items-start gap-2 text-muted-foreground sm:items-center">
             <HugeiconsIcon icon={Flag02Icon} className="size-4" strokeWidth={2} />
             <span className="text-sm font-medium">{CONDITION_LABELS[condition]}</span>

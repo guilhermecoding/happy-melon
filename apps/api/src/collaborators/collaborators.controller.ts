@@ -8,10 +8,12 @@ import {
   Post,
   Req,
   Sse,
+  UseGuards,
 } from '@nestjs/common';
 import { Roles } from '@thallesp/nestjs-better-auth';
 import type { IncomingHttpHeaders } from 'node:http';
 import { map, type Observable } from 'rxjs';
+import { StaffCompetitionGuard } from '../auth/staff-competition.guard.js';
 import { ZodValidationPipe } from '../common/pipes/zod-validation.pipe.js';
 import { CollaboratorsEventsService } from './collaborators.events.js';
 import { CollaboratorsService } from './collaborators.service.js';
@@ -31,7 +33,8 @@ const updateCollaboratorPipe = new ZodValidationPipe(updateCollaboratorSchema);
 const setAccessPipe = new ZodValidationPipe(setCollaboratorAccessSchema);
 
 @Controller()
-@Roles(['admin'])
+@Roles(['admin', 'chef'])
+@UseGuards(StaffCompetitionGuard)
 export class CollaboratorsController {
   constructor(
     private readonly collaboratorsService: CollaboratorsService,

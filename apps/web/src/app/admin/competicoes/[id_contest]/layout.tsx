@@ -1,6 +1,7 @@
 import { Suspense } from 'react';
 import { notFound } from 'next/navigation';
 import Loading from '@/app/loading';
+import ScoreFreezeNotice from '@/components/contest/score-freeze-notice';
 import { ContestServiceError } from '@/services/contest/contest.error';
 import { contestService } from '@/services/contest/contest.service';
 
@@ -10,8 +11,9 @@ async function ContestLayoutContent({
 }: LayoutProps<'/admin/competicoes/[id_contest]'>) {
   const { id_contest } = await params;
 
+  let contest;
   try {
-    await contestService.get(id_contest);
+    contest = await contestService.get(id_contest);
   } catch (error) {
     if (error instanceof ContestServiceError && error.status === 404) {
       notFound();
@@ -20,7 +22,12 @@ async function ContestLayoutContent({
     throw error;
   }
 
-  return children;
+  return (
+    <>
+      {children}
+      <ScoreFreezeNotice contest={contest} />
+    </>
+  );
 }
 
 export default function ContestLayout({

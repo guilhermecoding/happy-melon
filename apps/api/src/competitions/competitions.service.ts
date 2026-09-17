@@ -1,6 +1,7 @@
 import type { IncomingHttpHeaders } from 'node:http';
 import {
   BadRequestException,
+  ForbiddenException,
   Injectable,
   InternalServerErrorException,
   NotFoundException,
@@ -78,8 +79,6 @@ export class CompetitionsService {
   async create(dto: CreateCompetitionDto) {
     this.assertIncomingRoundsDoNotOverlap(dto.rounds);
 
-    const status = this.toStatus(dto.status);
-
     for (let attempt = 0; attempt < ID_MAX_ATTEMPTS; attempt++) {
       try {
         const competition = await prisma.$transaction(async (tx) => {
@@ -87,7 +86,6 @@ export class CompetitionsService {
             data: {
               id: generateShortId(),
               name: dto.name,
-              status,
               venue: dto.venue,
             },
           });
@@ -123,8 +121,21 @@ export class CompetitionsService {
     );
   }
 
-  async update(id: string, dto: UpdateCompetitionDto) {
+  async update(
+    id: string,
+    dto: UpdateCompetitionDto,
+    actorRole?: string | null,
+  ) {
     const existing = await getCompetitionOrThrow(id);
+
+    if (actorRole === 'chef') {
+      if (dto.name !== existing.name || dto.venue !== existing.venue) {
+        throw new ForbiddenException(
+          'Chefe não pode alterar os dados da competição.',
+        );
+      }
+    }
+
     const status = this.toStatus(dto.status);
 
     const competition = await prisma.competition.update({
@@ -223,6 +234,7 @@ export class CompetitionsService {
             name: dto.name,
             startsAt,
             endsAt,
+            scoreFreezeMinutes: dto.scoreFreezeMinutes ?? null,
           },
         });
       });
@@ -230,7 +242,9 @@ export class CompetitionsService {
       const scheduleChanged =
         existing.startsAt.getTime() !== startsAt.getTime() ||
         existing.endsAt.getTime() !== endsAt.getTime() ||
-        existing.name !== dto.name;
+        existing.name !== dto.name ||
+        (existing.scoreFreezeMinutes ?? null) !==
+          (dto.scoreFreezeMinutes ?? null);
 
       if (scheduleChanged) {
         this.emitScheduleUpdated(competitionId, round);
@@ -288,6 +302,7 @@ export class CompetitionsService {
             name: dto.name,
             startsAt: new Date(dto.startsAt),
             endsAt: new Date(dto.endsAt),
+            scoreFreezeMinutes: dto.scoreFreezeMinutes ?? null,
           },
         });
       } catch (error) {

@@ -22,7 +22,6 @@ function ContestGrid({ contests }: { contests: Contest[] }) {
           key={contest.id}
           id={contest.id}
           name={contest.name}
-          status={contest.status}
           condition={contest.condition}
           rounds={contest.rounds}
         />

@@ -21,6 +21,7 @@ import Image from 'next/image'
 type ContestScheduleValue = {
     startsAt: string
     endsAt: string
+    scoreFreezeMinutes: number | null
     currentRoundId: string | null
     currentRoundName: string | null
 }
@@ -111,21 +112,19 @@ export default function CountdownContest({
                 ? {
                     startsAt: activeRound.startsAt,
                     endsAt: activeRound.endsAt,
+                    scoreFreezeMinutes: activeRound.scoreFreezeMinutes,
                     currentRoundId: schedule.currentRound?.id ?? null,
                     currentRoundName: schedule.currentRound?.name ?? null,
                 }
                 : {
                     startsAt: contest.rounds[0]?.startsAt ?? new Date().toISOString(),
                     endsAt: contest.rounds[0]?.endsAt ?? new Date().toISOString(),
+                    scoreFreezeMinutes: contest.rounds[0]?.scoreFreezeMinutes ?? null,
                     currentRoundId: null,
                     currentRoundName: null,
                 },
         [activeRound, contest.rounds, schedule.currentRound],
     )
-
-    if (!ready) {
-        return null
-    }
 
     const waitingTarget = schedule.nextRound
         ? new Date(schedule.nextRound.startsAt)
@@ -133,10 +132,11 @@ export default function CountdownContest({
     const waiting =
         schedule.condition === 'not_started' ||
         schedule.condition === 'intermission'
+    const inProgress = ready && schedule.condition === 'in_progress'
 
     return (
         <ContestScheduleContext.Provider value={scheduleValue}>
-            {waiting ? (
+            {ready && waiting ? (
                 <div className="flex min-h-0 flex-1 flex-col items-center justify-center px-4">
                     <div className="flex flex-col items-center justify-center gap-4 md:gap-6">
                         <h1 className="text-center text-xl font-bold text-muted-foreground md:text-3xl lg:text-4xl">
@@ -174,7 +174,7 @@ export default function CountdownContest({
                     </div>
                 </div>
             ) : null}
-            {schedule.condition === 'finished' ? (
+            {ready && schedule.condition === 'finished' ? (
                 <div className="flex min-h-0 flex-1 flex-col items-center justify-center px-4">
                     <div className="flex flex-col items-center justify-center gap-4">
                         <h1 className="text-center text-xl font-bold text-muted-foreground md:text-3xl lg:text-4xl">
@@ -197,7 +197,7 @@ export default function CountdownContest({
             ) : null}
             <div
                 className={
-                    schedule.condition === 'in_progress'
+                    inProgress
                         ? 'flex min-h-0 flex-1 flex-col'
                         : 'hidden'
                 }

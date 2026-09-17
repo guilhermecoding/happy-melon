@@ -24,7 +24,7 @@ import {
 const printTeamActionPipe = new ZodValidationPipe(printTeamActionSchema);
 
 @Controller()
-@Roles(['admin', 'staff'])
+@Roles(['admin', 'staff', 'chef'])
 @UseGuards(StaffCompetitionGuard)
 export class PrintsController {
   constructor(private readonly printsService: PrintsService) {}

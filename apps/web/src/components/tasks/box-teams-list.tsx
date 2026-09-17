@@ -18,12 +18,13 @@ import { TeamBalloonsDialog } from './team-balloons-dialog';
 import FlashCardTeam from './flash-card-team';
 import Spinner from '@/components/spinner';
 import EmptyIcon from '@/components/empty-icon';
-import { Input } from '../../../../../../components/pouf/Input';
-import { Button } from '../../../../../../components/pouf/Button';
+import { Input } from '@/components/pouf/Input';
+import { Button } from '@/components/pouf/Button';
 
 type BoxTeamsListProps = {
     competitionId: string;
     roundId: string;
+    canSend?: boolean;
     onDeliveryChanged?: () => void;
 };
 
@@ -55,6 +56,7 @@ function countConqueredBalloons(deliveries: BalloonDelivery[]) {
 export default function BoxTeamsList({
     competitionId,
     roundId,
+    canSend = true,
     onDeliveryChanged,
 }: BoxTeamsListProps) {
     const [teams, setTeams] = useState<Team[]>([]);
@@ -302,6 +304,7 @@ export default function BoxTeamsList({
                 contestId={roundId}
                 team={selectedTeam}
                 open={achievementsOpen}
+                canSend={canSend}
                 onDeliveryChanged={applyDelivery}
                 onOpenChange={(nextOpen) => {
                     setAchievementsOpen(nextOpen);

@@ -37,3 +37,11 @@ export function isValidStaffSession(session: ServerSession): boolean {
     session.session.activeContestId.length > 0
   );
 }
+
+export function isValidChefSession(session: ServerSession): boolean {
+  return (
+    session?.user?.role === 'chef' &&
+    typeof session.session?.activeContestId === 'string' &&
+    session.session.activeContestId.length > 0
+  );
+}

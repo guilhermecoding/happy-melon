@@ -15,3 +15,8 @@ export const staff = ac.newRole({
   user: ['list', 'get'],
   session: ['list'],
 });
+
+export const chef = ac.newRole({
+  user: ['list', 'get'],
+  session: ['list'],
+});

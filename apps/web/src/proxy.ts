@@ -23,12 +23,30 @@ function loginRedirect(request: NextRequest, pathname: string) {
   return NextResponse.redirect(loginUrl);
 }
 
+function chefHome(activeContestId: string | null, request: NextRequest) {
+  if (activeContestId) {
+    return new URL(`/chef/${activeContestId}`, request.url);
+  }
+  return new URL('/chef', request.url);
+}
+
+function staffHome(activeContestId: string | null, request: NextRequest) {
+  if (activeContestId) {
+    return new URL(`/staff/${activeContestId}`, request.url);
+  }
+  return new URL('/staff', request.url);
+}
+
 function getPostLoginRedirect(session: SessionPayload, request: NextRequest) {
   const role = getRole(session);
-  const activeContestId = session?.session?.activeContestId;
+  const activeContestId = session?.session?.activeContestId ?? null;
 
   if (role === 'staff' && activeContestId) {
-    return new URL(`/staff/${activeContestId}`, request.url);
+    return staffHome(activeContestId, request);
+  }
+
+  if (role === 'chef') {
+    return chefHome(activeContestId, request);
   }
 
   if (role === 'admin') {
@@ -55,8 +73,11 @@ export async function proxy(request: NextRequest) {
     if (role === 'admin') {
       return respond(NextResponse.redirect(new URL('/admin', request.url)));
     }
+    if (role === 'chef') {
+      return respond(NextResponse.redirect(chefHome(activeContestId, request)));
+    }
     if (role === 'staff') {
-      return respond(NextResponse.redirect(new URL('/staff', request.url)));
+      return respond(NextResponse.redirect(staffHome(activeContestId, request)));
     }
     if (sessionUncertain) {
       return respond(NextResponse.next());
@@ -66,9 +87,10 @@ export async function proxy(request: NextRequest) {
 
   if (pathname.startsWith('/admin')) {
     if (role === 'staff' && activeContestId) {
-      return respond(
-        NextResponse.redirect(new URL(`/staff/${activeContestId}`, request.url)),
-      );
+      return respond(NextResponse.redirect(staffHome(activeContestId, request)));
+    }
+    if (role === 'chef') {
+      return respond(NextResponse.redirect(chefHome(activeContestId, request)));
     }
     if (sessionUncertain) {
       return respond(NextResponse.next());
@@ -79,9 +101,48 @@ export async function proxy(request: NextRequest) {
     return respond(NextResponse.next());
   }
 
+  if (pathname.startsWith('/chef')) {
+    if (role === 'admin') {
+      return respond(NextResponse.redirect(new URL('/admin', request.url)));
+    }
+    if (role === 'staff' && activeContestId) {
+      return respond(NextResponse.redirect(staffHome(activeContestId, request)));
+    }
+    if (sessionUncertain) {
+      return respond(NextResponse.next());
+    }
+    if (role !== 'chef') {
+      return respond(loginRedirect(request, pathname));
+    }
+
+    if (
+      pathname === '/chef' ||
+      pathname === '/chef/' ||
+      pathname === '/chef/sobre'
+    ) {
+      return respond(NextResponse.next());
+    }
+
+    if (!activeContestId) {
+      return respond(loginRedirect(request, pathname));
+    }
+
+    const ownHome = `/chef/${activeContestId}`;
+    const onOwnContest =
+      pathname === ownHome || pathname.startsWith(`${ownHome}/`);
+    if (!onOwnContest) {
+      return respond(NextResponse.redirect(new URL(ownHome, request.url)));
+    }
+
+    return respond(NextResponse.next());
+  }
+
   if (pathname.startsWith('/staff')) {
     if (role === 'admin') {
       return respond(NextResponse.redirect(new URL('/admin', request.url)));
+    }
+    if (role === 'chef') {
+      return respond(NextResponse.redirect(chefHome(activeContestId, request)));
     }
     if (sessionUncertain) {
       return respond(NextResponse.next());
@@ -90,7 +151,6 @@ export async function proxy(request: NextRequest) {
       return respond(loginRedirect(request, pathname));
     }
 
-    // Allow shared staff pages without forcing the contest route.
     if (
       pathname === '/staff' ||
       pathname === '/staff/' ||
@@ -99,18 +159,22 @@ export async function proxy(request: NextRequest) {
       return respond(NextResponse.next());
     }
 
-    const staffHome = `/staff/${activeContestId}`;
+    const ownHome = `/staff/${activeContestId}`;
     const onOwnContest =
-      pathname === staffHome || pathname.startsWith(`${staffHome}/`);
+      pathname === ownHome || pathname.startsWith(`${ownHome}/`);
     if (!onOwnContest) {
-      return respond(NextResponse.redirect(new URL(staffHome, request.url)));
+      return respond(NextResponse.redirect(new URL(ownHome, request.url)));
     }
 
     return respond(NextResponse.next());
   }
 
   if (pathname === '/entrar') {
-    if (role === 'admin' || (role === 'staff' && activeContestId)) {
+    if (
+      role === 'admin' ||
+      role === 'chef' ||
+      (role === 'staff' && activeContestId)
+    ) {
       return respond(
         NextResponse.redirect(getPostLoginRedirect(session, request)),
       );
@@ -121,5 +185,5 @@ export async function proxy(request: NextRequest) {
 }
 
 export const config = {
-  matcher: ['/', '/admin/:path*', '/staff/:path*', '/entrar'],
+  matcher: ['/', '/admin/:path*', '/chef/:path*', '/staff/:path*', '/entrar'],
 };

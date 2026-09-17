@@ -8,7 +8,7 @@ import Loading from '@/app/loading';
 import { Metadata } from 'next';
 import { contestService } from '@/services/contest/contest.service';
 import { pickRoundId } from '@/services/contest/contest.type';
-import RoundSwitcher from '../_components/round-switcher';
+import RoundSwitcher from '@/components/contest/round-switcher';
 
 export const metadata: Metadata = {
   title: 'Prova',

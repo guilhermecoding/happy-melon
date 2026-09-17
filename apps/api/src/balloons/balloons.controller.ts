@@ -28,7 +28,7 @@ import {
 const teamQuestionActionPipe = new ZodValidationPipe(teamQuestionActionSchema);
 
 @Controller()
-@Roles(['admin', 'staff'])
+@Roles(['admin', 'staff', 'chef'])
 @UseGuards(StaffCompetitionGuard)
 export class BalloonsController {
   constructor(

@@ -10,35 +10,41 @@ import {
   Delete02Icon,
   EditIcon,
   IterationCwIcon,
-  ViewIcon,
 } from '@hugeicons/core-free-icons';
 import { formatDateTime, toDateTimeLocalValue } from '@/lib/format-data';
 import { AdminPasswordConfirmDialog } from '@/components/admin-password-confirm-dialog';
 import { Button } from '@/components/pouf/Button';
-import { Badge } from '@/components/pouf/media';
 import { Field, Input } from '@/components/pouf/Input';
 import { Sheet } from '@/components/pouf/sheet';
 import { toast } from '@/components/pouf/toaster';
 import { contestService } from '@/services/contest/contest.service';
 import { getContestErrorMessage } from '@/services/contest/contest.error';
 import type { Contest, ContestRound } from '@/services/contest/contest.type';
-import { EditContestSheet } from '../../_components/edit-contest-sheet';
-import { roundFormSchema } from '../../_components/contest-schema';
+import { EditContestSheet } from '@/app/admin/competicoes/_components/edit-contest-sheet';
+import { parseScoreFreezeMinutes, roundFormSchema } from '@/app/admin/competicoes/_components/contest-schema';
 
 type BoxContentContestViewProps = {
   contest: Contest;
+  editable?: boolean;
 };
 
 type RoundDraft = {
   name: string;
   startsAt: string;
   endsAt: string;
+  scoreFreezeMinutes: string;
 };
 
-const EMPTY_ROUND: RoundDraft = { name: '', startsAt: '', endsAt: '' };
+const EMPTY_ROUND: RoundDraft = {
+  name: '',
+  startsAt: '',
+  endsAt: '',
+  scoreFreezeMinutes: '',
+};
 
 export default function BoxContentContestView({
   contest: initialContest,
+  editable = true,
 }: BoxContentContestViewProps) {
   const router = useRouter();
   const [contest, setContest] = useState(initialContest);
@@ -74,6 +80,8 @@ export default function BoxContentContestView({
       name: round.name,
       startsAt: toDateTimeLocalValue(round.startsAt),
       endsAt: toDateTimeLocalValue(round.endsAt),
+      scoreFreezeMinutes:
+        round.scoreFreezeMinutes != null ? String(round.scoreFreezeMinutes) : '',
     });
     setRoundError(undefined);
     setRoundSheetOpen(true);
@@ -92,6 +100,7 @@ export default function BoxContentContestView({
       name: parsed.data.name,
       startsAt: new Date(parsed.data.startsAt).toISOString(),
       endsAt: new Date(parsed.data.endsAt).toISOString(),
+      scoreFreezeMinutes: parseScoreFreezeMinutes(parsed.data.scoreFreezeMinutes),
     };
 
     try {
@@ -176,20 +185,6 @@ export default function BoxContentContestView({
           <span className="text-lg font-bold">{contest.id}</span>
         </div>
 
-        <div className="flex flex-col">
-          <div className="flex items-center gap-1 text-muted-foreground font-medium">
-            <HugeiconsIcon
-              icon={ViewIcon}
-              className="size-4 shrink-0"
-              strokeWidth={2}
-            />
-            <span>Status</span>
-          </div>
-          <Badge tone={contest.status === 'active' ? 'mint' : 'pink'}>
-            {contest.status === 'active' ? 'Habilitada' : 'Desabilitada'}
-          </Badge>
-        </div>
-
         <div className="mt-2 flex flex-col gap-2">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-1">
@@ -198,10 +193,12 @@ export default function BoxContentContestView({
                 Rodadas
               </span>
             </div>
-            <Button size="sm" tone="mint" onClick={openCreateRound}>
-              <HugeiconsIcon icon={Add01Icon} className="size-4 shrink-0" strokeWidth={2} />
-              Nova
-            </Button>
+            {editable ? (
+              <Button size="sm" tone="mint" onClick={openCreateRound}>
+                <HugeiconsIcon icon={Add01Icon} className="size-4 shrink-0" strokeWidth={2} />
+                Nova
+              </Button>
+            ) : null}
           </div>
           {contest.rounds.map((round) => (
             <div
@@ -210,22 +207,24 @@ export default function BoxContentContestView({
             >
               <div className="flex items-start justify-between gap-2">
                 <span className="font-bold">{round.name}</span>
-                <div className="flex gap-1">
-                  <Button
-                    size="sm"
-                    variant="quiet"
-                    onClick={() => openEditRound(round)}
-                  >
-                    <HugeiconsIcon icon={EditIcon} className="size-4 shrink-0" strokeWidth={2} />
-                  </Button>
-                  <Button
-                    size="sm"
-                    variant="quiet"
-                    onClick={() => openDeleteRound(round)}
-                  >
-                    <HugeiconsIcon icon={Delete02Icon} className="size-4 shrink-0" strokeWidth={2} />
-                  </Button>
-                </div>
+                {editable ? (
+                  <div className="flex gap-1">
+                    <Button
+                      size="sm"
+                      variant="quiet"
+                      onClick={() => openEditRound(round)}
+                    >
+                      <HugeiconsIcon icon={EditIcon} className="size-4 shrink-0" strokeWidth={2} />
+                    </Button>
+                    <Button
+                      size="sm"
+                      variant="quiet"
+                      onClick={() => openDeleteRound(round)}
+                    >
+                      <HugeiconsIcon icon={Delete02Icon} className="size-4 shrink-0" strokeWidth={2} />
+                    </Button>
+                  </div>
+                ) : null}
               </div>
               <div className="flex items-center gap-1 text-sm text-muted-foreground">
                 <HugeiconsIcon icon={DateTimeIcon} className="size-4 shrink-0" strokeWidth={2} />
@@ -235,103 +234,132 @@ export default function BoxContentContestView({
             </div>
           ))}
         </div>
-        <div className="mt-2 flex justify-end">
-          <Button tone="orange" size="sm" onClick={() => setEditOpen(true)}>
-            <HugeiconsIcon
-              icon={EditIcon}
-              className="size-4 shrink-0"
-              strokeWidth={2}
-            />
-            Editar
-          </Button>
-        </div>
-      </div>
-
-      <EditContestSheet
-        contest={contest}
-        open={editOpen}
-        onOpenChange={setEditOpen}
-        onUpdated={handleUpdated}
-      />
-
-      <Sheet
-        open={roundSheetOpen}
-        onOpenChange={setRoundSheetOpen}
-        title={editingRound ? 'Editar rodada' : 'Nova rodada'}
-        description="Defina o nome e o horário desta fatia da competição."
-      >
-        <div className="flex flex-col gap-4">
-          <Field label="Nome">
-            {(id) => (
-              <Input
-                id={id}
-                value={roundDraft.name}
-                onChange={(value) =>
-                  setRoundDraft((current) => ({ ...current, name: value }))
-                }
+        {editable ? (
+          <div className="mt-2 flex justify-end">
+            <Button tone="orange" size="sm" onClick={() => setEditOpen(true)}>
+              <HugeiconsIcon
+                icon={EditIcon}
+                className="size-4 shrink-0"
+                strokeWidth={2}
               />
-            )}
-          </Field>
-          <Field label="Início">
-            {(id) => (
-              <Input
-                id={id}
-                type="datetime-local"
-                value={roundDraft.startsAt}
-                onChange={(value) =>
-                  setRoundDraft((current) => ({ ...current, startsAt: value }))
-                }
-              />
-            )}
-          </Field>
-          <Field label="Término">
-            {(id) => (
-              <Input
-                id={id}
-                type="datetime-local"
-                value={roundDraft.endsAt}
-                onChange={(value) =>
-                  setRoundDraft((current) => ({ ...current, endsAt: value }))
-                }
-              />
-            )}
-          </Field>
-          {roundError ? (
-            <p role="alert" className="text-sm text-destructive">
-              {roundError}
-            </p>
-          ) : null}
-          <div className="flex justify-end">
-            <Button tone="mint" loading={savingRound} onClick={() => void handleSaveRound()}>
-              Salvar
+              Editar
             </Button>
           </div>
-        </div>
-      </Sheet>
+        ) : null}
+      </div>
 
-      <AdminPasswordConfirmDialog
-        open={Boolean(roundToDelete)}
-        onOpenChange={(nextOpen) => {
-          if (!nextOpen) {
-            setRoundToDelete(null);
-            setDeleteRoundError(undefined);
-          }
-        }}
-        title="Confirmar exclusão da rodada"
-        description={
-          <>
-            Digite a senha do administrador logado para excluir a rodada{' '}
-            <strong>{roundToDelete?.name}</strong>. Questões da prova, balões,
-            impressões e o histórico desta rodada serão apagados. Esta ação não
-            pode ser desfeita.
-          </>
-        }
-        confirmLabel="Apagar rodada"
-        confirmTone="pink"
-        isLoading={deletingRound}
-        error={deleteRoundError}
-        onConfirm={handleConfirmDeleteRound}
-      />
+      {editable ? (
+        <>
+          <EditContestSheet
+            contest={contest}
+            open={editOpen}
+            onOpenChange={setEditOpen}
+            onUpdated={handleUpdated}
+          />
+
+          <Sheet
+            open={roundSheetOpen}
+            onOpenChange={setRoundSheetOpen}
+            title={editingRound ? 'Editar rodada' : 'Nova rodada'}
+            description="Defina o nome e o horário desta fatia da competição."
+          >
+            <div className="flex flex-col gap-4">
+              <Field label="Nome">
+                {(id) => (
+                  <Input
+                    id={id}
+                    value={roundDraft.name}
+                    onChange={(value) =>
+                      setRoundDraft((current) => ({ ...current, name: value }))
+                    }
+                  />
+                )}
+              </Field>
+              <Field label="Início">
+                {(id) => (
+                  <Input
+                    id={id}
+                    type="datetime-local"
+                    value={roundDraft.startsAt}
+                    onChange={(value) =>
+                      setRoundDraft((current) => ({ ...current, startsAt: value }))
+                    }
+                  />
+                )}
+              </Field>
+              <Field label="Término">
+                {(id) => (
+                  <Input
+                    id={id}
+                    type="datetime-local"
+                    value={roundDraft.endsAt}
+                    onChange={(value) =>
+                      setRoundDraft((current) => ({ ...current, endsAt: value }))
+                    }
+                  />
+                )}
+              </Field>
+              <Field
+                label="Congelamento"
+                description="Define quando o placar será congelado nos minutos restantes."
+              >
+                {(id, describedBy) => (
+                  <Input
+                    id={id}
+                    describedBy={describedBy}
+                    type="number"
+                    inputMode="numeric"
+                    placeholder="Ex: 20"
+                    min={1}
+                    step={1}
+                    value={roundDraft.scoreFreezeMinutes}
+                    onChange={(value) =>
+                      setRoundDraft((current) => ({
+                        ...current,
+                        scoreFreezeMinutes: value,
+                      }))
+                    }
+                  />
+                )}
+              </Field>
+              {roundError ? (
+                <p role="alert" className="text-sm text-destructive">
+                  {roundError}
+                </p>
+              ) : null}
+              <div className="flex justify-end">
+                <Button tone="mint" loading={savingRound} onClick={() => void handleSaveRound()}>
+                  Salvar
+                </Button>
+              </div>
+            </div>
+          </Sheet>
+
+          <AdminPasswordConfirmDialog
+            open={Boolean(roundToDelete)}
+            onOpenChange={(nextOpen) => {
+              if (!nextOpen) {
+                setRoundToDelete(null);
+                setDeleteRoundError(undefined);
+              }
+            }}
+            title="Confirmar exclusão da rodada"
+            description={
+              <>
+                Digite a senha do administrador logado para excluir a rodada{' '}
+                <strong>{roundToDelete?.name}</strong>. Questões da prova, balões,
+                impressões e o histórico desta rodada serão apagados. Esta ação não
+                pode ser desfeita.
+              </>
+            }
+            confirmLabel="Apagar rodada"
+            confirmTone="pink"
+            isLoading={deletingRound}
+            error={deleteRoundError}
+            onConfirm={handleConfirmDeleteRound}
+          />
+        </>
+      ) : null}
     </>
   );
 }

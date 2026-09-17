@@ -18,7 +18,7 @@ import { ContestTasksEventsService } from './contest-tasks.events.js';
 import { ContestTasksService } from './contest-tasks.service.js';
 
 @Controller()
-@Roles(['admin', 'staff'])
+@Roles(['admin', 'staff', 'chef'])
 @UseGuards(StaffCompetitionGuard)
 export class ContestTasksController {
   constructor(

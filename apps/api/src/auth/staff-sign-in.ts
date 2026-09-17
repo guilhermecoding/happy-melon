@@ -103,7 +103,7 @@ async function createCollaboratorMembership(
   );
 }
 
-async function findActiveCompetition(contestCode: string) {
+async function findCompetition(contestCode: string) {
   const competition = await prisma.competition.findUnique({
     where: { id: contestCode },
   });
@@ -138,7 +138,7 @@ export const staffSignIn = () =>
         async (ctx) => {
           const email = ctx.body.email.toLowerCase().trim();
           const contestCode = ctx.body.contestCode.trim();
-          const contest = await findActiveCompetition(contestCode);
+          const contest = await findCompetition(contestCode);
 
           const found = await ctx.context.internalAdapter.findUserByEmail(email);
           if (!found?.user) {
@@ -159,7 +159,7 @@ export const staffSignIn = () =>
             });
           }
 
-          if (user.role === 'admin') {
+          if (user.role === 'admin' || user.role === 'chef') {
             throw APIError.from('FORBIDDEN', {
               message: 'Use o login de administrador para esta conta.',
               code: 'ADMIN_USE_PASSWORD_LOGIN',
@@ -250,7 +250,7 @@ export const staffSignIn = () =>
           const email = ctx.body.email.toLowerCase().trim();
           const contestCode = ctx.body.contestCode.trim();
           const name = ctx.body.name.trim();
-          const contest = await findActiveCompetition(contestCode);
+          const contest = await findCompetition(contestCode);
 
           const existing = await ctx.context.internalAdapter.findUserByEmail(
             email,

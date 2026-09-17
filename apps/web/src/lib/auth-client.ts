@@ -2,7 +2,7 @@ import { createAuthClient } from 'better-auth/react';
 import { adminClient } from 'better-auth/client/plugins';
 import { inferAdditionalFields } from 'better-auth/client/plugins';
 import type {} from 'zod';
-import { ac, admin, staff } from '@/lib/auth/permissions';
+import { ac, admin, chef, staff } from '@/lib/auth/permissions';
 import { staffSignInClient } from '@/lib/auth/staff-sign-in-client';
 
 function getAuthBaseUrl() {
@@ -25,7 +25,7 @@ export const authClient = createAuthClient({
   plugins: [
     adminClient({
       ac,
-      roles: { admin, staff },
+      roles: { admin, staff, chef },
     }),
     staffSignInClient(),
     inferAdditionalFields({

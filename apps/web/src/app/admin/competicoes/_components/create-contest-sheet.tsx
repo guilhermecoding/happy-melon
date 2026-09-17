@@ -7,13 +7,13 @@ import { contestService } from '@/services/contest/contest.service';
 import { getContestErrorMessage } from '@/services/contest/contest.error';
 import type { Contest } from '@/services/contest/contest.type';
 import { Button } from '@/components/pouf/Button';
-import { Select } from '@/components/pouf/controls';
 import { Field, Input } from '@/components/pouf/Input';
 import { Sheet } from '@/components/pouf/sheet';
 import { toast } from '@/components/pouf/toaster';
 import { fieldError } from '@/lib/form';
 import {
   contestFormSchema,
+  parseScoreFreezeMinutes,
   type ContestFormValues,
 } from './contest-schema';
 import {
@@ -23,14 +23,9 @@ import {
   EyeClosedIcon,
 } from '@hugeicons/core-free-icons';
 
-const STATUS_OPTIONS = [
-  { value: 'active', label: 'Habilitada' },
-  { value: 'inactive', label: 'Desabilitada' },
-];
-
 const DEFAULT_ROUNDS: ContestFormValues['rounds'] = [
-  { name: 'Aquecimento', startsAt: '', endsAt: '' },
-  { name: 'Prova', startsAt: '', endsAt: '' },
+  { name: 'Aquecimento', startsAt: '', endsAt: '', scoreFreezeMinutes: '' },
+  { name: 'Prova', startsAt: '', endsAt: '', scoreFreezeMinutes: '' },
 ];
 
 type CreateContestSheetProps = {
@@ -49,7 +44,6 @@ export function CreateContestSheet({
   const form = useForm({
     defaultValues: {
       name: '',
-      status: 'active' as ContestFormValues['status'],
       venue: '',
       rounds: DEFAULT_ROUNDS,
     } satisfies ContestFormValues,
@@ -61,12 +55,12 @@ export function CreateContestSheet({
       try {
         const contest = await contestService.create({
           name: value.name,
-          status: value.status,
           venue: value.venue,
           rounds: value.rounds.map((round) => ({
             name: round.name,
             startsAt: new Date(round.startsAt).toISOString(),
             endsAt: new Date(round.endsAt).toISOString(),
+            scoreFreezeMinutes: parseScoreFreezeMinutes(round.scoreFreezeMinutes),
           })),
         });
         onCreated(contest);
@@ -125,26 +119,6 @@ export function CreateContestSheet({
             )}
           </form.Field>
 
-          <form.Field name="status">
-            {(field) => (
-              <Field label="Status" error={fieldError(field.state.meta)}>
-                {(id, describedBy) => (
-                  <Select
-                    id={id}
-                    describedBy={describedBy}
-                    value={field.state.value}
-                    options={STATUS_OPTIONS}
-                    onChange={(value) => {
-                      if (value === 'active' || value === 'inactive') {
-                        field.handleChange(value);
-                      }
-                    }}
-                  />
-                )}
-              </Field>
-            )}
-          </form.Field>
-
           <form.Field name="venue">
             {(field) => (
               <Field label="Local da sede" error={fieldError(field.state.meta)}>
@@ -178,6 +152,7 @@ export function CreateContestSheet({
                         name: `Rodada ${roundsField.state.value.length + 1}`,
                         startsAt: '',
                         endsAt: '',
+                        scoreFreezeMinutes: '',
                       })
                     }
                   >
@@ -256,6 +231,32 @@ export function CreateContestSheet({
                               name={field.name}
                               describedBy={describedBy}
                               type="datetime-local"
+                              value={field.state.value}
+                              onBlur={field.handleBlur}
+                              onChange={field.handleChange}
+                              invalid={!field.state.meta.isValid}
+                            />
+                          )}
+                        </Field>
+                      )}
+                    </form.Field>
+                    <form.Field name={`rounds[${index}].scoreFreezeMinutes`}>
+                      {(field) => (
+                        <Field
+                          label="Congelamento"
+                          description="Define quando o placar será congelado nos minutos restantes."
+                          error={fieldError(field.state.meta)}
+                        >
+                          {(id, describedBy) => (
+                            <Input
+                              id={id}
+                              name={field.name}
+                              describedBy={describedBy}
+                              placeholder="Ex: 20"
+                              type="number"
+                              inputMode="numeric"
+                              min={1}
+                              step={1}
                               value={field.state.value}
                               onBlur={field.handleBlur}
                               onChange={field.handleChange}
