@@ -54,6 +54,13 @@ export function StaffShell({ children }: { children: React.ReactNode }) {
     }
 
     function handleAccessEvent(event: ContestAccessEvent) {
+      if (event.type === CONTEST_ACCESS_EVENT_TYPE.COLLABORATORS_DISABLED) {
+        void forceLogout(
+          'O acesso dos colaboradores foi desabilitado. Você foi desconectado.',
+        )
+        return
+      }
+
       if (
         event.type === CONTEST_ACCESS_EVENT_TYPE.COLLABORATOR_REVOKED &&
         event.userId === userId

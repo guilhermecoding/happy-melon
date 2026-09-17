@@ -3,6 +3,8 @@ import type { CompetitionCondition } from '@repo/shared';
 export type { CompetitionCondition } from '@repo/shared';
 export { getCompetitionSchedule, isScoreFreezeActive } from '@repo/shared';
 
+export type ContestStatus = 'active' | 'inactive';
+
 export type ContestCondition = 'not_started' | 'in_progress' | 'finished';
 
 export type ContestRound = {
@@ -19,6 +21,7 @@ export type ContestRound = {
 export type Contest = {
   id: string;
   name: string;
+  status: ContestStatus;
   venue: string;
   balloonLimitEnabled: boolean;
   balloonLimit: number | null;
@@ -53,6 +56,7 @@ export type CreateContestInput = {
 
 export type UpdateContestInput = {
   name: string;
+  status: ContestStatus;
   venue: string;
 };
 

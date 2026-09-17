@@ -54,6 +54,7 @@ export function EditContestSheet({
       try {
         const updatedContest = await contestService.update(contest.id, {
           name: value.name,
+          status: contest.status,
           venue: value.venue,
         });
         onUpdated(updatedContest);

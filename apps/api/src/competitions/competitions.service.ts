@@ -1,6 +1,7 @@
 import type { IncomingHttpHeaders } from 'node:http';
 import {
   BadRequestException,
+  ForbiddenException,
   Injectable,
   InternalServerErrorException,
   NotFoundException,
@@ -9,6 +10,7 @@ import {
 import { APIError } from 'better-auth/api';
 import { fromNodeHeaders } from 'better-auth/node';
 import {
+  ContestStatus,
   prisma,
   type Competition,
   type Contest,
@@ -21,6 +23,7 @@ import {
   roundsOverlap,
 } from '@repo/shared';
 import { auth } from '../auth/auth.js';
+import { revokeStaffSessionsForContest } from '../auth/staff-session-access.js';
 import {
   generateShortId,
   ID_MAX_ATTEMPTS,
@@ -30,6 +33,7 @@ import {
 import { ContestTasksEventsService } from '../contest-tasks/contest-tasks.events.js';
 import { ContestAccessEventsService } from '../contests/contest-access.events.js';
 import type {
+  ContestStatusDto,
   CreateCompetitionDto,
   CreateRoundDto,
   DeleteRoundDto,
@@ -120,17 +124,40 @@ export class CompetitionsService {
   async update(
     id: string,
     dto: UpdateCompetitionDto,
+    actorRole?: string | null,
   ) {
-    await getCompetitionOrThrow(id);
+    const existing = await getCompetitionOrThrow(id);
+
+    if (actorRole === 'chef') {
+      if (dto.name !== existing.name || dto.venue !== existing.venue) {
+        throw new ForbiddenException(
+          'Chefe não pode alterar os dados da competição.',
+        );
+      }
+    }
+
+    const status = this.toStatus(dto.status);
 
     const competition = await prisma.competition.update({
       where: { id },
       data: {
         name: dto.name,
+        status,
         venue: dto.venue,
       },
       include: { rounds: { orderBy: { startsAt: 'asc' } } },
     });
+
+    if (
+      existing.status === ContestStatus.ACTIVE &&
+      status === ContestStatus.INACTIVE
+    ) {
+      await revokeStaffSessionsForContest(id);
+      this.contestAccessEvents.emit(id, {
+        type: CONTEST_ACCESS_EVENT_TYPE.COLLABORATORS_DISABLED,
+        contestId: id,
+      });
+    }
 
     return this.toResponse(competition);
   }
@@ -386,6 +413,14 @@ export class CompetitionsService {
     });
   }
 
+  private toStatus(status: ContestStatusDto): ContestStatus {
+    return status === 'active' ? ContestStatus.ACTIVE : ContestStatus.INACTIVE;
+  }
+
+  private toStatusDto(status: ContestStatus): ContestStatusDto {
+    return status === ContestStatus.ACTIVE ? 'active' : 'inactive';
+  }
+
   private toResponse(
     competition: Competition & { rounds: Contest[] },
   ) {
@@ -394,6 +429,7 @@ export class CompetitionsService {
     return {
       id: competition.id,
       name: competition.name,
+      status: this.toStatusDto(competition.status),
       venue: competition.venue,
       balloonLimitEnabled: competition.balloonLimitEnabled,
       balloonLimit: competition.balloonLimit,

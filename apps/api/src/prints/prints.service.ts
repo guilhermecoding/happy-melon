@@ -29,7 +29,10 @@ import {
 } from '../common/short-id.js';
 import { getRoundOrThrow } from '../competitions/round-access.js';
 import { ContestTasksEventsService } from '../contest-tasks/contest-tasks.events.js';
-import { assertRoundInProgress } from '../contests/contest-window.js';
+import {
+  assertCompetitionActiveForRound,
+  assertRoundInProgress,
+} from '../contests/contest-window.js';
 import { LobbyCapacityService } from '../contest-tasks/lobby-capacity.service.js';
 import {
   teamFieldsFrom,
@@ -327,6 +330,7 @@ export class PrintsService {
     actor: Actor,
   ): Promise<StaffTask> {
     const round = await this.ensureContestExists(contestId);
+    await assertCompetitionActiveForRound(contestId);
     const competitionId = round.competitionId;
 
     const processingStatus = this.toPrismaStatus(

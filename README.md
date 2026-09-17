@@ -60,7 +60,7 @@ Antes da prova (e entre uma rodada e outra), veem o cronômetro. Durante a rodad
 3. Em **Prova**, escolha a rodada e cadastre as questões (identificador, título e cor do balão). Sem questão, não há balão para confirmar.
 4. Em **Times**, cadastre os times ou importe em massa. Sala e máquina aparecem para o colaborador na hora da entrega.
 5. Em **Chefes**, adicione nome e e-mail, copie a senha e ligue o acesso de cada chefe.
-6. Em **Colaboradores**, convide quem já conhece o e-mail ou compartilhe o QR e o código. Ligue o acesso de cada pessoa e, se quiser, defina limite de balões no lobby e tempo para entregar.
+6. Em **Colaboradores**, convide quem já conhece o e-mail ou compartilhe o QR e o código. Ligue o acesso e, se quiser, defina limite de balões no lobby e tempo para entregar.
 7. Os colaboradores entram em **Colaborador** com e-mail e código. Os chefes entram em **Administrador ou Chefe de Sala** com e-mail e senha.
 
 ### 2. Durante a prova
@@ -72,13 +72,13 @@ Antes da prova (e entre uma rodada e outra), veem o cronômetro. Durante a rodad
 3. O colaborador, na fila **Tarefas**, pega o balão ou a impressão. A tarefa vai para o **Lobby**.
 4. No **Lobby**, ele vai até o time (sala e máquina em **Detalhes do time**) e confirma a entrega.
 5. Acompanhe o **Histórico de tarefas**. Se os horários mudarem, os colaboradores são avisados na hora.
-6. Para tirar alguém da operação, desligue o acesso dessa pessoa.
+6. Para tirar alguém da operação, desligue o acesso dessa pessoa. Para pausar o salão inteiro, desligue o acesso dos colaboradores.
 
 ### 3. Depois da prova
 
 1. No término da última rodada, os colaboradores veem **A competição finalizou** e não pegam nem entregam mais tarefas.
 2. Revise o **Histórico de tarefas** e as conquistas de cada time.
-3. Se quiser, desligue o acesso de cada colaborador. Competições encerradas aparecem em **Finalizadas**.
+3. Se quiser, desabilite o acesso dos colaboradores. Competições encerradas aparecem em **Finalizadas**.
 
 Fluxo de um balão: **Confirmar** → fila **Tarefas** → **Levantar balão** → **Lobby** → confirmar entrega.
 

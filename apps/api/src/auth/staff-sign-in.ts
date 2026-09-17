@@ -2,7 +2,7 @@ import { randomBytes } from 'node:crypto';
 import type { BetterAuthPlugin } from 'better-auth';
 import { APIError, createAuthEndpoint } from 'better-auth/api';
 import { setSessionCookie } from 'better-auth/cookies';
-import { prisma } from '@repo/database';
+import { ContestStatus, prisma } from '@repo/database';
 import { COLLABORATOR_EVENT_TYPE } from '@repo/shared';
 import { z } from 'zod';
 import {
@@ -112,6 +112,13 @@ async function findCompetition(contestCode: string) {
     throw APIError.from('NOT_FOUND', {
       message: 'Competição não encontrada.',
       code: 'CONTEST_NOT_FOUND',
+    });
+  }
+
+  if (competition.status !== ContestStatus.ACTIVE) {
+    throw APIError.from('FORBIDDEN', {
+      message: 'O acesso dos colaboradores está desabilitado para esta competição.',
+      code: 'CONTEST_INACTIVE',
     });
   }
 

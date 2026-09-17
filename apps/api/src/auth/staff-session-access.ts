@@ -1,4 +1,17 @@
-import { prisma } from '@repo/database';
+import { ContestStatus, prisma } from '@repo/database';
+
+/**
+ * Ends all staff sessions bound to a competition (e.g. when collaborator access
+ * is disabled for the whole event). Chef sessions stay so the chef can re-enable access.
+ */
+export async function revokeStaffSessionsForContest(competitionId: string) {
+  await prisma.session.deleteMany({
+    where: {
+      activeContestId: competitionId,
+      user: { role: 'staff' },
+    },
+  });
+}
 
 /**
  * Ends sessions of one collaborator on a specific competition.
@@ -33,7 +46,7 @@ export type StaffSessionAccessCheck =
     }
   | {
       valid: false;
-      reason: 'access_disabled' | 'banned' | 'not_member';
+      reason: 'contest_inactive' | 'access_disabled' | 'banned' | 'not_member';
     };
 
 /**
@@ -50,7 +63,7 @@ export async function checkStaffSessionAccess(
     }),
     prisma.competition.findUnique({
       where: { id: competitionId },
-      select: { id: true },
+      select: { status: true },
     }),
     prisma.contestCollaborator.findUnique({
       where: {
@@ -68,8 +81,8 @@ export async function checkStaffSessionAccess(
     return { valid: false, reason: 'banned' };
   }
 
-  if (!competition) {
-    return { valid: false, reason: 'not_member' };
+  if (!competition || competition.status !== ContestStatus.ACTIVE) {
+    return { valid: false, reason: 'contest_inactive' };
   }
 
   if (!membership) {
@@ -95,6 +108,7 @@ export type ChefSessionAccessCheck =
 
 /**
  * Whether a chef session may keep using the given competition.
+ * Does not require the competition to be ACTIVE — chefs can re-enable collaborator access.
  */
 export async function checkChefSessionAccess(
   userId: string,

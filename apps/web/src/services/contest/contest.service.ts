@@ -258,6 +258,7 @@ export const contestService = {
     try {
       const parsed = JSON.parse(raw) as ContestAccessEvent;
       if (
+        parsed?.type === CONTEST_ACCESS_EVENT_TYPE.COLLABORATORS_DISABLED ||
         parsed?.type === CONTEST_ACCESS_EVENT_TYPE.COLLABORATOR_REVOKED ||
         parsed?.type === CONTEST_ACCESS_EVENT_TYPE.SCHEDULE_UPDATED ||
         parsed?.type === CONTEST_ACCESS_EVENT_TYPE.ROUND_CHANGED
