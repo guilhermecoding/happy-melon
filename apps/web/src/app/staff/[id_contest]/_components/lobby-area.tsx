@@ -11,6 +11,7 @@ import { IconButton } from '@/components/pouf/Button';
 import { Dialog } from '@/components/pouf/controls';
 import { Badge } from '@/components/pouf/media';
 import { Card } from '@/components/pouf/surface';
+import { SlideToConfirm } from '@/components/slide-to-confirm';
 import { cn } from '@/lib/utils';
 import {
   getBalloonColorLabel,
@@ -19,7 +20,6 @@ import {
 import {
   Alien02Icon,
   ArrowUp01Icon, AtSignIcon, BadgeInfoIcon,
-  CheckmarkCircle02Icon,
   Clock01Icon,
   ComputerIcon,
   Door01Icon,
@@ -75,6 +75,24 @@ function getTaskSubtitle(task: StaffTask): string {
   return `Balão ${label} em rota de entrega`;
 }
 
+function getTimeoutRemainingMs(
+  claimedAt: string,
+  timeoutMinutes: number,
+  nowMs: number,
+): number {
+  return Math.max(
+    0,
+    new Date(claimedAt).getTime() + timeoutMinutes * 60_000 - nowMs,
+  );
+}
+
+function formatRemainingMmSs(msRemaining: number): string {
+  const total = Math.max(0, Math.floor(msRemaining / 1000));
+  const minutes = Math.floor(total / 60);
+  const seconds = total % 60;
+  return `${String(minutes).padStart(2, '0')}:${String(seconds).padStart(2, '0')}`;
+}
+
 function getTimeoutRemainingPercent(
   claimedAt: string,
   timeoutMinutes: number,
@@ -83,15 +101,14 @@ function getTimeoutRemainingPercent(
   const totalMs = timeoutMinutes * 60_000;
   if (totalMs <= 0) return 0;
 
-  const remainingMs = new Date(claimedAt).getTime() + totalMs - nowMs;
-  return Math.min(100, Math.max(0, (remainingMs / totalMs) * 100));
+  return Math.min(100, Math.max(0, (getTimeoutRemainingMs(claimedAt, timeoutMinutes, nowMs) / totalMs) * 100));
 }
 
-function getTimeoutBarClass(percent: number): string {
-  if (percent > 60) return 'bg-mint';
-  if (percent > 40) return 'bg-yellow';
-  if (percent > 20) return 'bg-orange';
-  return 'bg-red-500';
+function getTimeoutFillClass(percent: number): string {
+  if (percent > 60) return 'bg-mint/40';
+  if (percent > 40) return 'bg-yellow/40';
+  if (percent > 20) return 'bg-orange/40';
+  return 'bg-red-500/25';
 }
 
 function displayOrDash(value: string | null | undefined): string {
@@ -101,35 +118,45 @@ function displayOrDash(value: string | null | undefined): string {
 
 type LobbyTaskItemProps = {
   task: StaffTask;
-  delivering: boolean;
   nowMs: number;
   deliveryTimeoutMinutes: number | null;
-  onDeliver: (task: StaffTask) => void;
   onOpenInfo: (task: StaffTask) => void;
 };
 
 function LobbyTaskItem({
   task,
-  delivering,
   nowMs,
   deliveryTimeoutMinutes,
-  onDeliver,
   onOpenInfo,
 }: LobbyTaskItemProps) {
   const isPrint = task.kind === TASK_KIND.PRINT_TASK;
   const balloonColor = toBalloonColor(task.balloonColor ?? '');
   const claimedAt = task.claimedAt;
-  const showTimeoutBar =
+  const showTimeoutFill =
     deliveryTimeoutMinutes != null && claimedAt != null;
   const remainingPercent =
-    showTimeoutBar && deliveryTimeoutMinutes != null && claimedAt
+    showTimeoutFill && deliveryTimeoutMinutes != null && claimedAt
       ? getTimeoutRemainingPercent(claimedAt, deliveryTimeoutMinutes, nowMs)
       : 0;
 
   return (
     <Card variant="flush">
       <div className="relative overflow-hidden rounded-card">
-        <div className="flex items-center gap-2 px-3 py-3">
+        {showTimeoutFill ? (
+          <div
+            className="pointer-events-none absolute inset-0 z-0 overflow-hidden"
+            aria-hidden
+          >
+            <div
+              className={cn(
+                'h-full transition-[width] duration-1000 ease-linear',
+                getTimeoutFillClass(remainingPercent),
+              )}
+              style={{ width: `${remainingPercent}%` }}
+            />
+          </div>
+        ) : null}
+        <div className="relative z-10 flex items-center gap-2 px-3 py-3">
           {isPrint ? (
             <PrintIcon className="size-8 shrink-0" strokeWidth={1.5} />
           ) : (
@@ -147,7 +174,7 @@ function LobbyTaskItem({
               </span>
             </div>
           </div>
-          <div className="ml-auto flex shrink-0 items-center gap-1.5">
+          <div className="ml-auto flex shrink-0 items-center">
             <IconButton
               tone="blue"
               size="sm"
@@ -156,43 +183,8 @@ function LobbyTaskItem({
               label="Detalhes do time"
               onClick={() => onOpenInfo(task)}
             />
-            <IconButton
-              tone="mint"
-              size="sm"
-              variant="solid"
-              icon={<HugeiconsIcon icon={CheckmarkCircle02Icon} strokeWidth={2} />}
-              label="Marcar como entregue"
-              disabled={delivering}
-              loading={delivering}
-              onClick={(event) => {
-                const rect = event.currentTarget.getBoundingClientRect();
-                playTaskDoneSound();
-                void confetti({
-                  zIndex: 9999,
-                  origin: {
-                    x: (rect.left + rect.width / 2) / window.innerWidth,
-                    y: (rect.top + rect.height / 2) / window.innerHeight,
-                  },
-                });
-                onDeliver(task);
-              }}
-            />
           </div>
         </div>
-        {showTimeoutBar ? (
-          <div
-            className="pointer-events-none absolute inset-x-0 bottom-0 h-1.5 overflow-hidden"
-            aria-hidden
-          >
-            <div
-              className={cn(
-                'h-full transition-[width] duration-1000 ease-linear',
-                getTimeoutBarClass(remainingPercent),
-              )}
-              style={{ width: `${remainingPercent}%` }}
-            />
-          </div>
-        ) : null}
       </div>
     </Card>
   );
@@ -223,6 +215,25 @@ export default function LobbyArea({
     const id = window.setInterval(() => setNowMs(Date.now()), intervalMs);
     return () => window.clearInterval(id);
   }, [deliveryTimeoutMinutes]);
+
+  useEffect(() => {
+    if (
+      infoTask == null ||
+      deliveryTimeoutMinutes == null ||
+      infoTask.claimedAt == null
+    ) {
+      return;
+    }
+
+    const remainingMs = getTimeoutRemainingMs(
+      infoTask.claimedAt,
+      deliveryTimeoutMinutes,
+      nowMs,
+    );
+    if (remainingMs <= 0) {
+      setInfoTask(null);
+    }
+  }, [infoTask, deliveryTimeoutMinutes, nowMs]);
 
   return (
     <>
@@ -290,11 +301,11 @@ export default function LobbyArea({
                     reduceMotion
                       ? { opacity: 0 }
                       : {
-                          opacity: 0,
-                          y: -8,
-                          scale: 0.97,
-                          transition: { duration: 0.18, ease: 'easeIn' },
-                        }
+                        opacity: 0,
+                        y: -8,
+                        scale: 0.97,
+                        transition: { duration: 0.18, ease: 'easeIn' },
+                      }
                   }
                   transition={
                     reduceMotion
@@ -304,10 +315,8 @@ export default function LobbyArea({
                 >
                   <LobbyTaskItem
                     task={task}
-                    delivering={deliveringIds.has(task.id)}
                     nowMs={nowMs}
                     deliveryTimeoutMinutes={deliveryTimeoutMinutes}
-                    onDeliver={onDeliver}
                     onOpenInfo={setInfoTask}
                   />
                 </motion.div>
@@ -325,39 +334,71 @@ export default function LobbyArea({
         }}
       >
         {infoTask ? (
-          <dl className="flex flex-col gap-4 text-sm">
-            <div className="flex flex-col">
-              <div className="flex items-center gap-2">
-                <HugeiconsIcon icon={UserMultiple02Icon} className="size-5 text-muted-foreground" strokeWidth={2.5} />
-                <dt className="font-semibold text-xl text-muted-foreground">Time</dt>
+          <>
+            <dl className="flex flex-col gap-4 text-sm">
+              <div className="flex flex-col">
+                <div className="flex items-center gap-2">
+                  <HugeiconsIcon icon={UserMultiple02Icon} className="size-5 text-muted-foreground" strokeWidth={2.5} />
+                  <dt className="font-semibold text-xl text-muted-foreground">Time</dt>
+                </div>
+                <dd className="font-bold text-2xl">{infoTask.teamName}</dd>
               </div>
-              <dd className="font-bold text-2xl">{infoTask.teamName}</dd>
-            </div>
 
-            <div className="flex flex-col">
-              <div className="flex items-center gap-2">
-                <HugeiconsIcon icon={AtSignIcon} className="size-5 text-muted-foreground" strokeWidth={2.5} />
-                <dt className="font-semibold text-xl text-muted-foreground">Usuário</dt>
+              <div className="flex flex-col">
+                <div className="flex items-center gap-2">
+                  <HugeiconsIcon icon={AtSignIcon} className="size-5 text-muted-foreground" strokeWidth={2.5} />
+                  <dt className="font-semibold text-xl text-muted-foreground">Usuário</dt>
+                </div>
+                <dd className="font-bold text-2xl">{infoTask.teamUsername}</dd>
               </div>
-              <dd className="font-bold text-2xl">{infoTask.teamUsername}</dd>
-            </div>
 
-            <div className="flex flex-col">
-              <div className="flex items-center gap-2">
-                <HugeiconsIcon icon={Door01Icon} className="size-5 text-muted-foreground" strokeWidth={2.5} />
-                <dt className="font-semibold text-xl text-muted-foreground">Sala</dt>
+              <div className="flex flex-col">
+                <div className="flex items-center gap-2">
+                  <HugeiconsIcon icon={Door01Icon} className="size-5 text-muted-foreground" strokeWidth={2.5} />
+                  <dt className="font-semibold text-xl text-muted-foreground">Sala</dt>
+                </div>
+                <dd className="font-bold text-2xl">{displayOrDash(infoTask.teamRoom)}</dd>
               </div>
-              <dd className="font-bold text-2xl">{displayOrDash(infoTask.teamRoom)}</dd>
-            </div>
 
-            <div className="flex flex-col">
-              <div className="flex items-center gap-2">
-                <HugeiconsIcon icon={ComputerIcon} className="size-5 text-muted-foreground" strokeWidth={2.5} />
-                <dt className="font-semibold text-xl text-muted-foreground">Máquina</dt>
+              <div className="flex flex-col">
+                <div className="flex items-center gap-2">
+                  <HugeiconsIcon icon={ComputerIcon} className="size-5 text-muted-foreground" strokeWidth={2.5} />
+                  <dt className="font-semibold text-xl text-muted-foreground">Máquina</dt>
+                </div>
+                <dd className="font-bold text-2xl">{displayOrDash(infoTask.teamMachine)}</dd>
               </div>
-              <dd className="font-bold text-2xl">{displayOrDash(infoTask.teamMachine)}</dd>
+            </dl>
+            {deliveryTimeoutMinutes != null && infoTask.claimedAt ? (
+              <div className="mt-4 flex flex-col items-center">
+                <span className="text-base mb-1 text-muted-foreground">Tempo Restante</span>
+                <span className="text-4xl font-bold tabular-nums">
+                  {formatRemainingMmSs(
+                    getTimeoutRemainingMs(
+                      infoTask.claimedAt,
+                      deliveryTimeoutMinutes,
+                      nowMs,
+                    ),
+                  )}
+                </span>
+              </div>
+            ) : null}
+            <div className="mt-12 flex justify-center" data-stroke="on">
+              <SlideToConfirm
+                disabled={deliveringIds.has(infoTask.id)}
+                label="Deslize para confirmar"
+                confirmedLabel="Entregue"
+                onConfirm={() => {
+                  playTaskDoneSound();
+                  void confetti({
+                    zIndex: 9999,
+                    origin: { x: 0.5, y: 0.72 },
+                  });
+                  onDeliver(infoTask);
+                  window.setTimeout(() => setInfoTask(null), 700);
+                }}
+              />
             </div>
-          </dl>
+          </>
         ) : null}
       </Dialog>
     </>

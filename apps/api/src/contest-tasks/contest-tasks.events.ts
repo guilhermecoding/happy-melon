@@ -6,8 +6,15 @@ import { Observable, Subject } from 'rxjs';
 export class ContestTasksEventsService {
   private readonly subjects = new Map<string, Subject<StaffTaskEvent>>();
 
-  emit(contestId: string, event: StaffTaskEvent) {
-    this.getOrCreate(contestId).next(event);
+  emit(scopeId: string, event: StaffTaskEvent) {
+    this.getOrCreate(scopeId).next(event);
+  }
+
+  emitForRound(roundId: string, competitionId: string, event: StaffTaskEvent) {
+    this.emit(roundId, event);
+    if (competitionId !== roundId) {
+      this.emit(competitionId, event);
+    }
   }
 
   subscribe(contestId: string): Observable<StaffTaskEvent> {

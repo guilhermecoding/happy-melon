@@ -7,20 +7,25 @@ import { contestService } from '@/services/contest/contest.service';
 import { getContestErrorMessage } from '@/services/contest/contest.error';
 import type { Contest } from '@/services/contest/contest.type';
 import { Button } from '@/components/pouf/Button';
-import { Select } from '@/components/pouf/controls';
 import { Field, Input } from '@/components/pouf/Input';
 import { Sheet } from '@/components/pouf/sheet';
 import { toast } from '@/components/pouf/toaster';
 import { fieldError } from '@/lib/form';
 import {
   contestFormSchema,
+  parseScoreFreezeMinutes,
   type ContestFormValues,
 } from './contest-schema';
-import { CheckmarkCircle01Icon, EyeClosedIcon } from '@hugeicons/core-free-icons';
+import {
+  Add01Icon,
+  CheckmarkCircle01Icon,
+  Delete02Icon,
+  EyeClosedIcon,
+} from '@hugeicons/core-free-icons';
 
-const STATUS_OPTIONS = [
-  { value: 'active', label: 'Habilitada' },
-  { value: 'inactive', label: 'Desabilitada' },
+const DEFAULT_ROUNDS: ContestFormValues['rounds'] = [
+  { name: 'Aquecimento', startsAt: '', endsAt: '', scoreFreezeMinutes: '' },
+  { name: 'Prova', startsAt: '', endsAt: '', scoreFreezeMinutes: '' },
 ];
 
 type CreateContestSheetProps = {
@@ -39,10 +44,8 @@ export function CreateContestSheet({
   const form = useForm({
     defaultValues: {
       name: '',
-      status: 'active' as ContestFormValues['status'],
-      startsAt: '',
-      endsAt: '',
       venue: '',
+      rounds: DEFAULT_ROUNDS,
     } satisfies ContestFormValues,
     validators: {
       onSubmit: contestFormSchema,
@@ -52,10 +55,13 @@ export function CreateContestSheet({
       try {
         const contest = await contestService.create({
           name: value.name,
-          status: value.status,
-          startsAt: new Date(value.startsAt).toISOString(),
-          endsAt: new Date(value.endsAt).toISOString(),
           venue: value.venue,
+          rounds: value.rounds.map((round) => ({
+            name: round.name,
+            startsAt: new Date(round.startsAt).toISOString(),
+            endsAt: new Date(round.endsAt).toISOString(),
+            scoreFreezeMinutes: parseScoreFreezeMinutes(round.scoreFreezeMinutes),
+          })),
         });
         onCreated(contest);
         toast.success('Competição cadastrada com sucesso.');
@@ -84,7 +90,7 @@ export function CreateContestSheet({
       open={open}
       onOpenChange={handleOpenChange}
       title="Nova competição"
-      description="Cadastre uma nova competição do sistema."
+      description="Cadastre o evento e as rodadas (aquecimento e prova)."
     >
       <form
         onSubmit={(event) => {
@@ -113,70 +119,6 @@ export function CreateContestSheet({
             )}
           </form.Field>
 
-          <form.Field name="status">
-            {(field) => (
-              <Field label="Status" error={fieldError(field.state.meta)}>
-                {(id, describedBy) => (
-                  <Select
-                    id={id}
-                    describedBy={describedBy}
-                    value={field.state.value}
-                    options={STATUS_OPTIONS}
-                    onChange={(value) => {
-                      if (value === 'active' || value === 'inactive') {
-                        field.handleChange(value);
-                      }
-                    }}
-                  />
-                )}
-              </Field>
-            )}
-          </form.Field>
-
-          <form.Field name="startsAt">
-            {(field) => (
-              <Field
-                label="Data e hora de início"
-                error={fieldError(field.state.meta)}
-              >
-                {(id, describedBy) => (
-                  <Input
-                    id={id}
-                    name={field.name}
-                    describedBy={describedBy}
-                    type="datetime-local"
-                    value={field.state.value}
-                    onBlur={field.handleBlur}
-                    onChange={field.handleChange}
-                    invalid={!field.state.meta.isValid}
-                  />
-                )}
-              </Field>
-            )}
-          </form.Field>
-
-          <form.Field name="endsAt">
-            {(field) => (
-              <Field
-                label="Data e hora de término"
-                error={fieldError(field.state.meta)}
-              >
-                {(id, describedBy) => (
-                  <Input
-                    id={id}
-                    name={field.name}
-                    describedBy={describedBy}
-                    type="datetime-local"
-                    value={field.state.value}
-                    onBlur={field.handleBlur}
-                    onChange={field.handleChange}
-                    invalid={!field.state.meta.isValid}
-                  />
-                )}
-              </Field>
-            )}
-          </form.Field>
-
           <form.Field name="venue">
             {(field) => (
               <Field label="Local da sede" error={fieldError(field.state.meta)}>
@@ -193,6 +135,140 @@ export function CreateContestSheet({
                   />
                 )}
               </Field>
+            )}
+          </form.Field>
+
+          <form.Field name="rounds" mode="array">
+            {(roundsField) => (
+              <div className="flex flex-col gap-4">
+                <div className="flex items-center justify-between">
+                  <p className="text-sm font-medium">Rodadas</p>
+                  <Button
+                    type="button"
+                    size="sm"
+                    variant="quiet"
+                    onClick={() =>
+                      roundsField.pushValue({
+                        name: `Rodada ${roundsField.state.value.length + 1}`,
+                        startsAt: '',
+                        endsAt: '',
+                        scoreFreezeMinutes: '',
+                      })
+                    }
+                  >
+                    <HugeiconsIcon icon={Add01Icon} className="size-4" />
+                    Adicionar
+                  </Button>
+                </div>
+                {roundsField.state.value.map((_, index) => (
+                  <div
+                    key={index}
+                    className="flex flex-col gap-3 rounded-xl border p-3"
+                  >
+                    <div className="flex items-center justify-between">
+                      <span className="text-sm font-medium">
+                        Rodada {index + 1}
+                      </span>
+                      {roundsField.state.value.length > 1 ? (
+                        <Button
+                          type="button"
+                          size="sm"
+                          variant="quiet"
+                          onClick={() => roundsField.removeValue(index)}
+                        >
+                          <HugeiconsIcon icon={Delete02Icon} className="size-4" />
+                          Remover
+                        </Button>
+                      ) : null}
+                    </div>
+                    <form.Field name={`rounds[${index}].name`}>
+                      {(field) => (
+                        <Field label="Nome" error={fieldError(field.state.meta)}>
+                          {(id, describedBy) => (
+                            <Input
+                              id={id}
+                              name={field.name}
+                              describedBy={describedBy}
+                              value={field.state.value}
+                              onBlur={field.handleBlur}
+                              onChange={field.handleChange}
+                              invalid={!field.state.meta.isValid}
+                            />
+                          )}
+                        </Field>
+                      )}
+                    </form.Field>
+                    <form.Field name={`rounds[${index}].startsAt`}>
+                      {(field) => (
+                        <Field
+                          label="Início"
+                          error={fieldError(field.state.meta)}
+                        >
+                          {(id, describedBy) => (
+                            <Input
+                              id={id}
+                              name={field.name}
+                              describedBy={describedBy}
+                              type="datetime-local"
+                              value={field.state.value}
+                              onBlur={field.handleBlur}
+                              onChange={field.handleChange}
+                              invalid={!field.state.meta.isValid}
+                            />
+                          )}
+                        </Field>
+                      )}
+                    </form.Field>
+                    <form.Field name={`rounds[${index}].endsAt`}>
+                      {(field) => (
+                        <Field
+                          label="Término"
+                          error={fieldError(field.state.meta)}
+                        >
+                          {(id, describedBy) => (
+                            <Input
+                              id={id}
+                              name={field.name}
+                              describedBy={describedBy}
+                              type="datetime-local"
+                              value={field.state.value}
+                              onBlur={field.handleBlur}
+                              onChange={field.handleChange}
+                              invalid={!field.state.meta.isValid}
+                            />
+                          )}
+                        </Field>
+                      )}
+                    </form.Field>
+                    <form.Field name={`rounds[${index}].scoreFreezeMinutes`}>
+                      {(field) => (
+                        <Field
+                          label="Congelamento"
+                          description="Define quando o placar será congelado nos minutos restantes."
+                          error={fieldError(field.state.meta)}
+                        >
+                          {(id, describedBy) => (
+                            <Input
+                              id={id}
+                              name={field.name}
+                              describedBy={describedBy}
+                              placeholder="Ex: 20"
+                              type="number"
+                              inputMode="numeric"
+                              min={1}
+                              step={1}
+                              value={field.state.value}
+                              onBlur={field.handleBlur}
+                              onChange={field.handleChange}
+                              invalid={!field.state.meta.isValid}
+                            />
+                          )}
+                        </Field>
+                      )}
+                    </form.Field>
+                  </div>
+                ))}
+              </div>
             )}
           </form.Field>
 

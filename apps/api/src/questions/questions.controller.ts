@@ -6,9 +6,11 @@ import {
   Patch,
   Post,
   Req,
+  UseGuards,
 } from '@nestjs/common';
 import { Roles } from '@thallesp/nestjs-better-auth';
 import type { IncomingHttpHeaders } from 'node:http';
+import { StaffCompetitionGuard } from '../auth/staff-competition.guard.js';
 import { ZodValidationPipe } from '../common/pipes/zod-validation.pipe.js';
 import { QuestionsService } from './questions.service.js';
 import {
@@ -32,7 +34,8 @@ export class QuestionsController {
   constructor(private readonly questionsService: QuestionsService) {}
 
   @Get('contests/:contestId/questions')
-  @Roles(['admin', 'staff'])
+  @Roles(['admin', 'staff', 'chef'])
+  @UseGuards(StaffCompetitionGuard)
   listByContest(@Param('contestId') contestId: string) {
     return this.questionsService.listByContest(contestId);
   }

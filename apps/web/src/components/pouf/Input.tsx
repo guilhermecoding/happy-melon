@@ -11,21 +11,35 @@ interface FieldProps {
   label: string
   children: (id: string, describedBy: string | undefined) => ReactNode
   hint?: string
+  description?: string
   error?: string
 }
 
 /** Wraps any control with a real <label for>, hint and error text, and wires
  * aria-describedby. Screens pass a render fn so the same wrapper serves Input,
  * Select and Switch without duplicating the a11y plumbing. */
-export function Field({ label, children, hint, error }: FieldProps) {
+export function Field({ label, children, hint, description, error }: FieldProps) {
   const id = useId()
-  const describedBy = error ? `${id}-err` : hint ? `${id}-hint` : undefined
+  const describedBy = [
+    description ? `${id}-desc` : undefined,
+    error ? `${id}-err` : hint ? `${id}-hint` : undefined,
+  ]
+    .filter(Boolean)
+    .join(' ') || undefined
   return (
     <div className="pouf-field flex flex-col gap-(--s2)">
       {/* Labels use ink so their compact uppercase treatment stays emphatic. */}
       <label className="pouf-label text-[13px] font-black tracking-[0.6px] uppercase text-ink" htmlFor={id}>
         {label}
       </label>
+      {description ? (
+        <span
+          className="pouf-hint text-[13px] font-bold text-pouf-muted opacity-70"
+          id={`${id}-desc`}
+        >
+          {description}
+        </span>
+      ) : null}
       {children(id, describedBy)}
       {hint && !error && (
         <span className="pouf-hint text-[13px] font-bold text-pouf-muted" id={`${id}-hint`}>

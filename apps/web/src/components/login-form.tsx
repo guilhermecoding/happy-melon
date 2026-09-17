@@ -32,7 +32,7 @@ import {
   LoginCircle01Icon,
 } from '@hugeicons/core-free-icons';
 
-const ADMIN_ROLES = new Set(['admin']);
+const PASSWORD_ROLES = new Set(['admin', 'chef']);
 
 const MODE_COPY: Record<
   LoginMode,
@@ -43,7 +43,7 @@ const MODE_COPY: Record<
     submit: 'Entrar',
   },
   admin: {
-    description: 'Entre com suas credenciais de administrador',
+    description: 'Entre com suas credenciais de administrador ou chefe de sala',
     submit: 'Entrar',
   },
   register: {
@@ -171,14 +171,14 @@ export function LoginForm({
         }
 
         const role = data?.user?.role;
-        if (!role || !ADMIN_ROLES.has(role)) {
+        if (!role || !PASSWORD_ROLES.has(role)) {
           await authClient.signOut();
           setRequestError('Acesso restrito a administradores.');
           return;
         }
 
         // Full navigation so the session cookie is available to the proxy
-        window.location.assign('/admin');
+        window.location.assign(role === 'chef' ? '/chef' : '/admin');
       } catch {
         setRequestError('Não foi possível conectar ao servidor de autenticação.');
       }
@@ -489,7 +489,7 @@ export function LoginForm({
                           Voltar
                         </Button>
                       ) : (
-                        <div className="flex justify-end mt-4">
+                        <div className="flex justify-center mt-4">
                           <div className="w-full sm:w-fit">
                             <Button
                               variant="quiet"
@@ -508,7 +508,7 @@ export function LoginForm({
                                 className="size-5"
                                 strokeWidth={2.5}
                               />
-                              {mode === 'admin' ? 'Colaborador' : 'Administrador'}
+                              {mode === 'admin' ? 'Colaborador' : 'Administrador ou Chefe de Sala'}
                             </Button>
                           </div>
                         </div>

@@ -6,7 +6,9 @@ import { AppService } from './app.service.js';
 import { auth } from './auth/auth.js';
 import { AdministratorsModule } from './administrators/administrators.module.js';
 import { BalloonsModule } from './balloons/balloons.module.js';
+import { ChefsModule } from './chefs/chefs.module.js';
 import { CollaboratorsModule } from './collaborators/collaborators.module.js';
+import { CompetitionsModule } from './competitions/competitions.module.js';
 import { ContestTasksModule } from './contest-tasks/contest-tasks.module.js';
 import { ContestsModule } from './contests/contests.module.js';
 import { PrintsModule } from './prints/prints.module.js';
@@ -20,6 +22,8 @@ import { TeamsModule } from './teams/teams.module.js';
     AdministratorsModule,
     BalloonsModule,
     CollaboratorsModule,
+    ChefsModule,
+    CompetitionsModule,
     ContestTasksModule,
     ContestsModule,
     PrintsModule,

@@ -1,23 +1,55 @@
 import { ForbiddenException, NotFoundException } from '@nestjs/common';
-import { prisma } from '@repo/database';
+import { ContestStatus, prisma } from '@repo/database';
 
-export async function assertContestInProgress(contestId: string) {
-  const contest = await prisma.contest.findUnique({
+export async function assertRoundInProgress(contestId: string) {
+  const round = await prisma.contest.findUnique({
     where: { id: contestId },
-    select: { startsAt: true, endsAt: true },
+    select: {
+      startsAt: true,
+      endsAt: true,
+      competition: { select: { status: true } },
+    },
   });
 
-  if (!contest) {
-    throw new NotFoundException('Competição não encontrada.');
+  if (!round) {
+    throw new NotFoundException('Rodada não encontrada.');
+  }
+
+  if (round.competition.status !== ContestStatus.ACTIVE) {
+    throw new ForbiddenException(
+      'O acesso dos colaboradores está desabilitado para esta competição.',
+    );
   }
 
   const now = new Date();
 
-  if (now < contest.startsAt) {
-    throw new ForbiddenException('A competição ainda não começou.');
+  if (now < round.startsAt) {
+    throw new ForbiddenException('A rodada ainda não começou.');
   }
 
-  if (now >= contest.endsAt) {
-    throw new ForbiddenException('A competição já finalizou.');
+  if (now >= round.endsAt) {
+    throw new ForbiddenException('A rodada já finalizou.');
   }
 }
+
+export async function assertCompetitionActiveForRound(contestId: string) {
+  const round = await prisma.contest.findUnique({
+    where: { id: contestId },
+    select: {
+      competition: { select: { status: true } },
+    },
+  });
+
+  if (!round) {
+    throw new NotFoundException('Rodada não encontrada.');
+  }
+
+  if (round.competition.status !== ContestStatus.ACTIVE) {
+    throw new ForbiddenException(
+      'O acesso dos colaboradores está desabilitado para esta competição.',
+    );
+  }
+}
+
+/** @deprecated Use assertRoundInProgress */
+export const assertContestInProgress = assertRoundInProgress;

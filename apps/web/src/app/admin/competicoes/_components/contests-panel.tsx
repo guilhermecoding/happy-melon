@@ -9,7 +9,6 @@ import Spinner from '@/components/spinner';
 import { contestService } from '@/services/contest/contest.service';
 import { getContestErrorMessage } from '@/services/contest/contest.error';
 import {
-  getContestCondition,
   type Contest,
 } from '@/services/contest/contest.type';
 import ContestCard from './contest-card';
@@ -23,9 +22,8 @@ function ContestGrid({ contests }: { contests: Contest[] }) {
           key={contest.id}
           id={contest.id}
           name={contest.name}
-          status={contest.status}
-          startsAt={contest.startsAt}
-          endsAt={contest.endsAt}
+          condition={contest.condition}
+          rounds={contest.rounds}
         />
       ))}
     </div>
@@ -70,7 +68,7 @@ export default function ContestsPanel() {
     const finished: Contest[] = [];
 
     for (const contest of contests) {
-      if (getContestCondition(contest.startsAt, contest.endsAt) === 'finished') {
+      if (contest.condition === 'finished') {
         finished.push(contest);
       } else {
         current.push(contest);

@@ -1,6 +1,6 @@
 export type Team = {
   id: string;
-  contestId: string;
+  competitionId: string;
   name: string;
   usernameTeam: string;
   room: string | null;

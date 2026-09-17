@@ -3,6 +3,7 @@ import process from "node:process";
 /** Prefixes of the Nest API, proxied same-origin via `app/backend/[...path]`. */
 const API_PREFIXES = [
   "api",
+  "competitions",
   "contests",
   "administrators",
   "teams",

@@ -10,8 +10,12 @@ import {
   ID_MAX_ATTEMPTS,
   isIdUniqueViolation,
 } from '../common/short-id.js';
-import { ac, admin, staff } from './permissions.js';
-import { checkStaffSessionAccess } from './staff-session-access.js';
+import { ac, admin, chef, staff } from './permissions.js';
+import {
+  checkChefSessionAccess,
+  checkStaffSessionAccess,
+  findChefCompetitionId,
+} from './staff-session-access.js';
 import { staffSignIn } from './staff-sign-in.js';
 
 type SessionPayload = {
@@ -103,8 +107,62 @@ export const auth = betterAuth({
       generateId: () => generateShortId(),
     },
   },
+  databaseHooks: {
+    session: {
+      create: {
+        async before(session) {
+          const user = await prisma.user.findUnique({
+            where: { id: session.userId },
+            select: { role: true },
+          });
+
+          if (user?.role !== 'chef') {
+            return { data: session };
+          }
+
+          const competitionId = await findChefCompetitionId(session.userId);
+          if (!competitionId) {
+            return { data: session };
+          }
+
+          return {
+            data: {
+              ...session,
+              activeContestId: competitionId,
+            },
+          };
+        },
+      },
+    },
+  },
   hooks: {
     after: createAuthMiddleware(async (ctx) => {
+      if (ctx.path === '/sign-in/email') {
+        const newSession = ctx.context.newSession as {
+          user?: { id?: string; role?: string | null } | null;
+          session?: { id?: string; activeContestId?: string | null } | null;
+        } | null;
+        const user = newSession?.user;
+        const session = newSession?.session;
+
+        if (!user?.id || !session?.id || user.role !== 'chef') {
+          return;
+        }
+
+        const competitionId = await findChefCompetitionId(user.id);
+        if (!competitionId) {
+          await prisma.session.deleteMany({ where: { id: session.id } });
+          deleteSessionCookie(ctx);
+          return ctx.json(null);
+        }
+
+        await prisma.session.update({
+          where: { id: session.id },
+          data: { activeContestId: competitionId },
+        });
+        return;
+      }
+
       if (ctx.path !== '/get-session') {
         return;
       }
@@ -118,7 +176,11 @@ export const auth = betterAuth({
       const user = payload?.user;
       const session = payload?.session;
 
-      if (!user?.id || !session?.id || user.role !== 'staff') {
+      if (!payload || !user?.id || !session?.id) {
+        return;
+      }
+
+      if (user.role !== 'staff' && user.role !== 'chef') {
         return;
       }
 
@@ -131,11 +193,32 @@ export const auth = betterAuth({
         contestId = stored?.activeContestId ?? undefined;
       }
 
+      if (user.role === 'chef' && !contestId) {
+        contestId = (await findChefCompetitionId(user.id)) ?? undefined;
+        if (contestId) {
+          await prisma.session.update({
+            where: { id: session.id },
+            data: { activeContestId: contestId },
+          });
+          if (payload.session) {
+            payload.session.activeContestId = contestId;
+          }
+        }
+      }
+
       if (!contestId) {
+        if (user.role === 'chef') {
+          await prisma.session.deleteMany({ where: { id: session.id } });
+          deleteSessionCookie(ctx);
+          return ctx.json(null);
+        }
         return;
       }
 
-      const access = await checkStaffSessionAccess(user.id, contestId);
+      const access =
+        user.role === 'chef'
+          ? await checkChefSessionAccess(user.id, contestId)
+          : await checkStaffSessionAccess(user.id, contestId);
       if (access.valid) {
         return;
       }
@@ -148,7 +231,7 @@ export const auth = betterAuth({
   plugins: [
     adminPlugin({
       ac,
-      roles: { admin, staff },
+      roles: { admin, staff, chef },
       defaultRole: 'staff',
       adminRoles: ['admin'],
     }),

@@ -26,27 +26,27 @@ import type {
 
 @Injectable()
 export class TeamsService {
-  async listByContest(contestId: string) {
-    await this.ensureContestExists(contestId);
+  async listByCompetition(competitionId: string) {
+    await this.ensureCompetitionExists(competitionId);
 
     const teams = await prisma.team.findMany({
-      where: { contestId },
+      where: { competitionId },
       orderBy: { name: 'asc' },
     });
 
     return teams.map((team) => this.toResponse(team));
   }
 
-  async create(contestId: string, dto: CreateTeamDto) {
-    await this.ensureContestExists(contestId);
-    await this.ensureUsernameAvailable(contestId, dto.usernameTeam);
+  async create(competitionId: string, dto: CreateTeamDto) {
+    await this.ensureCompetitionExists(competitionId);
+    await this.ensureUsernameAvailable(competitionId, dto.usernameTeam);
 
     for (let attempt = 0; attempt < ID_MAX_ATTEMPTS; attempt++) {
       try {
         const team = await prisma.team.create({
           data: {
             id: generateShortId(),
-            contestId,
+            competitionId,
             name: dto.name,
             usernameTeam: dto.usernameTeam,
             room: dto.room,
@@ -75,11 +75,11 @@ export class TeamsService {
     );
   }
 
-  async bulkUpsert(contestId: string, dto: BulkUpsertTeamsDto) {
-    await this.ensureContestExists(contestId);
+  async bulkUpsert(competitionId: string, dto: BulkUpsertTeamsDto) {
+    await this.ensureCompetitionExists(competitionId);
 
     const existingTeams = await prisma.team.findMany({
-      where: { contestId },
+      where: { competitionId },
       select: {
         id: true,
         usernameTeam: true,
@@ -118,7 +118,7 @@ export class TeamsService {
           created = await prisma.team.create({
             data: {
               id: generateShortId(),
-              contestId,
+              competitionId,
               name: item.name,
               usernameTeam: item.usernameTeam,
               room: item.room,
@@ -130,7 +130,7 @@ export class TeamsService {
           if (this.isUsernameUniqueViolation(error)) {
             const raced = await prisma.team.findFirst({
               where: {
-                contestId,
+                competitionId,
                 usernameTeam: {
                   equals: item.usernameTeam,
                   mode: 'insensitive',
@@ -181,7 +181,7 @@ export class TeamsService {
     }
 
     await this.ensureUsernameAvailable(
-      existing.contestId,
+      existing.competitionId,
       dto.usernameTeam,
       id,
     );
@@ -227,16 +227,16 @@ export class TeamsService {
     return { success: true as const };
   }
 
-  async removeAllByContest(
+  async removeAllByCompetition(
     headers: IncomingHttpHeaders,
-    contestId: string,
+    competitionId: string,
     dto: DeleteTeamDto,
   ) {
-    await this.ensureContestExists(contestId);
+    await this.ensureCompetitionExists(competitionId);
     await this.verifyAdminPassword(headers, dto.password);
 
     const result = await prisma.team.deleteMany({
-      where: { contestId },
+      where: { competitionId },
     });
 
     return {
@@ -246,13 +246,13 @@ export class TeamsService {
   }
 
   private async ensureUsernameAvailable(
-    contestId: string,
+    competitionId: string,
     usernameTeam: string,
     excludeId?: string,
   ) {
     const existing = await prisma.team.findFirst({
       where: {
-        contestId,
+        competitionId,
         usernameTeam: { equals: usernameTeam, mode: 'insensitive' },
         ...(excludeId ? { NOT: { id: excludeId } } : {}),
       },
@@ -312,13 +312,13 @@ export class TeamsService {
     return authHeaders;
   }
 
-  private async ensureContestExists(contestId: string) {
-    const contest = await prisma.contest.findUnique({
-      where: { id: contestId },
+  private async ensureCompetitionExists(competitionId: string) {
+    const competition = await prisma.competition.findUnique({
+      where: { id: competitionId },
       select: { id: true },
     });
 
-    if (!contest) {
+    if (!competition) {
       throw new NotFoundException('Competição não encontrada.');
     }
   }
@@ -326,7 +326,7 @@ export class TeamsService {
   private toResponse(team: Team) {
     return {
       id: team.id,
-      contestId: team.contestId,
+      competitionId: team.competitionId,
       name: team.name,
       usernameTeam: team.usernameTeam,
       room: team.room,

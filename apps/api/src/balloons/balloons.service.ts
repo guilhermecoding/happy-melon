@@ -27,8 +27,12 @@ import {
   ID_MAX_ATTEMPTS,
   isIdUniqueViolation,
 } from '../common/short-id.js';
+import { getRoundOrThrow } from '../competitions/round-access.js';
 import { ContestTasksEventsService } from '../contest-tasks/contest-tasks.events.js';
-import { assertContestInProgress } from '../contests/contest-window.js';
+import {
+  assertCompetitionActiveForRound,
+  assertRoundInProgress,
+} from '../contests/contest-window.js';
 import { LobbyCapacityService } from '../contest-tasks/lobby-capacity.service.js';
 import {
   teamFieldsFrom,
@@ -151,7 +155,9 @@ export class BalloonsService {
     dto: TeamQuestionActionDto,
     actor: Actor,
   ) {
-    const { team, question } = await this.resolveTeamAndQuestion(
+    await assertRoundInProgress(contestId);
+
+    const { team, question, competitionId } = await this.resolveTeamAndQuestion(
       contestId,
       dto.teamId,
       dto.questionId,
@@ -213,7 +219,7 @@ export class BalloonsService {
           return { delivery: saved, history };
         });
 
-        this.contestTasksEvents.emit(contestId, {
+        this.contestTasksEvents.emitForRound(contestId, competitionId, {
           type: STAFF_TASK_EVENT_TYPE.QUEUED,
           task: toBalloonStaffTask({
             id: delivery.id,
@@ -256,7 +262,7 @@ export class BalloonsService {
     dto: TeamQuestionActionDto,
     actor: Actor,
   ) {
-    const { team, question } = await this.resolveTeamAndQuestion(
+    const { team, question, competitionId } = await this.resolveTeamAndQuestion(
       contestId,
       dto.teamId,
       dto.questionId,
@@ -309,7 +315,7 @@ export class BalloonsService {
       return { delivery: saved, history };
     });
 
-    this.contestTasksEvents.emit(contestId, {
+    this.contestTasksEvents.emitForRound(contestId, competitionId, {
       type: STAFF_TASK_EVENT_TYPE.REMOVED,
       task: toBalloonStaffTask({
         id: delivery.id,
@@ -336,8 +342,9 @@ export class BalloonsService {
     taskId: string,
     actor: Actor,
   ): Promise<StaffTask> {
-    await this.ensureContestExists(contestId);
-    await assertContestInProgress(contestId);
+    const round = await this.ensureContestExists(contestId);
+    await assertRoundInProgress(contestId);
+    const competitionId = round.competitionId;
 
     const pendingStatus = this.toPrismaStatus(BALLOON_DELIVERY_STATUS.PENDING);
     const processingStatus = this.toPrismaStatus(
@@ -397,7 +404,7 @@ export class BalloonsService {
       createdAt: delivery.createdAt,
     });
 
-    this.contestTasksEvents.emit(contestId, {
+    this.contestTasksEvents.emitForRound(contestId, competitionId, {
       type: STAFF_TASK_EVENT_TYPE.CLAIMED,
       task: staffTask,
       claimedByName: actor.name,
@@ -413,8 +420,9 @@ export class BalloonsService {
     taskId: string,
     actor: Actor,
   ): Promise<StaffTask> {
-    await this.ensureContestExists(contestId);
-    await assertContestInProgress(contestId);
+    const round = await this.ensureContestExists(contestId);
+    await assertCompetitionActiveForRound(contestId);
+    const competitionId = round.competitionId;
 
     const processingStatus = this.toPrismaStatus(
       BALLOON_DELIVERY_STATUS.PROCESSING,
@@ -473,7 +481,7 @@ export class BalloonsService {
       createdAt: delivery.createdAt,
     });
 
-    this.contestTasksEvents.emit(contestId, {
+    this.contestTasksEvents.emitForRound(contestId, competitionId, {
       type: STAFF_TASK_EVENT_TYPE.REMOVED,
       task: staffTask,
     });
@@ -549,10 +557,12 @@ export class BalloonsService {
     teamId: string,
     questionId: string,
   ) {
-    await this.ensureContestExists(contestId);
+    const round = await this.ensureContestExists(contestId);
 
     const [team, question] = await Promise.all([
-      prisma.team.findFirst({ where: { id: teamId, contestId } }),
+      prisma.team.findFirst({
+        where: { id: teamId, competitionId: round.competitionId },
+      }),
       prisma.question.findFirst({ where: { id: questionId, contestId } }),
     ]);
 
@@ -561,32 +571,28 @@ export class BalloonsService {
     }
 
     if (!question) {
-      throw new NotFoundException('Questão não encontrada nesta competição.');
+      throw new NotFoundException('Questão não encontrada nesta rodada.');
     }
 
-    return { team, question };
+    return { team, question, competitionId: round.competitionId };
   }
 
   private async ensureContestExists(contestId: string) {
-    const contest = await prisma.contest.findUnique({
-      where: { id: contestId },
-      select: { id: true },
-    });
-
-    if (!contest) {
-      throw new NotFoundException('Competição não encontrada.');
-    }
+    return getRoundOrThrow(contestId);
   }
 
   private async ensureTeamInContest(contestId: string, teamId: string) {
+    const round = await this.ensureContestExists(contestId);
     const team = await prisma.team.findFirst({
-      where: { id: teamId, contestId },
+      where: { id: teamId, competitionId: round.competitionId },
       select: { id: true },
     });
 
     if (!team) {
       throw new NotFoundException('Time não encontrado nesta competição.');
     }
+
+    return team;
   }
 
   private getBalloonColorLabel(balloonColor: string): string {

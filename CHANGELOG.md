@@ -5,6 +5,28 @@ Todas as mudanças notáveis deste projeto serão documentadas neste arquivo.
 O formato segue [Keep a Changelog](https://keepachangelog.com/pt-BR/1.1.0/),
 e este projeto adere ao [Semantic Versioning](https://semver.org/lang/pt-BR/).
 
+## [1.4.0] - 2026-09-17
+
+### Added
+
+- Competição com **rodadas** (ex.: Aquecimento e Prova), cada uma com início, término e, se quiser, congelamento do placar.
+- **Chefes de sala**: cadastro por nome e e-mail, login no mesmo fluxo do administrador, com acesso a colaboradores e tarefas em todas as rodadas.
+- Aviso de **Placar Congelado** nos últimos minutos da rodada, para administradores, chefes e colaboradores.
+- Cronômetro no intervalo entre rodadas, indicando qual encerrou e quando a próxima começa.
+- Exclusão de rodada, com confirmação pela senha do administrador.
+- Entrega no lobby por **deslize para confirmar**, com tempo restante (MM:SS) quando há timeout e fechamento automático ao esgotar.
+
+### Changed
+
+- Prova e Tarefas passam a ser por rodada. Confirmar balões e encaminhar impressões só vale durante o horário da rodada.
+- A confirmação de entrega saiu do card do lobby e foi para os detalhes do time.
+- O selo Habilitada / Desabilitada saiu da lista e do cadastro da competição. O interruptor **Acesso dos colaboradores** continua no QR e no código.
+- README atualizado: como a maratona funciona (rodadas e chefes) e o passo a passo de instalação, inclusive HTTPS.
+
+### Fixed
+
+- Tela de espera e de rodada em andamento não se sobrepõem mais no countdown da competição.
+
 ## [1.3.0] - 2026-08-29
 
 ### Added
@@ -86,6 +108,7 @@ e este projeto adere ao [Semantic Versioning](https://semver.org/lang/pt-BR/).
 
 - Lançamento inicial do Happy Melon: operação de maratonas no estilo ICPC, com painel de administradores, fila e lobby de colaboradores, gestão de competições, prova, times, balões e impressões.
 
+[1.4.0]: https://github.com/guilhermecoding/happy-melon/compare/v1.3.0...v1.4.0
 [1.3.0]: https://github.com/guilhermecoding/happy-melon/compare/v1.2.0...v1.3.0
 [1.2.0]: https://github.com/guilhermecoding/happy-melon/compare/v1.1.0...v1.2.0
 [1.1.0]: https://github.com/guilhermecoding/happy-melon/compare/v1.0.2...v1.1.0
