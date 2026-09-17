@@ -22,14 +22,14 @@ importers:
         specifier: ^3.2.5
         version: 3.9.6
       turbo:
-        specifier: ^2.10.4
-        version: 2.10.8
+        specifier: ^2.10.13
+        version: 2.10.13
 
   apps/api:
     dependencies:
       '@better-auth/prisma-adapter':
         specifier: ^1.6.23
-        version: 1.6.25(@better-auth/core@1.6.25(@better-auth/utils@0.4.2)(@better-fetch/fetch@1.3.1)(better-call@1.3.7(zod@4.4.3))(jose@6.2.8)(kysely@0.29.4)(nanostores@1.4.2))(@better-auth/utils@0.4.2)(@prisma/client@7.9.1(prisma@7.9.1(@types/react@19.1.0)(react-dom@19.3.0(react@19.3.0))(react@19.3.0)(typescript@5.5.4))(typescript@5.5.4))(prisma@7.9.1(@types/react@19.1.0)(react-dom@19.3.0(react@19.3.0))(react@19.3.0)(typescript@5.5.4))
+        version: 1.6.25(@better-auth/core@1.6.25(@better-auth/utils@0.4.2)(@better-fetch/fetch@1.3.1)(better-call@1.3.7(zod@4.4.3))(jose@6.2.8)(kysely@0.29.4)(nanostores@1.4.2))(@better-auth/utils@0.4.2)(@prisma/client@7.9.1(prisma@7.9.1(@types/react-dom@19.1.1(@types/react@19.1.0))(@types/react@19.1.0)(react-dom@19.3.0(react@19.3.0))(react@19.3.0)(typescript@5.5.4))(typescript@5.5.4))(prisma@7.9.1(@types/react-dom@19.1.1(@types/react@19.1.0))(@types/react@19.1.0)(react-dom@19.3.0(react@19.3.0))(react@19.3.0)(typescript@5.5.4))
       '@nestjs/common':
         specifier: ^11.1.11
         version: 11.1.28(reflect-metadata@0.2.2)(rxjs@7.8.2)(supports-color@8.1.1)
@@ -53,10 +53,10 @@ importers:
         version: link:../../packages/shared
       '@thallesp/nestjs-better-auth':
         specifier: ^2.7.0
-        version: 2.7.0(@nestjs/common@11.1.28(reflect-metadata@0.2.2)(rxjs@7.8.2)(supports-color@8.1.1))(@nestjs/core@11.1.28)(better-auth@1.6.25(@prisma/client@7.9.1(prisma@7.9.1(@types/react@19.1.0)(react-dom@19.3.0(react@19.3.0))(react@19.3.0)(typescript@5.5.4))(typescript@5.5.4))(mysql2@3.15.3)(next@16.3.5(@babel/core@7.29.7(supports-color@8.1.1))(@types/node@22.20.1)(react-dom@19.3.0(react@19.3.0))(react@19.3.0))(pg@8.22.0)(prisma@7.9.1(@types/react@19.1.0)(react-dom@19.3.0(react@19.3.0))(react@19.3.0)(typescript@5.5.4))(react-dom@19.3.0(react@19.3.0))(react@19.3.0))(express@5.2.1(supports-color@8.1.1))(qs@6.15.3)(typescript@5.5.4)
+        version: 2.7.0(@nestjs/common@11.1.28(reflect-metadata@0.2.2)(rxjs@7.8.2)(supports-color@8.1.1))(@nestjs/core@11.1.28)(better-auth@1.6.25(@prisma/client@7.9.1(prisma@7.9.1(@types/react-dom@19.1.1(@types/react@19.1.0))(@types/react@19.1.0)(react-dom@19.3.0(react@19.3.0))(react@19.3.0)(typescript@5.5.4))(typescript@5.5.4))(mysql2@3.15.3)(next@16.3.5(@babel/core@7.29.7(supports-color@8.1.1))(@types/node@22.20.1)(react-dom@19.3.0(react@19.3.0))(react@19.3.0))(pg@8.22.0)(prisma@7.9.1(@types/react-dom@19.1.1(@types/react@19.1.0))(@types/react@19.1.0)(react-dom@19.3.0(react@19.3.0))(react@19.3.0)(typescript@5.5.4))(react-dom@19.3.0(react@19.3.0))(react@19.3.0))(express@5.2.1(supports-color@8.1.1))(qs@6.15.3)(typescript@5.5.4)
       better-auth:
         specifier: ^1.6.23
-        version: 1.6.25(@prisma/client@7.9.1(prisma@7.9.1(@types/react@19.1.0)(react-dom@19.3.0(react@19.3.0))(react@19.3.0)(typescript@5.5.4))(typescript@5.5.4))(mysql2@3.15.3)(next@16.3.5(@babel/core@7.29.7(supports-color@8.1.1))(@types/node@22.20.1)(react-dom@19.3.0(react@19.3.0))(react@19.3.0))(pg@8.22.0)(prisma@7.9.1(@types/react@19.1.0)(react-dom@19.3.0(react@19.3.0))(react@19.3.0)(typescript@5.5.4))(react-dom@19.3.0(react@19.3.0))(react@19.3.0)
+        version: 1.6.25(@prisma/client@7.9.1(prisma@7.9.1(@types/react-dom@19.1.1(@types/react@19.1.0))(@types/react@19.1.0)(react-dom@19.3.0(react@19.3.0))(react@19.3.0)(typescript@5.5.4))(typescript@5.5.4))(mysql2@3.15.3)(next@16.3.5(@babel/core@7.29.7(supports-color@8.1.1))(@types/node@22.20.1)(react-dom@19.3.0(react@19.3.0))(react@19.3.0))(pg@8.22.0)(prisma@7.9.1(@types/react-dom@19.1.1(@types/react@19.1.0))(@types/react@19.1.0)(react-dom@19.3.0(react@19.3.0))(react@19.3.0)(typescript@5.5.4))(react-dom@19.3.0(react@19.3.0))(react@19.3.0)
       dotenv:
         specifier: ^17.4.2
         version: 17.4.2
@@ -344,7 +344,7 @@ importers:
         version: 5.2.0(eslint@9.39.5(jiti@2.7.0)(supports-color@8.1.1))
       eslint-plugin-turbo:
         specifier: ^2.5.0
-        version: 2.10.8(eslint@9.39.5(jiti@2.7.0)(supports-color@8.1.1))(turbo@2.10.8)
+        version: 2.10.8(eslint@9.39.5(jiti@2.7.0)(supports-color@8.1.1))(turbo@2.10.13)
       globals:
         specifier: ^16.3.0
         version: 16.5.0
@@ -2689,33 +2689,33 @@ packages:
   '@tsconfig/node16@1.0.4':
     resolution: {integrity: sha512-vxhUy4J8lyeyinH7Azl1pdd43GJhZH/tP2weN8TntQblOY+A0XbT8DJk1/oCPuOOyg/Ja757rG0CgHcWC8OfMA==}
 
-  '@turbo/darwin-64@2.10.8':
-    resolution: {integrity: sha512-po+7rfJfUnFXjWlcoN2RwhErgzCdRtBc1T26vYPcywHlggmCQiQe1uWaE4j+BibI2uY9/2pDoFzMN0rmSaPFOw==}
+  '@turbo/darwin-64@2.10.13':
+    resolution: {integrity: sha512-m5DBcpkxmcKpEJHHFUfqf9GLUjSmw3cDnBJM9nghPW3kjCNb5OyNKmzG7/yT5x5AwzOO+HMwKN+UI4iVKL87YA==}
     cpu: [x64]
     os: [darwin]
 
-  '@turbo/darwin-arm64@2.10.8':
-    resolution: {integrity: sha512-+zB2btDJ00lnPRuqOvpVvgl4x34k/djZQGZTTCfjn7JgNCl8QFY5Njo5+dqkY1g/+9gbbsnAvWm9CmJg9ebcXA==}
+  '@turbo/darwin-arm64@2.10.13':
+    resolution: {integrity: sha512-vfKPvSuoY8BJGj8M8yN+a7aq1g+CejbEacDSDlJLDkSbPN3J/U1DbYAmPG8Ype5XvImI0SgfvUhIorNnFj67zw==}
     cpu: [arm64]
     os: [darwin]
 
-  '@turbo/linux-64@2.10.8':
-    resolution: {integrity: sha512-K1dxqiVisyN7cViVsfQLs6xscQbYuI8aO2nbUhFURDACgEDfZRdP/b4CCxeosBJpcMfhYyiibWqJorCnvz9kKg==}
+  '@turbo/linux-64@2.10.13':
+    resolution: {integrity: sha512-Zp0N5M6j9iEjJtFLTA2L+52TLuYy0VbXT3zLZzfMeqqdKSUJ7pDo2pA1NhqjoQcF2dIsktZ8xZRW3pGI6T81fw==}
     cpu: [x64]
     os: [android, linux]
 
-  '@turbo/linux-arm64@2.10.8':
-    resolution: {integrity: sha512-Gi77ibVnrE1fEmvr+/wBD/yvRqhwp/RQuCp2+//lv1U1wNFFyVg0V7Wj8FG9FXPFAw5QHReo8rxc9+wBSDZjzA==}
+  '@turbo/linux-arm64@2.10.13':
+    resolution: {integrity: sha512-M8XcfWdS2D4EP3wzd5ehUyCANucMIOsRE6gZuV0Mr2NIn+FpsUjXFCh7r9HY7GnNcjXH4tUnT76OsCDg2c0Fng==}
     cpu: [arm64]
     os: [android, linux]
 
-  '@turbo/windows-64@2.10.8':
-    resolution: {integrity: sha512-znnLO1haJPYTHoKMKwlAvlkjRiYbbhBzME6wIGaMd+fwir23U6jVd1ecaTWWi1fbnRVqxMfgDBKseQ/hLKb83g==}
+  '@turbo/windows-64@2.10.13':
+    resolution: {integrity: sha512-QFd3KBMpBBCc31TbxMnxgdBivie8lxJXV8EqmanH8fg8l2e1BdCLWpZJbxk48VNvcF4LHUnwO0FJOq+veKN1cw==}
     cpu: [x64]
     os: [win32]
 
-  '@turbo/windows-arm64@2.10.8':
-    resolution: {integrity: sha512-VN30vh3b3Czh2WzYHNTfF1FE0YMZ5aHsLO8dBMGHJewA6792wX6iJR8ZxlzFW6WdOu0gEAKIvlYhfyT81Wkm4Q==}
+  '@turbo/windows-arm64@2.10.13':
+    resolution: {integrity: sha512-rM+cFO1P8iAHXdasOdMyK9nDk0UGII7VEFLIA8+jwv/+rh48pnVBbF2OSjJDBOw57pxNLIOEDA0JyKcarTBcIw==}
     cpu: [arm64]
     os: [win32]
 
@@ -6438,8 +6438,8 @@ packages:
     engines: {node: '>=18.0.0'}
     hasBin: true
 
-  turbo@2.10.8:
-    resolution: {integrity: sha512-9+8YX5QOkGXzZxcIykTHgaooRHGMWO+jfdyRK0o+rN0U7hBIig2MrJ8r/aNzIPDPhdA73SGb0O+tIztaModTMg==}
+  turbo@2.10.13:
+    resolution: {integrity: sha512-69MkPbjk+G8oyC7pC2DeBk0rPdbLz51wuH5eAT0Q4BVJkzq/b1XM4kUUidsARbmDjwIELSJwd1ezITULY9kWNw==}
     hasBin: true
 
   tw-animate-css@1.4.0:
@@ -7126,6 +7126,14 @@ snapshots:
       '@better-auth/core': 1.6.25(@better-auth/utils@0.4.2)(@better-fetch/fetch@1.3.1)(better-call@1.3.7(zod@4.4.3))(jose@6.2.8)(kysely@0.29.4)(nanostores@1.4.2)
       '@better-auth/utils': 0.4.2
 
+  '@better-auth/prisma-adapter@1.6.25(@better-auth/core@1.6.25(@better-auth/utils@0.4.2)(@better-fetch/fetch@1.3.1)(better-call@1.3.7(zod@4.4.3))(jose@6.2.8)(kysely@0.29.4)(nanostores@1.4.2))(@better-auth/utils@0.4.2)(@prisma/client@7.9.1(prisma@7.9.1(@types/react-dom@19.1.1(@types/react@19.1.0))(@types/react@19.1.0)(react-dom@19.3.0(react@19.3.0))(react@19.3.0)(typescript@5.5.4))(typescript@5.5.4))(prisma@7.9.1(@types/react-dom@19.1.1(@types/react@19.1.0))(@types/react@19.1.0)(react-dom@19.3.0(react@19.3.0))(react@19.3.0)(typescript@5.5.4))':
+    dependencies:
+      '@better-auth/core': 1.6.25(@better-auth/utils@0.4.2)(@better-fetch/fetch@1.3.1)(better-call@1.3.7(zod@4.4.3))(jose@6.2.8)(kysely@0.29.4)(nanostores@1.4.2)
+      '@better-auth/utils': 0.4.2
+    optionalDependencies:
+      '@prisma/client': 7.9.1(prisma@7.9.1(@types/react-dom@19.1.1(@types/react@19.1.0))(@types/react@19.1.0)(react-dom@19.3.0(react@19.3.0))(react@19.3.0)(typescript@5.5.4))(typescript@5.5.4)
+      prisma: 7.9.1(@types/react-dom@19.1.1(@types/react@19.1.0))(@types/react@19.1.0)(react-dom@19.3.0(react@19.3.0))(react@19.3.0)(typescript@5.5.4)
+
   '@better-auth/prisma-adapter@1.6.25(@better-auth/core@1.6.25(@better-auth/utils@0.4.2)(@better-fetch/fetch@1.3.1)(better-call@1.3.7(zod@4.4.3))(jose@6.2.8)(kysely@0.29.4)(nanostores@1.4.2))(@better-auth/utils@0.4.2)(@prisma/client@7.9.1(prisma@7.9.1(@types/react-dom@19.1.1(@types/react@19.1.0))(@types/react@19.1.0)(react-dom@19.3.0(react@19.3.0))(react@19.3.0)(typescript@5.8.2))(typescript@5.8.2))(prisma@7.9.1(@types/react-dom@19.1.1(@types/react@19.1.0))(@types/react@19.1.0)(react-dom@19.3.0(react@19.3.0))(react@19.3.0)(typescript@5.8.2))':
     dependencies:
       '@better-auth/core': 1.6.25(@better-auth/utils@0.4.2)(@better-fetch/fetch@1.3.1)(better-call@1.3.7(zod@4.4.3))(jose@6.2.8)(kysely@0.29.4)(nanostores@1.4.2)
@@ -7133,14 +7141,6 @@ snapshots:
     optionalDependencies:
       '@prisma/client': 7.9.1(prisma@7.9.1(@types/react-dom@19.1.1(@types/react@19.1.0))(@types/react@19.1.0)(react-dom@19.3.0(react@19.3.0))(react@19.3.0)(typescript@5.8.2))(typescript@5.8.2)
       prisma: 7.9.1(@types/react-dom@19.1.1(@types/react@19.1.0))(@types/react@19.1.0)(react-dom@19.3.0(react@19.3.0))(react@19.3.0)(typescript@5.8.2)
-
-  '@better-auth/prisma-adapter@1.6.25(@better-auth/core@1.6.25(@better-auth/utils@0.4.2)(@better-fetch/fetch@1.3.1)(better-call@1.3.7(zod@4.4.3))(jose@6.2.8)(kysely@0.29.4)(nanostores@1.4.2))(@better-auth/utils@0.4.2)(@prisma/client@7.9.1(prisma@7.9.1(@types/react@19.1.0)(react-dom@19.3.0(react@19.3.0))(react@19.3.0)(typescript@5.5.4))(typescript@5.5.4))(prisma@7.9.1(@types/react@19.1.0)(react-dom@19.3.0(react@19.3.0))(react@19.3.0)(typescript@5.5.4))':
-    dependencies:
-      '@better-auth/core': 1.6.25(@better-auth/utils@0.4.2)(@better-fetch/fetch@1.3.1)(better-call@1.3.7(zod@4.4.3))(jose@6.2.8)(kysely@0.29.4)(nanostores@1.4.2)
-      '@better-auth/utils': 0.4.2
-    optionalDependencies:
-      '@prisma/client': 7.9.1(prisma@7.9.1(@types/react@19.1.0)(react-dom@19.3.0(react@19.3.0))(react@19.3.0)(typescript@5.5.4))(typescript@5.5.4)
-      prisma: 7.9.1(@types/react@19.1.0)(react-dom@19.3.0(react@19.3.0))(react@19.3.0)(typescript@5.5.4)
 
   '@better-auth/telemetry@1.6.25(@better-auth/core@1.6.25(@better-auth/utils@0.4.2)(@better-fetch/fetch@1.3.1)(better-call@1.3.7(zod@4.4.3))(jose@6.2.8)(kysely@0.29.4)(nanostores@1.4.2))(@better-auth/utils@0.4.2)(@better-fetch/fetch@1.3.1)':
     dependencies:
@@ -8306,14 +8306,6 @@ snapshots:
       typescript: 5.8.2
     optional: true
 
-  '@prisma/client@7.9.1(prisma@7.9.1(@types/react@19.1.0)(react-dom@19.3.0(react@19.3.0))(react@19.3.0)(typescript@5.5.4))(typescript@5.5.4)':
-    dependencies:
-      '@prisma/client-runtime-utils': 7.9.1
-    optionalDependencies:
-      prisma: 7.9.1(@types/react@19.1.0)(react-dom@19.3.0(react@19.3.0))(react@19.3.0)(typescript@5.5.4)
-      typescript: 5.5.4
-    optional: true
-
   '@prisma/config@7.9.1':
     dependencies:
       c12: 3.3.4
@@ -9072,11 +9064,11 @@ snapshots:
 
   '@tanstack/table-core@8.21.3': {}
 
-  '@thallesp/nestjs-better-auth@2.7.0(@nestjs/common@11.1.28(reflect-metadata@0.2.2)(rxjs@7.8.2)(supports-color@8.1.1))(@nestjs/core@11.1.28)(better-auth@1.6.25(@prisma/client@7.9.1(prisma@7.9.1(@types/react@19.1.0)(react-dom@19.3.0(react@19.3.0))(react@19.3.0)(typescript@5.5.4))(typescript@5.5.4))(mysql2@3.15.3)(next@16.3.5(@babel/core@7.29.7(supports-color@8.1.1))(@types/node@22.20.1)(react-dom@19.3.0(react@19.3.0))(react@19.3.0))(pg@8.22.0)(prisma@7.9.1(@types/react@19.1.0)(react-dom@19.3.0(react@19.3.0))(react@19.3.0)(typescript@5.5.4))(react-dom@19.3.0(react@19.3.0))(react@19.3.0))(express@5.2.1(supports-color@8.1.1))(qs@6.15.3)(typescript@5.5.4)':
+  '@thallesp/nestjs-better-auth@2.7.0(@nestjs/common@11.1.28(reflect-metadata@0.2.2)(rxjs@7.8.2)(supports-color@8.1.1))(@nestjs/core@11.1.28)(better-auth@1.6.25(@prisma/client@7.9.1(prisma@7.9.1(@types/react-dom@19.1.1(@types/react@19.1.0))(@types/react@19.1.0)(react-dom@19.3.0(react@19.3.0))(react@19.3.0)(typescript@5.5.4))(typescript@5.5.4))(mysql2@3.15.3)(next@16.3.5(@babel/core@7.29.7(supports-color@8.1.1))(@types/node@22.20.1)(react-dom@19.3.0(react@19.3.0))(react@19.3.0))(pg@8.22.0)(prisma@7.9.1(@types/react-dom@19.1.1(@types/react@19.1.0))(@types/react@19.1.0)(react-dom@19.3.0(react@19.3.0))(react@19.3.0)(typescript@5.5.4))(react-dom@19.3.0(react@19.3.0))(react@19.3.0))(express@5.2.1(supports-color@8.1.1))(qs@6.15.3)(typescript@5.5.4)':
     dependencies:
       '@nestjs/common': 11.1.28(reflect-metadata@0.2.2)(rxjs@7.8.2)(supports-color@8.1.1)
       '@nestjs/core': 11.1.28(@nestjs/common@11.1.28(reflect-metadata@0.2.2)(rxjs@7.8.2)(supports-color@8.1.1))(@nestjs/platform-express@11.1.28)(reflect-metadata@0.2.2)(rxjs@7.8.2)
-      better-auth: 1.6.25(@prisma/client@7.9.1(prisma@7.9.1(@types/react@19.1.0)(react-dom@19.3.0(react@19.3.0))(react@19.3.0)(typescript@5.5.4))(typescript@5.5.4))(mysql2@3.15.3)(next@16.3.5(@babel/core@7.29.7(supports-color@8.1.1))(@types/node@22.20.1)(react-dom@19.3.0(react@19.3.0))(react@19.3.0))(pg@8.22.0)(prisma@7.9.1(@types/react@19.1.0)(react-dom@19.3.0(react@19.3.0))(react@19.3.0)(typescript@5.5.4))(react-dom@19.3.0(react@19.3.0))(react@19.3.0)
+      better-auth: 1.6.25(@prisma/client@7.9.1(prisma@7.9.1(@types/react-dom@19.1.1(@types/react@19.1.0))(@types/react@19.1.0)(react-dom@19.3.0(react@19.3.0))(react@19.3.0)(typescript@5.5.4))(typescript@5.5.4))(mysql2@3.15.3)(next@16.3.5(@babel/core@7.29.7(supports-color@8.1.1))(@types/node@22.20.1)(react-dom@19.3.0(react@19.3.0))(react@19.3.0))(pg@8.22.0)(prisma@7.9.1(@types/react-dom@19.1.1(@types/react@19.1.0))(@types/react@19.1.0)(react-dom@19.3.0(react@19.3.0))(react@19.3.0)(typescript@5.5.4))(react-dom@19.3.0(react@19.3.0))(react@19.3.0)
       typescript: 5.5.4
     optionalDependencies:
       express: 5.2.1(supports-color@8.1.1)
@@ -9105,22 +9097,22 @@ snapshots:
 
   '@tsconfig/node16@1.0.4': {}
 
-  '@turbo/darwin-64@2.10.8':
+  '@turbo/darwin-64@2.10.13':
     optional: true
 
-  '@turbo/darwin-arm64@2.10.8':
+  '@turbo/darwin-arm64@2.10.13':
     optional: true
 
-  '@turbo/linux-64@2.10.8':
+  '@turbo/linux-64@2.10.13':
     optional: true
 
-  '@turbo/linux-arm64@2.10.8':
+  '@turbo/linux-arm64@2.10.13':
     optional: true
 
-  '@turbo/windows-64@2.10.8':
+  '@turbo/windows-64@2.10.13':
     optional: true
 
-  '@turbo/windows-arm64@2.10.8':
+  '@turbo/windows-arm64@2.10.13':
     optional: true
 
   '@tybys/wasm-util@0.10.3':
@@ -9867,6 +9859,37 @@ snapshots:
 
   baseline-browser-mapping@2.11.12: {}
 
+  better-auth@1.6.25(@prisma/client@7.9.1(prisma@7.9.1(@types/react-dom@19.1.1(@types/react@19.1.0))(@types/react@19.1.0)(react-dom@19.3.0(react@19.3.0))(react@19.3.0)(typescript@5.5.4))(typescript@5.5.4))(mysql2@3.15.3)(next@16.3.5(@babel/core@7.29.7(supports-color@8.1.1))(@types/node@22.20.1)(react-dom@19.3.0(react@19.3.0))(react@19.3.0))(pg@8.22.0)(prisma@7.9.1(@types/react-dom@19.1.1(@types/react@19.1.0))(@types/react@19.1.0)(react-dom@19.3.0(react@19.3.0))(react@19.3.0)(typescript@5.5.4))(react-dom@19.3.0(react@19.3.0))(react@19.3.0):
+    dependencies:
+      '@better-auth/core': 1.6.25(@better-auth/utils@0.4.2)(@better-fetch/fetch@1.3.1)(better-call@1.3.7(zod@4.4.3))(jose@6.2.8)(kysely@0.29.4)(nanostores@1.4.2)
+      '@better-auth/drizzle-adapter': 1.6.25(@better-auth/core@1.6.25(@better-auth/utils@0.4.2)(@better-fetch/fetch@1.3.1)(better-call@1.3.7(zod@4.4.3))(jose@6.2.8)(kysely@0.29.4)(nanostores@1.4.2))(@better-auth/utils@0.4.2)
+      '@better-auth/kysely-adapter': 1.6.25(@better-auth/core@1.6.25(@better-auth/utils@0.4.2)(@better-fetch/fetch@1.3.1)(better-call@1.3.7(zod@4.4.3))(jose@6.2.8)(kysely@0.29.4)(nanostores@1.4.2))(@better-auth/utils@0.4.2)(kysely@0.29.4)
+      '@better-auth/memory-adapter': 1.6.25(@better-auth/core@1.6.25(@better-auth/utils@0.4.2)(@better-fetch/fetch@1.3.1)(better-call@1.3.7(zod@4.4.3))(jose@6.2.8)(kysely@0.29.4)(nanostores@1.4.2))(@better-auth/utils@0.4.2)
+      '@better-auth/mongo-adapter': 1.6.25(@better-auth/core@1.6.25(@better-auth/utils@0.4.2)(@better-fetch/fetch@1.3.1)(better-call@1.3.7(zod@4.4.3))(jose@6.2.8)(kysely@0.29.4)(nanostores@1.4.2))(@better-auth/utils@0.4.2)
+      '@better-auth/prisma-adapter': 1.6.25(@better-auth/core@1.6.25(@better-auth/utils@0.4.2)(@better-fetch/fetch@1.3.1)(better-call@1.3.7(zod@4.4.3))(jose@6.2.8)(kysely@0.29.4)(nanostores@1.4.2))(@better-auth/utils@0.4.2)(@prisma/client@7.9.1(prisma@7.9.1(@types/react-dom@19.1.1(@types/react@19.1.0))(@types/react@19.1.0)(react-dom@19.3.0(react@19.3.0))(react@19.3.0)(typescript@5.5.4))(typescript@5.5.4))(prisma@7.9.1(@types/react-dom@19.1.1(@types/react@19.1.0))(@types/react@19.1.0)(react-dom@19.3.0(react@19.3.0))(react@19.3.0)(typescript@5.5.4))
+      '@better-auth/telemetry': 1.6.25(@better-auth/core@1.6.25(@better-auth/utils@0.4.2)(@better-fetch/fetch@1.3.1)(better-call@1.3.7(zod@4.4.3))(jose@6.2.8)(kysely@0.29.4)(nanostores@1.4.2))(@better-auth/utils@0.4.2)(@better-fetch/fetch@1.3.1)
+      '@better-auth/utils': 0.4.2
+      '@better-fetch/fetch': 1.3.1
+      '@noble/ciphers': 2.2.0
+      '@noble/hashes': 2.2.0
+      better-call: 1.3.7(zod@4.4.3)
+      defu: 6.1.7
+      jose: 6.2.8
+      kysely: 0.29.4
+      nanostores: 1.4.2
+      zod: 4.4.3
+    optionalDependencies:
+      '@prisma/client': 7.9.1(prisma@7.9.1(@types/react-dom@19.1.1(@types/react@19.1.0))(@types/react@19.1.0)(react-dom@19.3.0(react@19.3.0))(react@19.3.0)(typescript@5.5.4))(typescript@5.5.4)
+      mysql2: 3.15.3
+      next: 16.3.5(@babel/core@7.29.7(supports-color@8.1.1))(@types/node@22.20.1)(react-dom@19.3.0(react@19.3.0))(react@19.3.0)
+      pg: 8.22.0
+      prisma: 7.9.1(@types/react-dom@19.1.1(@types/react@19.1.0))(@types/react@19.1.0)(react-dom@19.3.0(react@19.3.0))(react@19.3.0)(typescript@5.5.4)
+      react: 19.3.0
+      react-dom: 19.3.0(react@19.3.0)
+    transitivePeerDependencies:
+      - '@cloudflare/workers-types'
+      - '@opentelemetry/api'
+
   better-auth@1.6.25(@prisma/client@7.9.1(prisma@7.9.1(@types/react-dom@19.1.1(@types/react@19.1.0))(@types/react@19.1.0)(react-dom@19.3.0(react@19.3.0))(react@19.3.0)(typescript@5.8.2))(typescript@5.8.2))(mysql2@3.15.3)(next@16.3.5(@babel/core@7.29.7(supports-color@8.1.1))(@types/node@22.20.1)(react-dom@19.3.0(react@19.3.0))(react@19.3.0))(pg@8.22.0)(prisma@7.9.1(@types/react-dom@19.1.1(@types/react@19.1.0))(@types/react@19.1.0)(react-dom@19.3.0(react@19.3.0))(react@19.3.0)(typescript@5.8.2))(react-dom@19.3.0(react@19.3.0))(react@19.3.0):
     dependencies:
       '@better-auth/core': 1.6.25(@better-auth/utils@0.4.2)(@better-fetch/fetch@1.3.1)(better-call@1.3.7(zod@4.4.3))(jose@6.2.8)(kysely@0.29.4)(nanostores@1.4.2)
@@ -9892,37 +9915,6 @@ snapshots:
       next: 16.3.5(@babel/core@7.29.7(supports-color@8.1.1))(@types/node@22.20.1)(react-dom@19.3.0(react@19.3.0))(react@19.3.0)
       pg: 8.22.0
       prisma: 7.9.1(@types/react-dom@19.1.1(@types/react@19.1.0))(@types/react@19.1.0)(react-dom@19.3.0(react@19.3.0))(react@19.3.0)(typescript@5.8.2)
-      react: 19.3.0
-      react-dom: 19.3.0(react@19.3.0)
-    transitivePeerDependencies:
-      - '@cloudflare/workers-types'
-      - '@opentelemetry/api'
-
-  better-auth@1.6.25(@prisma/client@7.9.1(prisma@7.9.1(@types/react@19.1.0)(react-dom@19.3.0(react@19.3.0))(react@19.3.0)(typescript@5.5.4))(typescript@5.5.4))(mysql2@3.15.3)(next@16.3.5(@babel/core@7.29.7(supports-color@8.1.1))(@types/node@22.20.1)(react-dom@19.3.0(react@19.3.0))(react@19.3.0))(pg@8.22.0)(prisma@7.9.1(@types/react@19.1.0)(react-dom@19.3.0(react@19.3.0))(react@19.3.0)(typescript@5.5.4))(react-dom@19.3.0(react@19.3.0))(react@19.3.0):
-    dependencies:
-      '@better-auth/core': 1.6.25(@better-auth/utils@0.4.2)(@better-fetch/fetch@1.3.1)(better-call@1.3.7(zod@4.4.3))(jose@6.2.8)(kysely@0.29.4)(nanostores@1.4.2)
-      '@better-auth/drizzle-adapter': 1.6.25(@better-auth/core@1.6.25(@better-auth/utils@0.4.2)(@better-fetch/fetch@1.3.1)(better-call@1.3.7(zod@4.4.3))(jose@6.2.8)(kysely@0.29.4)(nanostores@1.4.2))(@better-auth/utils@0.4.2)
-      '@better-auth/kysely-adapter': 1.6.25(@better-auth/core@1.6.25(@better-auth/utils@0.4.2)(@better-fetch/fetch@1.3.1)(better-call@1.3.7(zod@4.4.3))(jose@6.2.8)(kysely@0.29.4)(nanostores@1.4.2))(@better-auth/utils@0.4.2)(kysely@0.29.4)
-      '@better-auth/memory-adapter': 1.6.25(@better-auth/core@1.6.25(@better-auth/utils@0.4.2)(@better-fetch/fetch@1.3.1)(better-call@1.3.7(zod@4.4.3))(jose@6.2.8)(kysely@0.29.4)(nanostores@1.4.2))(@better-auth/utils@0.4.2)
-      '@better-auth/mongo-adapter': 1.6.25(@better-auth/core@1.6.25(@better-auth/utils@0.4.2)(@better-fetch/fetch@1.3.1)(better-call@1.3.7(zod@4.4.3))(jose@6.2.8)(kysely@0.29.4)(nanostores@1.4.2))(@better-auth/utils@0.4.2)
-      '@better-auth/prisma-adapter': 1.6.25(@better-auth/core@1.6.25(@better-auth/utils@0.4.2)(@better-fetch/fetch@1.3.1)(better-call@1.3.7(zod@4.4.3))(jose@6.2.8)(kysely@0.29.4)(nanostores@1.4.2))(@better-auth/utils@0.4.2)(@prisma/client@7.9.1(prisma@7.9.1(@types/react@19.1.0)(react-dom@19.3.0(react@19.3.0))(react@19.3.0)(typescript@5.5.4))(typescript@5.5.4))(prisma@7.9.1(@types/react@19.1.0)(react-dom@19.3.0(react@19.3.0))(react@19.3.0)(typescript@5.5.4))
-      '@better-auth/telemetry': 1.6.25(@better-auth/core@1.6.25(@better-auth/utils@0.4.2)(@better-fetch/fetch@1.3.1)(better-call@1.3.7(zod@4.4.3))(jose@6.2.8)(kysely@0.29.4)(nanostores@1.4.2))(@better-auth/utils@0.4.2)(@better-fetch/fetch@1.3.1)
-      '@better-auth/utils': 0.4.2
-      '@better-fetch/fetch': 1.3.1
-      '@noble/ciphers': 2.2.0
-      '@noble/hashes': 2.2.0
-      better-call: 1.3.7(zod@4.4.3)
-      defu: 6.1.7
-      jose: 6.2.8
-      kysely: 0.29.4
-      nanostores: 1.4.2
-      zod: 4.4.3
-    optionalDependencies:
-      '@prisma/client': 7.9.1(prisma@7.9.1(@types/react@19.1.0)(react-dom@19.3.0(react@19.3.0))(react@19.3.0)(typescript@5.5.4))(typescript@5.5.4)
-      mysql2: 3.15.3
-      next: 16.3.5(@babel/core@7.29.7(supports-color@8.1.1))(@types/node@22.20.1)(react-dom@19.3.0(react@19.3.0))(react@19.3.0)
-      pg: 8.22.0
-      prisma: 7.9.1(@types/react@19.1.0)(react-dom@19.3.0(react@19.3.0))(react@19.3.0)(typescript@5.5.4)
       react: 19.3.0
       react-dom: 19.3.0(react@19.3.0)
     transitivePeerDependencies:
@@ -10607,11 +10599,11 @@ snapshots:
       string.prototype.matchall: 4.0.12
       string.prototype.repeat: 1.0.0
 
-  eslint-plugin-turbo@2.10.8(eslint@9.39.5(jiti@2.7.0)(supports-color@8.1.1))(turbo@2.10.8):
+  eslint-plugin-turbo@2.10.8(eslint@9.39.5(jiti@2.7.0)(supports-color@8.1.1))(turbo@2.10.13):
     dependencies:
       dotenv: 16.0.3
       eslint: 9.39.5(jiti@2.7.0)(supports-color@8.1.1)
-      turbo: 2.10.8
+      turbo: 2.10.13
 
   eslint-scope@5.1.1:
     dependencies:
@@ -12576,24 +12568,6 @@ snapshots:
       - react-dom
     optional: true
 
-  prisma@7.9.1(@types/react@19.1.0)(react-dom@19.3.0(react@19.3.0))(react@19.3.0)(typescript@5.5.4):
-    dependencies:
-      '@prisma/config': 7.9.1
-      '@prisma/dev': 0.24.17(typescript@5.5.4)
-      '@prisma/engines': 7.9.1
-      '@prisma/studio-core': 0.33.0(@types/react-dom@19.1.1(@types/react@19.1.0))(@types/react@19.1.0)(react-dom@19.3.0(react@19.3.0))(react@19.3.0)
-      mysql2: 3.15.3
-      postgres: 3.4.7
-    optionalDependencies:
-      typescript: 5.5.4
-    transitivePeerDependencies:
-      - '@types/react'
-      - '@types/react-dom'
-      - magicast
-      - react
-      - react-dom
-    optional: true
-
   process-warning@4.0.1: {}
 
   process-warning@5.1.0: {}
@@ -13414,14 +13388,14 @@ snapshots:
     optionalDependencies:
       fsevents: 2.3.3
 
-  turbo@2.10.8:
+  turbo@2.10.13:
     optionalDependencies:
-      '@turbo/darwin-64': 2.10.8
-      '@turbo/darwin-arm64': 2.10.8
-      '@turbo/linux-64': 2.10.8
-      '@turbo/linux-arm64': 2.10.8
-      '@turbo/windows-64': 2.10.8
-      '@turbo/windows-arm64': 2.10.8
+      '@turbo/darwin-64': 2.10.13
+      '@turbo/darwin-arm64': 2.10.13
+      '@turbo/linux-64': 2.10.13
+      '@turbo/linux-arm64': 2.10.13
+      '@turbo/windows-64': 2.10.13
+      '@turbo/windows-arm64': 2.10.13
 
   tw-animate-css@1.4.0: {}
 
