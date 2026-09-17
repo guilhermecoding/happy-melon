@@ -75,6 +75,24 @@ function getTaskSubtitle(task: StaffTask): string {
   return `Balão ${label} em rota de entrega`;
 }
 
+function getTimeoutRemainingMs(
+  claimedAt: string,
+  timeoutMinutes: number,
+  nowMs: number,
+): number {
+  return Math.max(
+    0,
+    new Date(claimedAt).getTime() + timeoutMinutes * 60_000 - nowMs,
+  );
+}
+
+function formatRemainingMmSs(msRemaining: number): string {
+  const total = Math.max(0, Math.floor(msRemaining / 1000));
+  const minutes = Math.floor(total / 60);
+  const seconds = total % 60;
+  return `${String(minutes).padStart(2, '0')}:${String(seconds).padStart(2, '0')}`;
+}
+
 function getTimeoutRemainingPercent(
   claimedAt: string,
   timeoutMinutes: number,
@@ -83,8 +101,7 @@ function getTimeoutRemainingPercent(
   const totalMs = timeoutMinutes * 60_000;
   if (totalMs <= 0) return 0;
 
-  const remainingMs = new Date(claimedAt).getTime() + totalMs - nowMs;
-  return Math.min(100, Math.max(0, (remainingMs / totalMs) * 100));
+  return Math.min(100, Math.max(0, (getTimeoutRemainingMs(claimedAt, timeoutMinutes, nowMs) / totalMs) * 100));
 }
 
 function getTimeoutFillClass(percent: number): string {
@@ -199,6 +216,25 @@ export default function LobbyArea({
     return () => window.clearInterval(id);
   }, [deliveryTimeoutMinutes]);
 
+  useEffect(() => {
+    if (
+      infoTask == null ||
+      deliveryTimeoutMinutes == null ||
+      infoTask.claimedAt == null
+    ) {
+      return;
+    }
+
+    const remainingMs = getTimeoutRemainingMs(
+      infoTask.claimedAt,
+      deliveryTimeoutMinutes,
+      nowMs,
+    );
+    if (remainingMs <= 0) {
+      setInfoTask(null);
+    }
+  }, [infoTask, deliveryTimeoutMinutes, nowMs]);
+
   return (
     <>
       <div
@@ -265,11 +301,11 @@ export default function LobbyArea({
                     reduceMotion
                       ? { opacity: 0 }
                       : {
-                          opacity: 0,
-                          y: -8,
-                          scale: 0.97,
-                          transition: { duration: 0.18, ease: 'easeIn' },
-                        }
+                        opacity: 0,
+                        y: -8,
+                        scale: 0.97,
+                        transition: { duration: 0.18, ease: 'easeIn' },
+                      }
                   }
                   transition={
                     reduceMotion
@@ -332,7 +368,21 @@ export default function LobbyArea({
                 <dd className="font-bold text-2xl">{displayOrDash(infoTask.teamMachine)}</dd>
               </div>
             </dl>
-            <div className="mt-4 flex justify-center" data-stroke="on">
+            {deliveryTimeoutMinutes != null && infoTask.claimedAt ? (
+              <div className="mt-4 flex flex-col items-center">
+                <span className="text-base mb-1 text-muted-foreground">Tempo Restante</span>
+                <span className="text-4xl font-bold tabular-nums">
+                  {formatRemainingMmSs(
+                    getTimeoutRemainingMs(
+                      infoTask.claimedAt,
+                      deliveryTimeoutMinutes,
+                      nowMs,
+                    ),
+                  )}
+                </span>
+              </div>
+            ) : null}
+            <div className="mt-12 flex justify-center" data-stroke="on">
               <SlideToConfirm
                 disabled={deliveringIds.has(infoTask.id)}
                 label="Deslize para confirmar"
