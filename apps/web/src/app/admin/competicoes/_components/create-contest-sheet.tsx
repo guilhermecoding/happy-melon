@@ -7,7 +7,6 @@ import { contestService } from '@/services/contest/contest.service';
 import { getContestErrorMessage } from '@/services/contest/contest.error';
 import type { Contest } from '@/services/contest/contest.type';
 import { Button } from '@/components/pouf/Button';
-import { Select } from '@/components/pouf/controls';
 import { Field, Input } from '@/components/pouf/Input';
 import { Sheet } from '@/components/pouf/sheet';
 import { toast } from '@/components/pouf/toaster';
@@ -23,11 +22,6 @@ import {
   Delete02Icon,
   EyeClosedIcon,
 } from '@hugeicons/core-free-icons';
-
-const STATUS_OPTIONS = [
-  { value: 'active', label: 'Habilitada' },
-  { value: 'inactive', label: 'Desabilitada' },
-];
 
 const DEFAULT_ROUNDS: ContestFormValues['rounds'] = [
   { name: 'Aquecimento', startsAt: '', endsAt: '', scoreFreezeMinutes: '' },
@@ -50,7 +44,6 @@ export function CreateContestSheet({
   const form = useForm({
     defaultValues: {
       name: '',
-      status: 'active' as ContestFormValues['status'],
       venue: '',
       rounds: DEFAULT_ROUNDS,
     } satisfies ContestFormValues,
@@ -62,7 +55,6 @@ export function CreateContestSheet({
       try {
         const contest = await contestService.create({
           name: value.name,
-          status: value.status,
           venue: value.venue,
           rounds: value.rounds.map((round) => ({
             name: round.name,
@@ -121,26 +113,6 @@ export function CreateContestSheet({
                     onBlur={field.handleBlur}
                     onChange={field.handleChange}
                     invalid={!field.state.meta.isValid}
-                  />
-                )}
-              </Field>
-            )}
-          </form.Field>
-
-          <form.Field name="status">
-            {(field) => (
-              <Field label="Status" error={fieldError(field.state.meta)}>
-                {(id, describedBy) => (
-                  <Select
-                    id={id}
-                    describedBy={describedBy}
-                    value={field.state.value}
-                    options={STATUS_OPTIONS}
-                    onChange={(value) => {
-                      if (value === 'active' || value === 'inactive') {
-                        field.handleChange(value);
-                      }
-                    }}
                   />
                 )}
               </Field>

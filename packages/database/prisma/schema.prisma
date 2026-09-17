@@ -82,13 +82,6 @@ model Verification {
   @@schema("system-auth")
 }
 
-enum ContestStatus {
-  ACTIVE
-  INACTIVE
-
-  @@schema("public")
-}
-
 enum BalloonDeliveryStatus {
   PENDING
   PROCESSING
@@ -101,7 +94,6 @@ enum BalloonDeliveryStatus {
 model Competition {
   id                     String                @id
   name                   String
-  status                 ContestStatus         @default(ACTIVE)
   venue                  String
   balloonLimitEnabled    Boolean               @default(false)
   balloonLimit           Int?

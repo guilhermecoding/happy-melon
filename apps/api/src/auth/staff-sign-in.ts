@@ -2,7 +2,7 @@ import { randomBytes } from 'node:crypto';
 import type { BetterAuthPlugin } from 'better-auth';
 import { APIError, createAuthEndpoint } from 'better-auth/api';
 import { setSessionCookie } from 'better-auth/cookies';
-import { ContestStatus, prisma } from '@repo/database';
+import { prisma } from '@repo/database';
 import { COLLABORATOR_EVENT_TYPE } from '@repo/shared';
 import { z } from 'zod';
 import {
@@ -103,7 +103,7 @@ async function createCollaboratorMembership(
   );
 }
 
-async function findActiveCompetition(contestCode: string) {
+async function findCompetition(contestCode: string) {
   const competition = await prisma.competition.findUnique({
     where: { id: contestCode },
   });
@@ -112,13 +112,6 @@ async function findActiveCompetition(contestCode: string) {
     throw APIError.from('NOT_FOUND', {
       message: 'Competição não encontrada.',
       code: 'CONTEST_NOT_FOUND',
-    });
-  }
-
-  if (competition.status !== ContestStatus.ACTIVE) {
-    throw APIError.from('FORBIDDEN', {
-      message: 'O acesso dos colaboradores está desabilitado para esta competição.',
-      code: 'CONTEST_INACTIVE',
     });
   }
 
@@ -138,7 +131,7 @@ export const staffSignIn = () =>
         async (ctx) => {
           const email = ctx.body.email.toLowerCase().trim();
           const contestCode = ctx.body.contestCode.trim();
-          const contest = await findActiveCompetition(contestCode);
+          const contest = await findCompetition(contestCode);
 
           const found = await ctx.context.internalAdapter.findUserByEmail(email);
           if (!found?.user) {
@@ -250,7 +243,7 @@ export const staffSignIn = () =>
           const email = ctx.body.email.toLowerCase().trim();
           const contestCode = ctx.body.contestCode.trim();
           const name = ctx.body.name.trim();
-          const contest = await findActiveCompetition(contestCode);
+          const contest = await findCompetition(contestCode);
 
           const existing = await ctx.context.internalAdapter.findUserByEmail(
             email,

@@ -88,13 +88,6 @@ function getSignInErrorMessage(error: {
   }
 
   if (
-    code === 'CONTEST_INACTIVE' ||
-    /acesso dos colaboradores está desabilitado/i.test(message)
-  ) {
-    return 'O acesso dos colaboradores está desabilitado para esta competição.';
-  }
-
-  if (
     code === 'ADMIN_USE_PASSWORD_LOGIN' ||
     /login de administrador/i.test(message)
   ) {

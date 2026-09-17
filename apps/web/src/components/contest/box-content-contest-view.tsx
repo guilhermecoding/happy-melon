@@ -10,12 +10,10 @@ import {
   Delete02Icon,
   EditIcon,
   IterationCwIcon,
-  ViewIcon,
 } from '@hugeicons/core-free-icons';
 import { formatDateTime, toDateTimeLocalValue } from '@/lib/format-data';
 import { AdminPasswordConfirmDialog } from '@/components/admin-password-confirm-dialog';
 import { Button } from '@/components/pouf/Button';
-import { Badge } from '@/components/pouf/media';
 import { Field, Input } from '@/components/pouf/Input';
 import { Sheet } from '@/components/pouf/sheet';
 import { toast } from '@/components/pouf/toaster';
@@ -185,20 +183,6 @@ export default function BoxContentContestView({
             <span>ID</span>
           </div>
           <span className="text-lg font-bold">{contest.id}</span>
-        </div>
-
-        <div className="flex flex-col">
-          <div className="flex items-center gap-1 text-muted-foreground font-medium">
-            <HugeiconsIcon
-              icon={ViewIcon}
-              className="size-4 shrink-0"
-              strokeWidth={2}
-            />
-            <span>Status</span>
-          </div>
-          <Badge tone={contest.status === 'active' ? 'mint' : 'pink'}>
-            {contest.status === 'active' ? 'Habilitada' : 'Desabilitada'}
-          </Badge>
         </div>
 
         <div className="mt-2 flex flex-col gap-2">

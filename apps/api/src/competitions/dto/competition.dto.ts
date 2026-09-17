@@ -1,7 +1,5 @@
 import { z } from 'zod';
 
-export const contestStatusSchema = z.enum(['active', 'inactive']);
-
 const roundDatesRefine = (
   data: { startsAt: string; endsAt: string },
   ctx: z.RefinementCtx,
@@ -38,14 +36,12 @@ export const roundInputSchema = z
 
 export const createCompetitionSchema = z.object({
   name: z.string().min(1),
-  status: contestStatusSchema,
   venue: z.string().min(1),
   rounds: z.array(roundInputSchema).min(1),
 });
 
 export const updateCompetitionSchema = z.object({
   name: z.string().min(1),
-  status: contestStatusSchema,
   venue: z.string().min(1),
 });
 
@@ -106,4 +102,3 @@ export type CreateRoundDto = z.infer<typeof createRoundSchema>;
 export type UpdateRoundDto = z.infer<typeof updateRoundSchema>;
 export type DeleteRoundDto = z.infer<typeof deleteRoundSchema>;
 export type StaffSettingsDto = z.infer<typeof staffSettingsSchema>;
-export type ContestStatusDto = z.infer<typeof contestStatusSchema>;

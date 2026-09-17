@@ -43,9 +43,6 @@ export function parseScoreFreezeMinutes(value: string): number | null {
 export const contestFormSchema = z
   .object({
     name: z.string().min(1, 'Informe o nome'),
-    status: z.enum(['active', 'inactive'], {
-      error: 'Selecione o status',
-    }),
     venue: z.string().min(1, 'Informe o local da sede'),
     rounds: z.array(roundFormSchema).min(1, 'Inclua pelo menos uma rodada'),
   })
