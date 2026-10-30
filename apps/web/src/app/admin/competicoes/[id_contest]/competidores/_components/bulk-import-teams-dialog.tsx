@@ -249,7 +249,9 @@ export function BulkImportTeamsDialog({
         teams: importRows,
       });
       onBulkUpserted(teams);
-      toast.success(`${teams.length} competidor(es) importado(s) com sucesso.`);
+      const competitorLabel = teams.length === 1 ? 'competidor' : 'competidores';
+      const importedLabel = teams.length === 1 ? 'importado' : 'importados';
+      toast.success(`${teams.length} ${competitorLabel} ${importedLabel} com sucesso.`);
       setIsSubmitting(false);
       handleOpenChange(false);
       return;
@@ -352,7 +354,7 @@ export function BulkImportTeamsDialog({
               <p className="text-sm">
                 Arquivo: {fileName}
                 {importRows.length > 0
-                  ? ` · ${importRows.length} competidor(es) válido(s)`
+                  ? ` · ${importRows.length} ${importRows.length === 1 ? 'competidor' : 'competidores'} válido${importRows.length === 1 ? '' : 's'}`
                   : null}
                 {mode === 'boca' ? ' · Importação BOCA' : null}
               </p>

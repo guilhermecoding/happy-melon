@@ -178,7 +178,7 @@ export function TeamsPanel({ contestId }: TeamsPanelProps) {
     );
 
     downloadTeamsCsv(orderedTeams, `competidores-${contestId}.csv`);
-    toast.success(`${orderedTeams.length} competidor(es) exportado(s).`);
+    toast.success(`${orderedTeams.length} ${orderedTeams.length === 1 ? 'competidor' : 'competidores'} exportado${orderedTeams.length === 1 ? '' : 's'}.`);
   }
 
   async function handleConfirmDeleteAll(password: string) {
@@ -191,7 +191,7 @@ export function TeamsPanel({ contestId }: TeamsPanelProps) {
       setSelectedTeam(null);
       setDeleteAllOpen(false);
       toast.success(result.deletedCount > 0
-        ? `${result.deletedCount} competidor(es) excluído(s) com sucesso.`
+        ? `${result.deletedCount} ${result.deletedCount === 1 ? 'competidor' : 'competidores'} excluído${result.deletedCount === 1 ? '' : 's'} com sucesso.`
         : 'Nenhum competidor para excluir.');
     } catch (deleteError) {
       const message = getTeamErrorMessage(
@@ -462,7 +462,7 @@ export function TeamsPanel({ contestId }: TeamsPanelProps) {
         description={
           <>
             Digite a senha do administrador logado para excluir{' '}
-            <strong>todos os {teams.length} competidor(es)</strong> desta competição.
+            <strong>todos os {teams.length} {teams.length === 1 ? 'competidor' : 'competidores'}</strong> desta competição.
             Esta ação não pode ser desfeita.
           </>
         }
