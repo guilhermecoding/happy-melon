@@ -113,7 +113,7 @@ export function TeamsPanel({ contestId }: TeamsPanelProps) {
           setError(
             getTeamErrorMessage(
               loadError,
-              'Não foi possível carregar os times.',
+              'Não foi possível carregar os competidores.',
             ),
           );
         }
@@ -169,7 +169,7 @@ export function TeamsPanel({ contestId }: TeamsPanelProps) {
 
   function handleDownloadTeams() {
     if (teams.length === 0) {
-      toast.error('Não há times para baixar.');
+      toast.error('Não há competidores para baixar.');
       return;
     }
 
@@ -177,8 +177,8 @@ export function TeamsPanel({ contestId }: TeamsPanelProps) {
       a.name.localeCompare(b.name, 'pt-BR', { sensitivity: 'base' }),
     );
 
-    downloadTeamsCsv(orderedTeams, `times-${contestId}.csv`);
-    toast.success(`${orderedTeams.length} time(s) exportado(s).`);
+    downloadTeamsCsv(orderedTeams, `competidores-${contestId}.csv`);
+    toast.success(`${orderedTeams.length} competidor(es) exportado(s).`);
   }
 
   async function handleConfirmDeleteAll(password: string) {
@@ -191,12 +191,12 @@ export function TeamsPanel({ contestId }: TeamsPanelProps) {
       setSelectedTeam(null);
       setDeleteAllOpen(false);
       toast.success(result.deletedCount > 0
-        ? `${result.deletedCount} time(s) excluído(s) com sucesso.`
-        : 'Nenhum time para excluir.');
+        ? `${result.deletedCount} competidor(es) excluído(s) com sucesso.`
+        : 'Nenhum competidor para excluir.');
     } catch (deleteError) {
       const message = getTeamErrorMessage(
         deleteError,
-        'Não foi possível excluir os times.',
+        'Não foi possível excluir os competidores.',
       );
       setDeleteAllError(message);
       toast.error(message);
@@ -284,7 +284,7 @@ export function TeamsPanel({ contestId }: TeamsPanelProps) {
   return (
     <>
       <BoxFeatures
-        title="Times"
+        title="Competidores"
         icon={UserMultiple02Icon}
         blobSize="sm"
         blobTone="pink"
@@ -295,8 +295,8 @@ export function TeamsPanel({ contestId }: TeamsPanelProps) {
               <Input
                 value={search}
                 onChange={setSearch}
-                placeholder="Buscar times..."
-                label="Buscar times"
+                placeholder="Buscar competidores..."
+                label="Buscar competidores"
                 icon={
                   <HugeiconsIcon
                     icon={Search01Icon}
@@ -319,7 +319,7 @@ export function TeamsPanel({ contestId }: TeamsPanelProps) {
                   className="size-5 shrink-0"
                   strokeWidth={3}
                 />
-                Baixar times
+                Baixar competidores
               </Button>
 
               <Button
@@ -336,7 +336,7 @@ export function TeamsPanel({ contestId }: TeamsPanelProps) {
                   className="size-5 shrink-0"
                   strokeWidth={3}
                 />
-                Apagar times
+                Apagar competidores
               </Button>
 
               <Button tone="blue" size="sm" onClick={() => setCreateOpen(true)}>
@@ -345,7 +345,7 @@ export function TeamsPanel({ contestId }: TeamsPanelProps) {
                   className="size-5 shrink-0"
                   strokeWidth={3}
                 />
-                Adicionar time
+                Adicionar competidor
               </Button>
             </div>
           </div>
@@ -367,8 +367,8 @@ export function TeamsPanel({ contestId }: TeamsPanelProps) {
           ) : filteredTeams.length === 0 ? (
             <p className="text-center text-sm text-muted-foreground">
               {search.trim()
-                ? 'Nenhum time encontrado para a busca.'
-                : 'Nenhum time cadastrado.'}
+                ? 'Nenhum competidor encontrado para a busca.'
+                : 'Nenhum competidor cadastrado.'}
             </p>
           ) : (
             <>
@@ -462,7 +462,7 @@ export function TeamsPanel({ contestId }: TeamsPanelProps) {
         description={
           <>
             Digite a senha do administrador logado para excluir{' '}
-            <strong>todos os {teams.length} time(s)</strong> desta competição.
+            <strong>todos os {teams.length} competidor(es)</strong> desta competição.
             Esta ação não pode ser desfeita.
           </>
         }

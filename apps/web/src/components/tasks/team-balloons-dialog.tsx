@@ -270,11 +270,11 @@ export function TeamBalloonsDialog({
 
   const description = team ? (
     <>
-      Gerencie as conquistas do time <strong>{team.name}</strong> (
+      Gerencie as conquistas do competidor <strong>{team.name}</strong> (
       <strong>{team.usernameTeam}</strong>).
     </>
   ) : (
-    'Gerencie as conquistas do time selecionado.'
+    'Gerencie as conquistas do competidor selecionado.'
   );
 
   return (
@@ -404,7 +404,7 @@ export function TeamBalloonsDialog({
         open={Boolean(withholdQuestion)}
         onOpenChange={handleWithholdOpenChange}
         title="Tem certeza disso?"
-        body={`Deseja realmente reter o balão de ${team?.name ?? 'este time'}? O balão retornará ao ponto de partida.`}
+        body={`Deseja realmente reter o balão de ${team?.name ?? 'este competidor'}? O balão retornará ao ponto de partida.`}
         confirmLabel="Reter"
         cancelLabel="Cancelar"
         tone="pink"

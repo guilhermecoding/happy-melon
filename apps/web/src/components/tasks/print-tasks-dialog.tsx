@@ -152,7 +152,7 @@ export function PrintTasksDialog({
 
   const description = (
     <>
-      Tasks de impressão do time <strong>{team.name}</strong> (
+      Tasks de impressão do competidor <strong>{team.name}</strong> (
       <strong>{team.usernameTeam}</strong>).
     </>
   );

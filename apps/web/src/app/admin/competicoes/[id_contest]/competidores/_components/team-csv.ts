@@ -13,8 +13,8 @@ export type TeamCsvParseResult = {
 const TEMPLATE_HEADER = 'Nome,Usuario,Sala,Numero da Maquina';
 
 export const TEAM_CSV_TEMPLATE = `${TEMPLATE_HEADER}
-Time Alpha,alpha,Sala 1,12
-Time Beta,beta,,
+Competidor Alpha,alpha,Sala 1,12
+Competidor Beta,beta,,
 `;
 
 const HEADER_ALIASES = {
@@ -186,7 +186,7 @@ export function downloadTeamCsvTemplate() {
   const url = URL.createObjectURL(blob);
   const anchor = document.createElement('a');
   anchor.href = url;
-  anchor.download = 'modelo-times.csv';
+  anchor.download = 'modelo-competidores.csv';
   anchor.click();
   URL.revokeObjectURL(url);
 }
@@ -207,7 +207,7 @@ export function downloadTeamsCsv(
     room: string | null;
     machine: string | null;
   }>,
-  filename = 'times.csv',
+  filename = 'competidores.csv',
 ) {
   const header = 'ID,Nome,Usuario,Sala,Maquina';
   const lines = teams.map((team) =>

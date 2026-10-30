@@ -8,18 +8,18 @@ import { Metadata } from 'next';
 import { TeamsPanel } from './_components/teams-panel';
 
 export const metadata: Metadata = {
-  title: 'Times',
+  title: 'Competidores',
 };
 
 async function AdminTeamsPageContent({
   params,
-}: Omit<PageProps<'/admin/competicoes/[id_contest]/times'>, 'searchParams'>) {
+}: Omit<PageProps<'/admin/competicoes/[id_contest]/competidores'>, 'searchParams'>) {
   const { id_contest } = await params;
 
   return (
     <Page>
       <Section>
-        <TitlePage title="Times" icon={UserMultiple02Icon} />
+        <TitlePage title="Competidores" icon={UserMultiple02Icon} />
       </Section>
       <Section className="mt-6">
         <TeamsPanel contestId={id_contest} />
@@ -30,7 +30,7 @@ async function AdminTeamsPageContent({
 
 export default function AdminTeamsPage({
   params,
-}: PageProps<'/admin/competicoes/[id_contest]/times'>) {
+}: PageProps<'/admin/competicoes/[id_contest]/competidores'>) {
   return (
     <Suspense fallback={<Loading />}>
       <AdminTeamsPageContent params={params} />

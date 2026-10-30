@@ -1,8 +1,8 @@
 import { z } from 'zod';
 
 export const teamFormSchema = z.object({
-  name: z.string().min(1, 'Informe o nome do time'),
-  usernameTeam: z.string().min(1, 'Informe o usuário do time'),
+  name: z.string().min(1, 'Informe o nome do competidor'),
+  usernameTeam: z.string().min(1, 'Informe o usuário do competidor'),
   room: z.string(),
   machine: z.string(),
 });

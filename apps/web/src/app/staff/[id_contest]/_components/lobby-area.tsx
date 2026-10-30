@@ -180,7 +180,7 @@ function LobbyTaskItem({
               size="sm"
               variant="solid"
               icon={<HugeiconsIcon icon={BadgeInfoIcon} strokeWidth={2} />}
-              label="Detalhes do time"
+              label="Detalhes do competidor"
               onClick={() => onOpenInfo(task)}
             />
           </div>
@@ -327,7 +327,7 @@ export default function LobbyArea({
       </div>
 
       <Dialog
-        title="Detalhes do time"
+        title="Detalhes do competidor"
         open={infoTask != null}
         onOpenChange={(open) => {
           if (!open) setInfoTask(null);
@@ -339,7 +339,7 @@ export default function LobbyArea({
               <div className="flex flex-col">
                 <div className="flex items-center gap-2">
                   <HugeiconsIcon icon={UserMultiple02Icon} className="size-5 text-muted-foreground" strokeWidth={2.5} />
-                  <dt className="font-semibold text-xl text-muted-foreground">Time</dt>
+                  <dt className="font-semibold text-xl text-muted-foreground">Competidor</dt>
                 </div>
                 <dd className="font-bold text-2xl">{infoTask.teamName}</dd>
               </div>

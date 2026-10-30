@@ -115,11 +115,11 @@ export function TeamAchievementsDialog({
 
   const description = team ? (
     <>
-      Visualize as conquistas do time <strong>{team.name}</strong> (
+      Visualize as conquistas do competidor <strong>{team.name}</strong> (
       <strong>{team.usernameTeam}</strong>).
     </>
   ) : (
-    'Visualize as conquistas do time selecionado.'
+    'Visualize as conquistas do competidor selecionado.'
   );
 
   return (

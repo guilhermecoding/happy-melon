@@ -39,7 +39,7 @@ export const teamService = {
       if (!response.ok) {
         throw await parseTeamError(
           response,
-          'Não foi possível carregar os times.',
+          'Não foi possível carregar os competidores.',
         );
       }
 
@@ -47,7 +47,7 @@ export const teamService = {
     } catch (error) {
       throw normalizeTeamError(
         error,
-        'Não foi possível carregar os times.',
+        'Não foi possível carregar os competidores.',
       );
     }
   },
@@ -64,13 +64,13 @@ export const teamService = {
       if (!response.ok) {
         throw await parseTeamError(
           response,
-          'Não foi possível criar o time.',
+          'Não foi possível criar o competidor.',
         );
       }
 
       return response.json();
     } catch (error) {
-      throw normalizeTeamError(error, 'Não foi possível criar o time.');
+      throw normalizeTeamError(error, 'Não foi possível criar o competidor.');
     }
   },
 
@@ -92,7 +92,7 @@ export const teamService = {
       if (!response.ok) {
         throw await parseTeamError(
           response,
-          'Não foi possível importar os times.',
+          'Não foi possível importar os competidores.',
         );
       }
 
@@ -100,7 +100,7 @@ export const teamService = {
     } catch (error) {
       throw normalizeTeamError(
         error,
-        'Não foi possível importar os times.',
+        'Não foi possível importar os competidores.',
       );
     }
   },
@@ -117,7 +117,7 @@ export const teamService = {
       if (!response.ok) {
         throw await parseTeamError(
           response,
-          'Não foi possível atualizar o time.',
+          'Não foi possível atualizar o competidor.',
         );
       }
 
@@ -125,7 +125,7 @@ export const teamService = {
     } catch (error) {
       throw normalizeTeamError(
         error,
-        'Não foi possível atualizar o time.',
+        'Não foi possível atualizar o competidor.',
       );
     }
   },
@@ -145,7 +145,7 @@ export const teamService = {
       if (!response.ok) {
         throw await parseTeamError(
           response,
-          'Não foi possível excluir o time.',
+          'Não foi possível excluir o competidor.',
         );
       }
 
@@ -157,7 +157,7 @@ export const teamService = {
     } catch (error) {
       throw normalizeTeamError(
         error,
-        'Não foi possível excluir o time.',
+        'Não foi possível excluir o competidor.',
       );
     }
   },
@@ -180,7 +180,7 @@ export const teamService = {
       if (!response.ok) {
         throw await parseTeamError(
           response,
-          'Não foi possível excluir os times.',
+          'Não foi possível excluir os competidores.',
         );
       }
 
@@ -188,7 +188,7 @@ export const teamService = {
     } catch (error) {
       throw normalizeTeamError(
         error,
-        'Não foi possível excluir os times.',
+        'Não foi possível excluir os competidores.',
       );
     }
   },

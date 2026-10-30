@@ -28,7 +28,7 @@ export default function TasksBoard({
         <div className="flex flex-col gap-4 @5xl:flex-row">
           <div className="w-full lg:w-3/5">
             <BoxFeatures
-              title="Times disponíveis"
+              title="Competidores disponíveis"
               icon={BalloonIcon}
               blobSize="sm"
               blobTone="blue"

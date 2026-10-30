@@ -238,7 +238,7 @@ export function BulkImportTeamsDialog({
       setRequestError(
         fileErrors.length > 0
           ? `Nenhuma entrada válida para importar. Corrija os erros do ${mode === 'boca' ? 'TXT' : 'CSV'}.`
-          : `Selecione um arquivo ${mode === 'boca' ? 'TXT' : 'CSV'} válido com ao menos um time.`,
+          : `Selecione um arquivo ${mode === 'boca' ? 'TXT' : 'CSV'} válido com ao menos um competidor.`,
       );
       return;
     }
@@ -249,14 +249,14 @@ export function BulkImportTeamsDialog({
         teams: importRows,
       });
       onBulkUpserted(teams);
-      toast.success(`${teams.length} time(s) importado(s) com sucesso.`);
+      toast.success(`${teams.length} competidor(es) importado(s) com sucesso.`);
       setIsSubmitting(false);
       handleOpenChange(false);
       return;
     } catch (error) {
       const message = getTeamErrorMessage(
         error,
-        'Não foi possível importar os times.',
+        'Não foi possível importar os competidores.',
       );
       setRequestError(message);
       toast.error(message);
@@ -270,7 +270,7 @@ export function BulkImportTeamsDialog({
       open={open}
       onOpenChange={handleOpenChange}
       title="Como deseja importar?"
-      description="Escolha o formato do arquivo para cadastrar vários times de uma vez."
+      description="Escolha o formato do arquivo para cadastrar vários competidores de uma vez."
       size="lg"
     >
       <div className="flex flex-col gap-4">
@@ -352,7 +352,7 @@ export function BulkImportTeamsDialog({
               <p className="text-sm">
                 Arquivo: {fileName}
                 {importRows.length > 0
-                  ? ` · ${importRows.length} time(s) válido(s)`
+                  ? ` · ${importRows.length} competidor(es) válido(s)`
                   : null}
                 {mode === 'boca' ? ' · Importação BOCA' : null}
               </p>
