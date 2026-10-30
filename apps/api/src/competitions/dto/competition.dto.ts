@@ -66,7 +66,7 @@ export const staffSettingsSchema = z
     if (data.balloonLimitEnabled && data.balloonLimit === null) {
       ctx.addIssue({
         code: 'custom',
-        message: 'Informe o limite de balões.',
+        message: 'Informe o Limite de tarefas.',
         path: ['balloonLimit'],
       });
     }

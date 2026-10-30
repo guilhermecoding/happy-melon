@@ -103,7 +103,7 @@ export function CollaboratorSettingsDialog({
       : null;
 
     if (settings.balloonLimitEnabled && balloonLimit === null) {
-      toast.error('Informe um limite de balões válido (mínimo 1).');
+      toast.error('Informe um Limite de tarefas válido (mínimo 1).');
       return;
     }
 
@@ -152,16 +152,16 @@ export function CollaboratorSettingsDialog({
               <div className="flex items-center justify-between gap-4">
                 <div className="flex flex-col gap-0.5">
                   <span className="text-sm font-bold text-ink">
-                    Limite de balões
+                    Limite de tarefas
                   </span>
                   <span className="text-xs text-muted-foreground">
-                    Número máximo de balões que um staff pode pegar
+                    Número máximo de tarefas que um colaborador pode pegar
                     simultaneamente antes de ser entregue.
                   </span>
                 </div>
                 <Switch
                   checked={settings.balloonLimitEnabled}
-                  label="Limite de balões"
+                  label="Limite de tarefas"
                   onChange={(checked) =>
                     setSettings((current) => ({
                       ...current,
@@ -199,8 +199,8 @@ export function CollaboratorSettingsDialog({
                     Timeout de entrega
                   </span>
                   <span className="text-xs text-muted-foreground">
-                    Tempo máximo (em minutos) que um staff pode ficar com o
-                    balão antes de ser entregue.
+                    Tempo máximo (em minutos) que um colaborador pode ficar com a
+                    tarefa antes de ser entregue.
                   </span>
                 </div>
                 <Switch
