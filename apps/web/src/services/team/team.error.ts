@@ -1,3 +1,5 @@
+import { rewriteTeamNoun } from '@/lib/rewrite-team-noun';
+
 export class TeamServiceError extends Error {
   constructor(
     public readonly status: number | null,
@@ -53,7 +55,7 @@ function mapTeamErrorMessage(
   rawMessage: string,
   fallback: string,
 ): string {
-  const message = rawMessage.trim();
+  const message = rewriteTeamNoun(rawMessage.trim());
 
   if (status === 401) {
     if (/senha|password|incorrect|inválid|invalid/i.test(message)) {
@@ -67,7 +69,7 @@ function mapTeamErrorMessage(
   }
 
   if (status === 404) {
-    return message || 'Time não encontrado.';
+    return message || 'Competidor não encontrado.';
   }
 
   if (status === 400 || status === 422) {

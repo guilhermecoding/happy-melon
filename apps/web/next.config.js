@@ -22,6 +22,15 @@ const nextConfig = {
       .filter(Boolean)
     : [],
   cacheComponents: true,
+  async redirects() {
+    return [
+      {
+        source: "/admin/competicoes/:id/times",
+        destination: "/admin/competicoes/:id/competidores",
+        permanent: false,
+      },
+    ];
+  },
   async rewrites() {
     return API_PREFIXES.flatMap((prefix) => [
       { source: `/${prefix}`, destination: `/backend/${prefix}` },

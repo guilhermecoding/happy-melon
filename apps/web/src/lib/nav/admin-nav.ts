@@ -48,8 +48,8 @@ export function getContestNavItems(contestId: string): AdminNavItem[] {
       icon: 'tarefas',
     },
     {
-      title: 'Times',
-      url: `${base}/times`,
+      title: 'Competidores',
+      url: `${base}/competidores`,
       icon: 'times',
     },
   ];
