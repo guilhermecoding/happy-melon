@@ -11,9 +11,12 @@ const API_PREFIXES = [
   "me",
 ];
 
+const buildModeEnv = process.env.BUILD_MODE;
+const buildMode = buildModeEnv === "standalone" ? "standalone" : buildModeEnv === "development" ? undefined : undefined;
+
 /** @type {import('next').NextConfig} */
 const nextConfig = {
-  output: "standalone",
+  output: buildMode,
   // Hostnames only (no protocol/port). Comma-separated, e.g. "127.0.0.1,*.localhost"
   // localhost is already allowed by Next when this is empty/absent.
   allowedDevOrigins: process.env.ALLOWED_DEV_ORIGINS
