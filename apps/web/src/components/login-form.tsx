@@ -178,7 +178,7 @@ export function LoginForm({
         }
 
         // Full navigation so the session cookie is available to the proxy
-        window.location.assign(role === 'chef' ? '/chef' : '/admin');
+        window.location.assign(role === 'chef' ? '/chef' : '/admin/home');
       } catch {
         setRequestError('Não foi possível conectar ao servidor de autenticação.');
       }
