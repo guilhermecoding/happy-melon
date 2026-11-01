@@ -6,7 +6,6 @@ import Section from '@/components/ui/section'
 import { contestService } from '@/services/contest/contest.service'
 import CountdownContest from '../../_components/countdown-contest'
 import { StaffBackLink } from '../_components/staff-back-link'
-import StaffContestHeading from '../_components/staff-contest-heading'
 import StaffRoundContent from '../_components/staff-round-content'
 import StaffTasksBoard from '../_components/staff-tasks-board'
 
@@ -26,11 +25,7 @@ async function StaffTasksPageContent({
       <CountdownContest contest={contest}>
         <StaffRoundContent>
           <Page>
-            <Section>
-              <StaffContestHeading name={contest.name} />
-            </Section>
-
-            <Section className="mt-4 pb-40 lg:pb-8">
+            <Section className="pb-40 lg:pb-8">
               <StaffTasksBoard contestId={id_contest} />
             </Section>
           </Page>
