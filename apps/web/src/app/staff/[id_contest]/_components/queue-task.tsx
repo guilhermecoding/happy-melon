@@ -241,10 +241,10 @@ export default function QueueTask({
           <div>
             <Badge tone={scoreFrozen ? 'blue' : 'orange'}>
               <div className="flex items-center gap-1">
-                <HugeiconsIcon icon={ClockFadingIcon} className="size-4" strokeWidth={3} />
                 {scoreFrozen ? (
                   <HugeiconsIcon icon={SnowIcon} className="size-4" strokeWidth={3} />
-                ) : null}
+                ) : <HugeiconsIcon icon={ClockFadingIcon} className="size-4" strokeWidth={3} />
+                }
                 <span className="text-sm tabular-nums" suppressHydrationWarning>
                   {formatCountdown(new Date(endsAt).getTime() - countdownNowMs)}
                 </span>
