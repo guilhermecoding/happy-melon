@@ -1,9 +1,11 @@
 import { rewriteTeamNoun } from '@/lib/rewrite-team-noun';
+import { isTeam, type Team } from './team.type';
 
 export class TeamServiceError extends Error {
   constructor(
     public readonly status: number | null,
     message: string,
+    public readonly team: Team | null = null,
   ) {
     super(message);
     this.name = 'TeamServiceError';
@@ -14,10 +16,11 @@ export async function parseTeamError(
   response: Response,
   fallback: string,
 ): Promise<TeamServiceError> {
-  const rawMessage = await readResponseMessage(response);
+  const { message, team } = await readResponseBody(response);
   return new TeamServiceError(
     response.status,
-    mapTeamErrorMessage(response.status, rawMessage, fallback),
+    mapTeamErrorMessage(response.status, message, fallback),
+    team,
   );
 }
 
@@ -72,6 +75,13 @@ function mapTeamErrorMessage(
     return message || 'Competidor não encontrado.';
   }
 
+  if (status === 409) {
+    return (
+      message ||
+      'Sala e máquina foram alteradas por outra pessoa. Revise e salve de novo.'
+    );
+  }
+
   if (status === 400 || status === 422) {
     return message || 'Dados inválidos. Verifique os campos e tente novamente.';
   }
@@ -83,40 +93,60 @@ function mapTeamErrorMessage(
   return message || fallback;
 }
 
-async function readResponseMessage(response: Response): Promise<string> {
+async function readResponseBody(response: Response): Promise<{
+  message: string;
+  team: Team | null;
+}> {
   try {
     const body: unknown = await response.json();
-
-    if (typeof body === 'string') {
-      return body;
-    }
-
-    if (body && typeof body === 'object') {
-      const record = body as Record<string, unknown>;
-
-      if (typeof record.message === 'string') {
-        return record.message;
-      }
-
-      if (Array.isArray(record.message)) {
-        return record.message.map(String).join(', ');
-      }
-
-      if (
-        record.error &&
-        typeof record.error === 'object' &&
-        record.error !== null &&
-        'message' in record.error &&
-        typeof (record.error as { message: unknown }).message === 'string'
-      ) {
-        return (record.error as { message: string }).message;
-      }
-    }
+    return {
+      message: messageFromBody(body) || response.statusText,
+      team: teamFromBody(body),
+    };
   } catch {
-    // ignore JSON parse errors
+    return { message: response.statusText, team: null };
+  }
+}
+
+function messageFromBody(body: unknown): string {
+  if (typeof body === 'string') {
+    return body;
   }
 
-  return response.statusText;
+  if (!body || typeof body !== 'object') {
+    return '';
+  }
+
+  const record = body as Record<string, unknown>;
+
+  if (typeof record.message === 'string') {
+    return record.message;
+  }
+
+  if (Array.isArray(record.message)) {
+    return record.message.map(String).join(', ');
+  }
+
+  if (
+    record.error &&
+    typeof record.error === 'object' &&
+    record.error !== null &&
+    'message' in record.error &&
+    typeof (record.error as { message: unknown }).message === 'string'
+  ) {
+    return (record.error as { message: string }).message;
+  }
+
+  return '';
+}
+
+function teamFromBody(body: unknown): Team | null {
+  if (!body || typeof body !== 'object' || !('team' in body)) {
+    return null;
+  }
+
+  const team = (body as { team: unknown }).team;
+  return isTeam(team) ? team : null;
 }
 
 function isNetworkError(error: unknown): boolean {

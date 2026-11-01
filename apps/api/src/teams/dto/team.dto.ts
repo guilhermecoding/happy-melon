@@ -1,3 +1,4 @@
+import { TEAM_PLACEMENT_MAX_LENGTH } from '@repo/shared';
 import { z } from 'zod';
 
 function emptyToNull(value: string | null | undefined): string | null {
@@ -31,6 +32,24 @@ export const createTeamSchema = z.object({
 
 export const updateTeamSchema = createTeamSchema;
 
+const placementField = z
+  .union([
+    z
+      .string()
+      .max(
+        TEAM_PLACEMENT_MAX_LENGTH,
+        `Use no máximo ${TEAM_PLACEMENT_MAX_LENGTH} caracteres`,
+      ),
+    z.null(),
+  ])
+  .transform(emptyToNull);
+
+export const updateTeamPlacementSchema = z.strictObject({
+  room: placementField,
+  machine: placementField,
+  updatedAt: z.iso.datetime(),
+});
+
 export const bulkUpsertTeamsSchema = z.object({
   teams: z.array(createTeamSchema).min(1, 'Informe ao menos um time'),
 });
@@ -41,5 +60,6 @@ export const deleteTeamSchema = z.object({
 
 export type CreateTeamDto = z.infer<typeof createTeamSchema>;
 export type UpdateTeamDto = z.infer<typeof updateTeamSchema>;
+export type UpdateTeamPlacementDto = z.infer<typeof updateTeamPlacementSchema>;
 export type BulkUpsertTeamsDto = z.infer<typeof bulkUpsertTeamsSchema>;
 export type DeleteTeamDto = z.infer<typeof deleteTeamSchema>;
