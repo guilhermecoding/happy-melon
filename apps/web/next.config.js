@@ -25,6 +25,11 @@ const nextConfig = {
   async redirects() {
     return [
       {
+        source: "/admin",
+        destination: "/admin/home",
+        permanent: false,
+      },
+      {
         source: "/admin/competicoes/:id/times",
         destination: "/admin/competicoes/:id/competidores",
         permanent: false,

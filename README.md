@@ -60,7 +60,7 @@ Antes da prova (e entre uma rodada e outra), veem o cronômetro. Durante a rodad
 3. Em **Prova**, escolha a rodada e cadastre as questões (identificador, título e cor do balão). Sem questão, não há balão para confirmar.
 4. Em **Times**, cadastre os times ou importe em massa. Sala e máquina aparecem para o colaborador na hora da entrega.
 5. Em **Chefes**, adicione nome e e-mail, copie a senha e ligue o acesso de cada chefe.
-6. Em **Colaboradores**, convide quem já conhece o e-mail ou compartilhe o QR e o código. Ligue o acesso e, se quiser, defina limite de balões no lobby e tempo para entregar.
+6. Em **Colaboradores**, convide quem já conhece o e-mail ou compartilhe o QR e o código. Ligue o acesso e, se quiser, defina Limite de tarefas no lobby e tempo para entregar.
 7. Os colaboradores entram em **Colaborador** com e-mail e código. Os chefes entram em **Administrador ou Chefe de Sala** com e-mail e senha.
 
 ### 2. Durante a prova
