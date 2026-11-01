@@ -12,7 +12,7 @@ const API_PREFIXES = [
 ];
 
 const buildModeEnv = process.env.BUILD_MODE;
-const buildMode = buildModeEnv === "standalone" ? "standalone" : buildModeEnv === "development" ? undefined : undefined;
+const buildMode = buildModeEnv === "standalone" ? "standalone" : buildModeEnv === "development" ? undefined : "standalone";
 
 /** @type {import('next').NextConfig} */
 const nextConfig = {
