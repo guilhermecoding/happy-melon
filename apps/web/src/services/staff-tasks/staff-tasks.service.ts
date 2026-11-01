@@ -178,6 +178,9 @@ export const staffTasksService = {
         const multiTouchBanEnabled = (
           parsed as { multiTouchBanEnabled?: unknown }
         ).multiTouchBanEnabled;
+        const multiTouchBanSeconds = (
+          parsed as { multiTouchBanSeconds?: unknown }
+        ).multiTouchBanSeconds;
         if (minutes !== null && typeof minutes !== 'number') {
           return null;
         }
@@ -187,11 +190,18 @@ export const staffTasksService = {
         if (typeof multiTouchBanEnabled !== 'boolean') {
           return null;
         }
+        if (
+          multiTouchBanSeconds !== null &&
+          typeof multiTouchBanSeconds !== 'number'
+        ) {
+          return null;
+        }
         return {
           type: STAFF_TASK_EVENT_TYPE.SETTINGS_UPDATED,
           deliveryTimeoutMinutes: minutes,
           balloonLimit,
           multiTouchBanEnabled,
+          multiTouchBanSeconds,
         };
       }
 

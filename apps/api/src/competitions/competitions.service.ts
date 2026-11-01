@@ -197,6 +197,9 @@ export class CompetitionsService {
         ? competition.balloonLimit
         : null,
       multiTouchBanEnabled: competition.multiTouchBanEnabled,
+      multiTouchBanSeconds: competition.multiTouchBanEnabled
+        ? competition.multiTouchBanSeconds
+        : null,
     });
 
     return this.toResponse(competition);

@@ -169,7 +169,10 @@ function LobbyTaskItem({
             </span>
             <div className="mt-0.5 flex items-center gap-1">
               <HugeiconsIcon icon={Clock01Icon} className="size-3" />
-              <span className="text-[11px] text-muted-foreground">
+              <span
+                className="text-[11px] text-muted-foreground"
+                suppressHydrationWarning
+              >
                 {formatRelativeTime(task.createdAt, nowMs)}
               </span>
             </div>

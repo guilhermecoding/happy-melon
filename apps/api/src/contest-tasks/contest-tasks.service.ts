@@ -40,6 +40,7 @@ export class ContestTasksService {
       deliveryTimeoutEnabled: competition.deliveryTimeoutEnabled,
       deliveryTimeoutMinutes: competition.deliveryTimeoutMinutes,
       multiTouchBanEnabled: competition.multiTouchBanEnabled,
+      multiTouchBanSeconds: competition.multiTouchBanSeconds,
     });
   }
 
@@ -52,6 +53,7 @@ export class ContestTasksService {
     deliveryTimeoutEnabled: boolean;
     deliveryTimeoutMinutes: number | null;
     multiTouchBanEnabled: boolean;
+    multiTouchBanSeconds: number | null;
   }): Promise<StaffTasksSnapshot> {
     const processing = PrismaBalloonDeliveryStatus.PROCESSING;
     const pending = PrismaBalloonDeliveryStatus.PENDING;
@@ -174,6 +176,9 @@ export class ContestTasksService {
       balloonLimit: params.balloonLimitEnabled ? params.balloonLimit : null,
       currentRoundId: params.queueContestId,
       multiTouchBanEnabled: params.multiTouchBanEnabled,
+      multiTouchBanSeconds: params.multiTouchBanEnabled
+        ? params.multiTouchBanSeconds
+        : null,
       multiTouchBannedUntil,
     };
   }

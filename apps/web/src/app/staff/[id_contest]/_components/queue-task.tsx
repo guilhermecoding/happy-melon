@@ -156,7 +156,10 @@ function TaskItem({
             </span>
             <div className="flex items-center gap-1 mt-1">
               <HugeiconsIcon icon={Clock01Icon} className="size-3" />
-              <span className="text-xs text-muted-foreground">
+              <span
+                className="text-xs text-muted-foreground"
+                suppressHydrationWarning
+              >
                 {formatRelativeTime(task.createdAt, nowMs)}
               </span>
             </div>
@@ -242,7 +245,7 @@ export default function QueueTask({
                 {scoreFrozen ? (
                   <HugeiconsIcon icon={SnowIcon} className="size-4" strokeWidth={3} />
                 ) : null}
-                <span className="text-sm tabular-nums">
+                <span className="text-sm tabular-nums" suppressHydrationWarning>
                   {formatCountdown(new Date(endsAt).getTime() - countdownNowMs)}
                 </span>
               </div>

@@ -169,6 +169,7 @@ export type StaffSettingsUpdatedEvent = {
   deliveryTimeoutMinutes: number | null;
   balloonLimit: number | null;
   multiTouchBanEnabled: boolean;
+  multiTouchBanSeconds: number | null;
 };
 
 export type StaffMultiTouchRestrictedEvent = {
@@ -189,5 +190,6 @@ export type StaffTasksSnapshot = {
   balloonLimit: number | null;
   currentRoundId: string | null;
   multiTouchBanEnabled: boolean;
+  multiTouchBanSeconds: number | null;
   multiTouchBannedUntil: string | null;
 };

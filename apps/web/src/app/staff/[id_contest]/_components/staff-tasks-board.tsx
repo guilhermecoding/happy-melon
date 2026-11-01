@@ -74,6 +74,9 @@ export default function StaffTasksBoard({ contestId }: StaffTasksBoardProps) {
   >(null);
   const [balloonLimit, setBalloonLimit] = useState<number | null>(null);
   const [multiTouchBanEnabled, setMultiTouchBanEnabled] = useState(false);
+  const [multiTouchBanSeconds, setMultiTouchBanSeconds] = useState<
+    number | null
+  >(null);
   const [bannedUntil, setBannedUntil] = useState<string | null>(null);
   const [blockPending, setBlockPending] = useState(false);
   const [claimingIds, setClaimingIds] = useState<Set<string>>(new Set());
@@ -102,6 +105,7 @@ export default function StaffTasksBoard({ contestId }: StaffTasksBoardProps) {
           setDeliveryTimeoutMinutes(snapshot.deliveryTimeoutMinutes);
           setBalloonLimit(snapshot.balloonLimit);
           setMultiTouchBanEnabled(snapshot.multiTouchBanEnabled);
+          setMultiTouchBanSeconds(snapshot.multiTouchBanSeconds);
         });
         multiTouchEnabledRef.current = snapshot.multiTouchBanEnabled;
         if (reportingRef.current && !snapshot.multiTouchBannedUntil) {
@@ -146,6 +150,7 @@ export default function StaffTasksBoard({ contestId }: StaffTasksBoardProps) {
         setBalloonLimit(event.balloonLimit);
         multiTouchEnabledRef.current = event.multiTouchBanEnabled;
         setMultiTouchBanEnabled(event.multiTouchBanEnabled);
+        setMultiTouchBanSeconds(event.multiTouchBanSeconds);
         if (!event.multiTouchBanEnabled) {
           reportingRef.current = false;
           tapTimesRef.current = [];
@@ -332,6 +337,7 @@ export default function StaffTasksBoard({ contestId }: StaffTasksBoardProps) {
           .then((snapshot) => {
             multiTouchEnabledRef.current = snapshot.multiTouchBanEnabled;
             setMultiTouchBanEnabled(snapshot.multiTouchBanEnabled);
+            setMultiTouchBanSeconds(snapshot.multiTouchBanSeconds);
             if (reportingRef.current && !snapshot.multiTouchBannedUntil) return;
             setBlockPending(false);
             setBannedUntil(
@@ -392,7 +398,12 @@ export default function StaffTasksBoard({ contestId }: StaffTasksBoardProps) {
         balloonLimit={balloonLimit}
         onDeliver={handleDeliver}
       />
-      {bannedUntil || blockPending ? <MultiTouchBlock /> : null}
+      {bannedUntil || blockPending ? (
+        <MultiTouchBlock
+          bannedUntil={bannedUntil}
+          durationSeconds={multiTouchBanSeconds}
+        />
+      ) : null}
     </>
   );
 }
