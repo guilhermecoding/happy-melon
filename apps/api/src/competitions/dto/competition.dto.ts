@@ -61,6 +61,8 @@ export const staffSettingsSchema = z
     balloonLimit: z.number().int().min(1).nullable(),
     deliveryTimeoutEnabled: z.boolean(),
     deliveryTimeoutMinutes: z.number().int().min(1).nullable(),
+    multiTouchBanEnabled: z.boolean(),
+    multiTouchBanSeconds: z.number().int().min(5).max(90).nullable(),
   })
   .superRefine((data, ctx) => {
     if (data.balloonLimitEnabled && data.balloonLimit === null) {
@@ -95,6 +97,22 @@ export const staffSettingsSchema = z
         code: 'custom',
         message: 'O timeout deve ser nulo quando desabilitado.',
         path: ['deliveryTimeoutMinutes'],
+      });
+    }
+
+    if (data.multiTouchBanEnabled && data.multiTouchBanSeconds === null) {
+      ctx.addIssue({
+        code: 'custom',
+        message: 'Informe o tempo de bloqueio em segundos.',
+        path: ['multiTouchBanSeconds'],
+      });
+    }
+
+    if (!data.multiTouchBanEnabled && data.multiTouchBanSeconds !== null) {
+      ctx.addIssue({
+        code: 'custom',
+        message: 'O tempo de bloqueio deve ser nulo quando desabilitado.',
+        path: ['multiTouchBanSeconds'],
       });
     }
   });

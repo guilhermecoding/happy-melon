@@ -34,6 +34,7 @@ import {
   assertRoundInProgress,
 } from '../contests/contest-window.js';
 import { LobbyCapacityService } from '../contest-tasks/lobby-capacity.service.js';
+import { MultiTouchBanService } from '../contest-tasks/multi-touch-ban.service.js';
 import {
   teamFieldsFrom,
   toPrintStaffTask,
@@ -60,6 +61,7 @@ export class PrintsService {
     private readonly contestTasksEvents: ContestTasksEventsService,
     private readonly taskHistoryEvents: TaskHistoryEventsService,
     private readonly lobbyCapacity: LobbyCapacityService,
+    private readonly multiTouchBan: MultiTouchBanService,
   ) { }
 
   async listByContest(contestId: string, teamId?: string) {
@@ -265,6 +267,7 @@ export class PrintsService {
     );
 
     const { task, history } = await prisma.$transaction(async (tx) => {
+      await this.multiTouchBan.assertCanClaim(tx, contestId, actor.userId);
       await this.lobbyCapacity.assertCanClaim(tx, contestId, actor.userId);
 
       const updated = await tx.printTask.updateMany({

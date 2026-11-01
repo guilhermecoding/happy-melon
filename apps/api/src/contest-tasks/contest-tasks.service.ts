@@ -9,6 +9,7 @@ import {
   type StaffTasksSnapshot,
 } from '@repo/shared';
 import { getCompetitionOrThrow } from '../competitions/round-access.js';
+import { MultiTouchBanService } from './multi-touch-ban.service.js';
 import {
   teamFieldsFrom,
   toBalloonStaffTask,
@@ -17,6 +18,8 @@ import {
 
 @Injectable()
 export class ContestTasksService {
+  constructor(private readonly multiTouchBan: MultiTouchBanService) {}
+
   async getCompetitionStaffTasksSnapshot(
     competitionId: string,
     userId: string,
@@ -36,6 +39,8 @@ export class ContestTasksService {
       balloonLimit: competition.balloonLimit,
       deliveryTimeoutEnabled: competition.deliveryTimeoutEnabled,
       deliveryTimeoutMinutes: competition.deliveryTimeoutMinutes,
+      multiTouchBanEnabled: competition.multiTouchBanEnabled,
+      multiTouchBanSeconds: competition.multiTouchBanSeconds,
     });
   }
 
@@ -47,11 +52,13 @@ export class ContestTasksService {
     balloonLimit: number | null;
     deliveryTimeoutEnabled: boolean;
     deliveryTimeoutMinutes: number | null;
+    multiTouchBanEnabled: boolean;
+    multiTouchBanSeconds: number | null;
   }): Promise<StaffTasksSnapshot> {
     const processing = PrismaBalloonDeliveryStatus.PROCESSING;
     const pending = PrismaBalloonDeliveryStatus.PENDING;
 
-    const [balloonQueue, printQueue, balloonMine, printMine] =
+    const [balloonQueue, printQueue, balloonMine, printMine, multiTouchBannedUntil] =
       await Promise.all([
         params.queueContestId
           ? prisma.balloonDelivery.findMany({
@@ -93,6 +100,11 @@ export class ContestTasksService {
           include: { team: true },
           orderBy: { createdAt: 'asc' },
         }),
+        this.multiTouchBan.findActiveBannedUntil(
+          params.mineCompetitionId,
+          params.userId,
+          params.multiTouchBanEnabled,
+        ),
       ]);
 
     const queue = this.sortByCreatedAt([
@@ -163,6 +175,11 @@ export class ContestTasksService {
         : null,
       balloonLimit: params.balloonLimitEnabled ? params.balloonLimit : null,
       currentRoundId: params.queueContestId,
+      multiTouchBanEnabled: params.multiTouchBanEnabled,
+      multiTouchBanSeconds: params.multiTouchBanEnabled
+        ? params.multiTouchBanSeconds
+        : null,
+      multiTouchBannedUntil,
     };
   }
 
