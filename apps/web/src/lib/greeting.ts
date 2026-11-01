@@ -4,11 +4,11 @@ export type TimeOfDayGreeting = 'Bom dia' | 'Boa tarde' | 'Boa noite';
 export function getTimeOfDayGreeting(date: Date = new Date()): TimeOfDayGreeting {
   const hour = date.getHours();
 
-  if (hour < 12) {
+  if (hour >= 6 && hour < 12) {
     return 'Bom dia';
   }
 
-  if (hour < 18) {
+  if (hour >= 12 && hour < 18) {
     return 'Boa tarde';
   }
 

@@ -24,6 +24,7 @@ import { Table } from '@/components/pouf/table';
 import { toast } from '@/components/pouf/toaster';
 import { teamService } from '@/services/team/team.service';
 import { getTeamErrorMessage } from '@/services/team/team.error';
+import { useTeamList } from '@/services/team/use-team-list';
 import type { Team } from '@/services/team/team.type';
 import { CreateTeamSheet } from './create-team-sheet';
 import { EditTeamSheet } from './edit-team-sheet';
@@ -55,9 +56,7 @@ function matchesSearch(team: Team, query: string) {
 }
 
 export function TeamsPanel({ contestId }: TeamsPanelProps) {
-  const [teams, setTeams] = useState<Team[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string>();
+  const { teams, setTeams, loading, error, setError } = useTeamList(contestId);
   const [search, setSearch] = useState('');
   const deferredSearch = useDeferredValue(search);
   const [page, setPage] = useState(1);
@@ -102,31 +101,18 @@ export function TeamsPanel({ contestId }: TeamsPanelProps) {
   }, [page, totalPages]);
 
   useEffect(() => {
-    let active = true;
+    if (!selectedTeam) return;
+    if (teams.some((team) => team.id === selectedTeam.id)) return;
+    setEditOpen(false);
+    setSelectedTeam(null);
+  }, [teams, selectedTeam]);
 
-    async function loadTeams() {
-      try {
-        const data = await teamService.list(contestId);
-        if (active) setTeams(data);
-      } catch (loadError) {
-        if (active) {
-          setError(
-            getTeamErrorMessage(
-              loadError,
-              'Não foi possível carregar os competidores.',
-            ),
-          );
-        }
-      } finally {
-        if (active) setLoading(false);
-      }
-    }
-
-    void loadTeams();
-    return () => {
-      active = false;
-    };
-  }, [contestId]);
+  useEffect(() => {
+    setAchievementsTeam((current) => {
+      if (!current) return current;
+      return teams.find((team) => team.id === current.id) ?? null;
+    });
+  }, [teams]);
 
   function handleCreated(team: Team) {
     setTeams((current) => [...current, team]);
