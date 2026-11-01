@@ -1,6 +1,7 @@
 'use client';
 
 import { useEffect, useRef, useState, useTransition, type PointerEvent } from 'react';
+import { AnimatePresence } from 'motion/react';
 import {
   BALLOON_DELIVERY_STATUS,
   STAFF_TASK_EVENT_TYPE,
@@ -398,12 +399,15 @@ export default function StaffTasksBoard({ contestId }: StaffTasksBoardProps) {
         balloonLimit={balloonLimit}
         onDeliver={handleDeliver}
       />
-      {bannedUntil || blockPending ? (
-        <MultiTouchBlock
-          bannedUntil={bannedUntil}
-          durationSeconds={multiTouchBanSeconds}
-        />
-      ) : null}
+      <AnimatePresence>
+        {bannedUntil || blockPending ? (
+          <MultiTouchBlock
+            key="multi-touch-block"
+            bannedUntil={bannedUntil}
+            durationSeconds={multiTouchBanSeconds}
+          />
+        ) : null}
+      </AnimatePresence>
     </>
   );
 }

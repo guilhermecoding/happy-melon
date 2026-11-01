@@ -3,6 +3,7 @@
 import { useEffect, useLayoutEffect, useRef, useState } from 'react';
 import { createPortal } from 'react-dom';
 import { DotLottieReact } from '@lottiefiles/dotlottie-react';
+import { motion, useReducedMotion } from 'motion/react';
 
 type MultiTouchBlockProps = {
   bannedUntil: string | null;
@@ -72,6 +73,7 @@ export default function MultiTouchBlock({
   durationSeconds,
 }: MultiTouchBlockProps) {
   const [mounted, setMounted] = useState(false);
+  const reduceMotion = useReducedMotion();
 
   useEffect(() => {
     setMounted(true);
@@ -82,13 +84,30 @@ export default function MultiTouchBlock({
   }
 
   return createPortal(
-    <div
+    <motion.div
       className="fixed inset-0 z-70 flex items-center justify-center bg-linear-to-t from-orange-500 to-orange-100 p-6"
       role="alertdialog"
       aria-modal="true"
       aria-label="Bloqueio de multi-toque"
+      initial={reduceMotion ? { opacity: 0 } : { y: '100%' }}
+      animate={reduceMotion ? { opacity: 1 } : { y: 0 }}
+      exit={{ opacity: 0, transition: { duration: 0.2, ease: 'easeOut' } }}
+      transition={
+        reduceMotion
+          ? { duration: 0.15, ease: 'easeOut' }
+          : { duration: 0.45, ease: 'easeOut' }
+      }
     >
-      <div className="flex flex-col items-center justify-center gap-4">
+      <motion.div
+        className="flex flex-col items-center justify-center gap-4"
+        initial={reduceMotion ? false : { opacity: 0 }}
+        animate={{ opacity: 1 }}
+        transition={
+          reduceMotion
+            ? { duration: 0 }
+            : { duration: 0.3, delay: 0.45, ease: 'easeOut' }
+        }
+      >
         <div className="flex items-center justify-center">
           <DotLottieReact src="/animations/fire.lottie" loop autoplay />
         </div>
@@ -99,8 +118,8 @@ export default function MultiTouchBlock({
           Isso significa que é hora de uma pausa. <br /> Basta esperar um pouco e você poderá pegar outra tarefa.
         </p>
         <DrainBar bannedUntil={bannedUntil} durationSeconds={durationSeconds} />
-      </div>
-    </div>,
+      </motion.div>
+    </motion.div>,
     document.body,
   );
 }
