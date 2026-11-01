@@ -20,6 +20,9 @@ import {
 export const CLAIM_RACE_ERROR_MESSAGE =
   'Ops! Alguém foi ligeiro e já pegou essa task. Tente outra!';
 
+export const MULTI_TOUCH_BAN_ERROR_MESSAGE =
+  'Você está temporariamente impedido de pegar tarefas.';
+
 export const CLAIM_SUCCESS_MESSAGES = [
   'Agora é com você! Tarefa adicionada ao seu lobby.',
   'Pegou! Essa tarefa já está no seu lobby.',
@@ -120,6 +123,44 @@ export const staffTasksService = {
     return `${getApiBaseUrl()}/competitions/${contestId}/tasks/events`;
   },
 
+  async reportMultiTouch(
+    contestId: string,
+  ): Promise<{ bannedUntil: string | null }> {
+    try {
+      const response = await fetch(
+        `${getApiBaseUrl()}/competitions/${contestId}/staff-tasks/multi-touch`,
+        {
+          method: 'POST',
+          credentials: 'include',
+        },
+      );
+
+      if (!response.ok) {
+        throw await parseBalloonError(
+          response,
+          'Não foi possível aplicar o bloqueio.',
+        );
+      }
+
+      const body: unknown = await response.json();
+      if (!body || typeof body !== 'object' || !('bannedUntil' in body)) {
+        throw new Error('Não foi possível aplicar o bloqueio.');
+      }
+
+      const bannedUntil = (body as { bannedUntil: unknown }).bannedUntil;
+      if (bannedUntil !== null && typeof bannedUntil !== 'string') {
+        throw new Error('Não foi possível aplicar o bloqueio.');
+      }
+
+      return { bannedUntil };
+    } catch (error) {
+      throw normalizeBalloonError(
+        error,
+        'Não foi possível aplicar o bloqueio.',
+      );
+    }
+  },
+
   parseEventData(raw: string): StaffTaskEvent | null {
     try {
       const parsed: unknown = JSON.parse(raw);
@@ -134,16 +175,39 @@ export const staffTasksService = {
           .deliveryTimeoutMinutes;
         const balloonLimit = (parsed as { balloonLimit?: unknown })
           .balloonLimit;
+        const multiTouchBanEnabled = (
+          parsed as { multiTouchBanEnabled?: unknown }
+        ).multiTouchBanEnabled;
         if (minutes !== null && typeof minutes !== 'number') {
           return null;
         }
         if (balloonLimit !== null && typeof balloonLimit !== 'number') {
           return null;
         }
+        if (typeof multiTouchBanEnabled !== 'boolean') {
+          return null;
+        }
         return {
           type: STAFF_TASK_EVENT_TYPE.SETTINGS_UPDATED,
           deliveryTimeoutMinutes: minutes,
           balloonLimit,
+          multiTouchBanEnabled,
+        };
+      }
+
+      if (type === STAFF_TASK_EVENT_TYPE.MULTI_TOUCH_RESTRICTED) {
+        const restrictedUserId = (parsed as { userId?: unknown }).userId;
+        const bannedUntil = (parsed as { bannedUntil?: unknown }).bannedUntil;
+        if (typeof restrictedUserId !== 'string' || restrictedUserId === '') {
+          return null;
+        }
+        if (typeof bannedUntil !== 'string' || bannedUntil === '') {
+          return null;
+        }
+        return {
+          type: STAFF_TASK_EVENT_TYPE.MULTI_TOUCH_RESTRICTED,
+          userId: restrictedUserId,
+          bannedUntil,
         };
       }
 
@@ -283,6 +347,19 @@ export const staffTasksService = {
     ) {
       return (
         error.status === 400 && error.message === CLAIM_RACE_ERROR_MESSAGE
+      );
+    }
+
+    return false;
+  },
+
+  isMultiTouchBanError(error: unknown): boolean {
+    if (
+      error instanceof PrintServiceError ||
+      error instanceof BalloonServiceError
+    ) {
+      return (
+        error.status === 400 && error.message === MULTI_TOUCH_BAN_ERROR_MESSAGE
       );
     }
 

@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useLayoutEffect, useRef, useState } from 'react';
+import { useEffect, useLayoutEffect, useRef, useState, type PointerEvent } from 'react';
 import {
   isScoreFreezeActive,
   TASK_KIND,
@@ -185,6 +185,7 @@ type QueueTaskProps = {
   balloonLimit: number | null;
   lobbyCount: number;
   onClaim: (task: StaffTask) => void;
+  onPointerDownCapture?: (event: PointerEvent<HTMLDivElement>) => void;
 };
 
 export default function QueueTask({
@@ -193,6 +194,7 @@ export default function QueueTask({
   balloonLimit,
   lobbyCount,
   onClaim,
+  onPointerDownCapture,
 }: QueueTaskProps) {
   const { startsAt, endsAt, scoreFreezeMinutes } = useContestSchedule();
   const [nowMs, setNowMs] = useState(() => Date.now());
@@ -217,7 +219,10 @@ export default function QueueTask({
   );
 
   return (
-    <div className="flex w-full flex-col gap-4">
+    <div
+      className="flex w-full flex-col gap-4"
+      onPointerDownCapture={onPointerDownCapture}
+    >
       <Card variant="tight">
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-3">

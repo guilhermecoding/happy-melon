@@ -24,6 +24,8 @@ const EMPTY_SETTINGS: StaffSettingsInput = {
   balloonLimit: null,
   deliveryTimeoutEnabled: false,
   deliveryTimeoutMinutes: null,
+  multiTouchBanEnabled: false,
+  multiTouchBanSeconds: null,
 };
 
 export function CollaboratorSettingsDialog({
@@ -34,6 +36,7 @@ export function CollaboratorSettingsDialog({
   const [settings, setSettings] = useState<StaffSettingsInput>(EMPTY_SETTINGS);
   const [balloonLimitInput, setBalloonLimitInput] = useState('');
   const [timeoutInput, setTimeoutInput] = useState('');
+  const [multiTouchSecondsInput, setMultiTouchSecondsInput] = useState('');
   const [loading, setLoading] = useState(false);
   const [saving, setSaving] = useState(false);
 
@@ -53,6 +56,8 @@ export function CollaboratorSettingsDialog({
           balloonLimit: contest.balloonLimit,
           deliveryTimeoutEnabled: contest.deliveryTimeoutEnabled,
           deliveryTimeoutMinutes: contest.deliveryTimeoutMinutes,
+          multiTouchBanEnabled: contest.multiTouchBanEnabled,
+          multiTouchBanSeconds: contest.multiTouchBanSeconds,
         });
         setBalloonLimitInput(
           contest.balloonLimit !== null ? String(contest.balloonLimit) : '',
@@ -60,6 +65,11 @@ export function CollaboratorSettingsDialog({
         setTimeoutInput(
           contest.deliveryTimeoutMinutes !== null
             ? String(contest.deliveryTimeoutMinutes)
+            : '',
+        );
+        setMultiTouchSecondsInput(
+          contest.multiTouchBanSeconds !== null
+            ? String(contest.multiTouchBanSeconds)
             : '',
         );
       } catch (error) {
@@ -94,12 +104,23 @@ export function CollaboratorSettingsDialog({
     return parsed;
   }
 
+  function parseBanSeconds(value: string): number | null {
+    const parsed = Number.parseInt(value, 10);
+    if (!Number.isFinite(parsed) || parsed < 5 || parsed > 90) {
+      return null;
+    }
+    return parsed;
+  }
+
   async function handleSave() {
     const balloonLimit = settings.balloonLimitEnabled
       ? parsePositiveInt(balloonLimitInput)
       : null;
     const deliveryTimeoutMinutes = settings.deliveryTimeoutEnabled
       ? parsePositiveInt(timeoutInput)
+      : null;
+    const multiTouchBanSeconds = settings.multiTouchBanEnabled
+      ? parseBanSeconds(multiTouchSecondsInput)
       : null;
 
     if (settings.balloonLimitEnabled && balloonLimit === null) {
@@ -112,11 +133,18 @@ export function CollaboratorSettingsDialog({
       return;
     }
 
+    if (settings.multiTouchBanEnabled && multiTouchBanSeconds === null) {
+      toast.error('Informe um tempo de bloqueio entre 5 e 90 segundos.');
+      return;
+    }
+
     const payload: StaffSettingsInput = {
       balloonLimitEnabled: settings.balloonLimitEnabled,
       balloonLimit,
       deliveryTimeoutEnabled: settings.deliveryTimeoutEnabled,
       deliveryTimeoutMinutes,
+      multiTouchBanEnabled: settings.multiTouchBanEnabled,
+      multiTouchBanSeconds,
     };
 
     setSaving(true);
@@ -230,6 +258,54 @@ export function CollaboratorSettingsDialog({
                       value={timeoutInput}
                       onChange={setTimeoutInput}
                       placeholder="Ex: 10"
+                    />
+                  )}
+                </Field>
+              ) : null}
+            </div>
+          </RowCard>
+
+          <RowCard>
+            <div className="flex flex-col gap-3">
+              <div className="flex items-center justify-between gap-4">
+                <div className="flex flex-col gap-0.5">
+                  <span className="text-sm font-bold text-ink">
+                    Multi-toque
+                  </span>
+                  <span className="text-xs text-muted-foreground">
+                    Bloqueia por um tempo quem tocar várias vezes seguidas na fila de
+                    tarefas, para não pegar uma tarefa no instante em que ela
+                    aparece.
+                  </span>
+                </div>
+                <Switch
+                  checked={settings.multiTouchBanEnabled}
+                  label="Multi-toque"
+                  onChange={(checked) =>
+                    setSettings((current) => ({
+                      ...current,
+                      multiTouchBanEnabled: checked,
+                      multiTouchBanSeconds: checked
+                        ? current.multiTouchBanSeconds
+                        : null,
+                    }))
+                  }
+                />
+              </div>
+              {settings.multiTouchBanEnabled ? (
+                <Field label="Segundos">
+                  {(id, describedBy) => (
+                    <Input
+                      id={id}
+                      describedBy={describedBy}
+                      type="number"
+                      min={5}
+                      max={90}
+                      step={1}
+                      inputMode="numeric"
+                      value={multiTouchSecondsInput}
+                      onChange={setMultiTouchSecondsInput}
+                      placeholder="Min. 5, Max. 90"
                     />
                   )}
                 </Field>

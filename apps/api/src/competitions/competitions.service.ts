@@ -31,6 +31,7 @@ import {
   isIdUniqueViolation,
 } from '../common/short-id.js';
 import { ContestTasksEventsService } from '../contest-tasks/contest-tasks.events.js';
+import { MultiTouchBanService } from '../contest-tasks/multi-touch-ban.service.js';
 import { ContestAccessEventsService } from '../contests/contest-access.events.js';
 import type {
   ContestStatusDto,
@@ -52,6 +53,7 @@ export class CompetitionsService {
   constructor(
     private readonly contestAccessEvents: ContestAccessEventsService,
     private readonly contestTasksEvents: ContestTasksEventsService,
+    private readonly multiTouchBan: MultiTouchBanService,
   ) {}
 
   async list() {
@@ -174,9 +176,17 @@ export class CompetitionsService {
         deliveryTimeoutMinutes: dto.deliveryTimeoutEnabled
           ? dto.deliveryTimeoutMinutes
           : null,
+        multiTouchBanEnabled: dto.multiTouchBanEnabled,
+        multiTouchBanSeconds: dto.multiTouchBanEnabled
+          ? dto.multiTouchBanSeconds
+          : null,
       },
       include: { rounds: { orderBy: { startsAt: 'asc' } } },
     });
+
+    if (!competition.multiTouchBanEnabled) {
+      await this.multiTouchBan.clearCompetition(id);
+    }
 
     this.contestTasksEvents.emit(id, {
       type: STAFF_TASK_EVENT_TYPE.SETTINGS_UPDATED,
@@ -186,6 +196,7 @@ export class CompetitionsService {
       balloonLimit: competition.balloonLimitEnabled
         ? competition.balloonLimit
         : null,
+      multiTouchBanEnabled: competition.multiTouchBanEnabled,
     });
 
     return this.toResponse(competition);
@@ -435,6 +446,8 @@ export class CompetitionsService {
       balloonLimit: competition.balloonLimit,
       deliveryTimeoutEnabled: competition.deliveryTimeoutEnabled,
       deliveryTimeoutMinutes: competition.deliveryTimeoutMinutes,
+      multiTouchBanEnabled: competition.multiTouchBanEnabled,
+      multiTouchBanSeconds: competition.multiTouchBanSeconds,
       rounds: competition.rounds.map((round) => toRoundResponse(round)),
       currentRound: schedule.currentRound
         ? toRoundResponse(schedule.currentRound)

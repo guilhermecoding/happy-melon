@@ -141,6 +141,7 @@ export const STAFF_TASK_EVENT_TYPE = {
   CLAIMED: 'task.claimed',
   REMOVED: 'task.removed',
   SETTINGS_UPDATED: 'task.settings.updated',
+  MULTI_TOUCH_RESTRICTED: 'task.multi-touch.restricted',
 } as const;
 
 export type StaffTaskEventType =
@@ -167,9 +168,19 @@ export type StaffSettingsUpdatedEvent = {
   type: typeof STAFF_TASK_EVENT_TYPE.SETTINGS_UPDATED;
   deliveryTimeoutMinutes: number | null;
   balloonLimit: number | null;
+  multiTouchBanEnabled: boolean;
 };
 
-export type StaffTaskEvent = StaffTaskLifecycleEvent | StaffSettingsUpdatedEvent;
+export type StaffMultiTouchRestrictedEvent = {
+  type: typeof STAFF_TASK_EVENT_TYPE.MULTI_TOUCH_RESTRICTED;
+  userId: string;
+  bannedUntil: string;
+};
+
+export type StaffTaskEvent =
+  | StaffTaskLifecycleEvent
+  | StaffSettingsUpdatedEvent
+  | StaffMultiTouchRestrictedEvent;
 
 export type StaffTasksSnapshot = {
   queue: StaffTask[];
@@ -177,4 +188,6 @@ export type StaffTasksSnapshot = {
   deliveryTimeoutMinutes: number | null;
   balloonLimit: number | null;
   currentRoundId: string | null;
+  multiTouchBanEnabled: boolean;
+  multiTouchBannedUntil: string | null;
 };
