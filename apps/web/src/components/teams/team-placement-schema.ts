@@ -8,14 +8,14 @@ const placementText = z
     `Use no máximo ${TEAM_PLACEMENT_MAX_LENGTH} caracteres`,
   );
 
-export const staffTeamPlacementSchema = z.object({
+export const teamPlacementSchema = z.object({
   room: placementText,
   machine: placementText,
 });
 
-export type StaffTeamPlacementValues = z.infer<typeof staffTeamPlacementSchema>;
+export type TeamPlacementValues = z.infer<typeof teamPlacementSchema>;
 
-export const emptyStaffTeamPlacementValues: StaffTeamPlacementValues = {
+export const emptyTeamPlacementValues: TeamPlacementValues = {
   room: '',
   machine: '',
 };
@@ -26,7 +26,7 @@ export function normalizePlacement(value: string): string | null {
 }
 
 export function isPlacementDirty(
-  values: StaffTeamPlacementValues,
+  values: TeamPlacementValues,
   team: { room: string | null; machine: string | null },
 ): boolean {
   return (
@@ -38,7 +38,7 @@ export function isPlacementDirty(
 export function toPlacementValues(team: {
   room: string | null;
   machine: string | null;
-}): StaffTeamPlacementValues {
+}): TeamPlacementValues {
   return {
     room: team.room ?? '',
     machine: team.machine ?? '',

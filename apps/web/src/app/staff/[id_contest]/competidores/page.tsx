@@ -5,8 +5,8 @@ import Loading from '@/app/loading'
 import TitlePage from '@/components/title-page'
 import Page from '@/components/ui/page'
 import Section from '@/components/ui/section'
+import { TeamsPlacementPanel } from '@/components/teams/teams-placement-panel'
 import { StaffBackLink } from '../_components/staff-back-link'
-import { StaffTeamsPanel } from './_components/staff-teams-panel'
 
 export const metadata: Metadata = {
   title: 'Competidores',
@@ -25,7 +25,7 @@ async function StaffTeamsPageContent({
           <TitlePage title="Competidores" icon={UserMultiple02Icon} />
         </Section>
         <Section className="mt-6">
-          <StaffTeamsPanel contestId={id_contest} />
+          <TeamsPlacementPanel contestId={id_contest} />
         </Section>
       </Page>
     </>

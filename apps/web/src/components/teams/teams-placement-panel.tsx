@@ -16,9 +16,9 @@ import { Input } from '@/components/pouf/Input'
 import { Table } from '@/components/pouf/table'
 import { useTeamList } from '@/services/team/use-team-list'
 import type { Team } from '@/services/team/team.type'
-import { StaffTeamInfoSheet } from './staff-team-info-sheet'
+import { TeamPlacementSheet } from './team-placement-sheet'
 
-type StaffTeamsPanelProps = {
+type TeamsPlacementPanelProps = {
   contestId: string
 }
 
@@ -42,7 +42,7 @@ function matchesSearch(team: Team, query: string) {
   return haystack.includes(query)
 }
 
-export function StaffTeamsPanel({ contestId }: StaffTeamsPanelProps) {
+export function TeamsPlacementPanel({ contestId }: TeamsPlacementPanelProps) {
   const { teams, setTeams, loading, error } = useTeamList(contestId)
   const [search, setSearch] = useState('')
   const deferredSearch = useDeferredValue(search)
@@ -230,7 +230,7 @@ export function StaffTeamsPanel({ contestId }: StaffTeamsPanelProps) {
         </div>
       </BoxFeatures>
 
-      <StaffTeamInfoSheet
+      <TeamPlacementSheet
         contestId={contestId}
         team={selectedTeam}
         open={infoOpen}
