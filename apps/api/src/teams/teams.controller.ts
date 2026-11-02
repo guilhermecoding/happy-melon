@@ -56,7 +56,7 @@ export class TeamsController {
   }
 
   @Patch('competitions/:competitionId/teams/:teamId/placement')
-  @Roles(['staff'])
+  @Roles(['staff', 'chef'])
   @UseGuards(StaffCompetitionGuard)
   updatePlacement(
     @Param('competitionId') competitionId: string,

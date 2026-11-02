@@ -14,15 +14,15 @@ import { teamService } from '@/services/team/team.service'
 import type { Team } from '@/services/team/team.type'
 import { TEAM_PLACEMENT_MAX_LENGTH } from '@repo/shared'
 import {
-  emptyStaffTeamPlacementValues,
+  emptyTeamPlacementValues,
   isPlacementDirty,
   normalizePlacement,
-  staffTeamPlacementSchema,
+  teamPlacementSchema,
   toPlacementValues,
-  type StaffTeamPlacementValues,
-} from './staff-team-placement-schema'
+  type TeamPlacementValues,
+} from './team-placement-schema'
 
-type StaffTeamInfoSheetProps = {
+type TeamPlacementSheetProps = {
   contestId: string
   team: Team | null
   open: boolean
@@ -41,20 +41,20 @@ function ReadOnlyValue({ label, value }: { label: string; value: string }) {
   )
 }
 
-export function StaffTeamInfoSheet({
+export function TeamPlacementSheet({
   contestId,
   team,
   open,
   onOpenChange,
   onUpdated,
-}: StaffTeamInfoSheetProps) {
+}: TeamPlacementSheetProps) {
   const [requestError, setRequestError] = useState<string>()
   const baselineRef = useRef<Team | null>(null)
 
   const form = useForm({
-    defaultValues: emptyStaffTeamPlacementValues satisfies StaffTeamPlacementValues,
+    defaultValues: emptyTeamPlacementValues satisfies TeamPlacementValues,
     validators: {
-      onSubmit: staffTeamPlacementSchema,
+      onSubmit: teamPlacementSchema,
     },
     onSubmit: async ({ value }) => {
       const baseline = baselineRef.current

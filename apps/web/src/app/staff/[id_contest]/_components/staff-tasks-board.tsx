@@ -45,8 +45,8 @@ type StaffTasksBoardProps = {
   contestId: string;
 };
 
-const MULTI_TOUCH_TAP_COUNT = 8;
-const MULTI_TOUCH_WINDOW_MS = 2_000;
+const MULTI_TOUCH_TAP_COUNT = 6; // Quantidade de toques para banir
+const MULTI_TOUCH_WINDOW_MS = 4_000; // Janela de tempo para contar os toques
 
 function applyRestriction(
   bannedUntil: string | null,
