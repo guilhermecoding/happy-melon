@@ -52,6 +52,8 @@ services:
       NODE_ENV: production
       # Server-side fetch from the web container → api service (not localhost)
       INTERNAL_API_URL: http://api:3000
+      # Optional remote login photo. Empty keeps the bundled image.
+      LOGIN_IMAGE_URL: ${LOGIN_IMAGE_URL:-}
     depends_on:
       - api
 

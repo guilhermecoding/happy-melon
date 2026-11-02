@@ -116,6 +116,7 @@ Edite o `.env`. Valores mínimos:
 | `NEXT_PUBLIC_APP_URL` | A **mesma** URL do site |
 | `ADMIN_EMAIL` / `ADMIN_PASSWORD` | Credenciais do primeiro admin (senha com 8+ caracteres) |
 | `ADMIN_NAME` | Nome do admin (opcional; padrão `Admin`) |
+| `LOGIN_IMAGE_URL` | Foto da tela de login (opcional). URL `http` ou `https`. Vazio usa a imagem padrão. Reiniciar o container web basta |
 
 Notas:
 
