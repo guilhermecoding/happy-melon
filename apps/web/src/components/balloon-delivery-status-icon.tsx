@@ -32,14 +32,14 @@ export const BALLOON_DELIVERY_STATUS_COLOR_CLASS = {
 
 export const BALLOON_DELIVERY_STATUS_LABEL = {
   [BALLOON_DELIVERY_STATUS.PENDING]:
-    'Confirmado. Ninguém pegou este balão ainda',
+    'Disponível. Ninguém pegou este balão ainda',
   [BALLOON_DELIVERY_STATUS.PROCESSING]: 'Balão em rota de entrega',
   [BALLOON_DELIVERY_STATUS.DELIVERED]: 'Entregue',
   [BALLOON_DELIVERY_STATUS.WITHHELD]: 'Retido',
 } as const satisfies Record<BalloonDeliveryStatus, string>;
 
 export const PRINT_DELIVERY_STATUS_LABEL = {
-  [BALLOON_DELIVERY_STATUS.PENDING]: 'Confirmada. Ninguém pegou esta impressão ainda',
+  [BALLOON_DELIVERY_STATUS.PENDING]: 'Disponível. Ninguém pegou esta impressão ainda',
   [BALLOON_DELIVERY_STATUS.PROCESSING]: 'Impressão em rota de entrega',
   [BALLOON_DELIVERY_STATUS.DELIVERED]: 'Entregue',
   [BALLOON_DELIVERY_STATUS.WITHHELD]: 'Retida',
