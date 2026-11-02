@@ -62,7 +62,7 @@ export function AppSidebar({
   const pathname = usePathname()
   const { data: session } = authClient.useSession()
 
-  const homeHref = area === "chef" ? "/chef" : "/admin"
+  const homeHref = area === "chef" ? "/chef" : "/admin/home"
   const primaryItems =
     area === "chef"
       ? getChefPrimaryNavItems(pathname)

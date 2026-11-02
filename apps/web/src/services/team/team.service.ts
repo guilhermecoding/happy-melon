@@ -1,13 +1,19 @@
 import {
+  TEAM_EVENT_TYPE,
+  type TeamEvent,
+} from '@repo/shared';
+import {
   normalizeTeamError,
   parseTeamError,
 } from './team.error';
-import type {
-  BulkUpsertTeamsInput,
-  CreateTeamInput,
-  DeleteTeamInput,
-  Team,
-  UpdateTeamInput,
+import {
+  isTeam,
+  type BulkUpsertTeamsInput,
+  type CreateTeamInput,
+  type DeleteTeamInput,
+  type Team,
+  type UpdateTeamInput,
+  type UpdateTeamPlacementInput,
 } from './team.type';
 
 import { getApiBaseUrl } from '@/lib/api-url';
@@ -39,7 +45,7 @@ export const teamService = {
       if (!response.ok) {
         throw await parseTeamError(
           response,
-          'Não foi possível carregar os times.',
+          'Não foi possível carregar os competidores.',
         );
       }
 
@@ -47,7 +53,7 @@ export const teamService = {
     } catch (error) {
       throw normalizeTeamError(
         error,
-        'Não foi possível carregar os times.',
+        'Não foi possível carregar os competidores.',
       );
     }
   },
@@ -64,13 +70,13 @@ export const teamService = {
       if (!response.ok) {
         throw await parseTeamError(
           response,
-          'Não foi possível criar o time.',
+          'Não foi possível criar o competidor.',
         );
       }
 
       return response.json();
     } catch (error) {
-      throw normalizeTeamError(error, 'Não foi possível criar o time.');
+      throw normalizeTeamError(error, 'Não foi possível criar o competidor.');
     }
   },
 
@@ -92,7 +98,7 @@ export const teamService = {
       if (!response.ok) {
         throw await parseTeamError(
           response,
-          'Não foi possível importar os times.',
+          'Não foi possível importar os competidores.',
         );
       }
 
@@ -100,7 +106,7 @@ export const teamService = {
     } catch (error) {
       throw normalizeTeamError(
         error,
-        'Não foi possível importar os times.',
+        'Não foi possível importar os competidores.',
       );
     }
   },
@@ -117,7 +123,7 @@ export const teamService = {
       if (!response.ok) {
         throw await parseTeamError(
           response,
-          'Não foi possível atualizar o time.',
+          'Não foi possível atualizar o competidor.',
         );
       }
 
@@ -125,8 +131,74 @@ export const teamService = {
     } catch (error) {
       throw normalizeTeamError(
         error,
-        'Não foi possível atualizar o time.',
+        'Não foi possível atualizar o competidor.',
       );
+    }
+  },
+
+  async updatePlacement(
+    contestId: string,
+    teamId: string,
+    data: UpdateTeamPlacementInput,
+  ): Promise<Team> {
+    try {
+      const response = await fetch(
+        `${getApiBaseUrl()}/competitions/${contestId}/teams/${teamId}/placement`,
+        {
+          method: 'PATCH',
+          credentials: 'include',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(data),
+        },
+      );
+
+      if (!response.ok) {
+        throw await parseTeamError(
+          response,
+          'Não foi possível atualizar o competidor.',
+        );
+      }
+
+      return response.json();
+    } catch (error) {
+      throw normalizeTeamError(
+        error,
+        'Não foi possível atualizar o competidor.',
+      );
+    }
+  },
+
+  getEventsUrl(contestId: string): string {
+    return `${getApiBaseUrl()}/competitions/${contestId}/teams/events`;
+  },
+
+  parseEventData(raw: string): TeamEvent | null {
+    try {
+      const parsed: unknown = JSON.parse(raw);
+      if (!parsed || typeof parsed !== 'object' || !('type' in parsed)) {
+        return null;
+      }
+
+      const record = parsed as {
+        type?: unknown;
+        team?: unknown;
+        teamId?: unknown;
+      };
+
+      if (record.type === TEAM_EVENT_TYPE.UPSERTED && isTeam(record.team)) {
+        return { type: TEAM_EVENT_TYPE.UPSERTED, team: record.team };
+      }
+
+      if (
+        record.type === TEAM_EVENT_TYPE.REMOVED &&
+        typeof record.teamId === 'string'
+      ) {
+        return { type: TEAM_EVENT_TYPE.REMOVED, teamId: record.teamId };
+      }
+
+      return null;
+    } catch {
+      return null;
     }
   },
 
@@ -145,7 +217,7 @@ export const teamService = {
       if (!response.ok) {
         throw await parseTeamError(
           response,
-          'Não foi possível excluir o time.',
+          'Não foi possível excluir o competidor.',
         );
       }
 
@@ -157,7 +229,7 @@ export const teamService = {
     } catch (error) {
       throw normalizeTeamError(
         error,
-        'Não foi possível excluir o time.',
+        'Não foi possível excluir o competidor.',
       );
     }
   },
@@ -180,7 +252,7 @@ export const teamService = {
       if (!response.ok) {
         throw await parseTeamError(
           response,
-          'Não foi possível excluir os times.',
+          'Não foi possível excluir os competidores.',
         );
       }
 
@@ -188,8 +260,23 @@ export const teamService = {
     } catch (error) {
       throw normalizeTeamError(
         error,
-        'Não foi possível excluir os times.',
+        'Não foi possível excluir os competidores.',
       );
     }
   },
 };
+
+export function applyTeamEvent(teams: Team[], event: TeamEvent): Team[] {
+  if (event.type === TEAM_EVENT_TYPE.REMOVED) {
+    return teams.filter((team) => team.id !== event.teamId);
+  }
+
+  const exists = teams.some((team) => team.id === event.team.id);
+  if (!exists) {
+    return [...teams, event.team];
+  }
+
+  return teams.map((team) =>
+    team.id === event.team.id ? event.team : team,
+  );
+}

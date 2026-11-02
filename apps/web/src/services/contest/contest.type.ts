@@ -27,6 +27,8 @@ export type Contest = {
   balloonLimit: number | null;
   deliveryTimeoutEnabled: boolean;
   deliveryTimeoutMinutes: number | null;
+  multiTouchBanEnabled: boolean;
+  multiTouchBanSeconds: number | null;
   rounds: ContestRound[];
   currentRound: ContestRound | null;
   nextRound: ContestRound | null;
@@ -65,6 +67,8 @@ export type StaffSettingsInput = {
   balloonLimit: number | null;
   deliveryTimeoutEnabled: boolean;
   deliveryTimeoutMinutes: number | null;
+  multiTouchBanEnabled: boolean;
+  multiTouchBanSeconds: number | null;
 };
 
 export function getContestCondition(

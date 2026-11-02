@@ -33,6 +33,33 @@ import {
 } from '@hugeicons/core-free-icons';
 
 const PASSWORD_ROLES = new Set(['admin', 'chef']);
+const FALLBACK_LOGIN_IMAGE = '/thumb_todos.JPG';
+
+function LoginSideImage({ imageUrl }: { imageUrl?: string }) {
+  const [failed, setFailed] = useState(false);
+
+  if (!imageUrl || failed) {
+    return (
+      <Image
+        src={FALLBACK_LOGIN_IMAGE}
+        alt="Imagem de login"
+        className="absolute inset-0 h-full w-full object-cover"
+        width={1000}
+        height={1000}
+        loading="eager"
+      />
+    );
+  }
+
+  return (
+    <img
+      src={imageUrl}
+      alt="Imagem de login"
+      className="absolute inset-0 h-full w-full object-cover"
+      onError={() => setFailed(true)}
+    />
+  );
+}
 
 const MODE_COPY: Record<
   LoginMode,
@@ -132,9 +159,11 @@ function getFetchErrorMessage(error: unknown, fallback: string) {
 export function LoginForm({
   className,
   contestCode,
+  imageUrl,
   ...props
 }: {
   contestCode?: string;
+  imageUrl?: string;
 } & React.ComponentProps<'div'>) {
   const contestCodeToUse = contestCode ?? '';
   const router = useRouter();
@@ -178,7 +207,7 @@ export function LoginForm({
         }
 
         // Full navigation so the session cookie is available to the proxy
-        window.location.assign(role === 'chef' ? '/chef' : '/admin');
+        window.location.assign(role === 'chef' ? '/chef' : '/admin/home');
       } catch {
         setRequestError('Não foi possível conectar ao servidor de autenticação.');
       }
@@ -528,14 +557,7 @@ export function LoginForm({
             </div>
           </form>
           <div className="relative hidden bg-muted md:block">
-            <Image
-              src="/thumb_todos.JPG"
-              alt="Imagem de login"
-              className="absolute inset-0 h-full w-full object-cover"
-              width={1000}
-              height={1000}
-              loading="eager"
-            />
+            <LoginSideImage key={imageUrl ?? 'fallback'} imageUrl={imageUrl} />
           </div>
         </div>
       </Card>

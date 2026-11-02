@@ -64,3 +64,13 @@ export {
   type TaskHistoryEntryDto,
   type TaskHistoryEventType,
 } from './task-history.js';
+
+export {
+  TEAM_EVENT_TYPE,
+  TEAM_PLACEMENT_MAX_LENGTH,
+  type TeamEvent,
+  type TeamEventType,
+  type TeamRemovedEvent,
+  type TeamSnapshot,
+  type TeamUpsertedEvent,
+} from './team.js';

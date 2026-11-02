@@ -107,12 +107,15 @@ model Competition {
   balloonLimit           Int?
   deliveryTimeoutEnabled Boolean               @default(false)
   deliveryTimeoutMinutes Int?
+  multiTouchBanEnabled   Boolean               @default(false)
+  multiTouchBanSeconds   Int?
   createdAt              DateTime              @default(now())
   updatedAt              DateTime              @updatedAt
   rounds                 Contest[]
   teams                  Team[]
   collaborators          ContestCollaborator[]
   chefs                  ContestChef[]
+  multiTouchBans         StaffMultiTouchBan[]
 
   @@map("competition")
   @@schema("public")
@@ -136,6 +139,17 @@ model Contest {
 
   @@index([competitionId, startsAt])
   @@map("contest")
+  @@schema("public")
+}
+
+model StaffMultiTouchBan {
+  competitionId String
+  userId        String
+  bannedUntil   DateTime
+  competition   Competition @relation(fields: [competitionId], references: [id], onDelete: Cascade)
+
+  @@id([competitionId, userId])
+  @@map("staff_multi_touch_ban")
   @@schema("public")
 }
 

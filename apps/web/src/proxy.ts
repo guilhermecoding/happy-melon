@@ -50,7 +50,7 @@ function getPostLoginRedirect(session: SessionPayload, request: NextRequest) {
   }
 
   if (role === 'admin') {
-    return new URL('/admin', request.url);
+    return new URL('/admin/home', request.url);
   }
 
   return new URL('/entrar', request.url);
@@ -71,7 +71,7 @@ export async function proxy(request: NextRequest) {
 
   if (pathname === '/') {
     if (role === 'admin') {
-      return respond(NextResponse.redirect(new URL('/admin', request.url)));
+      return respond(NextResponse.redirect(new URL('/admin/home', request.url)));
     }
     if (role === 'chef') {
       return respond(NextResponse.redirect(chefHome(activeContestId, request)));
@@ -103,7 +103,7 @@ export async function proxy(request: NextRequest) {
 
   if (pathname.startsWith('/chef')) {
     if (role === 'admin') {
-      return respond(NextResponse.redirect(new URL('/admin', request.url)));
+      return respond(NextResponse.redirect(new URL('/admin/home', request.url)));
     }
     if (role === 'staff' && activeContestId) {
       return respond(NextResponse.redirect(staffHome(activeContestId, request)));
@@ -139,7 +139,7 @@ export async function proxy(request: NextRequest) {
 
   if (pathname.startsWith('/staff')) {
     if (role === 'admin') {
-      return respond(NextResponse.redirect(new URL('/admin', request.url)));
+      return respond(NextResponse.redirect(new URL('/admin/home', request.url)));
     }
     if (role === 'chef') {
       return respond(NextResponse.redirect(chefHome(activeContestId, request)));

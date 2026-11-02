@@ -1,3 +1,5 @@
+import { rewriteTeamNoun } from '@/lib/rewrite-team-noun';
+
 export class PrintServiceError extends Error {
   constructor(
     public readonly status: number | null,
@@ -53,7 +55,7 @@ function mapPrintErrorMessage(
   rawMessage: string,
   fallback: string,
 ): string {
-  const message = rawMessage.trim();
+  const message = rewriteTeamNoun(rawMessage.trim());
 
   if (status === 401) {
     return 'Sessão expirada. Faça login novamente.';

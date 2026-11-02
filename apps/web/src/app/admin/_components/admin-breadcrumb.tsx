@@ -22,7 +22,7 @@ const SEGMENT_LABELS: Record<string, string> = {
   chefes: "Chefes",
   colaboradores: "Colaboradores",
   tarefas: "Tarefas",
-  times: "Times",
+  competidores: "Competidores",
   prova: "Prova",
   sobre: "Sobre",
   teste: "Teste",

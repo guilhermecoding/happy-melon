@@ -20,6 +20,7 @@ import { balloonService } from '@/services/balloon/balloon.service';
 import { getBalloonErrorMessage } from '@/services/balloon/balloon.error';
 import type { TaskHistoryEntry } from '@/services/balloon/balloon.type';
 import { getFirstName } from '@/lib/greeting';
+import { rewriteTeamNoun } from '@/lib/rewrite-team-noun';
 import { cn } from '@/lib/utils';
 
 type TaskTimelineDialogProps = {
@@ -48,7 +49,7 @@ function formatTimelineActorMessage(
   kind: TaskKind,
 ): ReactNode {
   if (entry.status === BALLOON_DELIVERY_STATUS.PENDING) {
-    return entry.message;
+    return rewriteTeamNoun(entry.message);
   }
 
   const firstName = getFirstName(entry.actorName) || entry.actorName;
@@ -63,23 +64,23 @@ function formatTimelineActorMessage(
     case BALLOON_DELIVERY_STATUS.PROCESSING:
       return (
         <>
-          {staff} está levando {item} para o time.
+          {staff} está levando {item} para o competidor.
         </>
       );
     case BALLOON_DELIVERY_STATUS.DELIVERED:
       return (
         <>
-          {staff} entregou {item} ao time.
+          {staff} entregou {item} ao competidor.
         </>
       );
     case BALLOON_DELIVERY_STATUS.WITHHELD:
       return (
         <>
-          {staff} pegou de volta {item} do time.
+          {staff} pegou de volta {item} do competidor.
         </>
       );
     default:
-      return entry.message;
+      return rewriteTeamNoun(entry.message);
   }
 }
 

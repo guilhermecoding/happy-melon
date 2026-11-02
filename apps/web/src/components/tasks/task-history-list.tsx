@@ -26,6 +26,7 @@ import { getBalloonErrorMessage } from '@/services/balloon/balloon.error';
 import type { TaskHistoryEntry } from '@/services/balloon/balloon.type';
 import Spinner from '@/components/spinner';
 import { Tooltip } from '@/components/pouf/controls';
+import { rewriteTeamNoun } from '@/lib/rewrite-team-noun';
 import { TaskTimelineDialog } from './task-timeline-dialog';
 import { Button as ButtonPouf } from '@/components/pouf/Button';
 
@@ -56,11 +57,13 @@ function getStatusChangedTaskId(entry: TaskHistoryEntry): string | null {
 }
 
 function formatHistoryMessage(entry: TaskHistoryEntry): string {
+  const message = rewriteTeamNoun(entry.message);
+
   if (entry.status !== BALLOON_DELIVERY_STATUS.PROCESSING) {
-    return entry.message;
+    return message;
   }
 
-  return entry.message.replace(/\bem entrega\b/g, 'em rota de entrega');
+  return message.replace(/\bem entrega\b/g, 'em rota de entrega');
 }
 
 /** Marks only ids that appear after the initial history load (e.g. SSE). */

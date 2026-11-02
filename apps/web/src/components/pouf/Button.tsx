@@ -19,7 +19,7 @@ interface ButtonProps
   size?: 'sm' | 'md' | 'lg'
   /** quiet: no cushion until hover — for tertiary actions that shouldn't
    *  compete with the primary cushion on the same row. */
-  variant?: 'solid' | 'quiet'
+  variant?: 'solid' | 'quiet' | 'ghost'
   block?: boolean
   disabled?: boolean
   /** Shows a spinner and blocks the click. A submit that fires twice because
@@ -67,6 +67,8 @@ const button = cva(
           'text-[var(--on-accent)] bg-[var(--tone,var(--purple))] cushion-control disabled:cushion-control-active disabled:[transform:translateY(2px)]',
         quiet:
           'text-[var(--quiet-ink,var(--ink))] bg-transparent [box-shadow:inset_0_0_0_2px_rgba(158,200,255,0.55)] enabled:hover:bg-bg enabled:hover:text-ink enabled:hover:cushion-field disabled:[box-shadow:none]',
+        ghost:
+          'text-[var(--quiet-ink,var(--ink))] bg-muted border-foreground enabled:hover:bg-bg enabled:hover:text-ink enabled:hover:cushion-field disabled:[box-shadow:none]',
       },
       block: {
         true: 'flex w-full',
@@ -93,7 +95,7 @@ export function buttonClasses(
   opts: {
     tone?: Tone
     size?: 'sm' | 'md' | 'lg'
-    variant?: 'solid' | 'quiet'
+    variant?: 'solid' | 'quiet' | 'ghost'
     block?: boolean
     shape?: 'label' | 'icon'
   } = {},
@@ -152,7 +154,7 @@ interface IconButtonProps
   onClick?: MouseEventHandler<HTMLButtonElement>
   tone?: Tone
   size?: 'sm' | 'md' | 'lg'
-  variant?: 'solid' | 'quiet'
+  variant?: 'solid' | 'quiet' | 'ghost'
   disabled?: boolean
   loading?: boolean
   type?: 'button' | 'submit'

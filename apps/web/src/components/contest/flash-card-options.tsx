@@ -12,7 +12,7 @@ interface FlashCardOptionsProps {
     index: number;
 }
 
-const blobTones: Tone[] = ['mint', 'blue', 'purple', 'pink', 'yellow'];
+const blobTones: Tone[] = ['mint', 'blue', 'orange', 'purple', 'pink', 'yellow'];
 
 export default function FlashCardOptions({ icon, title, href, index }: FlashCardOptionsProps) {
     return (

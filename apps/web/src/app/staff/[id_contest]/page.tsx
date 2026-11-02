@@ -1,44 +1,58 @@
 import { Suspense } from 'react'
+import {
+  ClipboardCheckIcon,
+  UserMultiple02Icon,
+} from '@hugeicons/core-free-icons'
+import type { Metadata } from 'next'
+import HomeGreeting from '@/app/admin/home/_components/home-greeting'
+import Loading from '@/app/loading'
+import GreetingSkeleton from '@/components/skeletons/gretting-skeleton'
 import Page from '@/components/ui/page'
 import Section from '@/components/ui/section'
-import Loading from '@/app/loading'
-import { Metadata } from 'next'
-import StaffContestHeading from './_components/staff-contest-heading'
-import StaffRoundContent from './_components/staff-round-content'
-import StaffTasksBoard from './_components/staff-tasks-board'
-import { contestService } from '@/services/contest/contest.service'
+import { StaffOptionCard } from './_components/staff-option-card'
 
 export const metadata: Metadata = {
-  title: 'Tarefas',
+  title: 'Início',
 }
 
-async function StaffContestPageContent({
+async function StaffOptionCards({
   params,
 }: Omit<PageProps<'/staff/[id_contest]'>, 'searchParams'>) {
-  const { id_contest } = await params;
-  const contest = await contestService.get(id_contest);
+  const { id_contest } = await params
 
   return (
-    <StaffRoundContent>
-      <Page>
-        <Section>
-          <StaffContestHeading name={contest.name} />
-        </Section>
-
-        <Section className="mt-4 pb-40 lg:pb-8">
-          <StaffTasksBoard contestId={id_contest} />
-        </Section>
-      </Page>
-    </StaffRoundContent>
+    <>
+      <StaffOptionCard
+        title="Tarefas"
+        href={`/staff/${id_contest}/tarefas`}
+        tone="mint"
+        icon={ClipboardCheckIcon}
+      />
+      <StaffOptionCard
+        title="Competidores"
+        href={`/staff/${id_contest}/competidores`}
+        tone="orange"
+        icon={UserMultiple02Icon}
+      />
+    </>
   )
 }
 
-export default function StaffContestPage({
+export default function StaffHomePage({
   params,
 }: PageProps<'/staff/[id_contest]'>) {
   return (
-    <Suspense fallback={<Loading />}>
-      <StaffContestPageContent params={params} />
-    </Suspense>
+    <Page>
+      <Section>
+        <Suspense fallback={<GreetingSkeleton />}>
+          <HomeGreeting />
+        </Suspense>
+      </Section>
+      <Section className="mt-6 flex flex-col gap-8 md:flex-row">
+        <Suspense fallback={<Loading />}>
+          <StaffOptionCards params={params} />
+        </Suspense>
+      </Section>
+    </Page>
   )
 }

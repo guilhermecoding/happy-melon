@@ -28,14 +28,19 @@ export function getContestNavItems(contestId: string): AdminNavItem[] {
   const base = `/admin/competicoes/${contestId}`;
   return [
     {
+      title: 'Chefes de Sala',
+      url: `${base}/chefes`,
+      icon: 'chefes',
+    },
+    {
       title: 'Colaboradores',
       url: `${base}/colaboradores`,
       icon: 'colaboradores',
     },
     {
-      title: 'Chefes',
-      url: `${base}/chefes`,
-      icon: 'chefes',
+      title: 'Competidores',
+      url: `${base}/competidores`,
+      icon: 'times',
     },
     {
       title: 'Prova',
@@ -46,11 +51,6 @@ export function getContestNavItems(contestId: string): AdminNavItem[] {
       title: 'Tarefas',
       url: `${base}/tarefas`,
       icon: 'tarefas',
-    },
-    {
-      title: 'Times',
-      url: `${base}/times`,
-      icon: 'times',
     },
   ];
 }

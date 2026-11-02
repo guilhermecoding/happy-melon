@@ -1,6 +1,7 @@
 import type { IncomingHttpHeaders } from 'node:http';
 import {
   BadRequestException,
+  ConflictException,
   Injectable,
   InternalServerErrorException,
   NotFoundException,
@@ -9,6 +10,7 @@ import {
 import { APIError } from 'better-auth/api';
 import { fromNodeHeaders } from 'better-auth/node';
 import { prisma, type Team } from '@repo/database';
+import { TEAM_EVENT_TYPE } from '@repo/shared';
 import { auth } from '../auth/auth.js';
 import {
   generateShortId,
@@ -22,10 +24,17 @@ import type {
   CreateTeamDto,
   DeleteTeamDto,
   UpdateTeamDto,
+  UpdateTeamPlacementDto,
 } from './dto/team.dto.js';
+import { TeamsEventsService } from './teams.events.js';
+
+const PLACEMENT_CONFLICT_MESSAGE =
+  'Sala e máquina foram alteradas por outra pessoa. Revise e salve de novo.';
 
 @Injectable()
 export class TeamsService {
+  constructor(private readonly teamsEvents: TeamsEventsService) {}
+
   async listByCompetition(competitionId: string) {
     await this.ensureCompetitionExists(competitionId);
 
@@ -54,7 +63,7 @@ export class TeamsService {
           },
         });
 
-        return this.toResponse(team);
+        return this.publishUpserted(team);
       } catch (error) {
         if (this.isUsernameUniqueViolation(error)) {
           throw new BadRequestException(
@@ -170,7 +179,11 @@ export class TeamsService {
       results.push(created);
     }
 
-    return results.map((team) => this.toResponse(team));
+    const responses = results.map((team) => this.toResponse(team));
+    for (const team of responses) {
+      this.publish(team);
+    }
+    return responses;
   }
 
   async update(id: string, dto: UpdateTeamDto) {
@@ -197,7 +210,7 @@ export class TeamsService {
         },
       });
 
-      return this.toResponse(team);
+      return this.publishUpserted(team);
     } catch (error) {
       if (this.isUsernameUniqueViolation(error)) {
         throw new BadRequestException(
@@ -223,6 +236,7 @@ export class TeamsService {
     await this.verifyAdminPassword(headers, dto.password);
 
     await prisma.team.delete({ where: { id } });
+    this.publishRemoved(existing.competitionId, id);
 
     return { success: true as const };
   }
@@ -235,14 +249,80 @@ export class TeamsService {
     await this.ensureCompetitionExists(competitionId);
     await this.verifyAdminPassword(headers, dto.password);
 
+    const existing = await prisma.team.findMany({
+      where: { competitionId },
+      select: { id: true },
+    });
+
     const result = await prisma.team.deleteMany({
       where: { competitionId },
     });
+
+    for (const team of existing) {
+      this.publishRemoved(competitionId, team.id);
+    }
 
     return {
       success: true as const,
       deletedCount: result.count,
     };
+  }
+
+  async updatePlacement(
+    competitionId: string,
+    teamId: string,
+    dto: UpdateTeamPlacementDto,
+  ) {
+    await this.ensureCompetitionExists(competitionId);
+
+    const existing = await prisma.team.findFirst({
+      where: { id: teamId, competitionId },
+    });
+
+    if (!existing) {
+      throw new NotFoundException('Time não encontrado.');
+    }
+
+    const expected = new Date(dto.updatedAt);
+    if (existing.updatedAt.getTime() !== expected.getTime()) {
+      throw new ConflictException({
+        message: PLACEMENT_CONFLICT_MESSAGE,
+        team: this.toResponse(existing),
+      });
+    }
+
+    const written = await prisma.team.updateMany({
+      where: {
+        id: teamId,
+        competitionId,
+        updatedAt: existing.updatedAt,
+      },
+      data: {
+        room: dto.room,
+        machine: dto.machine,
+      },
+    });
+
+    if (written.count === 0) {
+      const current = await prisma.team.findFirst({
+        where: { id: teamId, competitionId },
+      });
+
+      if (!current) {
+        throw new NotFoundException('Time não encontrado.');
+      }
+
+      throw new ConflictException({
+        message: PLACEMENT_CONFLICT_MESSAGE,
+        team: this.toResponse(current),
+      });
+    }
+
+    const team = await prisma.team.findUniqueOrThrow({
+      where: { id: teamId },
+    });
+
+    return this.publishUpserted(team);
   }
 
   private async ensureUsernameAvailable(
@@ -321,6 +401,26 @@ export class TeamsService {
     if (!competition) {
       throw new NotFoundException('Competição não encontrada.');
     }
+  }
+
+  private publishUpserted(team: Team) {
+    const response = this.toResponse(team);
+    this.publish(response);
+    return response;
+  }
+
+  private publish(team: ReturnType<TeamsService['toResponse']>) {
+    this.teamsEvents.emit(team.competitionId, {
+      type: TEAM_EVENT_TYPE.UPSERTED,
+      team,
+    });
+  }
+
+  private publishRemoved(competitionId: string, teamId: string) {
+    this.teamsEvents.emit(competitionId, {
+      type: TEAM_EVENT_TYPE.REMOVED,
+      teamId,
+    });
   }
 
   private toResponse(team: Team) {

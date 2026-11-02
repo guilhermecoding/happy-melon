@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useLayoutEffect, useRef, useState } from 'react';
+import { useEffect, useLayoutEffect, useRef, useState, type PointerEvent } from 'react';
 import {
   isScoreFreezeActive,
   TASK_KIND,
@@ -156,7 +156,10 @@ function TaskItem({
             </span>
             <div className="flex items-center gap-1 mt-1">
               <HugeiconsIcon icon={Clock01Icon} className="size-3" />
-              <span className="text-xs text-muted-foreground">
+              <span
+                className="text-xs text-muted-foreground"
+                suppressHydrationWarning
+              >
                 {formatRelativeTime(task.createdAt, nowMs)}
               </span>
             </div>
@@ -185,6 +188,7 @@ type QueueTaskProps = {
   balloonLimit: number | null;
   lobbyCount: number;
   onClaim: (task: StaffTask) => void;
+  onPointerDownCapture?: (event: PointerEvent<HTMLDivElement>) => void;
 };
 
 export default function QueueTask({
@@ -193,6 +197,7 @@ export default function QueueTask({
   balloonLimit,
   lobbyCount,
   onClaim,
+  onPointerDownCapture,
 }: QueueTaskProps) {
   const { startsAt, endsAt, scoreFreezeMinutes } = useContestSchedule();
   const [nowMs, setNowMs] = useState(() => Date.now());
@@ -217,7 +222,10 @@ export default function QueueTask({
   );
 
   return (
-    <div className="flex w-full flex-col gap-4">
+    <div
+      className="flex w-full flex-col gap-4"
+      onPointerDownCapture={onPointerDownCapture}
+    >
       <Card variant="tight">
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-3">
@@ -233,11 +241,11 @@ export default function QueueTask({
           <div>
             <Badge tone={scoreFrozen ? 'blue' : 'orange'}>
               <div className="flex items-center gap-1">
-                <HugeiconsIcon icon={ClockFadingIcon} className="size-4" strokeWidth={3} />
                 {scoreFrozen ? (
                   <HugeiconsIcon icon={SnowIcon} className="size-4" strokeWidth={3} />
-                ) : null}
-                <span className="text-sm tabular-nums">
+                ) : <HugeiconsIcon icon={ClockFadingIcon} className="size-4" strokeWidth={3} />
+                }
+                <span className="text-sm tabular-nums" suppressHydrationWarning>
                   {formatCountdown(new Date(endsAt).getTime() - countdownNowMs)}
                 </span>
               </div>

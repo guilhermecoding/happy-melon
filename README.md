@@ -24,18 +24,18 @@
 
 Aumente a eficiência na organização e entrega de tarefas durante as competições de programação!
 
-O Happy Melon apoia a operação de maratonas no estilo ICPC: administradores e chefes de sala confirmam balões e encaminham impressões; colaboradores no salão pegam as tarefas e entregam aos times, em tempo real.
+O Happy Melon apoia a operação de maratonas no estilo ICPC: administradores e chefes de sala confirmam balões e encaminham impressões; colaboradores no salão pegam as tarefas e entregam aos competidores, em tempo real.
 
 ## Quem usa
 
 ### Administradores
 
-Cadastram a competição, as rodadas, a prova, os times, os colaboradores e os chefes. Durante a prova, confirmam balões, encaminham impressões e acompanham o histórico.
+Cadastram a competição, as rodadas, a prova, os competidores, os colaboradores e os chefes. Durante a prova, confirmam balões, encaminham impressões e acompanham o histórico.
 
 - **Competições** — nome, sede e rodadas (ex.: Aquecimento e Prova). Cada rodada tem horário de início e término e, se quiser, congelamento do placar nos últimos minutos.
 - **Prova** — questões de cada rodada, com identificador, título e cor do balão.
-- **Times** — cadastro um a um ou importação em massa (CSV ou arquivo BOCA), com sala e máquina.
-- **Colaboradores** — convite por e-mail, QR e código da competição. Dá para limitar quantos balões cada um leva no lobby e o tempo para entregar.
+- **Competidores** — cadastro um a um ou importação em massa (CSV ou arquivo BOCA), com sala e máquina.
+- **Colaboradores** — convite por e-mail, QR e código da competição. Em **Ajustes**, dá para limitar quantas tarefas cada um leva no lobby, o tempo para entregar e o **Multi-toque**.
 - **Chefes** — cadastro por nome e e-mail. Recebem uma senha no primeiro cadastro e passam a gerenciar colaboradores e tarefas.
 - **Tarefas** — por rodada: confirmar ou reter balões, encaminhar impressões e ver o histórico.
 
@@ -43,13 +43,19 @@ Cadastram a competição, as rodadas, a prova, os times, os colaboradores e os c
 
 Entram com e-mail e senha, no mesmo lugar que o administrador.
 
-Consultam os detalhes da competição, gerenciam colaboradores e confirmam tarefas em todas as rodadas. Não cadastram prova, times, chefes nem a competição em si.
+Consultam os detalhes da competição, gerenciam colaboradores e confirmam tarefas em todas as rodadas. Não cadastram prova, competidores, chefes nem a competição em si.
 
 ### Colaboradores
 
 Entram com e-mail e o código da competição. No primeiro acesso, informam o nome.
 
-Antes da prova (e entre uma rodada e outra), veem o cronômetro. Durante a rodada, pegam balões ou impressões na fila **Tarefas**, levam até o time pelo **Lobby** e marcam como entregue. Depois da última rodada, a tela avisa que a competição finalizou.
+Ao entrar, caem na tela inicial, com dois cartões: **Tarefas** e **Competidores**.
+
+Em **Tarefas**, antes da prova (e entre uma rodada e outra), veem o cronômetro. Durante a rodada, pegam balões ou impressões na fila, levam até o competidor pelo **Lobby** e marcam como entregue. Se o **Multi-toque** estiver ligado, quem tocar várias vezes seguidas na fila fica com a tela coberta pelo tempo configurado e não pega tarefa nesse intervalo.
+
+Em **Competidores**, consultam a lista e ajustam só a **sala** e a **máquina**. Nome e usuário ficam só para leitura. A alteração aparece na hora para quem está entregando e na lista do administrador. Se outra pessoa salvou o mesmo competidor antes, a tela mostra os dados atuais para conferir de novo.
+
+Depois da última rodada, a tela de tarefas avisa que a competição finalizou.
 
 ## Como realizar uma maratona
 
@@ -58,29 +64,33 @@ Antes da prova (e entre uma rodada e outra), veem o cronômetro. Durante a rodad
 1. Entre como **Administrador ou Chefe de Sala** e abra **Competições** → **Nova Competição**. Informe nome, sede e as **rodadas** (o padrão é Aquecimento e Prova), cada uma com início, término e, se quiser, congelamento.
 2. Abra a competição. Dá para incluir ou ajustar rodadas depois, na **Visão geral**.
 3. Em **Prova**, escolha a rodada e cadastre as questões (identificador, título e cor do balão). Sem questão, não há balão para confirmar.
-4. Em **Times**, cadastre os times ou importe em massa. Sala e máquina aparecem para o colaborador na hora da entrega.
+4. Em **Competidores**, cadastre os competidores ou importe em massa. Sala e máquina aparecem para o colaborador na hora da entrega e podem ser corrigidas por ele durante a prova.
 5. Em **Chefes**, adicione nome e e-mail, copie a senha e ligue o acesso de cada chefe.
-6. Em **Colaboradores**, convide quem já conhece o e-mail ou compartilhe o QR e o código. Ligue o acesso e, se quiser, defina limite de balões no lobby e tempo para entregar.
-7. Os colaboradores entram em **Colaborador** com e-mail e código. Os chefes entram em **Administrador ou Chefe de Sala** com e-mail e senha.
+6. Em **Colaboradores**, convide quem já conhece o e-mail ou compartilhe o QR e o código. Ligue o acesso. Em **Ajustes**, se quiser, defina:
+   - **Limite de tarefas** — quantas tarefas cada um pode carregar no lobby ao mesmo tempo.
+   - **Timeout de entrega** — minutos máximos com a tarefa antes de entregar.
+   - **Multi-toque** — segundos de bloqueio (de 5 a 90) para quem tocar várias vezes seguidas na fila, para não pegar a tarefa no instante em que ela aparece.
+7. Os colaboradores entram em **Colaborador** com e-mail e código e caem na tela com **Tarefas** e **Competidores**. Os chefes entram em **Administrador ou Chefe de Sala** com e-mail e senha.
 
 ### 2. Durante a prova
 
 1. No horário de cada rodada, a fila **Tarefas** e o **Lobby** são liberados. No intervalo, os colaboradores esperam a próxima.
-2. O administrador ou o chefe abre **Tarefas**, escolhe a **rodada** e o time:
+2. O administrador ou o chefe abre **Tarefas**, escolhe a **rodada** e o competidor:
    - **Balões conquistados** → **Confirmar** para enviar à fila; **Reter** se não for entregar.
    - **Impressão** → **Encaminhar** para a fila de impressão.
-3. O colaborador, na fila **Tarefas**, pega o balão ou a impressão. A tarefa vai para o **Lobby**.
-4. No **Lobby**, ele vai até o time (sala e máquina em **Detalhes do time**) e confirma a entrega.
-5. Acompanhe o **Histórico de tarefas**. Se os horários mudarem, os colaboradores são avisados na hora.
-6. Para tirar alguém da operação, desligue o acesso dessa pessoa. Para pausar o salão inteiro, desligue o acesso dos colaboradores.
+3. O colaborador abre **Tarefas**, pega o balão ou a impressão na fila. A tarefa vai para o **Lobby**.
+4. No **Lobby**, ele vai até o competidor (sala e máquina em **Detalhes do competidor**) e confirma a entrega. Se a sala ou a máquina mudou, volta à tela inicial, abre **Competidores**, toca em **Info** e salva só esses dois campos.
+5. Com o **Multi-toque** ligado, toques repetidos na fila cobrem a tela até o tempo acabar. Nesse intervalo a pessoa não pega tarefa.
+6. Acompanhe o **Histórico de tarefas**. Se os horários mudarem, os colaboradores são avisados na hora.
+7. Para tirar alguém da operação, desligue o acesso dessa pessoa. Para pausar o salão inteiro, desligue o acesso dos colaboradores.
 
 ### 3. Depois da prova
 
 1. No término da última rodada, os colaboradores veem **A competição finalizou** e não pegam nem entregam mais tarefas.
-2. Revise o **Histórico de tarefas** e as conquistas de cada time.
+2. Revise o **Histórico de tarefas** e as conquistas de cada competidor.
 3. Se quiser, desabilite o acesso dos colaboradores. Competições encerradas aparecem em **Finalizadas**.
 
-Fluxo de um balão: **Confirmar** → fila **Tarefas** → **Levantar balão** → **Lobby** → confirmar entrega.
+Fluxo de um balão: **Confirmar** → o colaborador abre **Tarefas** → fila → **Levantar balão** → **Lobby** → confirmar entrega.
 
 ## Instalação
 
@@ -116,6 +126,7 @@ Edite o `.env`. Valores mínimos:
 | `NEXT_PUBLIC_APP_URL` | A **mesma** URL do site |
 | `ADMIN_EMAIL` / `ADMIN_PASSWORD` | Credenciais do primeiro admin (senha com 8+ caracteres) |
 | `ADMIN_NAME` | Nome do admin (opcional; padrão `Admin`) |
+| `LOGIN_IMAGE_URL` | Foto da tela de login (opcional). URL `http` ou `https`. Vazio usa a imagem padrão. Reiniciar o container web basta |
 
 Notas:
 

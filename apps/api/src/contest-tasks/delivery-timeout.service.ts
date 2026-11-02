@@ -44,7 +44,7 @@ export class DeliveryTimeoutService {
   constructor(
     private readonly contestTasksEvents: ContestTasksEventsService,
     private readonly taskHistoryEvents: TaskHistoryEventsService,
-  ) {}
+  ) { }
 
   @Interval(SWEEP_INTERVAL_MS)
   async expireOverdueTasks() {
@@ -177,7 +177,7 @@ export class DeliveryTimeoutService {
         contestId: saved.contestId,
         kind: TASK_KIND.BALLOON_TASK,
         status: saved.status,
-        message: 'Tempo esgotado. Balão voltou para a fila.',
+        message: 'Tempo esgotado. Balão voltou para a fila',
         teamId: saved.teamId,
         questionId: saved.questionId,
         balloonDeliveryId: saved.id,
@@ -198,21 +198,21 @@ export class DeliveryTimeoutService {
       result.saved.contestId,
       delivery.contest.competitionId,
       {
-      type: STAFF_TASK_EVENT_TYPE.QUEUED,
-      task: toBalloonStaffTask({
-        id: result.saved.id,
-        contestId: result.saved.contestId,
-        teamId: result.saved.teamId,
-        ...teamFieldsFrom(result.saved.team),
-        questionId: result.saved.questionId,
-        balloonColor: result.saved.question.balloonColor,
-        questionLabel: result.saved.question.label,
-        status: result.saved.status,
-        claimedByUserId: result.saved.claimedByUserId,
-        claimedAt: result.saved.claimedAt,
-        createdAt: result.saved.createdAt,
-      }),
-    },
+        type: STAFF_TASK_EVENT_TYPE.QUEUED,
+        task: toBalloonStaffTask({
+          id: result.saved.id,
+          contestId: result.saved.contestId,
+          teamId: result.saved.teamId,
+          ...teamFieldsFrom(result.saved.team),
+          questionId: result.saved.questionId,
+          balloonColor: result.saved.question.balloonColor,
+          questionLabel: result.saved.question.label,
+          status: result.saved.status,
+          claimedByUserId: result.saved.claimedByUserId,
+          claimedAt: result.saved.claimedAt,
+          createdAt: result.saved.createdAt,
+        }),
+      },
     );
 
     this.taskHistoryEvents.emit(result.saved.contestId, {
@@ -259,7 +259,7 @@ export class DeliveryTimeoutService {
         contestId: saved.contestId,
         kind: TASK_KIND.PRINT_TASK,
         status: saved.status,
-        message: 'Tempo esgotado. Impressão voltou para a fila.',
+        message: 'Tempo esgotado. Impressão voltou para a fila',
         teamId: saved.teamId,
         questionId: null,
         balloonDeliveryId: null,
@@ -280,18 +280,18 @@ export class DeliveryTimeoutService {
       result.saved.contestId,
       task.contest.competitionId,
       {
-      type: STAFF_TASK_EVENT_TYPE.QUEUED,
-      task: toPrintStaffTask({
-        id: result.saved.id,
-        contestId: result.saved.contestId,
-        teamId: result.saved.teamId,
-        ...teamFieldsFrom(result.saved.team),
-        status: result.saved.status,
-        claimedByUserId: result.saved.claimedByUserId,
-        claimedAt: result.saved.claimedAt,
-        createdAt: result.saved.createdAt,
-      }),
-    },
+        type: STAFF_TASK_EVENT_TYPE.QUEUED,
+        task: toPrintStaffTask({
+          id: result.saved.id,
+          contestId: result.saved.contestId,
+          teamId: result.saved.teamId,
+          ...teamFieldsFrom(result.saved.team),
+          status: result.saved.status,
+          claimedByUserId: result.saved.claimedByUserId,
+          claimedAt: result.saved.claimedAt,
+          createdAt: result.saved.createdAt,
+        }),
+      },
     );
 
     this.taskHistoryEvents.emit(result.saved.contestId, {

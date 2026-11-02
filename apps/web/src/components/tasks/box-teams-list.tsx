@@ -156,7 +156,7 @@ export default function BoxTeamsList({
                     setError(
                         getTeamErrorMessage(
                             loadError,
-                            'Não foi possível carregar os times.',
+                            'Não foi possível carregar os competidores.',
                         ),
                     );
                 }
@@ -206,8 +206,8 @@ export default function BoxTeamsList({
                     <Input
                         value={search}
                         onChange={(value) => setSearch(value)}
-                        placeholder="Buscar por nome do time ou usuário..."
-                        aria-label="Buscar times"
+                        placeholder="Buscar por nome do competidor ou usuário..."
+                        aria-label="Buscar competidores"
                         icon={
                             <HugeiconsIcon
                                 icon={Search01Icon}
@@ -231,8 +231,8 @@ export default function BoxTeamsList({
                         <EmptyIcon className="size-14 text-muted-foreground opacity-70" />
                         <p className="text-center text-sm text-muted-foreground">
                             {search.trim()
-                                ? 'Nenhum time encontrado para a busca.'
-                                : 'Nenhum time cadastrado.'}
+                                ? 'Nenhum competidor encontrado para a busca.'
+                                : 'Nenhum competidor cadastrado.'}
                         </p>
                     </div>
                 ) : (
