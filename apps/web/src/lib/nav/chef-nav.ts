@@ -23,6 +23,11 @@ export function getChefContestNavItems(contestId: string): AdminNavItem[] {
       icon: 'colaboradores',
     },
     {
+      title: 'Competidores',
+      url: `${base}/competidores`,
+      icon: 'times',
+    },
+    {
       title: 'Tarefas',
       url: `${base}/tarefas`,
       icon: 'tarefas',
