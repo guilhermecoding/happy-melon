@@ -1,15 +1,12 @@
 "use client";
 
 import { Balloon } from '@/components/balloon';
-import {
-  type BalloonColor,
-  COLOR,
-} from '@/services/question/balloon-color';
+import { COLOR } from '@/services/question/balloon-color';
 import { cn } from '@/lib/utils';
 
 type BalloonAchievementProps = {
   questionId?: string;
-  color: BalloonColor;
+  color: string;
   resolved: boolean;
   className?: string;
   sizeBalloon?: number;

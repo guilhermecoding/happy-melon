@@ -55,18 +55,50 @@ export const BALLOON_COLOR_OPTIONS: BalloonColorOption[] = (
   }))
   .sort((a, b) => a.label.localeCompare(b.label, 'pt-BR'));
 
+const HEX_COLOR = /^#?([0-9A-Fa-f]{3}|[0-9A-Fa-f]{6})$/;
+
+export function balloonColorNameKey(name: string): string {
+  return name.trim().toLocaleLowerCase('pt-BR');
+}
+
+export function normalizeBalloonHex(value: string): string | null {
+  const match = value.trim().match(HEX_COLOR);
+  if (!match?.[1]) {
+    return null;
+  }
+
+  const digits = match[1].toUpperCase();
+  const expanded =
+    digits.length === 3
+      ? digits
+          .split('')
+          .map((digit) => `${digit}${digit}`)
+          .join('')
+      : digits;
+
+  return `#${expanded}`;
+}
+
 export function isBalloonColor(value: string): value is BalloonColor {
   return (BALLOON_COLOR_VALUES as readonly string[]).includes(value);
 }
 
 export function toBalloonColor(
   value: string,
-  fallback: BalloonColor = COLOR.RED,
-): BalloonColor {
-  const normalized = value.toUpperCase();
-  return isBalloonColor(normalized) ? normalized : fallback;
+  fallback: string = COLOR.RED,
+): string {
+  return normalizeBalloonHex(value) ?? fallback;
 }
 
-export function getBalloonColorLabel(value: BalloonColor): string {
-  return BALLOON_COLOR_LABELS[value];
+export function getBalloonColorLabel(value: string): string {
+  const normalized = normalizeBalloonHex(value);
+  if (!normalized) {
+    return value;
+  }
+
+  if (isBalloonColor(normalized)) {
+    return BALLOON_COLOR_LABELS[normalized];
+  }
+
+  return normalized;
 }

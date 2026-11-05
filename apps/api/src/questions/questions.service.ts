@@ -17,6 +17,7 @@ import {
   isPrismaUniqueViolation,
   isUniqueViolationOn,
 } from '../common/short-id.js';
+import { BalloonColorsService } from './balloon-colors.service.js';
 import type {
   CreateQuestionDto,
   DeleteQuestionDto,
@@ -25,6 +26,8 @@ import type {
 
 @Injectable()
 export class QuestionsService {
+  constructor(private readonly balloonColors: BalloonColorsService) {}
+
   async listByContest(contestId: string) {
     await this.ensureContestExists(contestId);
 
@@ -39,6 +42,7 @@ export class QuestionsService {
   async create(contestId: string, dto: CreateQuestionDto) {
     await this.ensureContestExists(contestId);
     await this.ensureLabelAvailable(contestId, dto.label);
+    const balloonColor = await this.balloonColors.assertUsable(dto.balloonColor);
 
     for (let attempt = 0; attempt < ID_MAX_ATTEMPTS; attempt++) {
       try {
@@ -48,7 +52,7 @@ export class QuestionsService {
             contestId,
             label: dto.label,
             title: dto.title,
-            balloonColor: dto.balloonColor,
+            balloonColor,
           },
         });
 
@@ -84,6 +88,7 @@ export class QuestionsService {
     }
 
     await this.ensureLabelAvailable(existing.contestId, dto.label, id);
+    const balloonColor = await this.balloonColors.assertUsable(dto.balloonColor);
 
     try {
       const question = await prisma.question.update({
@@ -91,7 +96,7 @@ export class QuestionsService {
         data: {
           label: dto.label,
           title: dto.title,
-          balloonColor: dto.balloonColor,
+          balloonColor,
         },
       });
 
