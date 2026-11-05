@@ -4,7 +4,15 @@ import type { Contest } from '@/services/contest/contest.type';
 import BoxAccessControllCollab from './box-access-controll-collab';
 import BoxListCollaborators from './box-list-collaborators';
 
-export function CollaboratorsGeralPanel({ contest }: { contest: Contest }) {
+type CollaboratorsGeralPanelProps = {
+    contest: Contest;
+    canManageSettings?: boolean;
+};
+
+export function CollaboratorsGeralPanel({
+    contest,
+    canManageSettings = false,
+}: CollaboratorsGeralPanelProps) {
     return (
         <div className="mt-4 flex flex-col gap-4 @5xl/main:flex-row">
             <div className="w-full @5xl/main:w-3/5">
@@ -13,7 +21,10 @@ export function CollaboratorsGeralPanel({ contest }: { contest: Contest }) {
                     blobSize="sm"
                     blobTone="yellow"
                 >
-                    <BoxListCollaborators contestId={contest.id} />
+                    <BoxListCollaborators
+                        contestId={contest.id}
+                        canManageSettings={canManageSettings}
+                    />
                 </BoxFeatures>
             </div>
             <div className="w-full @5xl/main:w-2/5">
