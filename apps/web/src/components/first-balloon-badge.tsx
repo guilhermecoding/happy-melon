@@ -1,4 +1,7 @@
+'use client';
+
 import { Icon } from '@/components/pouf/Icon';
+import { Tooltip } from '@/components/pouf/controls';
 import { cn } from '@/lib/utils';
 
 type FirstBalloonBadgeProps = {
@@ -11,9 +14,8 @@ export function FirstBalloonBadge({
   className,
 }: FirstBalloonBadgeProps) {
   return (
-    <span
-      role="img"
-      aria-label="Primeira confirmação"
+    <Tooltip
+      tip="Primeira submissão da questão"
       className={cn(
         'absolute -right-0.5 -bottom-0.5 flex items-center justify-center rounded-full bg-yellow-400 text-white ring-1',
         size === 'sm' ? 'size-4' : 'size-6',
@@ -28,6 +30,6 @@ export function FirstBalloonBadge({
       >
         <Icon name="star" size="sm" />
       </span>
-    </span>
+    </Tooltip>
   );
 }
