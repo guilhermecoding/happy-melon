@@ -8,6 +8,7 @@ const API_PREFIXES = [
   "administrators",
   "teams",
   "questions",
+  "balloon-colors",
   "me",
 ];
 

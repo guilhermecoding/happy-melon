@@ -12,7 +12,7 @@ import { AdminPasswordConfirmDialog } from '@/components/admin-password-confirm-
 import { questionService } from '@/services/question/question.service';
 import { getQuestionErrorMessage } from '@/services/question/question.error';
 import type { Question } from '@/services/question/question.type';
-import { COLOR, toBalloonColor, type BalloonColor } from '@/services/question/balloon-color';
+import { COLOR, toBalloonColor } from '@/services/question/balloon-color';
 import { Button } from '@/components/pouf/Button';
 import { Field, Input } from '@/components/pouf/Input';
 import { Sheet } from '@/components/pouf/sheet';
@@ -203,7 +203,7 @@ export function EditQuestionSheet({
                       value={field.state.value}
                       invalid={!field.state.meta.isValid}
                       onBlur={field.handleBlur}
-                      onChange={(color: BalloonColor) => field.handleChange(color)}
+                      onChange={(color) => field.handleChange(color)}
                     />
                   )}
                 </Field>

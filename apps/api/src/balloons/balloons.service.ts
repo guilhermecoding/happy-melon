@@ -42,24 +42,10 @@ import {
 import { TaskHistoryEventsService } from '../contest-tasks/task-history.events.js';
 import { toTaskHistoryEntryDto } from '../contest-tasks/task-history.mapper.js';
 import type { TeamQuestionActionDto } from './dto/balloon.dto.js';
-
-const BALLOON_COLOR_LABELS: Record<string, string> = {
-  '#000000': 'Preto',
-  '#0000FF': 'Azul',
-  '#00FFFF': 'Azul claro',
-  '#000080': 'Azul marinho',
-  '#FFFFFF': 'Branco',
-  '#800000': 'Grená',
-  '#FF8000': 'Laranja',
-  '#A3794D': 'Marrom',
-  '#C0C0C0': 'Prata',
-  '#FF00FF': 'Rosa',
-  '#800080': 'Roxo',
-  '#008000': 'Verde',
-  '#00FF00': 'Verde limão',
-  '#FF0000': 'Vermelho',
-  '#FFD800': 'Amarelo',
-};
+import {
+  builtinBalloonColorLabel,
+  normalizeBalloonHex,
+} from '../questions/balloon-color.js';
 
 const STATUS_ACTION_LABEL = {
   [BALLOON_DELIVERY_STATUS.PENDING]: 'confirmado',
@@ -506,7 +492,10 @@ export class BalloonsService {
   ) {
     const status = this.toStatusDto(params.delivery.status);
     const type = taskTypeFromStatus(status, TASK_KIND.BALLOON_TASK);
-    const colorLabel = this.getBalloonColorLabel(params.balloonColor);
+    const colorLabel = await this.getBalloonColorLabel(
+      tx,
+      params.balloonColor,
+    );
     const actionLabel = STATUS_ACTION_LABEL[status];
     const message = `Balão ${colorLabel} do time ${params.teamName} ${actionLabel}`;
 
@@ -598,9 +587,22 @@ export class BalloonsService {
     return team;
   }
 
-  private getBalloonColorLabel(balloonColor: string): string {
-    const normalized = balloonColor.toUpperCase();
-    return BALLOON_COLOR_LABELS[normalized] ?? balloonColor;
+  private async getBalloonColorLabel(
+    tx: Prisma.TransactionClient,
+    balloonColor: string,
+  ): Promise<string> {
+    const normalized = normalizeBalloonHex(balloonColor) ?? balloonColor;
+    const builtin = builtinBalloonColorLabel(normalized);
+    if (builtin) {
+      return builtin;
+    }
+
+    const custom = await tx.balloonColorPreset.findUnique({
+      where: { hex: normalized },
+      select: { name: true },
+    });
+
+    return custom?.name ?? normalized;
   }
 
   private toPrismaStatus(

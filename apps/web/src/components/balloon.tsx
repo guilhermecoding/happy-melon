@@ -4,19 +4,22 @@ import { HugeiconsIcon } from '@hugeicons/react';
 import { BalloonIcon } from '@hugeicons/core-free-icons';
 import {
   COLOR,
-  isBalloonColor,
+  normalizeBalloonHex,
 } from '@/services/question/balloon-color';
 import { cn } from '@/lib/utils';
 
+const UNFILLED_COLORS = new Set<string>([COLOR.WHITE, '#ECECEC']);
+
 type BalloonProps = {
-  color: typeof COLOR[keyof typeof COLOR] | string;
+  color: string;
   className?: string;
 };
 
 export function Balloon({ color, className }: BalloonProps) {
-  const normalized = color.toUpperCase();
-  const isWhite = normalized === COLOR.WHITE;
-  const shouldFill = isBalloonColor(normalized) && !isWhite;
+  const normalized = normalizeBalloonHex(color) ?? color;
+  const isWhite = normalized.toUpperCase() === COLOR.WHITE;
+  const shouldFill =
+    normalizeBalloonHex(color) !== null && !UNFILLED_COLORS.has(normalized);
 
   return (
     <HugeiconsIcon
