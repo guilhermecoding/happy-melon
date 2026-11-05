@@ -6,6 +6,7 @@ import {
   type StaffTask,
 } from '@repo/shared';
 import { Balloon } from '@/components/balloon';
+import { FirstBalloonBadge } from '@/components/first-balloon-badge';
 import PrintIcon from '@/components/print-icon';
 import { IconButton } from '@/components/pouf/Button';
 import { Dialog } from '@/components/pouf/controls';
@@ -160,7 +161,10 @@ function LobbyTaskItem({
           {isPrint ? (
             <PrintIcon className="size-8 shrink-0" strokeWidth={1.5} />
           ) : (
-            <Balloon color={balloonColor} className="size-8 shrink-0" />
+            <span className="relative shrink-0">
+              <Balloon color={balloonColor} className="size-8" />
+              {task.isFirst ? <FirstBalloonBadge size="sm" /> : null}
+            </span>
           )}
           <div className="flex min-w-0 flex-col">
             <span className="truncate text-base font-bold">{task.teamName}</span>

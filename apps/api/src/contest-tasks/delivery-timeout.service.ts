@@ -211,6 +211,7 @@ export class DeliveryTimeoutService {
           claimedByUserId: result.saved.claimedByUserId,
           claimedAt: result.saved.claimedAt,
           createdAt: result.saved.createdAt,
+          isFirst: result.saved.isFirst,
         }),
       },
     );

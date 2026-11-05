@@ -63,10 +63,12 @@ export function toBalloonStaffTask(params: {
   claimedByUserId: string | null;
   claimedAt: Date | null;
   createdAt: Date;
+  isFirst: boolean;
 } & TeamFields): StaffTask {
   return {
     id: params.id,
     kind: TASK_KIND.BALLOON_TASK,
+    isFirst: params.isFirst,
     contestId: params.contestId,
     teamId: params.teamId,
     teamName: params.teamName,

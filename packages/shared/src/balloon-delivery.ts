@@ -134,12 +134,14 @@ export type StaffTask = {
   questionId?: string | null;
   balloonColor?: string | null;
   questionLabel?: string | null;
+  isFirst?: boolean;
 };
 
 export const STAFF_TASK_EVENT_TYPE = {
   QUEUED: 'task.queued',
   CLAIMED: 'task.claimed',
   REMOVED: 'task.removed',
+  UPDATED: 'task.updated',
   SETTINGS_UPDATED: 'task.settings.updated',
   MULTI_TOUCH_RESTRICTED: 'task.multi-touch.restricted',
 } as const;
@@ -160,9 +162,15 @@ export type StaffTaskClaimedEvent = {
   claimedByName: string;
 };
 
+export type StaffTaskUpdatedEvent = {
+  type: typeof STAFF_TASK_EVENT_TYPE.UPDATED;
+  task: StaffTask;
+};
+
 export type StaffTaskLifecycleEvent =
   | StaffTaskQueuedOrRemovedEvent
-  | StaffTaskClaimedEvent;
+  | StaffTaskClaimedEvent
+  | StaffTaskUpdatedEvent;
 
 export type StaffSettingsUpdatedEvent = {
   type: typeof STAFF_TASK_EVENT_TYPE.SETTINGS_UPDATED;
