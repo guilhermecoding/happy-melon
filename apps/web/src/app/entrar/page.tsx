@@ -11,27 +11,13 @@ export const metadata: Metadata = {
   title: "Entrar",
 }
 
-function loginImageUrl(value: string | undefined) {
-  const trimmed = value?.trim()
-  if (!trimmed) return undefined
-
-  try {
-    const url = new URL(trimmed)
-    if (url.protocol !== "http:" && url.protocol !== "https:") return undefined
-    return url.href
-  } catch {
-    return undefined
-  }
-}
-
 async function LoginPageContent({
   searchParams,
 }: Pick<PageProps<'/entrar'>, 'searchParams'>) {
   const query = await searchParams
   const contestCode = toSingleSearchParam(query.contest_code)
-  const imageUrl = loginImageUrl(process.env.LOGIN_IMAGE_URL)
 
-  return <LoginForm contestCode={contestCode} imageUrl={imageUrl} />
+  return <LoginForm contestCode={contestCode} />
 }
 
 export default function LoginPage({
