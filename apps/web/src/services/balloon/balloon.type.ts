@@ -12,6 +12,7 @@ export type BalloonDelivery = {
   questionId: string;
   status: BalloonDeliveryStatus;
   claimedByUserId: string | null;
+  isFirst: boolean;
   createdAt: string;
   updatedAt: string;
 };

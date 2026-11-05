@@ -41,6 +41,16 @@ function removeTask(tasks: StaffTask[], taskId: string): StaffTask[] {
   return tasks.filter((item) => item.id !== taskId);
 }
 
+function patchTask(tasks: StaffTask[], task: StaffTask): StaffTask[] {
+  let changed = false;
+  const next = tasks.map((item) => {
+    if (item.id !== task.id) return item;
+    changed = true;
+    return task;
+  });
+  return changed ? next : tasks;
+}
+
 type StaffTasksBoardProps = {
   contestId: string;
 };
@@ -160,6 +170,14 @@ export default function StaffTasksBoard({ contestId }: StaffTasksBoardProps) {
           setBannedUntil(null);
         }
         toast.info('Os ajustes da competição foram atualizados.');
+        return;
+      }
+
+      if (event.type === STAFF_TASK_EVENT_TYPE.UPDATED) {
+        startTransition(() => {
+          setQueue((prev) => patchTask(prev, event.task));
+          setLobby((prev) => patchTask(prev, event.task));
+        });
         return;
       }
 
