@@ -164,7 +164,17 @@ export class CompetitionsService {
     return this.toResponse(competition);
   }
 
-  async updateStaffSettings(id: string, dto: StaffSettingsDto) {
+  async updateStaffSettings(
+    id: string,
+    dto: StaffSettingsDto,
+    actorRole?: string | null,
+  ) {
+    if (actorRole !== 'admin') {
+      throw new ForbiddenException(
+        'Apenas administradores podem alterar os ajustes.',
+      );
+    }
+
     await getCompetitionOrThrow(id);
 
     const competition = await prisma.competition.update({

@@ -45,10 +45,12 @@ function orderCollaborators(collaborators: Collaborator[]) {
 
 type BoxListCollaboratorsProps = {
   contestId: string;
+  canManageSettings?: boolean;
 };
 
 export default function BoxListCollaborators({
   contestId,
+  canManageSettings = false,
 }: BoxListCollaboratorsProps) {
   const [collaborators, setCollaborators] = useState<Collaborator[]>([]);
   const [loading, setLoading] = useState(true);
@@ -352,14 +354,16 @@ export default function BoxListCollaborators({
   return (
     <div className="flex h-full flex-1 flex-col gap-4 p-4">
       <div className="flex flex-col-reverse justify-end gap-2 sm:flex-row">
-        <Button tone="orange" size="sm" onClick={() => setSettingsOpen(true)}>
-          <HugeiconsIcon
-            icon={CustomizeIcon}
-            className="size-5"
-            strokeWidth={2.5}
-          />
-          Ajustes
-        </Button>
+        {canManageSettings ? (
+          <Button tone="orange" size="sm" onClick={() => setSettingsOpen(true)}>
+            <HugeiconsIcon
+              icon={CustomizeIcon}
+              className="size-5"
+              strokeWidth={2.5}
+            />
+            Ajustes
+          </Button>
+        ) : null}
         <Button tone="blue" size="sm" onClick={() => setCreateOpen(true)}>
           <HugeiconsIcon
             icon={CirclePlusIcon}
@@ -463,11 +467,13 @@ export default function BoxListCollaborators({
         onDeleted={removeCollaboratorFromList}
       />
 
-      <CollaboratorSettingsDialog
-        contestId={contestId}
-        open={settingsOpen}
-        onOpenChange={setSettingsOpen}
-      />
+      {canManageSettings ? (
+        <CollaboratorSettingsDialog
+          contestId={contestId}
+          open={settingsOpen}
+          onOpenChange={setSettingsOpen}
+        />
+      ) : null}
 
       <Confirm
         open={collaboratorToDelete !== null}

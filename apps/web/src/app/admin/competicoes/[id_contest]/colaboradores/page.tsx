@@ -32,7 +32,12 @@ async function AdminCompetitionColaboratorsPageContent({
             <Section className="mt-6">
                 <CollaboratorsPageTabs
                     key={contest.id}
-                    geral={<CollaboratorsGeralPanel contest={contest} />}
+                    geral={
+                        <CollaboratorsGeralPanel
+                            contest={contest}
+                            canManageSettings
+                        />
+                    }
                     score={<CollaboratorsScorePanel contestId={contest.id} />}
                 />
             </Section>
