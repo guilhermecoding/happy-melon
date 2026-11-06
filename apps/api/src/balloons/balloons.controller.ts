@@ -18,6 +18,7 @@ import { map, type Observable } from 'rxjs';
 import type { auth } from '../auth/auth.js';
 import { StaffCompetitionGuard } from '../auth/staff-competition.guard.js';
 import { TaskHistoryEventsService } from '../contest-tasks/task-history.events.js';
+import { TaskSummaryService } from '../contest-tasks/task-summary.service.js';
 import { ZodValidationPipe } from '../common/pipes/zod-validation.pipe.js';
 import { BalloonsService } from './balloons.service.js';
 import {
@@ -34,6 +35,7 @@ export class BalloonsController {
   constructor(
     private readonly balloonsService: BalloonsService,
     private readonly taskHistoryEvents: TaskHistoryEventsService,
+    private readonly taskSummaries: TaskSummaryService,
   ) {}
 
   @Get('contests/:contestId/balloon-deliveries')
@@ -47,6 +49,22 @@ export class BalloonsController {
   @Get('contests/:contestId/task-history')
   listTaskHistory(@Param('contestId') contestId: string) {
     return this.balloonsService.listTaskHistory(contestId);
+  }
+
+  @Get('contests/:contestId/task-summaries')
+  listTaskSummaries(@Param('contestId') contestId: string) {
+    return this.taskSummaries.list(contestId);
+  }
+
+  @Sse('contests/:contestId/task-summaries/events')
+  streamTaskSummaries(
+    @Param('contestId') contestId: string,
+  ): Observable<MessageEvent> {
+    return this.taskSummaries.stream(contestId).pipe(
+      map((event) => ({
+        data: event,
+      })),
+    );
   }
 
   @Sse('contests/:contestId/task-history/events')

@@ -5,7 +5,7 @@ import clsx from 'clsx'
 import { buttonClasses } from './Button'
 import { useState, type ReactNode } from 'react'
 import { motion, AnimatePresence, useReducedMotion } from 'framer-motion'
-import { Icon } from './Icon'
+import { Icon, renderIcon, type IconLike } from './Icon'
 import { type Tone } from './tone'
 
 /* ------------------------------------------------------------------ */
@@ -15,6 +15,7 @@ import { type Tone } from './tone'
 interface Tab {
   value: string
   label: string
+  icon?: IconLike
   content: ReactNode
 }
 
@@ -41,6 +42,7 @@ export function Tabs({ tabs, value, onChange, tone = 'blue' }: TabsProps) {
             value={t.value}
             className={clsx(buttonClasses({ size: 'sm', tone }), 'pouf-tabs__trigger')}
           >
+            {t.icon ? renderIcon(t.icon, 'sm') : null}
             {t.label}
           </RTabs.Trigger>
         ))}

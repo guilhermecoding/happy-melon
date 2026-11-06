@@ -12,6 +12,8 @@ interface TableColumn<T> {
   align?: 'left' | 'right'
   mono?: boolean
   truncate?: boolean
+  /** Up to two lines, then an ellipsis. Other columns stay on one line. */
+  clamp?: boolean
   /** Supply a comparator to make this column's header a sort control.
    *  Opt-in on purpose: a column without `sort` renders the same inert header
    *  it always has, so adding sorting to the system changed no existing
@@ -122,20 +124,31 @@ export function Table<T>({ columns, rows, getKey, onRowClick, getRowLabel }: Tab
                 }
               >
                 {columns.map((col, colIndex) => {
-                  const cell = (
+                  const rendered = col.render(row, rowIndex)
+                  const cell = col.clamp ? (
+                    <span className="line-clamp-2 whitespace-normal font-bold text-[13px] leading-snug [overflow-wrap:anywhere]">
+                      {rendered}
+                    </span>
+                  ) : (
                     <Text
                       size="sm"
                       mono={col.mono}
                       num={col.align === 'right'}
                       truncate={col.truncate}
                     >
-                      {col.render(row, rowIndex)}
+                      {rendered}
                     </Text>
                   )
+                  const cellClass = [
+                    col.align === 'right' ? 'pouf-table__cell--right' : '',
+                    col.clamp ? 'pouf-table__cell--clamp' : '',
+                  ]
+                    .filter(Boolean)
+                    .join(' ')
                   return (
                     <td
                       key={col.key}
-                      className={col.align === 'right' ? 'pouf-table__cell--right' : ''}
+                      className={cellClass || undefined}
                     >
                       {colIndex === 0 && onRowClick ? (
                         <button

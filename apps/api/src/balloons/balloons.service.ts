@@ -41,6 +41,7 @@ import {
 } from '../contest-tasks/staff-task.mapper.js';
 import { TaskHistoryEventsService } from '../contest-tasks/task-history.events.js';
 import { toTaskHistoryEntryDto } from '../contest-tasks/task-history.mapper.js';
+import { TaskSummaryService } from '../contest-tasks/task-summary.service.js';
 import type { TeamQuestionActionDto } from './dto/balloon.dto.js';
 import {
   builtinBalloonColorLabel,
@@ -70,6 +71,7 @@ export class BalloonsService {
   constructor(
     private readonly contestTasksEvents: ContestTasksEventsService,
     private readonly taskHistoryEvents: TaskHistoryEventsService,
+    private readonly taskSummaries: TaskSummaryService,
     private readonly lobbyCapacity: LobbyCapacityService,
     private readonly multiTouchBan: MultiTouchBanService,
   ) { }
@@ -210,7 +212,13 @@ export class BalloonsService {
             });
 
           const winner = await this.recomputeFirst(tx, question.id);
-          const delivery = { ...saved, isFirst: winner?.id === saved.id };
+          const isFirst = winner?.id === saved.id;
+          const delivery = {
+            ...saved,
+            isFirst,
+            updatedAt:
+              isFirst && winner ? winner.updatedAt : saved.updatedAt,
+          };
 
           const history = await this.createHistoryEntry(tx, {
             contestId,
@@ -242,6 +250,7 @@ export class BalloonsService {
         });
 
         this.emitHistoryCreated(contestId, history);
+        await this.publishBalloonSummary(delivery, team, question, actor);
 
         return this.toDeliveryResponse(delivery);
       } catch (error) {
@@ -376,6 +385,22 @@ export class BalloonsService {
     }
 
     this.emitHistoryCreated(contestId, history);
+    await this.publishBalloonSummary(delivery, team, question, actor);
+
+    if (promoted) {
+      await this.taskSummaries.publishBalloon({
+        id: promoted.id,
+        contestId: promoted.contestId,
+        status: promoted.status,
+        updatedAt: promoted.updatedAt,
+        isFirst: true,
+        claimedByUserId: promoted.claimedByUserId,
+        teamName: promoted.team.name,
+        teamUsername: promoted.team.usernameTeam,
+        questionLabel: promoted.question.label,
+        balloonColor: promoted.question.balloonColor,
+      });
+    }
 
     return this.toDeliveryResponse(delivery);
   }
@@ -456,6 +481,12 @@ export class BalloonsService {
     });
 
     this.emitHistoryCreated(contestId, history);
+    await this.publishBalloonSummary(
+      delivery,
+      delivery.team,
+      delivery.question,
+      actor,
+    );
 
     return staffTask;
   }
@@ -533,6 +564,12 @@ export class BalloonsService {
     });
 
     this.emitHistoryCreated(contestId, history);
+    await this.publishBalloonSummary(
+      delivery,
+      delivery.team,
+      delivery.question,
+      actor,
+    );
 
     return staffTask;
   }
@@ -751,12 +788,46 @@ export class BalloonsService {
     });
 
     if (winner && !winner.isFirst) {
-      await tx.balloonDelivery.update({
+      const updated = await tx.balloonDelivery.update({
         where: { id: winner.id },
         data: { isFirst: true },
       });
+      return { ...winner, isFirst: true as const, updatedAt: updated.updatedAt };
     }
 
     return winner ? { ...winner, isFirst: true as const } : null;
+  }
+
+  private publishBalloonSummary(
+    delivery: {
+      id: string;
+      contestId: string;
+      status: PrismaBalloonDeliveryStatus;
+      updatedAt: Date;
+      isFirst: boolean;
+      claimedByUserId: string | null;
+    },
+    team: { name: string; usernameTeam: string },
+    question: { label: string; balloonColor: string },
+    actor?: Actor,
+  ) {
+    const responsibleName =
+      actor && delivery.claimedByUserId === actor.userId
+        ? actor.name
+        : undefined;
+
+    return this.taskSummaries.publishBalloon({
+      id: delivery.id,
+      contestId: delivery.contestId,
+      status: delivery.status,
+      updatedAt: delivery.updatedAt,
+      isFirst: delivery.isFirst,
+      claimedByUserId: delivery.claimedByUserId,
+      teamName: team.name,
+      teamUsername: team.usernameTeam,
+      questionLabel: question.label,
+      balloonColor: question.balloonColor,
+      responsibleName,
+    });
   }
 }

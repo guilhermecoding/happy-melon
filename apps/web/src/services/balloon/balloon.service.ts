@@ -1,6 +1,9 @@
 import {
   TASK_HISTORY_EVENT_TYPE,
+  TASK_SUMMARY_EVENT_TYPE,
   type TaskHistoryCreatedEvent,
+  type TaskSummaryDto,
+  type TaskSummaryUpdatedEvent,
 } from '@repo/shared';
 import {
   normalizeBalloonError,
@@ -106,6 +109,58 @@ export const balloonService = {
         'entry' in parsed
       ) {
         return parsed as TaskHistoryCreatedEvent;
+      }
+      return null;
+    } catch {
+      return null;
+    }
+  },
+
+  async listTaskSummaries(contestId: string): Promise<TaskSummaryDto[]> {
+    try {
+      const cookie = await getServerCookieHeader();
+      const response = await fetch(
+        `${getApiBaseUrl()}/contests/${contestId}/task-summaries`,
+        {
+          credentials: 'include',
+          headers: cookie ? { cookie } : undefined,
+          cache: 'no-store',
+        },
+      );
+
+      if (!response.ok) {
+        throw await parseBalloonError(
+          response,
+          'Não foi possível carregar o histórico.',
+        );
+      }
+
+      return response.json();
+    } catch (error) {
+      throw normalizeBalloonError(
+        error,
+        'Não foi possível carregar o histórico.',
+      );
+    }
+  },
+
+  getTaskSummaryEventsUrl(contestId: string): string {
+    return `${getApiBaseUrl()}/contests/${contestId}/task-summaries/events`;
+  },
+
+  parseTaskSummaryEventData(raw: string): TaskSummaryUpdatedEvent | null {
+    try {
+      const parsed: unknown = JSON.parse(raw);
+      if (
+        parsed &&
+        typeof parsed === 'object' &&
+        'type' in parsed &&
+        parsed.type === TASK_SUMMARY_EVENT_TYPE.UPDATED &&
+        'task' in parsed &&
+        parsed.task &&
+        typeof parsed.task === 'object'
+      ) {
+        return parsed as TaskSummaryUpdatedEvent;
       }
       return null;
     } catch {

@@ -66,6 +66,17 @@ export {
 } from './task-history.js';
 
 export {
+  TASK_SUMMARY_EVENT_TYPE,
+  compareTaskSummaries,
+  mergeTaskSummaries,
+  taskSummaryKey,
+  upsertTaskSummary,
+  type TaskSummaryDto,
+  type TaskSummaryEventType,
+  type TaskSummaryUpdatedEvent,
+} from './task-summary.js';
+
+export {
   TEAM_EVENT_TYPE,
   TEAM_PLACEMENT_MAX_LENGTH,
   type TeamEvent,

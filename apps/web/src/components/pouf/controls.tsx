@@ -1,11 +1,11 @@
-"use client";
+'use client';
 
-import * as RSelect from '@radix-ui/react-select'
-import * as RSwitch from '@radix-ui/react-switch'
-import * as RTooltip from '@radix-ui/react-tooltip'
-import * as RAlert from '@radix-ui/react-alert-dialog'
-import * as RDialog from '@radix-ui/react-dialog'
-import * as RPopover from '@radix-ui/react-popover'
+import * as RSelect from '@radix-ui/react-select';
+import * as RSwitch from '@radix-ui/react-switch';
+import * as RTooltip from '@radix-ui/react-tooltip';
+import * as RAlert from '@radix-ui/react-alert-dialog';
+import * as RDialog from '@radix-ui/react-dialog';
+import * as RPopover from '@radix-ui/react-popover';
 import {
   useEffect,
   useId,
@@ -15,38 +15,38 @@ import {
   type KeyboardEvent,
   type PointerEvent as ReactPointerEvent,
   type ReactNode,
-} from 'react'
-import clsx from 'clsx'
+} from 'react';
+import clsx from 'clsx';
 import {
   animate,
   motion,
   useDragControls,
   useMotionValue,
   type PanInfo,
-} from 'motion/react'
-import { Button } from './Button'
-import { Icon } from './Icon'
-import { inputClasses } from './Input'
-import { Row, Stack } from './layout'
-import { Heading, Text } from './text'
-import type { Tone } from './tone'
+} from 'motion/react';
+import { Button } from './Button';
+import { Icon } from './Icon';
+import { inputClasses } from './Input';
+import { Row, Stack } from './layout';
+import { Heading, Text } from './text';
+import type { Tone } from './tone';
 
-const POUF_SHEET_MEDIA = '(max-width: 900px)'
-const DIALOG_DISMISS_OFFSET_PX = 120
-const DIALOG_DISMISS_VELOCITY_Y = 700
+const POUF_SHEET_MEDIA = '(max-width: 900px)';
+const DIALOG_DISMISS_OFFSET_PX = 120;
+const DIALOG_DISMISS_VELOCITY_Y = 700;
 
 function usePoufSheetLayout() {
-  const [isSheet, setIsSheet] = useState(false)
+  const [isSheet, setIsSheet] = useState(false);
 
   useEffect(() => {
-    const media = window.matchMedia(POUF_SHEET_MEDIA)
-    const sync = () => setIsSheet(media.matches)
-    sync()
-    media.addEventListener('change', sync)
-    return () => media.removeEventListener('change', sync)
-  }, [])
+    const media = window.matchMedia(POUF_SHEET_MEDIA);
+    const sync = () => setIsSheet(media.matches);
+    sync();
+    media.addEventListener('change', sync);
+    return () => media.removeEventListener('change', sync);
+  }, []);
 
-  return isSheet
+  return isSheet;
 }
 
 /* Radix supplies the behaviour (focus traps, typeahead, escape handling,
@@ -55,22 +55,31 @@ function usePoufSheetLayout() {
  * exactly like it reaches the page. */
 
 export interface SelectOption {
-  value: string
-  label: string
+  value: string;
+  label: ReactNode;
 }
 
 interface SelectProps {
-  value: string
-  onChange: (value: string) => void
-  options: SelectOption[]
-  id?: string
-  describedBy?: string
-  placeholder?: string
-  disabled?: boolean
-  label?: string
+  value: string;
+  onChange: (value: string) => void;
+  options: SelectOption[];
+  id?: string;
+  describedBy?: string;
+  placeholder?: string;
+  disabled?: boolean;
+  label?: string;
 }
 
-export function Select({ value, onChange, options, id, describedBy, placeholder, disabled, label }: SelectProps) {
+export function Select({
+  value,
+  onChange,
+  options,
+  id,
+  describedBy,
+  placeholder,
+  disabled,
+  label,
+}: SelectProps) {
   return (
     <RSelect.Root value={value} onValueChange={onChange} disabled={disabled}>
       <RSelect.Trigger
@@ -85,10 +94,18 @@ export function Select({ value, onChange, options, id, describedBy, placeholder,
         </RSelect.Icon>
       </RSelect.Trigger>
       <RSelect.Portal>
-        <RSelect.Content className="pouf-popover pouf-popover--select" position="popper" sideOffset={8}>
+        <RSelect.Content
+          className="pouf-popover pouf-popover--select"
+          position="popper"
+          sideOffset={8}
+        >
           <RSelect.Viewport>
             {options.map((o) => (
-              <RSelect.Item key={o.value} value={o.value} className="pouf-option">
+              <RSelect.Item
+                key={o.value}
+                value={o.value}
+                className="pouf-option"
+              >
                 <RSelect.ItemText>{o.label}</RSelect.ItemText>
               </RSelect.Item>
             ))}
@@ -96,19 +113,26 @@ export function Select({ value, onChange, options, id, describedBy, placeholder,
         </RSelect.Content>
       </RSelect.Portal>
     </RSelect.Root>
-  )
+  );
 }
 
 interface SwitchProps {
-  checked: boolean
-  onChange: (checked: boolean) => void
-  id?: string
-  describedBy?: string
-  disabled?: boolean
-  label?: string
+  checked: boolean;
+  onChange: (checked: boolean) => void;
+  id?: string;
+  describedBy?: string;
+  disabled?: boolean;
+  label?: string;
 }
 
-export function Switch({ checked, onChange, id, describedBy, disabled, label }: SwitchProps) {
+export function Switch({
+  checked,
+  onChange,
+  id,
+  describedBy,
+  disabled,
+  label,
+}: SwitchProps) {
   return (
     <RSwitch.Root
       id={id}
@@ -123,18 +147,20 @@ export function Switch({ checked, onChange, id, describedBy, disabled, label }: 
       aria-describedby={describedBy}
       aria-label={label}
     >
-      <RSwitch.Thumb className={[
-        'pouf-switch__thumb block w-7 h-7 rounded-[50%] bg-surface',
-        '[box-shadow:inset_0_-3px_0_rgba(0,0,0,0.12),inset_0_2px_0_rgba(255,255,255,0.9),0_4px_8px_rgba(58,46,92,0.2)]',
-        '[transition:transform_160ms_cubic-bezier(0.2,0.9,0.3,1.3)] transform-[translateX(0)]',
-        'group-data-[state=checked]:transform-[translateX(26px)]',
-      ].join(' ')} />
+      <RSwitch.Thumb
+        className={[
+          'pouf-switch__thumb block w-7 h-7 rounded-[50%] bg-surface',
+          '[box-shadow:inset_0_-3px_0_rgba(0,0,0,0.12),inset_0_2px_0_rgba(255,255,255,0.9),0_4px_8px_rgba(58,46,92,0.2)]',
+          '[transition:transform_160ms_cubic-bezier(0.2,0.9,0.3,1.3)] transform-[translateX(0)]',
+          'group-data-[state=checked]:transform-[translateX(26px)]',
+        ].join(' ')}
+      />
     </RSwitch.Root>
-  )
+  );
 }
 
 export function TooltipProvider({ children }: { children: ReactNode }) {
-  return <RTooltip.Provider delayDuration={300}>{children}</RTooltip.Provider>
+  return <RTooltip.Provider delayDuration={300}>{children}</RTooltip.Provider>;
 }
 
 /** Tooltip owns its anchor rather than asChild-ing onto its child.
@@ -163,10 +189,10 @@ export function Tooltip({
   children,
   className,
 }: {
-  tip: string
-  children: ReactNode
+  tip: string;
+  children: ReactNode;
   /** Applied to the tip anchor (the real Radix trigger), not the child. */
-  className?: string
+  className?: string;
 }) {
   return (
     <RTooltip.Root>
@@ -179,21 +205,21 @@ export function Tooltip({
         </RTooltip.Content>
       </RTooltip.Portal>
     </RTooltip.Root>
-  )
+  );
 }
 
 interface DialogProps {
   /** The element that opens it. Optional when `open` is controlled externally. */
-  trigger?: ReactNode
-  title: string
-  description?: ReactNode
-  children: ReactNode
+  trigger?: ReactNode;
+  title: string;
+  description?: ReactNode;
+  children: ReactNode;
   /** Controlled open state — needed when the dialog must close in response to
    *  something inside it (picking an item), not just the close button. */
-  open?: boolean
-  onOpenChange?: (open: boolean) => void
-  size?: 'md' | 'lg' | 'xl'
-  className?: string
+  open?: boolean;
+  onOpenChange?: (open: boolean) => void;
+  size?: 'md' | 'lg' | 'xl';
+  className?: string;
 }
 
 /** A plain modal (Radix Dialog), distinct from Confirm (Radix AlertDialog).
@@ -211,41 +237,44 @@ function DialogPanel({
   size,
   className,
 }: {
-  title: string
-  description?: ReactNode
-  children: ReactNode
-  size: 'md' | 'lg' | 'xl'
-  className?: string
+  title: string;
+  description?: ReactNode;
+  children: ReactNode;
+  size: 'md' | 'lg' | 'xl';
+  className?: string;
 }) {
-  const isSheet = usePoufSheetLayout()
-  const dragControls = useDragControls()
-  const y = useMotionValue(0)
-  const closeRef = useRef<HTMLButtonElement>(null)
-  const [dragging, setDragging] = useState(false)
+  const isSheet = usePoufSheetLayout();
+  const dragControls = useDragControls();
+  const y = useMotionValue(0);
+  const closeRef = useRef<HTMLButtonElement>(null);
+  const [dragging, setDragging] = useState(false);
 
   function startSheetDrag(event: ReactPointerEvent<HTMLElement>) {
-    if (!isSheet) return
-    if ((event.target as HTMLElement).closest('button')) return
-    setDragging(true)
-    dragControls.start(event)
+    if (!isSheet) return;
+    if ((event.target as HTMLElement).closest('button')) return;
+    setDragging(true);
+    dragControls.start(event);
   }
 
-  async function handleDragEnd(_: MouseEvent | TouchEvent | PointerEvent, info: PanInfo) {
+  async function handleDragEnd(
+    _: MouseEvent | TouchEvent | PointerEvent,
+    info: PanInfo,
+  ) {
     const shouldClose =
       info.offset.y > DIALOG_DISMISS_OFFSET_PX ||
-      info.velocity.y > DIALOG_DISMISS_VELOCITY_Y
+      info.velocity.y > DIALOG_DISMISS_VELOCITY_Y;
 
     if (shouldClose) {
       await animate(y, window.innerHeight, {
         duration: 0.2,
         ease: [0.32, 0.72, 0, 1],
-      })
-      closeRef.current?.click()
-      return
+      });
+      closeRef.current?.click();
+      return;
     }
 
-    await animate(y, 0, { type: 'spring', stiffness: 500, damping: 40 })
-    setDragging(false)
+    await animate(y, 0, { type: 'spring', stiffness: 500, damping: 40 });
+    setDragging(false);
   }
 
   return (
@@ -270,10 +299,7 @@ function DialogPanel({
         onDragStart={() => setDragging(true)}
         onDragEnd={handleDragEnd}
       >
-        <div
-          className="pouf-dialog__handle"
-          onPointerDown={startSheetDrag}
-        >
+        <div className="pouf-dialog__handle" onPointerDown={startSheetDrag}>
           <span className="pouf-dialog__handle-bar" aria-hidden />
           <span className="sr-only">Arraste para baixo para fechar</span>
         </div>
@@ -305,7 +331,7 @@ function DialogPanel({
         </Stack>
       </motion.div>
     </RDialog.Content>
-  )
+  );
 }
 
 export function Dialog({
@@ -342,28 +368,28 @@ export function Dialog({
         </DialogPanel>
       </RDialog.Portal>
     </RDialog.Root>
-  )
+  );
 }
 
 interface ConfirmProps {
   /** Optional trigger. Omit when `open` is controlled externally. */
-  children?: ReactNode
-  title: string
-  body: string
+  children?: ReactNode;
+  title: string;
+  body: string;
   /** Must name the outcome, not agree with a question: "Close 3 positions",
    *  never "Yes"/"OK". */
-  confirmLabel: string
+  confirmLabel: string;
   /** Must name the opposite outcome: "Keep positions open", never "Cancel".
    *  Required, because a sensible default here does not exist — only the caller
    *  knows what NOT doing the thing means. */
-  cancelLabel: string
-  onConfirm: () => void
-  tone?: Tone
-  loading?: boolean
+  cancelLabel: string;
+  onConfirm: () => void;
+  tone?: Tone;
+  loading?: boolean;
   /** The specific records this will affect — symbols, sizes, live P&L. */
-  details?: ReactNode
-  open?: boolean
-  onOpenChange?: (open: boolean) => void
+  details?: ReactNode;
+  open?: boolean;
+  onOpenChange?: (open: boolean) => void;
 }
 
 /** Every irreversible action routes through here — delete an account, empty a
@@ -397,7 +423,9 @@ export function Confirm({
 }: ConfirmProps) {
   return (
     <RAlert.Root open={open} onOpenChange={onOpenChange}>
-      {children != null ? <RAlert.Trigger asChild>{children}</RAlert.Trigger> : null}
+      {children != null ? (
+        <RAlert.Trigger asChild>{children}</RAlert.Trigger>
+      ) : null}
       <RAlert.Portal>
         {/* Enter/exit via Radix data-state CSS animations — same reasoning as Dialog,
             including keeping both as direct Portal children. Opening over a Dialog
@@ -437,26 +465,26 @@ export function Confirm({
         </RAlert.Content>
       </RAlert.Portal>
     </RAlert.Root>
-  )
+  );
 }
 
 interface ComboboxProps {
-  value: string
-  onChange: (value: string) => void
+  value: string;
+  onChange: (value: string) => void;
   /** The ids fetched from the provider. `[]` is a valid working state, not an error:
    *  an endpoint with no /models leaves this empty and the field must still work. */
-  options: string[]
-  loading?: boolean
+  options: string[];
+  loading?: boolean;
   /** Why the list is missing. Rendered inside the popover; never blocks typing. */
-  error?: string
+  error?: string;
   /** Fired on open — the caller uses it to trigger the lazy fetch. */
-  onOpen?: () => void
-  id?: string
-  describedBy?: string
-  placeholder?: string
-  mono?: boolean
+  onOpen?: () => void;
+  id?: string;
+  describedBy?: string;
+  placeholder?: string;
+  mono?: boolean;
   /** Accessible name when the control is not wrapped in Field. */
-  label?: string
+  label?: string;
 }
 
 /** A typeable select: pick from the provider's list, or type an id it doesn't offer.
@@ -484,58 +512,58 @@ export function Combobox({
   mono,
   label,
 }: ComboboxProps) {
-  const [open, setOpen] = useState(false)
-  const [query, setQuery] = useState('')
-  const [active, setActive] = useState(0)
-  const listboxId = useId()
-  const optionPrefix = useId()
+  const [open, setOpen] = useState(false);
+  const [query, setQuery] = useState('');
+  const [active, setActive] = useState(0);
+  const listboxId = useId();
+  const optionPrefix = useId();
 
   const shown = useMemo(() => {
-    const q = query.trim().toLowerCase()
-    return q ? options.filter((o) => o.toLowerCase().includes(q)) : options
-  }, [options, query])
+    const q = query.trim().toLowerCase();
+    return q ? options.filter((o) => o.toLowerCase().includes(q)) : options;
+  }, [options, query]);
 
-  const typed = query.trim()
-  const canCreate = typed.length > 0 && !options.includes(typed)
-  const createIndex = shown.length
-  const optionCount = shown.length + (canCreate ? 1 : 0)
-  const activeIndex = optionCount > 0 ? Math.min(active, optionCount - 1) : -1
+  const typed = query.trim();
+  const canCreate = typed.length > 0 && !options.includes(typed);
+  const createIndex = shown.length;
+  const optionCount = shown.length + (canCreate ? 1 : 0);
+  const activeIndex = optionCount > 0 ? Math.min(active, optionCount - 1) : -1;
   const activeOptionId =
     activeIndex < 0
       ? undefined
       : activeIndex === createIndex && canCreate
         ? `${optionPrefix}-create`
-        : `${optionPrefix}-${activeIndex}`
+        : `${optionPrefix}-${activeIndex}`;
 
   const commit = (v: string) => {
-    onChange(v)
-    setOpen(false)
-  }
+    onChange(v);
+    setOpen(false);
+  };
 
   const onKeyDown = (e: KeyboardEvent<HTMLInputElement>) => {
-    const max = optionCount - 1
+    const max = optionCount - 1;
     if (e.key === 'ArrowDown') {
-      e.preventDefault()
-      if (max >= 0) setActive((i) => Math.min(i + 1, max))
+      e.preventDefault();
+      if (max >= 0) setActive((i) => Math.min(i + 1, max));
     } else if (e.key === 'ArrowUp') {
-      e.preventDefault()
-      setActive((i) => Math.max(i - 1, 0))
+      e.preventDefault();
+      setActive((i) => Math.max(i - 1, 0));
     } else if (e.key === 'Enter') {
-      e.preventDefault()
-      if (canCreate && activeIndex === createIndex) commit(typed)
-      else if (shown[activeIndex] !== undefined) commit(shown[activeIndex])
+      e.preventDefault();
+      if (canCreate && activeIndex === createIndex) commit(typed);
+      else if (shown[activeIndex] !== undefined) commit(shown[activeIndex]);
     }
-  }
+  };
 
   return (
     <RPopover.Root
       open={open}
       onOpenChange={(o) => {
-        setOpen(o)
+        setOpen(o);
         if (o) {
-          setQuery('')
-          setActive(0)
-          onOpen?.()
+          setQuery('');
+          setActive(0);
+          onOpen?.();
         }
       }}
     >
@@ -562,13 +590,17 @@ export function Combobox({
         </button>
       </RPopover.Trigger>
       <RPopover.Portal>
-        <RPopover.Content className="pouf-popover pouf-popover--combobox" sideOffset={8} align="start">
+        <RPopover.Content
+          className="pouf-popover pouf-popover--combobox"
+          sideOffset={8}
+          align="start"
+        >
           <input
             className={inputClasses({ mono })}
             value={query}
             onChange={(e) => {
-              setQuery(e.target.value)
-              setActive(0)
+              setQuery(e.target.value);
+              setActive(0);
             }}
             onKeyDown={onKeyDown}
             placeholder="Search, or type a value…"
@@ -582,9 +614,30 @@ export function Combobox({
             spellCheck={false}
             autoFocus
           />
-          <div className="pouf-combobox__list" id={listboxId} role="listbox" aria-busy={loading || undefined}>
-            {loading && <div className="pouf-combobox__note" role="status" aria-live="polite">Loading options…</div>}
-            {!loading && error && <div className="pouf-combobox__note" role="status" aria-live="polite">{error}</div>}
+          <div
+            className="pouf-combobox__list"
+            id={listboxId}
+            role="listbox"
+            aria-busy={loading || undefined}
+          >
+            {loading && (
+              <div
+                className="pouf-combobox__note"
+                role="status"
+                aria-live="polite"
+              >
+                Loading options…
+              </div>
+            )}
+            {!loading && error && (
+              <div
+                className="pouf-combobox__note"
+                role="status"
+                aria-live="polite"
+              >
+                {error}
+              </div>
+            )}
             {!loading &&
               shown.map((o, i) => (
                 <button
@@ -625,11 +678,13 @@ export function Combobox({
               </button>
             )}
             {!loading && !error && shown.length === 0 && !canCreate && (
-              <div className="pouf-combobox__note">No models offered — type an id.</div>
+              <div className="pouf-combobox__note">
+                No models offered — type an id.
+              </div>
             )}
           </div>
         </RPopover.Content>
       </RPopover.Portal>
     </RPopover.Root>
-  )
+  );
 }
