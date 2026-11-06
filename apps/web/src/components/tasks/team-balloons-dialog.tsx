@@ -367,7 +367,7 @@ export function TeamBalloonsDialog({
                         icon={
                           canConfirm ? CheckmarkCircle02Icon : RemoveCircleIcon
                         }
-                        className="size-5"
+                        className="size-5 shrink-0"
                         strokeWidth={3}
                       />
                       {canConfirm ? 'Confirmar' : 'Reter'}
