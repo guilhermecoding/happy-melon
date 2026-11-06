@@ -5,6 +5,13 @@ Todas as mudanças notáveis deste projeto serão documentadas neste arquivo.
 O formato segue [Keep a Changelog](https://keepachangelog.com/pt-BR/1.1.0/),
 e este projeto adere ao [Semantic Versioning](https://semver.org/lang/pt-BR/).
 
+## [1.6.1] - 2026-11-06
+
+### Corrigido
+
+- Na aba **Kanban** do histórico de tarefas, os cards deixam de encostar nas bordas da coluna. O último card de cada quadro rola por completo, inclusive em telas maiores.
+- Corrigido falha de redirecionamento para usuários Chefes de Sala.
+
 ## [1.6.0] - 2026-11-06
 
 ### Adicionado
@@ -142,6 +149,7 @@ e este projeto adere ao [Semantic Versioning](https://semver.org/lang/pt-BR/).
 
 - Lançamento inicial do Happy Melon: operação de maratonas no estilo ICPC, com painel de administradores, fila e lobby de colaboradores, gestão de competições, prova, times, balões e impressões.
 
+[1.6.1]: https://github.com/guilhermecoding/happy-melon/compare/v1.6.0...v1.6.1
 [1.6.0]: https://github.com/guilhermecoding/happy-melon/compare/v1.5.0...v1.6.0
 [1.5.0]: https://github.com/guilhermecoding/happy-melon/compare/v1.4.0...v1.5.0
 [1.4.0]: https://github.com/guilhermecoding/happy-melon/compare/v1.3.0...v1.4.0
