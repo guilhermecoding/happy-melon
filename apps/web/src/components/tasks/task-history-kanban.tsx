@@ -57,27 +57,27 @@ const COLUMNS: Array<{
   status: BalloonDeliveryStatus;
   match: (status: BalloonDeliveryStatus) => boolean;
 }> = [
-  {
-    id: 'available',
-    title: 'Disponível',
-    status: BALLOON_DELIVERY_STATUS.PENDING,
-    match: (status) =>
-      status === BALLOON_DELIVERY_STATUS.PENDING ||
-      status === BALLOON_DELIVERY_STATUS.WITHHELD,
-  },
-  {
-    id: 'route',
-    title: 'Em rota',
-    status: BALLOON_DELIVERY_STATUS.PROCESSING,
-    match: (status) => status === BALLOON_DELIVERY_STATUS.PROCESSING,
-  },
-  {
-    id: 'delivered',
-    title: 'Entregue',
-    status: BALLOON_DELIVERY_STATUS.DELIVERED,
-    match: (status) => status === BALLOON_DELIVERY_STATUS.DELIVERED,
-  },
-];
+    {
+      id: 'available',
+      title: 'Disponível',
+      status: BALLOON_DELIVERY_STATUS.PENDING,
+      match: (status) =>
+        status === BALLOON_DELIVERY_STATUS.PENDING ||
+        status === BALLOON_DELIVERY_STATUS.WITHHELD,
+    },
+    {
+      id: 'route',
+      title: 'Em rota',
+      status: BALLOON_DELIVERY_STATUS.PROCESSING,
+      match: (status) => status === BALLOON_DELIVERY_STATUS.PROCESSING,
+    },
+    {
+      id: 'delivered',
+      title: 'Entregue',
+      status: BALLOON_DELIVERY_STATUS.DELIVERED,
+      match: (status) => status === BALLOON_DELIVERY_STATUS.DELIVERED,
+    },
+  ];
 
 function useVisibleOnScrollCount(
   itemCount: number,
@@ -263,7 +263,7 @@ function KanbanColumn({
 
         <div
           ref={scrollRef}
-          className="flex min-h-0 flex-1 flex-col gap-4 overflow-y-auto [scrollbar-gutter:stable]"
+          className="flex min-h-0 flex-1 flex-col gap-4 overflow-y-auto scrollbar-gutter-stable"
         >
           <AnimatePresence initial={false} mode="popLayout">
             {visibleTasks.map((task) => {
@@ -284,20 +284,20 @@ function KanbanColumn({
                     reduceMotion
                       ? { opacity: 0 }
                       : {
-                          opacity: 0,
-                          scale: 0.98,
-                          transition: { duration: 0.15 },
-                        }
+                        opacity: 0,
+                        scale: 0.98,
+                        transition: { duration: 0.15 },
+                      }
                   }
                   transition={
                     reduceMotion
                       ? { duration: 0.01 }
                       : {
-                          type: 'spring',
-                          stiffness: 420,
-                          damping: 34,
-                          mass: 0.8,
-                        }
+                        type: 'spring',
+                        stiffness: 420,
+                        damping: 34,
+                        mass: 0.8,
+                      }
                   }
                 >
                   <KanbanCardBody task={task} onOpenTimeline={onOpenTimeline} />
