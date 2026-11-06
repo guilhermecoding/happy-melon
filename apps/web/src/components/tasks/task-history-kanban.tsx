@@ -1,6 +1,13 @@
 'use client';
 
-import { useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react';
+import {
+  useEffect,
+  useLayoutEffect,
+  useMemo,
+  useRef,
+  useState,
+  type RefObject,
+} from 'react';
 import {
   BALLOON_DELIVERY_STATUS,
   isResolvedBalloonStatus,
@@ -11,13 +18,16 @@ import {
 } from '@repo/shared';
 import { HugeiconsIcon } from '@hugeicons/react';
 import {
-  ArrowLeft01Icon,
-  ArrowRight01Icon,
   BadgeInfoIcon,
   Clock01Icon,
   LookTopIcon,
 } from '@hugeicons/core-free-icons';
-import { AnimatePresence, LayoutGroup, motion, useReducedMotion } from 'motion/react';
+import {
+  AnimatePresence,
+  LayoutGroup,
+  motion,
+  useReducedMotion,
+} from 'motion/react';
 import { Balloon } from '@/components/balloon';
 import {
   getBalloonDeliveryStatusColorClass,
@@ -25,7 +35,7 @@ import {
 } from '@/components/balloon-delivery-status-icon';
 import { FirstBalloonBadge } from '@/components/first-balloon-badge';
 import PrintIcon from '@/components/print-icon';
-import { Button as ButtonPouf, IconButton } from '@/components/pouf/Button';
+import { IconButton } from '@/components/pouf/Button';
 import { Card } from '@/components/pouf/surface';
 import { toBalloonColor } from '@/services/question/balloon-color';
 import { cn } from '@/lib/utils';
@@ -47,27 +57,55 @@ const COLUMNS: Array<{
   status: BalloonDeliveryStatus;
   match: (status: BalloonDeliveryStatus) => boolean;
 }> = [
-    {
-      id: 'available',
-      title: 'Disponível',
-      status: BALLOON_DELIVERY_STATUS.PENDING,
-      match: (status) =>
-        status === BALLOON_DELIVERY_STATUS.PENDING ||
-        status === BALLOON_DELIVERY_STATUS.WITHHELD,
-    },
-    {
-      id: 'route',
-      title: 'Em rota',
-      status: BALLOON_DELIVERY_STATUS.PROCESSING,
-      match: (status) => status === BALLOON_DELIVERY_STATUS.PROCESSING,
-    },
-    {
-      id: 'delivered',
-      title: 'Entregue',
-      status: BALLOON_DELIVERY_STATUS.DELIVERED,
-      match: (status) => status === BALLOON_DELIVERY_STATUS.DELIVERED,
-    },
-  ];
+  {
+    id: 'available',
+    title: 'Disponível',
+    status: BALLOON_DELIVERY_STATUS.PENDING,
+    match: (status) =>
+      status === BALLOON_DELIVERY_STATUS.PENDING ||
+      status === BALLOON_DELIVERY_STATUS.WITHHELD,
+  },
+  {
+    id: 'route',
+    title: 'Em rota',
+    status: BALLOON_DELIVERY_STATUS.PROCESSING,
+    match: (status) => status === BALLOON_DELIVERY_STATUS.PROCESSING,
+  },
+  {
+    id: 'delivered',
+    title: 'Entregue',
+    status: BALLOON_DELIVERY_STATUS.DELIVERED,
+    match: (status) => status === BALLOON_DELIVERY_STATUS.DELIVERED,
+  },
+];
+
+function useVisibleOnScrollCount(
+  itemCount: number,
+  sentinelRef: RefObject<HTMLDivElement | null>,
+  rootRef: RefObject<HTMLDivElement | null>,
+) {
+  const [visibleCount, setVisibleCount] = useState(TASK_SUMMARY_PAGE_SIZE);
+  const count = Math.min(visibleCount, itemCount);
+
+  useEffect(() => {
+    const node = sentinelRef.current;
+    const root = rootRef.current;
+    if (!node || !root || count >= itemCount) return;
+
+    const observer = new IntersectionObserver(
+      (entries) => {
+        if (!entries.some((entry) => entry.isIntersecting)) return;
+        setVisibleCount((current) => current + TASK_SUMMARY_PAGE_SIZE);
+      },
+      { root, rootMargin: '160px' },
+    );
+
+    observer.observe(node);
+    return () => observer.disconnect();
+  }, [count, itemCount, rootRef, sentinelRef]);
+
+  return count;
+}
 
 function showsFirstBadge(task: TaskSummaryDto): boolean {
   return (
@@ -115,7 +153,7 @@ function EmptyTask() {
       <HugeiconsIcon icon={LookTopIcon} className="size-14" />
       <p className="mt-2 text-lg">Nada aqui, por enquanto.</p>
     </div>
-  )
+  );
 }
 
 function KanbanCardBody({
@@ -189,29 +227,26 @@ function KanbanColumn({
   enteringKeys: Set<string>;
   onOpenTimeline: (task: TaskSummaryDto) => void;
 }) {
-  const [page, setPage] = useState(1);
-  const totalPages = Math.max(1, Math.ceil(tasks.length / TASK_SUMMARY_PAGE_SIZE));
-  const currentPage = Math.min(page, totalPages);
-
-  useEffect(() => {
-    if (page > totalPages) {
-      setPage(totalPages);
-    }
-  }, [page, totalPages]);
-
-  const pageTasks = useMemo(() => {
-    const start = (currentPage - 1) * TASK_SUMMARY_PAGE_SIZE;
-    return tasks.slice(start, start + TASK_SUMMARY_PAGE_SIZE);
-  }, [tasks, currentPage]);
+  const scrollRef = useRef<HTMLDivElement>(null);
+  const sentinelRef = useRef<HTMLDivElement>(null);
+  const visibleCount = useVisibleOnScrollCount(
+    tasks.length,
+    sentinelRef,
+    scrollRef,
+  );
+  const visibleTasks = useMemo(
+    () => tasks.slice(0, visibleCount),
+    [tasks, visibleCount],
+  );
 
   const reduceMotion = useReducedMotion();
 
   return (
     <Card variant="tight" shadow="inset">
-      <div className="flex h-full flex-col gap-4">
+      <div className="flex h-full max-h-[calc(100dvh-18rem)] min-h-80 flex-col gap-4">
         <div
           className={cn(
-            'flex items-center gap-2',
+            'flex shrink-0 items-center gap-2',
             getBalloonDeliveryStatusColorClass(status),
           )}
         >
@@ -226,65 +261,57 @@ function KanbanColumn({
           </span>
         </div>
 
-        <AnimatePresence initial={false} mode="popLayout">
-          {pageTasks.map((task) => {
-            const key = taskSummaryKey(task);
-            const animateEnter = enteringKeys.has(key);
-            return (
-              <motion.div
-                key={key}
-                layout={reduceMotion ? false : 'position'}
-                layoutId={reduceMotion ? undefined : key}
-                initial={
-                  animateEnter && !reduceMotion ? { opacity: 0, y: 12 } : false
-                }
-                animate={{ opacity: 1, y: 0 }}
-                exit={
-                  reduceMotion
-                    ? { opacity: 0 }
-                    : { opacity: 0, scale: 0.98, transition: { duration: 0.15 } }
-                }
-                transition={
-                  reduceMotion
-                    ? { duration: 0.01 }
-                    : { type: 'spring', stiffness: 420, damping: 34, mass: 0.8 }
-                }
-              >
-                <KanbanCardBody task={task} onOpenTimeline={onOpenTimeline} />
-              </motion.div>
-            );
-          })}
-        </AnimatePresence>
+        <div
+          ref={scrollRef}
+          className="flex min-h-0 flex-1 flex-col gap-4 overflow-y-auto [scrollbar-gutter:stable]"
+        >
+          <AnimatePresence initial={false} mode="popLayout">
+            {visibleTasks.map((task) => {
+              const key = taskSummaryKey(task);
+              const animateEnter = enteringKeys.has(key);
+              return (
+                <motion.div
+                  key={key}
+                  layout={reduceMotion ? false : 'position'}
+                  layoutId={reduceMotion ? undefined : key}
+                  initial={
+                    animateEnter && !reduceMotion
+                      ? { opacity: 0, y: 12 }
+                      : false
+                  }
+                  animate={{ opacity: 1, y: 0 }}
+                  exit={
+                    reduceMotion
+                      ? { opacity: 0 }
+                      : {
+                          opacity: 0,
+                          scale: 0.98,
+                          transition: { duration: 0.15 },
+                        }
+                  }
+                  transition={
+                    reduceMotion
+                      ? { duration: 0.01 }
+                      : {
+                          type: 'spring',
+                          stiffness: 420,
+                          damping: 34,
+                          mass: 0.8,
+                        }
+                  }
+                >
+                  <KanbanCardBody task={task} onOpenTimeline={onOpenTimeline} />
+                </motion.div>
+              );
+            })}
+          </AnimatePresence>
 
-        {tasks.length === 0 ? (
-          <EmptyTask />
-        ) : null}
+          {visibleCount < tasks.length ? (
+            <div ref={sentinelRef} className="h-px" aria-hidden />
+          ) : null}
 
-        {totalPages > 1 ? (
-          <div className="mt-auto flex items-center justify-between gap-2">
-            <ButtonPouf
-              variant="quiet"
-              size="sm"
-              disabled={currentPage <= 1}
-              onClick={() => setPage((current) => Math.max(1, current - 1))}
-            >
-              <HugeiconsIcon icon={ArrowLeft01Icon} className="size-4" strokeWidth={2} />
-              Voltar
-            </ButtonPouf>
-            <ButtonPouf
-              type="button"
-              variant="quiet"
-              size="sm"
-              disabled={currentPage >= totalPages}
-              onClick={() =>
-                setPage((current) => Math.min(totalPages, current + 1))
-              }
-            >
-              Próxima
-              <HugeiconsIcon icon={ArrowRight01Icon} className="size-4" strokeWidth={2} />
-            </ButtonPouf>
-          </div>
-        ) : null}
+          {tasks.length === 0 ? <EmptyTask /> : null}
+        </div>
       </div>
     </Card>
   );
