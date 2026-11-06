@@ -263,7 +263,7 @@ function KanbanColumn({
 
         <div
           ref={scrollRef}
-          className="flex min-h-0 flex-1 flex-col gap-4 overflow-y-auto scrollbar-gutter-stable"
+          className="-mx-(--s4) flex min-h-0 flex-1 flex-col gap-4 overflow-y-auto px-6 pt-4 pb-6 md:pb-28 scrollbar-gutter-stable"
         >
           <AnimatePresence initial={false} mode="popLayout">
             {visibleTasks.map((task) => {

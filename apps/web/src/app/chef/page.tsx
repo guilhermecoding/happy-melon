@@ -1,7 +1,9 @@
-import { redirect } from 'next/navigation'
+import Loading from '@/app/loading'
 import { lookupServerSession } from '@/lib/auth/get-server-session'
+import { redirect } from 'next/navigation'
+import { Suspense } from 'react'
 
-export default async function ChefPage() {
+async function ChefHomeRedirect() {
   const result = await lookupServerSession()
 
   if (result.status === 'unknown') {
@@ -15,4 +17,12 @@ export default async function ChefPage() {
   }
 
   redirect('/entrar')
+}
+
+export default function ChefPage() {
+  return (
+    <Suspense fallback={<Loading />}>
+      <ChefHomeRedirect />
+    </Suspense>
+  )
 }
