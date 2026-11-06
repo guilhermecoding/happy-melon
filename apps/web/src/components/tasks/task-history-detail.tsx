@@ -1,11 +1,13 @@
 'use client';
 
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useState } from 'react';
 import {
   mergeTaskSummaries,
   upsertTaskSummary,
   type TaskSummaryDto,
 } from '@repo/shared';
+import { AppleReminderIcon, KanbanIcon } from '@hugeicons/core-free-icons';
+import { HugeiconsIcon } from '@hugeicons/react';
 import { Tabs } from '@/components/pouf/disclosure';
 import Spinner from '@/components/spinner';
 import { balloonService } from '@/services/balloon/balloon.service';
@@ -15,6 +17,24 @@ import { TaskHistoryGroupedTable } from './task-history-grouped-table';
 import { TaskHistoryKanban } from './task-history-kanban';
 
 const RESYNC_DELAY_MS = 400;
+
+const groupedTabIcon = (
+  <HugeiconsIcon
+    icon={AppleReminderIcon}
+    className="size-4 shrink-0"
+    strokeWidth={2}
+    aria-hidden
+  />
+);
+
+const kanbanTabIcon = (
+  <HugeiconsIcon
+    icon={KanbanIcon}
+    className="size-4 shrink-0"
+    strokeWidth={2}
+    aria-hidden
+  />
+);
 
 type TaskHistoryDetailProps = {
   roundId: string;
@@ -116,6 +136,7 @@ export default function TaskHistoryDetail({ roundId }: TaskHistoryDetailProps) {
           {
             value: 'agrupado',
             label: 'Agrupado',
+            icon: groupedTabIcon,
             content: (
               <TaskHistoryGroupedTable
                 tasks={tasks}
@@ -126,6 +147,7 @@ export default function TaskHistoryDetail({ roundId }: TaskHistoryDetailProps) {
           {
             value: 'kanban',
             label: 'Kanban',
+            icon: kanbanTabIcon,
             content: (
               <TaskHistoryKanban
                 tasks={tasks}
