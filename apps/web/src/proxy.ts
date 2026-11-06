@@ -115,11 +115,16 @@ export async function proxy(request: NextRequest) {
       return respond(loginRedirect(request, pathname));
     }
 
-    if (
-      pathname === '/chef' ||
-      pathname === '/chef/' ||
-      pathname === '/chef/sobre'
-    ) {
+    if (pathname === '/chef' || pathname === '/chef/') {
+      if (activeContestId) {
+        return respond(
+          NextResponse.redirect(new URL(`/chef/${activeContestId}`, request.url)),
+        );
+      }
+      return respond(NextResponse.next());
+    }
+
+    if (pathname === '/chef/sobre') {
       return respond(NextResponse.next());
     }
 
