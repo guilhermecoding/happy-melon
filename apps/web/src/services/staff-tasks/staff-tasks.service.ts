@@ -223,7 +223,8 @@ export const staffTasksService = {
 
       if (
         (type === STAFF_TASK_EVENT_TYPE.QUEUED ||
-          type === STAFF_TASK_EVENT_TYPE.REMOVED) &&
+          type === STAFF_TASK_EVENT_TYPE.REMOVED ||
+          type === STAFF_TASK_EVENT_TYPE.UPDATED) &&
         'task' in parsed
       ) {
         return parsed as StaffTaskEvent;

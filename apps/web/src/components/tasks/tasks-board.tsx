@@ -1,11 +1,14 @@
 "use client";
 
 import { useState } from 'react';
-import { BalloonIcon, HistoryIcon } from '@hugeicons/core-free-icons';
+import Link from 'next/link';
+import { usePathname } from 'next/navigation';
+import { BalloonIcon, ChevronRightIcon, HistoryIcon } from '@hugeicons/core-free-icons';
 import BoxFeatures from '@/components/box-features';
 import BoxTeamsList from './box-teams-list';
 import RoundSendGuard from './round-send-guard';
 import TaskHistoryList from './task-history-list';
+import { HugeiconsIcon } from '@hugeicons/react';
 
 type TasksBoardProps = {
   competitionId: string;
@@ -21,6 +24,8 @@ export default function TasksBoard({
   endsAt,
 }: TasksBoardProps) {
   const [historyKey, setHistoryKey] = useState(0);
+  const pathname = usePathname();
+  const historyHref = `${pathname}/historico?round=${encodeURIComponent(roundId)}`;
 
   return (
     <RoundSendGuard startsAt={startsAt} endsAt={endsAt}>
@@ -49,6 +54,13 @@ export default function TasksBoard({
               blobSize="sm"
               blobTone="down"
             >
+              <Link
+                href={historyHref}
+                className="self-end px-4 pt-1 text-sm font-bold text-ink underline-offset-4 hover:underline inline-flex items-center gap-2"
+              >
+                Ver histórico detalhado
+                <HugeiconsIcon icon={ChevronRightIcon} className="size-4 shrink-0" strokeWidth={2.5} aria-hidden />
+              </Link>
               <TaskHistoryList contestId={roundId} refreshKey={historyKey} />
             </BoxFeatures>
           </div>

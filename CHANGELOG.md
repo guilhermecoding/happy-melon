@@ -5,6 +5,23 @@ Todas as mudanças notáveis deste projeto serão documentadas neste arquivo.
 O formato segue [Keep a Changelog](https://keepachangelog.com/pt-BR/1.1.0/),
 e este projeto adere ao [Semantic Versioning](https://semver.org/lang/pt-BR/).
 
+## [1.6.0] - 2026-11-06
+
+### Adicionado
+
+- **Histórico de tarefas detalhado**, para administradores e chefes de sala, a partir de **Tarefas**. A aba **Agrupado** mostra uma linha por tarefa, da última alteração para a mais antiga, com balão ou impressão, competidor, responsável, último status e horário; o ícone de informação abre a linha do tempo. A aba **Kanban** separa **Disponível** (também as retidas), **Em rota** e **Entregue**, e os cards entram conforme a rolagem de cada quadro. As duas abas acompanham as mudanças na hora.
+- **Cores de balão personalizadas** na prova. Além da paleta padrão, o administrador cria, edita e remove cores pelo nome e pelo código hexadecimal.
+- Estrela de **Primeira submissão da questão** no primeiro balão confirmado de cada questão. Aparece na fila e no lobby do colaborador, nos balões do competidor e no histórico detalhado. Se esse balão for retido, a estrela passa para o próximo confirmado.
+
+### Alterado
+
+- **Ajustes** dos colaboradores (limite de tarefas, tempo de entrega e multi-toque) ficam só com o administrador. O chefe de sala deixa de ver e de salvar essa tela.
+- No seletor de rodada de **Tarefas** e do **Histórico**, a rodada em execução aparece em verde, com ícone de play. Na opção selecionada, de fundo roxo, o texto e o ícone ficam brancos.
+
+### Corrigido
+
+- A foto da tela de login aparece no primeiro carregamento. Se `LOGIN_IMAGE_URL` não responder, entra a imagem padrão.
+
 ## [1.5.0] - 2026-11-02
 
 ### Adicionado
@@ -125,6 +142,7 @@ e este projeto adere ao [Semantic Versioning](https://semver.org/lang/pt-BR/).
 
 - Lançamento inicial do Happy Melon: operação de maratonas no estilo ICPC, com painel de administradores, fila e lobby de colaboradores, gestão de competições, prova, times, balões e impressões.
 
+[1.6.0]: https://github.com/guilhermecoding/happy-melon/compare/v1.5.0...v1.6.0
 [1.5.0]: https://github.com/guilhermecoding/happy-melon/compare/v1.4.0...v1.5.0
 [1.4.0]: https://github.com/guilhermecoding/happy-melon/compare/v1.3.0...v1.4.0
 [1.3.0]: https://github.com/guilhermecoding/happy-melon/compare/v1.2.0...v1.3.0

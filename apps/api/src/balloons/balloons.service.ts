@@ -41,25 +41,18 @@ import {
 } from '../contest-tasks/staff-task.mapper.js';
 import { TaskHistoryEventsService } from '../contest-tasks/task-history.events.js';
 import { toTaskHistoryEntryDto } from '../contest-tasks/task-history.mapper.js';
+import { TaskSummaryService } from '../contest-tasks/task-summary.service.js';
 import type { TeamQuestionActionDto } from './dto/balloon.dto.js';
+import {
+  builtinBalloonColorLabel,
+  normalizeBalloonHex,
+} from '../questions/balloon-color.js';
 
-const BALLOON_COLOR_LABELS: Record<string, string> = {
-  '#000000': 'Preto',
-  '#0000FF': 'Azul',
-  '#00FFFF': 'Azul claro',
-  '#000080': 'Azul marinho',
-  '#FFFFFF': 'Branco',
-  '#800000': 'Grená',
-  '#FF8000': 'Laranja',
-  '#A3794D': 'Marrom',
-  '#C0C0C0': 'Prata',
-  '#FF00FF': 'Rosa',
-  '#800080': 'Roxo',
-  '#008000': 'Verde',
-  '#00FF00': 'Verde limão',
-  '#FF0000': 'Vermelho',
-  '#FFD800': 'Amarelo',
-};
+const ACTIVE_FIRST_STATUSES = [
+  PrismaBalloonDeliveryStatus.PENDING,
+  PrismaBalloonDeliveryStatus.PROCESSING,
+  PrismaBalloonDeliveryStatus.DELIVERED,
+] as const;
 
 const STATUS_ACTION_LABEL = {
   [BALLOON_DELIVERY_STATUS.PENDING]: 'confirmado',
@@ -78,6 +71,7 @@ export class BalloonsService {
   constructor(
     private readonly contestTasksEvents: ContestTasksEventsService,
     private readonly taskHistoryEvents: TaskHistoryEventsService,
+    private readonly taskSummaries: TaskSummaryService,
     private readonly lobbyCapacity: LobbyCapacityService,
     private readonly multiTouchBan: MultiTouchBanService,
   ) { }
@@ -186,10 +180,13 @@ export class BalloonsService {
 
     const targetStatus = BALLOON_DELIVERY_STATUS.PENDING;
     const prismaStatus = this.toPrismaStatus(targetStatus);
+    const confirmedAt = new Date();
 
     for (let attempt = 0; attempt < ID_MAX_ATTEMPTS; attempt++) {
       try {
         const { delivery, history } = await prisma.$transaction(async (tx) => {
+          await this.lockQuestion(tx, question.id);
+
           const saved = existing
             ? await tx.balloonDelivery.update({
               where: { id: existing.id },
@@ -197,6 +194,8 @@ export class BalloonsService {
                 status: prismaStatus,
                 claimedByUserId: null,
                 claimedAt: null,
+                confirmedAt,
+                isFirst: false,
               },
             })
             : await tx.balloonDelivery.create({
@@ -207,18 +206,29 @@ export class BalloonsService {
                 questionId: question.id,
                 status: prismaStatus,
                 claimedByUserId: null,
+                confirmedAt,
+                isFirst: false,
               },
             });
 
+          const winner = await this.recomputeFirst(tx, question.id);
+          const isFirst = winner?.id === saved.id;
+          const delivery = {
+            ...saved,
+            isFirst,
+            updatedAt:
+              isFirst && winner ? winner.updatedAt : saved.updatedAt,
+          };
+
           const history = await this.createHistoryEntry(tx, {
             contestId,
-            delivery: saved,
+            delivery,
             teamName: team.name,
             balloonColor: question.balloonColor,
             actor,
           });
 
-          return { delivery: saved, history };
+          return { delivery, history };
         });
 
         this.contestTasksEvents.emitForRound(contestId, competitionId, {
@@ -235,10 +245,12 @@ export class BalloonsService {
             claimedByUserId: delivery.claimedByUserId,
             claimedAt: delivery.claimedAt,
             createdAt: delivery.createdAt,
+            isFirst: delivery.isFirst,
           }),
         });
 
         this.emitHistoryCreated(contestId, history);
+        await this.publishBalloonSummary(delivery, team, question, actor);
 
         return this.toDeliveryResponse(delivery);
       } catch (error) {
@@ -296,15 +308,28 @@ export class BalloonsService {
     }
 
     const targetStatus = BALLOON_DELIVERY_STATUS.WITHHELD;
-    const { delivery, history } = await prisma.$transaction(async (tx) => {
+    const { delivery, history, promoted } = await prisma.$transaction(async (tx) => {
+      await this.lockQuestion(tx, question.id);
+
+      const locked = await tx.balloonDelivery.findUnique({
+        where: { id: existing.id },
+        select: { isFirst: true },
+      });
+
       const saved = await tx.balloonDelivery.update({
         where: { id: existing.id },
         data: {
           status: this.toPrismaStatus(targetStatus),
           claimedByUserId: null,
           claimedAt: null,
+          confirmedAt: null,
+          isFirst: false,
         },
       });
+
+      const winner = await this.recomputeFirst(tx, question.id);
+      const promoted =
+        locked?.isFirst && winner && winner.id !== saved.id ? winner : null;
 
       const history = await this.createHistoryEntry(tx, {
         contestId,
@@ -314,7 +339,7 @@ export class BalloonsService {
         actor,
       });
 
-      return { delivery: saved, history };
+      return { delivery: { ...saved, isFirst: false }, history, promoted };
     });
 
     this.contestTasksEvents.emitForRound(contestId, competitionId, {
@@ -331,10 +356,51 @@ export class BalloonsService {
         claimedByUserId: delivery.claimedByUserId,
         claimedAt: delivery.claimedAt,
         createdAt: delivery.createdAt,
+        isFirst: false,
       }),
     });
 
+    if (
+      promoted &&
+      (promoted.status === PrismaBalloonDeliveryStatus.PENDING ||
+        promoted.status === PrismaBalloonDeliveryStatus.PROCESSING)
+    ) {
+      this.contestTasksEvents.emitForRound(contestId, competitionId, {
+        type: STAFF_TASK_EVENT_TYPE.UPDATED,
+        task: toBalloonStaffTask({
+          id: promoted.id,
+          contestId: promoted.contestId,
+          teamId: promoted.teamId,
+          ...teamFieldsFrom(promoted.team),
+          questionId: promoted.questionId,
+          balloonColor: promoted.question.balloonColor,
+          questionLabel: promoted.question.label,
+          status: promoted.status,
+          claimedByUserId: promoted.claimedByUserId,
+          claimedAt: promoted.claimedAt,
+          createdAt: promoted.createdAt,
+          isFirst: true,
+        }),
+      });
+    }
+
     this.emitHistoryCreated(contestId, history);
+    await this.publishBalloonSummary(delivery, team, question, actor);
+
+    if (promoted) {
+      await this.taskSummaries.publishBalloon({
+        id: promoted.id,
+        contestId: promoted.contestId,
+        status: promoted.status,
+        updatedAt: promoted.updatedAt,
+        isFirst: true,
+        claimedByUserId: promoted.claimedByUserId,
+        teamName: promoted.team.name,
+        teamUsername: promoted.team.usernameTeam,
+        questionLabel: promoted.question.label,
+        balloonColor: promoted.question.balloonColor,
+      });
+    }
 
     return this.toDeliveryResponse(delivery);
   }
@@ -405,6 +471,7 @@ export class BalloonsService {
       claimedByUserId: delivery.claimedByUserId,
       claimedAt: delivery.claimedAt,
       createdAt: delivery.createdAt,
+      isFirst: delivery.isFirst,
     });
 
     this.contestTasksEvents.emitForRound(contestId, competitionId, {
@@ -414,6 +481,12 @@ export class BalloonsService {
     });
 
     this.emitHistoryCreated(contestId, history);
+    await this.publishBalloonSummary(
+      delivery,
+      delivery.team,
+      delivery.question,
+      actor,
+    );
 
     return staffTask;
   }
@@ -482,6 +555,7 @@ export class BalloonsService {
       claimedByUserId: delivery.claimedByUserId,
       claimedAt: delivery.claimedAt,
       createdAt: delivery.createdAt,
+      isFirst: delivery.isFirst,
     });
 
     this.contestTasksEvents.emitForRound(contestId, competitionId, {
@@ -490,6 +564,12 @@ export class BalloonsService {
     });
 
     this.emitHistoryCreated(contestId, history);
+    await this.publishBalloonSummary(
+      delivery,
+      delivery.team,
+      delivery.question,
+      actor,
+    );
 
     return staffTask;
   }
@@ -506,7 +586,10 @@ export class BalloonsService {
   ) {
     const status = this.toStatusDto(params.delivery.status);
     const type = taskTypeFromStatus(status, TASK_KIND.BALLOON_TASK);
-    const colorLabel = this.getBalloonColorLabel(params.balloonColor);
+    const colorLabel = await this.getBalloonColorLabel(
+      tx,
+      params.balloonColor,
+    );
     const actionLabel = STATUS_ACTION_LABEL[status];
     const message = `Balão ${colorLabel} do time ${params.teamName} ${actionLabel}`;
 
@@ -598,9 +681,22 @@ export class BalloonsService {
     return team;
   }
 
-  private getBalloonColorLabel(balloonColor: string): string {
-    const normalized = balloonColor.toUpperCase();
-    return BALLOON_COLOR_LABELS[normalized] ?? balloonColor;
+  private async getBalloonColorLabel(
+    tx: Prisma.TransactionClient,
+    balloonColor: string,
+  ): Promise<string> {
+    const normalized = normalizeBalloonHex(balloonColor) ?? balloonColor;
+    const builtin = builtinBalloonColorLabel(normalized);
+    if (builtin) {
+      return builtin;
+    }
+
+    const custom = await tx.balloonColorPreset.findUnique({
+      where: { hex: normalized },
+      select: { name: true },
+    });
+
+    return custom?.name ?? normalized;
   }
 
   private toPrismaStatus(
@@ -649,8 +745,89 @@ export class BalloonsService {
       questionId: delivery.questionId,
       status: this.toStatusDto(delivery.status),
       claimedByUserId: delivery.claimedByUserId,
+      isFirst: delivery.isFirst,
       createdAt: delivery.createdAt.toISOString(),
       updatedAt: delivery.updatedAt.toISOString(),
     };
+  }
+
+  private async lockQuestion(
+    tx: Prisma.TransactionClient,
+    questionId: string,
+  ) {
+    const rows = await tx.$queryRaw<Array<{ id: string }>>`
+      SELECT id FROM "question" WHERE id = ${questionId} FOR UPDATE
+    `;
+
+    if (rows.length === 0) {
+      throw new NotFoundException('Questão não encontrada nesta rodada.');
+    }
+  }
+
+  private async recomputeFirst(
+    tx: Prisma.TransactionClient,
+    questionId: string,
+  ) {
+    const winner = await tx.balloonDelivery.findFirst({
+      where: {
+        questionId,
+        confirmedAt: { not: null },
+        status: { in: [...ACTIVE_FIRST_STATUSES] },
+      },
+      orderBy: [{ confirmedAt: 'asc' }, { id: 'asc' }],
+      include: { team: true, question: true },
+    });
+
+    await tx.balloonDelivery.updateMany({
+      where: {
+        questionId,
+        isFirst: true,
+        ...(winner ? { NOT: { id: winner.id } } : {}),
+      },
+      data: { isFirst: false },
+    });
+
+    if (winner && !winner.isFirst) {
+      const updated = await tx.balloonDelivery.update({
+        where: { id: winner.id },
+        data: { isFirst: true },
+      });
+      return { ...winner, isFirst: true as const, updatedAt: updated.updatedAt };
+    }
+
+    return winner ? { ...winner, isFirst: true as const } : null;
+  }
+
+  private publishBalloonSummary(
+    delivery: {
+      id: string;
+      contestId: string;
+      status: PrismaBalloonDeliveryStatus;
+      updatedAt: Date;
+      isFirst: boolean;
+      claimedByUserId: string | null;
+    },
+    team: { name: string; usernameTeam: string },
+    question: { label: string; balloonColor: string },
+    actor?: Actor,
+  ) {
+    const responsibleName =
+      actor && delivery.claimedByUserId === actor.userId
+        ? actor.name
+        : undefined;
+
+    return this.taskSummaries.publishBalloon({
+      id: delivery.id,
+      contestId: delivery.contestId,
+      status: delivery.status,
+      updatedAt: delivery.updatedAt,
+      isFirst: delivery.isFirst,
+      claimedByUserId: delivery.claimedByUserId,
+      teamName: team.name,
+      teamUsername: team.usernameTeam,
+      questionLabel: question.label,
+      balloonColor: question.balloonColor,
+      responsibleName,
+    });
   }
 }

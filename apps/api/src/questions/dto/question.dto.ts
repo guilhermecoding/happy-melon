@@ -1,14 +1,18 @@
 import { z } from 'zod';
-import { BALLOON_COLOR_VALUES } from '../balloon-color.js';
+import { normalizeBalloonHex } from '../balloon-color.js';
 
-export const balloonColorSchema = z
-  .string()
-  .transform((value) => value.toUpperCase())
-  .pipe(
-    z.enum(BALLOON_COLOR_VALUES, {
-      error: 'Informe uma cor de balão válida.',
-    }),
-  );
+export const balloonColorSchema = z.string().transform((value, ctx) => {
+  const normalized = normalizeBalloonHex(value);
+  if (!normalized) {
+    ctx.addIssue({
+      code: 'custom',
+      message: 'Informe uma cor de balão válida.',
+    });
+    return z.NEVER;
+  }
+
+  return normalized;
+});
 
 export const createQuestionSchema = z.object({
   label: z

@@ -20,6 +20,7 @@ const ALLOWED_PREFIXES = [
   'administrators',
   'teams',
   'questions',
+  'balloon-colors',
   'me',
 ];
 

@@ -81,13 +81,18 @@ export class CompetitionsController {
   }
 
   @Patch(':id/staff-settings')
-  @Roles(['admin', 'chef'])
+  @Roles(['admin'])
   @UseGuards(StaffCompetitionGuard)
   updateStaffSettings(
     @Param('id') id: string,
     @Body(staffSettingsPipe) dto: StaffSettingsDto,
+    @Session() session: UserSession<typeof auth>,
   ) {
-    return this.competitionsService.updateStaffSettings(id, dto);
+    return this.competitionsService.updateStaffSettings(
+      id,
+      dto,
+      session.user.role,
+    );
   }
 
   @Patch(':id')

@@ -1766,6 +1766,12 @@
 .pouf-table td {
   white-space: nowrap;
 }
+.pouf-table td.pouf-table__cell--clamp {
+  white-space: normal;
+  max-width: 16rem;
+  min-width: 7rem;
+  vertical-align: middle;
+}
 .pouf-table th {
   padding: var(--s2) var(--s3);
   border-bottom: 2px solid rgba(201, 168, 255, 0.3);

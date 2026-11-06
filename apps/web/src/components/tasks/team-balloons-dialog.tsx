@@ -12,6 +12,7 @@ import {
 import {
   BALLOON_EFFECTIVE_STATUS,
   isConfirmableStatus,
+  isResolvedBalloonStatus,
   toBalloonEffectiveStatus,
   type BalloonDeliveryStatus,
 } from '@repo/shared';
@@ -128,7 +129,7 @@ export function TeamBalloonsDialog({
 }: TeamBalloonsDialogProps) {
   const [questions, setQuestions] = useState<Question[]>([]);
   const [deliveriesByQuestionId, setDeliveriesByQuestionId] = useState(
-    () => new Map<string, BalloonDeliveryStatus>(),
+    () => new Map<string, { status: BalloonDeliveryStatus; isFirst: boolean }>(),
   );
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string>();
@@ -163,7 +164,7 @@ export function TeamBalloonsDialog({
           new Map(
             deliveriesData.map((delivery) => [
               delivery.questionId,
-              delivery.status,
+              { status: delivery.status, isFirst: delivery.isFirst },
             ]),
           ),
         );
@@ -212,7 +213,10 @@ export function TeamBalloonsDialog({
   function applyDelivery(delivery: BalloonDelivery) {
     setDeliveriesByQuestionId((current) => {
       const next = new Map(current);
-      next.set(delivery.questionId, delivery.status);
+      next.set(delivery.questionId, {
+        status: delivery.status,
+        isFirst: delivery.isFirst,
+      });
       return next;
     });
     onDeliveryChanged?.(delivery);
@@ -312,10 +316,11 @@ export function TeamBalloonsDialog({
           ) : (
             <div className="grid grid-cols-1 gap-3 text-center sm:grid-cols-2 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-6">
               {questions.map((question) => {
-                const status = toBalloonEffectiveStatus(
-                  deliveriesByQuestionId.get(question.id),
-                );
+                const delivery = deliveriesByQuestionId.get(question.id);
+                const status = toBalloonEffectiveStatus(delivery?.status);
                 const canConfirm = isConfirmableStatus(status);
+                const showFirst =
+                  Boolean(delivery?.isFirst) && isResolvedBalloonStatus(status);
                 const isPending = pendingQuestionId === question.id;
 
                 return (
@@ -339,6 +344,7 @@ export function TeamBalloonsDialog({
                       questionId={question.label}
                       color={toBalloonColor(question.balloonColor)}
                       resolved={true}
+                      first={showFirst}
                     />
                     <ButtonPouf
                       variant="solid"
@@ -361,7 +367,7 @@ export function TeamBalloonsDialog({
                         icon={
                           canConfirm ? CheckmarkCircle02Icon : RemoveCircleIcon
                         }
-                        className="size-5"
+                        className="size-5 shrink-0"
                         strokeWidth={3}
                       />
                       {canConfirm ? 'Confirmar' : 'Reter'}

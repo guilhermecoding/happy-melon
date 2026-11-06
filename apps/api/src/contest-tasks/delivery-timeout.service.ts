@@ -25,6 +25,7 @@ import {
 } from './staff-task.mapper.js';
 import { TaskHistoryEventsService } from './task-history.events.js';
 import { toTaskHistoryEntryDto } from './task-history.mapper.js';
+import { TaskSummaryService } from './task-summary.service.js';
 
 const SWEEP_INTERVAL_MS = 15_000;
 
@@ -44,6 +45,7 @@ export class DeliveryTimeoutService {
   constructor(
     private readonly contestTasksEvents: ContestTasksEventsService,
     private readonly taskHistoryEvents: TaskHistoryEventsService,
+    private readonly taskSummaries: TaskSummaryService,
   ) { }
 
   @Interval(SWEEP_INTERVAL_MS)
@@ -211,6 +213,7 @@ export class DeliveryTimeoutService {
           claimedByUserId: result.saved.claimedByUserId,
           claimedAt: result.saved.claimedAt,
           createdAt: result.saved.createdAt,
+          isFirst: result.saved.isFirst,
         }),
       },
     );
@@ -218,6 +221,19 @@ export class DeliveryTimeoutService {
     this.taskHistoryEvents.emit(result.saved.contestId, {
       type: TASK_HISTORY_EVENT_TYPE.CREATED,
       entry: toTaskHistoryEntryDto(result.history),
+    });
+
+    await this.taskSummaries.publishBalloon({
+      id: result.saved.id,
+      contestId: result.saved.contestId,
+      status: result.saved.status,
+      updatedAt: result.saved.updatedAt,
+      isFirst: result.saved.isFirst,
+      claimedByUserId: result.saved.claimedByUserId,
+      teamName: result.saved.team.name,
+      teamUsername: result.saved.team.usernameTeam,
+      questionLabel: result.saved.question.label,
+      balloonColor: result.saved.question.balloonColor,
     });
   }
 
@@ -297,6 +313,16 @@ export class DeliveryTimeoutService {
     this.taskHistoryEvents.emit(result.saved.contestId, {
       type: TASK_HISTORY_EVENT_TYPE.CREATED,
       entry: toTaskHistoryEntryDto(result.history),
+    });
+
+    await this.taskSummaries.publishPrint({
+      id: result.saved.id,
+      contestId: result.saved.contestId,
+      status: result.saved.status,
+      updatedAt: result.saved.updatedAt,
+      claimedByUserId: result.saved.claimedByUserId,
+      teamName: result.saved.team.name,
+      teamUsername: result.saved.team.usernameTeam,
     });
   }
 

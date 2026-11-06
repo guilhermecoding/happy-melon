@@ -121,6 +121,7 @@ export class ContestTasksService {
           claimedByUserId: delivery.claimedByUserId,
           claimedAt: delivery.claimedAt,
           createdAt: delivery.createdAt,
+          isFirst: delivery.isFirst,
         }),
       ),
       ...printQueue.map((task) =>
@@ -151,6 +152,7 @@ export class ContestTasksService {
           claimedByUserId: delivery.claimedByUserId,
           claimedAt: delivery.claimedAt,
           createdAt: delivery.createdAt,
+          isFirst: delivery.isFirst,
         }),
       ),
       ...printMine.map((task) =>

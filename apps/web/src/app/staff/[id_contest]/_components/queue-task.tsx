@@ -7,6 +7,7 @@ import {
   type StaffTask,
 } from '@repo/shared';
 import { Balloon } from '@/components/balloon';
+import { FirstBalloonBadge } from '@/components/first-balloon-badge';
 import PrintIcon from '@/components/print-icon';
 import { IconButton } from '@/components/pouf/Button';
 import { Badge, Blob } from '@/components/pouf/media';
@@ -147,7 +148,10 @@ function TaskItem({
           {isPrint ? (
             <PrintIcon className="size-10" strokeWidth={1.5} />
           ) : (
-            <Balloon color={balloonColor} className="size-10" />
+            <span className="relative">
+              <Balloon color={balloonColor} className="size-10" />
+              {task.isFirst ? <FirstBalloonBadge size="sm" /> : null}
+            </span>
           )}
           <div className="flex flex-col min-w-0">
             <span className="text-xl font-bold truncate">{task.teamName}</span>

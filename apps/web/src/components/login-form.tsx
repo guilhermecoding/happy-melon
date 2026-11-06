@@ -33,30 +33,52 @@ import {
 } from '@hugeicons/core-free-icons';
 
 const PASSWORD_ROLES = new Set(['admin', 'chef']);
-const FALLBACK_LOGIN_IMAGE = '/thumb_todos.JPG';
+const LOGIN_IMAGE_SRC = '/entrar/imagem';
+const LOGIN_IMAGE_MEDIA = '(min-width: 768px)';
 
-function LoginSideImage({ imageUrl }: { imageUrl?: string }) {
-  const [failed, setFailed] = useState(false);
+function LoginSideImage() {
+  const [ready, setReady] = useState(false);
+  const [loaded, setLoaded] = useState(false);
 
-  if (!imageUrl || failed) {
-    return (
-      <Image
-        src={FALLBACK_LOGIN_IMAGE}
-        alt="Imagem de login"
-        className="absolute inset-0 h-full w-full object-cover"
-        width={1000}
-        height={1000}
-        loading="eager"
-      />
-    );
-  }
+  useEffect(() => {
+    const media = window.matchMedia(LOGIN_IMAGE_MEDIA);
+    let cancelled = false;
+
+    const show = () => {
+      if (!cancelled && media.matches) setReady(true);
+    };
+
+    const onChange = () => {
+      if (media.matches) show();
+      else setReady(false);
+    };
+
+    if (document.readyState === 'complete') show();
+    else window.addEventListener('load', show, { once: true });
+
+    media.addEventListener('change', onChange);
+    return () => {
+      cancelled = true;
+      window.removeEventListener('load', show);
+      media.removeEventListener('change', onChange);
+    };
+  }, []);
+
+  if (!ready) return null;
 
   return (
+    // The route already returns a small JPEG. Next's optimizer would fetch it again.
+    // eslint-disable-next-line @next/next/no-img-element
     <img
-      src={imageUrl}
+      src={LOGIN_IMAGE_SRC}
       alt="Imagem de login"
-      className="absolute inset-0 h-full w-full object-cover"
-      onError={() => setFailed(true)}
+      decoding="async"
+      fetchPriority="low"
+      className={cn(
+        'absolute inset-0 h-full w-full object-cover transition-opacity duration-300',
+        loaded ? 'opacity-100' : 'opacity-0',
+      )}
+      onLoad={() => setLoaded(true)}
     />
   );
 }
@@ -159,11 +181,9 @@ function getFetchErrorMessage(error: unknown, fallback: string) {
 export function LoginForm({
   className,
   contestCode,
-  imageUrl,
   ...props
 }: {
   contestCode?: string;
-  imageUrl?: string;
 } & React.ComponentProps<'div'>) {
   const contestCodeToUse = contestCode ?? '';
   const router = useRouter();
@@ -557,7 +577,7 @@ export function LoginForm({
             </div>
           </form>
           <div className="relative hidden bg-muted md:block">
-            <LoginSideImage key={imageUrl ?? 'fallback'} imageUrl={imageUrl} />
+            <LoginSideImage />
           </div>
         </div>
       </Card>

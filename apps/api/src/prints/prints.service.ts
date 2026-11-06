@@ -41,6 +41,7 @@ import {
 } from '../contest-tasks/staff-task.mapper.js';
 import { TaskHistoryEventsService } from '../contest-tasks/task-history.events.js';
 import { toTaskHistoryEntryDto } from '../contest-tasks/task-history.mapper.js';
+import { TaskSummaryService } from '../contest-tasks/task-summary.service.js';
 import type { PrintTeamActionDto } from './dto/print.dto.js';
 
 const STATUS_ACTION_LABEL = {
@@ -60,6 +61,7 @@ export class PrintsService {
   constructor(
     private readonly contestTasksEvents: ContestTasksEventsService,
     private readonly taskHistoryEvents: TaskHistoryEventsService,
+    private readonly taskSummaries: TaskSummaryService,
     private readonly lobbyCapacity: LobbyCapacityService,
     private readonly multiTouchBan: MultiTouchBanService,
   ) { }
@@ -133,6 +135,7 @@ export class PrintsService {
         });
 
         this.emitHistoryCreated(contestId, history);
+        await this.publishPrintSummary(task, team, actor);
 
         return this.toTaskResponse(task);
       } catch (error) {
@@ -199,6 +202,7 @@ export class PrintsService {
     });
 
     this.emitHistoryCreated(contestId, history);
+    await this.publishPrintSummary(saved, team, actor);
 
     return this.toTaskResponse(saved);
   }
@@ -248,6 +252,7 @@ export class PrintsService {
     });
 
     this.emitHistoryCreated(contestId, history);
+    await this.publishPrintSummary(saved, team, actor);
 
     return this.toTaskResponse(saved);
   }
@@ -323,6 +328,7 @@ export class PrintsService {
     });
 
     this.emitHistoryCreated(contestId, history);
+    await this.publishPrintSummary(task, task.team, actor);
 
     return staffTask;
   }
@@ -395,6 +401,7 @@ export class PrintsService {
     });
 
     this.emitHistoryCreated(contestId, history);
+    await this.publishPrintSummary(task, task.team, actor);
 
     return staffTask;
   }
@@ -538,5 +545,31 @@ export class PrintsService {
       createdAt: task.createdAt.toISOString(),
       updatedAt: task.updatedAt.toISOString(),
     };
+  }
+
+  private publishPrintSummary(
+    task: {
+      id: string;
+      contestId: string;
+      status: PrismaBalloonDeliveryStatus;
+      updatedAt: Date;
+      claimedByUserId: string | null;
+    },
+    team: { name: string; usernameTeam: string },
+    actor?: Actor,
+  ) {
+    const responsibleName =
+      actor && task.claimedByUserId === actor.userId ? actor.name : undefined;
+
+    return this.taskSummaries.publishPrint({
+      id: task.id,
+      contestId: task.contestId,
+      status: task.status,
+      updatedAt: task.updatedAt,
+      claimedByUserId: task.claimedByUserId,
+      teamName: team.name,
+      teamUsername: team.usernameTeam,
+      responsibleName,
+    });
   }
 }
